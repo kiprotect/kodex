@@ -1,0 +1,16 @@
+parameter-store:
+  type: inMemory # we only need in-memory parameter storage
+controller:
+  type: inMemory # we only need in-memory config storage
+internal-channel:
+  type: amqp
+  config:
+    url: amqp://kiprotect:kiprotect@localhost:5672/kiprotect_test
+    format: json
+    compress: false
+    # the queue will expire after 10 minutes
+    queue_expires_after_ms: 600000
+    queue: internal_test
+    exchange: internal_test
+    exchange_type: topic
+    routing_key: internal_test

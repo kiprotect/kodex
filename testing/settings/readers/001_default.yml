@@ -1,0 +1,11 @@
+testing:
+  amqp:
+    url: amqp://kiprotect:kiprotect@localhost:5672/kiprotect_test
+    format: json
+    compress: false
+    # the queue will expire after 10 minutes
+    queue_expires_after_ms: 600000
+    queue: test
+    exchange: test
+    exchange_type: topic
+    routing_key: test
