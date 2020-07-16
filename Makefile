@@ -21,6 +21,9 @@ dep:
 install:
 	@go install $(GOFLAGS) ./...
 
+copyright:
+	python .scripts/make_copyright_headers.py
+
 init:
 	RABBITMQ_VHOST=kiprotect_test RABBITMQ_USER=kiprotect RABBITMQ_PASSWORD=kiprotect .scripts/init_rabbitmq.sh
 	RABBITMQ_VHOST=kiprotect_development RABBITMQ_USER=kiprotect RABBITMQ_PASSWORD=kiprotect .scripts/init_rabbitmq.sh
