@@ -7,57 +7,30 @@ key: $key
 #salt: this-is-my-secret-salt
 # here we list all the actions that we possibly want to perform
 actions:
-  pseudonymize-name:
-    type: pseudonymize
-    config:
-      key: name
-      method: merengue
-  pseudonymize-date:
-    type: pseudonymize
-    config:
-      key: date
-      method: structured
-      type: date
-      format: "%(2010-2030)Y-%m-%d"
-  pseudonymize-ip:
-    type: pseudonymize
-    config:
-      key: ip
-      method: structured
-      type: ipv4
-      preserve-prefixes: true
-  pseudonymize-count:
-    type: pseudonymize
-    config:
-      key: count
-      method: structured
-      type: integer
-      preserve-prefixes: true
-      type-params:
-        min: 0
-        max: 10000
+  # we include the actions from another file
+  $include: actions.yml
 # here we list the data sources that we want to read from
 sources:
-  file:
+  - name: file
     type: file
     config:
       path: input.json
       format: json
 # here we list the destinations that we want to write to
 destinations:
-  file:
-    type: stdout
+  - name: file
+    type: file
     config:
       base-name: pseudonymized
       format: json
 # here we specify the different streams that we want to create
 streams:
-  default:
+  - name: default
     sources:
       # we want to read input items from the 'file' source
       - source: file
     configs:
-      test:
+      - name: test
         actions:
           - name: pseudonymize-name
           - name: pseudonymize-date

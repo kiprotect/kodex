@@ -53,15 +53,17 @@ func loadBlueprint(filename string) (*kiprotect.Blueprint, error) {
 	}
 	if config, err := settings.LoadYaml(filename); err != nil {
 		return nil, err
+	} else if configMap, ok := config.(map[string]interface{}); !ok {
+		return nil, fmt.Errorf("expected a map")
 	} else {
-		if values, err := settings.ParseVars(config); err != nil {
+		if values, err := settings.ParseVars(configMap); err != nil {
 			return nil, err
 		} else {
-			if err := settings.InsertVars(config, values); err != nil {
+			if err := settings.InsertVars(configMap, values); err != nil {
 				return nil, err
 			}
 		}
-		return kiprotect.MakeBlueprint(config), nil
+		return kiprotect.MakeBlueprint(configMap), nil
 	}
 }
 

@@ -26,21 +26,22 @@ type Blueprint struct {
 }
 
 func initSources(project Project, config map[string]interface{}) error {
-	sourcesConfig, ok := maps.ToStringMap(config["sources"])
+	sourcesConfig, ok := maps.ToStringMapList(config["sources"])
 	if !ok {
 		return nil
 	}
 	Log.Debug("Initializing sources...")
-	for name, sourceConfig := range sourcesConfig {
+	for _, sourceConfig := range sourcesConfig {
+		name, ok := sourceConfig["name"].(string)
+		if !ok {
+			return fmt.Errorf("name is missing")
+		}
 		sourceMapConfig, ok := maps.ToStringMap(sourceConfig)
 		if !ok {
 			return fmt.Errorf("invalid config for source %s", name)
 		}
 		Log.Debugf("Creating source: %s", name)
 		source := project.MakeSource()
-
-		// we manually add the name
-		sourceMapConfig["name"] = name
 
 		if err := source.Create(sourceMapConfig); err != nil {
 			return err
@@ -55,22 +56,23 @@ func initSources(project Project, config map[string]interface{}) error {
 }
 
 func initActionConfigs(project Project, config map[string]interface{}) error {
-	actionsConfig, ok := maps.ToStringMap(config["actions"])
+	actionsConfig, ok := maps.ToStringMapList(config["actions"])
 	if !ok {
 		Log.Debug("actions config does not exist")
 		return nil
 	}
 	Log.Debug("Initializing actions...")
-	for name, actionConfig := range actionsConfig {
+	for _, actionConfig := range actionsConfig {
+		name, ok := actionConfig["name"].(string)
+		if !ok {
+			return fmt.Errorf("name is missing")
+		}
 		actionMapConfig, ok := maps.ToStringMap(actionConfig)
 		if !ok {
 			return fmt.Errorf("invalid config for action %s", name)
 		}
 		Log.Debugf("Creating action: %s", name)
 		action := project.MakeActionConfig()
-
-		// we manually add the name
-		actionMapConfig["name"] = name
 
 		if err := action.Create(actionMapConfig); err != nil {
 			return err
@@ -85,22 +87,23 @@ func initActionConfigs(project Project, config map[string]interface{}) error {
 }
 
 func initDestinations(project Project, config map[string]interface{}) error {
-	destinationsConfig, ok := maps.ToStringMap(config["destinations"])
+	destinationsConfig, ok := maps.ToStringMapList(config["destinations"])
 	if !ok {
 		Log.Debug("destinations config does not exist")
 		return nil
 	}
 	Log.Debug("Initializing destinations...")
-	for name, destinationConfig := range destinationsConfig {
+	for _, destinationConfig := range destinationsConfig {
+		name, ok := destinationConfig["name"].(string)
+		if !ok {
+			return fmt.Errorf("name is missing")
+		}
 		destinationMapConfig, ok := maps.ToStringMap(destinationConfig)
 		if !ok {
 			return fmt.Errorf("invalid config for destination %s", name)
 		}
 		Log.Debugf("Creating destination: %s", name)
 		destination := project.MakeDestination()
-
-		// we manually add the name
-		destinationMapConfig["name"] = name
 
 		if err := destination.Create(destinationMapConfig); err != nil {
 			return err
@@ -116,12 +119,16 @@ func initDestinations(project Project, config map[string]interface{}) error {
 }
 
 func initStreams(project Project, config map[string]interface{}) error {
-	streamsConfig, ok := maps.ToStringMap(config["streams"])
+	streamsConfig, ok := maps.ToStringMapList(config["streams"])
 	if !ok {
 		return nil
 	}
 	Log.Debug("Initializing streams...")
-	for name, streamConfig := range streamsConfig {
+	for _, streamConfig := range streamsConfig {
+		name, ok := streamConfig["name"].(string)
+		if !ok {
+			return fmt.Errorf("name is missing")
+		}
 		streamConfigMap, ok := maps.ToStringMap(streamConfig)
 		if !ok {
 			return fmt.Errorf("stream config missing")
@@ -194,13 +201,17 @@ func initStreamSources(stream Stream, config map[string]interface{}) error {
 
 func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 
-	configConfigs, ok := maps.ToStringMap(config["configs"])
+	configConfigs, ok := maps.ToStringMapList(config["configs"])
 
 	if !ok {
 		return nil
 	}
 
-	for name, configConfig := range configConfigs {
+	for _, configConfig := range configConfigs {
+		name, ok := configConfig["name"].(string)
+		if !ok {
+			return fmt.Errorf("name is missing")
+		}
 
 		mapConfigConfig, ok := maps.ToStringMap(configConfig)
 		if !ok {
