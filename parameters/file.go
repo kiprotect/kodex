@@ -550,6 +550,13 @@ func (p *FileParameterStore) update() error {
 				if parameters, err := p.inMemoryStore.RestoreParameters(data); err != nil {
 					return err
 				} else {
+					// we check if there already is a parameter set for this action and parameter
+					// group. If yes, we do not overwrite it.
+					if existingParameters, err := p.inMemoryStore.Parameters(parameters.Action(), parameters.ParameterGroup()); err != nil {
+						return err
+					} else if existingParameters != nil {
+						continue
+					}
 					if err := parameters.Save(); err != nil {
 						return err
 					}
@@ -559,6 +566,13 @@ func (p *FileParameterStore) update() error {
 				if parameterSet, err := p.inMemoryStore.RestoreParameterSet(data); err != nil {
 					return err
 				} else {
+					// as above we check if there already is a parameter set defined, if yes we
+					// do not overwrite it.
+					if existingParameterSet, err := p.inMemoryStore.ParameterSet(parameterSet.Hash()); err != nil {
+						return err
+					} else if existingParameterSet != nil {
+						continue
+					}
 					if err := parameterSet.Save(); err != nil {
 						return err
 					}
@@ -577,11 +591,19 @@ func (p *FileParameterStore) writeParameters(parameters *kiprotect.Parameters) e
 	if err != nil {
 		return err
 	}
-	return p.dataStore.Write(&DataEntry{
+	// we first write the entry to the data store
+	if err := p.dataStore.Write(&DataEntry{
 		Type: ParametersType,
 		ID:   parameters.ID(),
 		Data: bytes,
-	})
+	}); err != nil {
+		return err
+	}
+	// we make sure the parameters actually exist in the storer now
+	if _, err := p.ParametersById(parameters.ID()); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (p *FileParameterStore) writeParameterSet(parameterSet *kiprotect.ParameterSet) error {
@@ -589,11 +611,18 @@ func (p *FileParameterStore) writeParameterSet(parameterSet *kiprotect.Parameter
 	if err != nil {
 		return err
 	}
-	return p.dataStore.Write(&DataEntry{
+	if err := p.dataStore.Write(&DataEntry{
 		Type: ParameterSetType,
 		ID:   parameterSet.Hash(),
 		Data: bytes,
-	})
+	}); err != nil {
+		return err
+	}
+	// we make sure the parameters actually exist in the storer now
+	if _, err := p.ParameterSet(parameterSet.Hash()); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (p *FileParameterStore) ParametersById(id []byte) (*kiprotect.Parameters, error) {
@@ -685,20 +714,15 @@ func (p *FileParameterStore) SaveParameters(parameters *kiprotect.Parameters) (b
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	written, err := p.inMemoryStore.SaveParameters(parameters)
-	if err != nil {
+	// we check if the parameters already exist in the in-memory store
+	// (in that case they already have been written to disk)
+	if parameters, err := p.inMemoryStore.ParametersById(parameters.ID()); err != nil {
 		return false, err
-	}
-	if !written {
+	} else if parameters != nil {
 		return false, nil
 	}
-	if err := p.writeParameters(parameters); err != nil {
-		if p.inMemoryStore.DeleteParameters(parameters); err != nil {
-			return false, err
-		}
-		return false, err
-	}
-	return written, nil
+	// if not we write them to disk
+	return true, p.writeParameters(parameters)
 }
 
 func (p *FileParameterStore) SaveParameterSet(parameterSet *kiprotect.ParameterSet) (bool, error) {
@@ -706,19 +730,14 @@ func (p *FileParameterStore) SaveParameterSet(parameterSet *kiprotect.ParameterS
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	written, err := p.inMemoryStore.SaveParameterSet(parameterSet)
-
-	if err != nil {
+	// we check if the parameter set already exists in the in-memory store
+	// (in that case it already has been written to disk)
+	if parameters, err := p.inMemoryStore.ParameterSet(parameterSet.Hash()); err != nil {
 		return false, err
-	}
-	if !written {
+	} else if parameters != nil {
 		return false, nil
 	}
-	if err := p.writeParameterSet(parameterSet); err != nil {
-		if p.inMemoryStore.DeleteParameterSet(parameterSet); err != nil {
-			return false, err
-		}
-		return false, err
-	}
-	return written, nil
+
+	// if not we write it to disk
+	return true, p.writeParameterSet(parameterSet)
 }
