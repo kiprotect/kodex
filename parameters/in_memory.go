@@ -92,6 +92,22 @@ func (p *InMemoryParameterStore) getParameters(action kiprotect.Action, paramete
 	return nil, nil
 }
 
+func (p *InMemoryParameterStore) AllParameters() ([]*kiprotect.Parameters, error) {
+	parametersList := make([]*kiprotect.Parameters, 0, len(p.parametersById))
+	for _, parameters := range p.parametersById {
+		parametersList = append(parametersList, parameters)
+	}
+	return parametersList, nil
+}
+
+func (p *InMemoryParameterStore) AllParameterSets() ([]*kiprotect.ParameterSet, error) {
+	parameterSets := make([]*kiprotect.ParameterSet, 0, len(p.parameterSets))
+	for _, parameterSet := range p.parameterSets {
+		parameterSets = append(parameterSets, parameterSet)
+	}
+	return parameterSets, nil
+}
+
 func (p *InMemoryParameterStore) DeleteParameterSet(parameterSet *kiprotect.ParameterSet) error {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
