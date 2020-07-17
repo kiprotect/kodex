@@ -102,7 +102,7 @@ var ActionSpecificationForm = forms.Form{
 		forms.Field{
 			Name: "name",
 			Validators: []forms.Validator{
-				forms.IsRequired{},
+				forms.IsOptional{Default: ""},
 				forms.IsString{},
 			},
 		},

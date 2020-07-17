@@ -1,28 +1,28 @@
 # here we list all the actions that we possibly want to perform
 actions:
-  undo:
+  - name: undo
     type: undo
     config: {}
 # here we list the data sources that we want to read from
 sources:
-  file:
+  - name: file
     type: file
     config:
       path: pseudonymized.json
       format: json
 # here we list the destinations that we want to write to
 destinations:
-  stdout:
+  - name: stdout
     type: stdout
     config: {}
 # here we specify the different streams that we want to create
 streams:
-  default:
+  - name: default
     sources:
       # we want to read input items from the 'file' source
       - source: file
     configs:
-      test:
+      - name: test
         actions:
           - name: undo
         destinations:
