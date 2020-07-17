@@ -17,6 +17,7 @@
 package helpers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/kiprotect/go-helpers/settings"
 	"github.com/kiprotect/kiprotect"
@@ -24,6 +25,7 @@ import (
 	kipHelpers "github.com/kiprotect/kiprotect/helpers"
 	"github.com/kiprotect/kiprotect/processing"
 	"github.com/urfave/cli"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -64,6 +66,62 @@ func loadBlueprint(filename string) (*kiprotect.Blueprint, error) {
 			}
 		}
 		return kiprotect.MakeBlueprint(configMap), nil
+	}
+}
+
+type ParametersStruct struct {
+	Parameters    []map[string]interface{} `json:"parameters"`
+	ParameterSets []map[string]interface{} `json:"parameter-sets"`
+}
+
+func importParameters(controller kiprotect.Controller, path string) error {
+	var parametersStruct ParametersStruct
+	parameterStore := controller.ParameterStore()
+	definitions := controller.Definitions()
+	if bytes, err := ioutil.ReadFile(path); err != nil {
+		return err
+	} else if err := json.Unmarshal(bytes, &parametersStruct); err != nil {
+		return err
+	} else {
+		for _, parametersData := range parametersStruct.Parameters {
+			if parameters, err := kiprotect.RestoreParameters(parametersData, parameterStore, definitions); err != nil {
+				return err
+			} else {
+				if err := parameters.Save(); err != nil {
+					kiprotect.Log.Error(err)
+					continue
+				}
+			}
+		}
+		for _, parameterSetData := range parametersStruct.ParameterSets {
+			if parameterSet, err := kiprotect.RestoreParameterSet(parameterSetData, parameterStore); err != nil {
+				return err
+			} else if err := parameterSet.Save(); err != nil {
+				kiprotect.Log.Error(err)
+				continue
+			}
+		}
+	}
+	return nil
+}
+
+func exportParameters(controller kiprotect.Controller, path string) error {
+	parameterStore := controller.ParameterStore()
+	allParameterSets, err := parameterStore.AllParameterSets()
+	if err != nil {
+		return err
+	}
+	allParameters, err := parameterStore.AllParameters()
+	if err != nil {
+		return err
+	}
+	if bytes, err := json.Marshal(map[string]interface{}{
+		"parameter-sets": allParameterSets,
+		"parameters":     allParameters,
+	}); err != nil {
+		return err
+	} else {
+		return ioutil.WriteFile(path, bytes, 0644)
 	}
 }
 
@@ -149,6 +207,29 @@ func KIProtect() {
 	}
 
 	bareCommands := []cli.Command{
+		cli.Command{
+			Name: "parameters",
+			Subcommands: []cli.Command{
+				cli.Command{
+					Name: "export",
+					Action: func(c *cli.Context) error {
+						if c.NArg() != 1 {
+							return fmt.Errorf("usage: export [filename]")
+						}
+						return exportParameters(controller, c.Args().Get(0))
+					},
+				},
+				cli.Command{
+					Name: "import",
+					Action: func(c *cli.Context) error {
+						if c.NArg() != 1 {
+							return fmt.Errorf("usage: import [filename]")
+						}
+						return importParameters(controller, c.Args().Get(0))
+					},
+				},
+			},
+		},
 		cli.Command{
 			Name: "run",
 			Action: func(c *cli.Context) error {

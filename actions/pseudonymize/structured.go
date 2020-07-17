@@ -200,6 +200,13 @@ func (p *StructuredPseudonymizer) SetParams(params interface{}) error {
 }
 
 func (p *StructuredPseudonymizer) GenerateParams(key, salt []byte) error {
+	if key == nil {
+		randomBytes, err := kiprotect.RandomBytes(64)
+		if err != nil {
+			return err
+		}
+		key = randomBytes
+	}
 	p.key = kiprotect.DeriveKey(key, salt, 64)
 	return nil
 }

@@ -555,6 +555,7 @@ func (p *FileParameterStore) update() error {
 					if existingParameters, err := p.inMemoryStore.Parameters(parameters.Action(), parameters.ParameterGroup()); err != nil {
 						return err
 					} else if existingParameters != nil {
+						kiprotect.Log.Debug("Skipping parameters")
 						continue
 					}
 					if err := parameters.Save(); err != nil {
@@ -571,6 +572,7 @@ func (p *FileParameterStore) update() error {
 					if existingParameterSet, err := p.inMemoryStore.ParameterSet(parameterSet.Hash()); err != nil {
 						return err
 					} else if existingParameterSet != nil {
+						kiprotect.Log.Debug("Skipping parameter set")
 						continue
 					}
 					if err := parameterSet.Save(); err != nil {
@@ -600,7 +602,7 @@ func (p *FileParameterStore) writeParameters(parameters *kiprotect.Parameters) e
 		return err
 	}
 	// we make sure the parameters actually exist in the storer now
-	if _, err := p.ParametersById(parameters.ID()); err != nil {
+	if _, err := p.parametersById(parameters.ID()); err != nil {
 		return err
 	}
 	return nil
@@ -619,16 +621,19 @@ func (p *FileParameterStore) writeParameterSet(parameterSet *kiprotect.Parameter
 		return err
 	}
 	// we make sure the parameters actually exist in the storer now
-	if _, err := p.ParameterSet(parameterSet.Hash()); err != nil {
+	if _, err := p.parameterSet(parameterSet.Hash()); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p *FileParameterStore) ParametersById(id []byte) (*kiprotect.Parameters, error) {
-
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
+	return p.parametersById(id)
+}
+
+func (p *FileParameterStore) parametersById(id []byte) (*kiprotect.Parameters, error) {
 
 	if parameters, err := p.inMemoryStore.ParametersById(id); err != nil {
 		return nil, err
@@ -678,11 +683,13 @@ func (p *FileParameterStore) Parameters(action kiprotect.Action, parameterGroup 
 		}
 	}
 }
-
 func (p *FileParameterStore) ParameterSet(hash []byte) (*kiprotect.ParameterSet, error) {
-
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
+	return p.parameterSet(hash)
+}
+
+func (p *FileParameterStore) parameterSet(hash []byte) (*kiprotect.ParameterSet, error) {
 
 	// we first try to retrieve the parameter set from the in-memory store
 	if parameterSet, err := p.inMemoryStore.ParameterSet(hash); err != nil {
@@ -734,6 +741,10 @@ func (p *FileParameterStore) SaveParameters(parameters *kiprotect.Parameters) (b
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
+	if err := p.update(); err != nil {
+		return false, err
+	}
+
 	// we check if the parameters already exist in the in-memory store
 	// (in that case they already have been written to disk)
 	if parameters, err := p.inMemoryStore.ParametersById(parameters.ID()); err != nil {
@@ -741,6 +752,7 @@ func (p *FileParameterStore) SaveParameters(parameters *kiprotect.Parameters) (b
 	} else if parameters != nil {
 		return false, nil
 	}
+
 	// if not we write them to disk
 	return true, p.writeParameters(parameters)
 }
@@ -749,6 +761,10 @@ func (p *FileParameterStore) SaveParameterSet(parameterSet *kiprotect.ParameterS
 
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
+
+	if err := p.update(); err != nil {
+		return false, err
+	}
 
 	// we check if the parameter set already exists in the in-memory store
 	// (in that case it already has been written to disk)
