@@ -50,6 +50,8 @@ type ParameterStore interface {
 	ParameterSet(hash []byte) (*ParameterSet, error)
 	SaveParameterSet(*ParameterSet) (bool, error)
 	SaveParameters(*Parameters) (bool, error)
+	AllParameters() ([]*Parameters, error)
+	AllParameterSets() ([]*ParameterSet, error)
 }
 
 func MakeParameterStore(settings Settings, definitions Definitions) (ParameterStore, error) {

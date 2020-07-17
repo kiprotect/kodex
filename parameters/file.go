@@ -709,6 +709,26 @@ func (p *FileParameterStore) ParameterSet(hash []byte) (*kiprotect.ParameterSet,
 	}
 }
 
+func (p *FileParameterStore) AllParameters() ([]*kiprotect.Parameters, error) {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	if err := p.update(); err != nil {
+		return nil, err
+	}
+	return p.inMemoryStore.AllParameters()
+}
+
+func (p *FileParameterStore) AllParameterSets() ([]*kiprotect.ParameterSet, error) {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	if err := p.update(); err != nil {
+		return nil, err
+	}
+	return p.inMemoryStore.AllParameterSets()
+}
+
 func (p *FileParameterStore) SaveParameters(parameters *kiprotect.Parameters) (bool, error) {
 
 	p.mutex.Lock()
