@@ -102,10 +102,6 @@ func (p *MerenguePseudonymizer) GenerateParams(key, salt []byte) error {
 		}
 		key = randomBytes
 	}
-	return p.GenerateParamsFromSeed(key, salt)
-}
-
-func (p *MerenguePseudonymizer) GenerateParamsFromSeed(key, salt []byte) error {
 	p.key = kiprotect.DeriveKey(key, salt, 64)
 	return nil
 }

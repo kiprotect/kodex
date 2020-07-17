@@ -213,7 +213,7 @@ func (p *InMemoryParameterStore) ParameterSet(hash []byte) (*kiprotect.Parameter
 
 	parameterSet, ok := p.parameterSets[hex.EncodeToString(hash)]
 	if !ok {
-		return nil, fmt.Errorf("not found")
+		return nil, nil
 	}
 	return parameterSet, nil
 }

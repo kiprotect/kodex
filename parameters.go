@@ -408,7 +408,7 @@ func RestoreParameterSet(data map[string]interface{}, parameterStore ParameterSt
 			return nil, err
 		}
 		if parameters == nil {
-			return nil, fmt.Errorf("parameters not found")
+			return nil, fmt.Errorf("required parameters for parameter set not found")
 		}
 		parametersList[i] = parameters
 	}
