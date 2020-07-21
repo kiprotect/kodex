@@ -37,6 +37,10 @@ To download and install KIProtect from source, simply run
     make
     make install
 
+# Documentation
+
+You can find the official documentation at https://kiprotect.com/docs.
+
 # Transforming data
 
 KIProtect reads its configuration from so-called blueprints. To get an idea
