@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kiprotect/go-helpers/settings"
+	kipStrings "github.com/kiprotect/go-helpers/strings"
+	"github.com/kiprotect/go-helpers/yaml"
 	"github.com/kiprotect/kiprotect"
 	"github.com/kiprotect/kiprotect/definitions"
 	kipHelpers "github.com/kiprotect/kiprotect/helpers"
@@ -27,6 +29,7 @@ import (
 	"github.com/urfave/cli"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -44,29 +47,6 @@ func decorate(commands []cli.Command, decorator decorator) []cli.Command {
 		newCommands[i] = command
 	}
 	return newCommands
-}
-
-func loadBlueprint(filename string) (*kiprotect.Blueprint, error) {
-	if filename == "" {
-		filename = ".kiprotect.yml"
-	}
-	if !strings.HasSuffix(filename, ".yml") {
-		filename = filename + ".yml"
-	}
-	if config, err := settings.LoadYaml(filename); err != nil {
-		return nil, err
-	} else if configMap, ok := config.(map[string]interface{}); !ok {
-		return nil, fmt.Errorf("expected a map")
-	} else {
-		if values, err := settings.ParseVars(configMap); err != nil {
-			return nil, err
-		} else {
-			if err := settings.InsertVars(configMap, values); err != nil {
-				return nil, err
-			}
-		}
-		return kiprotect.MakeBlueprint(configMap), nil
-	}
 }
 
 type ParametersStruct struct {
@@ -133,6 +113,120 @@ var defaultSettings = map[string]interface{}{
 		"type":     "file",
 		"filename": "~/.kiprotect/parameters.kip",
 	},
+	"blueprints": map[string]interface{}{
+		"paths": []interface{}{
+			"~/.kiprotect/blueprints",
+		},
+	},
+}
+
+func downloadBlueprints(path, url string) error {
+	if data, err := Download(url); err != nil {
+		return err
+	} else {
+		if err := ExtractBlueprints(data, path); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func loadBlueprint(settingsObj kiprotect.Settings, filename, version string) (*kiprotect.Blueprint, error) {
+	if filename == "" {
+		filename = ".kiprotect.yml"
+	} else {
+		if !strings.HasSuffix(filename, ".yml") {
+			filename = filename + ".yml"
+		}
+		var err error
+		if filename, err = findBlueprint(settingsObj, filename, version); err != nil {
+			return nil, err
+		}
+	}
+	if _, err := os.Stat(filename); err != nil {
+		return nil, fmt.Errorf("blueprint '%s' not found", filename)
+	}
+	if config, err := settings.LoadYaml(filename); err != nil {
+		return nil, err
+	} else if configMap, ok := config.(map[string]interface{}); !ok {
+		return nil, fmt.Errorf("expected a map")
+	} else {
+		if values, err := settings.ParseVars(configMap); err != nil {
+			return nil, err
+		} else {
+			if err := settings.InsertVars(configMap, values); err != nil {
+				return nil, err
+			}
+		}
+		return kiprotect.MakeBlueprint(configMap), nil
+	}
+}
+
+func blueprintSettings(path string) (map[string]interface{}, error) {
+	var settings map[string]interface{}
+	if f, err := os.OpenFile(path, os.O_RDONLY, 0700); err != nil {
+		return nil, err
+	} else if data, err := ioutil.ReadAll(f); err != nil {
+		return nil, err
+	} else if err := yaml.Unmarshal(data, &settings); err != nil {
+		return nil, err
+	}
+	return settings, nil
+}
+
+func findBlueprint(settings kiprotect.Settings, name string, version string) (string, error) {
+	blueprintsPaths, err := getBlueprintsPaths(settings)
+	if err != nil {
+		return "", err
+	}
+	for _, path := range blueprintsPaths {
+		files, err := ioutil.ReadDir(path)
+		if err != nil {
+			return "", err
+		}
+		for _, file := range files {
+			if file.IsDir() {
+				subfiles, err := ioutil.ReadDir(filepath.Join(path, file.Name()))
+				if err != nil {
+					return "", err
+				}
+				for _, subfile := range subfiles {
+					if subfile.Name() == ".blueprints.yml" {
+						settingsPath := filepath.Join(path, file.Name(), subfile.Name())
+						if settings, err := blueprintSettings(settingsPath); err != nil {
+							return "", err
+						} else {
+							if versionInfo, ok := settings["version"].(string); !ok {
+								return "", fmt.Errorf("version information missing in settings file '%s'", settingsPath)
+							} else if version != "" && version != versionInfo {
+								// this is not the version we're looking for
+								continue
+							}
+						}
+						kiprotect.Log.Debugf("found blueprints directory: '%s'", filepath.Join(path, file.Name()))
+						trialPath := filepath.Join(path, file.Name(), name)
+						if _, err := os.Stat(trialPath); err == nil {
+							kiprotect.Log.Debugf("found blueprint '%s' at path '%s'", name, trialPath)
+							return trialPath, nil
+						}
+					}
+				}
+			}
+		}
+	}
+	return "", fmt.Errorf("blueprint '%s' with version '%s' not found", name, version)
+}
+
+func getBlueprintsPaths(settings kiprotect.Settings) ([]string, error) {
+	blueprintsPaths, err := settings.Get("blueprints.paths")
+	if err != nil {
+		return nil, err
+	}
+	blueprintsPathsList, err := kipStrings.ToListOfStr(blueprintsPaths)
+	if err != nil {
+		return nil, err
+	}
+	return blueprintsPathsList, nil
 }
 
 func KIProtect() {
@@ -231,7 +325,37 @@ func KIProtect() {
 			},
 		},
 		cli.Command{
+			Name: "blueprints",
+			Subcommands: []cli.Command{
+				cli.Command{
+					Name: "download",
+					Action: func(c *cli.Context) error {
+						blueprintsPaths, err := getBlueprintsPaths(settings)
+						if err != nil {
+							return err
+						}
+						if len(blueprintsPaths) == 0 {
+							return fmt.Errorf("no blueprint paths specified")
+						}
+						blueprintsPath := blueprintsPaths[0]
+						blueprintsUrl := "https://github.com/kiprotect/blueprints/archive/master.zip"
+						if c.NArg() == 1 {
+							blueprintsUrl = c.Args().Get(0)
+						}
+						return downloadBlueprints(blueprintsPath, blueprintsUrl)
+					},
+				},
+			},
+		},
+		cli.Command{
 			Name: "run",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "version",
+					Value: "",
+					Usage: "optional: the version of the blueprint to load",
+				},
+			},
 			Action: func(c *cli.Context) error {
 				project := controller.MakeProject()
 				project.SetName("default")
@@ -242,7 +366,7 @@ func KIProtect() {
 				if c.NArg() > 0 {
 					blueprintName = c.Args().Get(0)
 				}
-				blueprint, err := loadBlueprint(blueprintName)
+				blueprint, err := loadBlueprint(settings, blueprintName, c.String("version"))
 				if err != nil {
 					return err
 				}
