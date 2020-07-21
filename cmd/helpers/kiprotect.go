@@ -138,9 +138,13 @@ func loadBlueprint(settingsObj kiprotect.Settings, filename, version string) (*k
 		if !strings.HasSuffix(filename, ".yml") {
 			filename = filename + ".yml"
 		}
-		var err error
-		if filename, err = findBlueprint(settingsObj, filename, version); err != nil {
-			return nil, err
+		// we check if we can directly locate the blueprint. If not, we try to
+		// find it using the blueprints directories.
+		if _, err := os.Stat(filename); err != nil {
+			var err error
+			if filename, err = findBlueprint(settingsObj, filename, version); err != nil {
+				return nil, err
+			}
 		}
 	}
 	if _, err := os.Stat(filename); err != nil {
