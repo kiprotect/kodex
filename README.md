@@ -44,24 +44,30 @@ You can find the official documentation at https://kiprotect.com/docs.
 # Transforming data
 
 KIProtect reads its configuration from so-called blueprints. To get an idea
-of how this works, check out the `docs/examples` directory, which contains
-example blueprints together with instructions on how to run them. For example,
-the pseudonymization example can be run as follows:
+of how this works, check out our
+[blueprints repository](https://github.com/kiprotect/blueprints), which contains
+example blueprints together with instructions on how to run them. You can
+install these blueprints via KIProtect (requires Internet access):
 
-    cd docs/examples/pseudonymize
-    # pseudonymize the example data in input.json
-    kiprotect run pseudonymize
-    # depseudonymize the data again
-    kiprotect run depseudonymize
+    kiprotect blueprints download
+
+Alternatively, you can copy them to your machine manually, please refer to the
+[documentation](https://kiprotect.com/docs/components/blueprints) for more details.
+To then run the pseudonymization example, simply type
+
+    # pseudonymize the example data and write it to a file named 'pseudonymized.json'
+    kiprotect run pseudonymization/examples/data-types/pseudonymize
+    # depseudonymize the data again and print the result on stdout
+    kiprotect run pseudonymization/examples/data-types/depseudonymize
 
 That's it! KIProtect takes care of generating and storing cryptographic
 parameters for the pseudonymization. If you want to manually enter a key instead
 to generate parameters, you can do that too:
 
     # pseudonymize the data with a user-supplied key
-    kiprotect run pseudonymize-with-key
+    kiprotect run pseudonymization/examples/data-types/pseudonymize-with-key
     # depseudonymize with a key as well
-    kiprotect run depseudonymize-with-key
+    kiprotect run pseudonymization/examples/data-types/depseudonymize-with-key
 
 # Running the tests
 
