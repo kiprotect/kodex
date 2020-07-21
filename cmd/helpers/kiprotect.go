@@ -29,6 +29,7 @@ import (
 	"github.com/urfave/cli"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 )
@@ -131,12 +132,27 @@ func downloadBlueprints(path, url string) error {
 	return nil
 }
 
+func normalizePath(path string) (string, error) {
+	if strings.HasPrefix(path, "~") {
+		usr, err := user.Current()
+		if err != nil {
+			return "", err
+		}
+		return usr.HomeDir + path[1:len(path)], nil
+	}
+	return path, nil
+}
+
 func loadBlueprint(settingsObj kiprotect.Settings, filename, version string) (*kiprotect.Blueprint, error) {
 	if filename == "" {
 		filename = ".kiprotect.yml"
 	} else {
 		if !strings.HasSuffix(filename, ".yml") {
 			filename = filename + ".yml"
+		}
+		var err error
+		if filename, err = normalizePath(filename); err != nil {
+			return nil, err
 		}
 		// we check if we can directly locate the blueprint. If not, we try to
 		// find it using the blueprints directories.
@@ -184,6 +200,10 @@ func findBlueprint(settings kiprotect.Settings, name string, version string) (st
 		return "", err
 	}
 	for _, path := range blueprintsPaths {
+		var err error
+		if path, err = normalizePath(path); err != nil {
+			return "", err
+		}
 		files, err := ioutil.ReadDir(path)
 		if err != nil {
 			return "", err
@@ -341,12 +361,15 @@ func KIProtect() {
 						if len(blueprintsPaths) == 0 {
 							return fmt.Errorf("no blueprint paths specified")
 						}
-						blueprintsPath := blueprintsPaths[0]
 						blueprintsUrl := "https://github.com/kiprotect/blueprints/archive/master.zip"
 						if c.NArg() == 1 {
 							blueprintsUrl = c.Args().Get(0)
 						}
-						return downloadBlueprints(blueprintsPath, blueprintsUrl)
+						if blueprintsPath, err := normalizePath(blueprintsPaths[0]); err != nil {
+							return err
+						} else {
+							return downloadBlueprints(blueprintsPath, blueprintsUrl)
+						}
 					},
 				},
 			},
