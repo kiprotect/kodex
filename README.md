@@ -145,7 +145,7 @@ which you make to KIProtect will benefit the entire user community.
 If you have trouble using KIProtect due to the license terms, please
 [get in touch with us](mailto:ce@kiprotect.com). We offer a commercial license 
 that enables you to integrate KIProtect with your own software code without
-being affected by the terms of the A-GPL license.
+being affected by the terms of the AGPL license.
 
 # Contact us
 
