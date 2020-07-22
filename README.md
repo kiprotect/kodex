@@ -113,16 +113,42 @@ enterprise environment. It includes e.g. the following functionality:
 - Role-based access control mechanism.
 
 Are you interested to learn more about KIProtect EE? Just visit
-[our website](https://kiprotect.com) or [get in touch with us](ee@kiprotect.com)!
+[our website](https://kiprotect.com) or [get in touch with us](mailto:ee@kiprotect.com)!
 
 # License
 
-KIProtect is currently released under the Affero GPL license. See the
-[license file](LICENSE) for more information.
+KIProtect is currently licensed under the Affero GPL license, version 3 (AGPL-3.0). See the
+[license file](LICENSE) for details. In addition, we also offer a commercial license
+that allow you to directly integrate the KIProtect code into closed-source software
+without disclosing your own code. If you're interested in buying a commercial license,
+[please get in touch with us](mailto:ce@kiprotect.com).
+
+## Why A-GPL?
+
+The Affero GPL license is a strong copyleft license that allows you to freely use
+KIProtect for commercial and non-commercial purposes. If you use the software as a
+standalone tool without integrating it with your own software code (i.e. you do not
+import and compile it as a Go library in your own Go code) its use will not
+affect your own software code in any way. In that respect, KIProtect can be used
+as freely as other Linux tools provided under a GPL license. 
+
+However, if you integrate the KIProtect code with your own software code and distribute
+or offer that software as a web service, you will have to make the source
+code of your software available under a compatible license. Similarly, if you modify
+or extend KIProtect and either distribute it or offer it as a service you will have
+to make the source code of your changes available as well. This ensures that improvements
+which you make to KIProtect will benefit the entire user community.
+
+## I can't use this due  to the A-GPL license!
+
+If you have trouble using KIProtect due to the license terms, please
+[get in touch with us](mailto:ce@kiprotect.com). We offer a commercial license 
+that enables you to integrate KIProtect with your own software code without
+being affected by the terms of the A-GPL license.
 
 # Contact us
 
-Do you have trouble getting KIProtect to work? Do you want to suggest a new
+Do you have trouble getting KIProtect to run? Do you want to suggest a new
 feature or report a bug? Please open an issue in this issue tracker. If
 it's something that you'd like to discuss directly with us, please
 [send us an e-mail](ce@kiprotect.com), we love to hear from you!
