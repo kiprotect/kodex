@@ -1,8 +1,6 @@
-# Welcome to KIProtect!
-
 ![](https://kiprotect.com/static/images/logos/kip-logo-blue.png)
 
-KIProtect is an open-source toolkit for **privacy and security engineering**. It
+**KIProtect** is an open-source toolkit for **privacy and security engineering**. It
 helps you to automate data security and data protection measures in your
 data engineering workflows. It offers the following functionality:
 
