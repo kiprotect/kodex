@@ -13,7 +13,7 @@ data engineering workflows. It offers the following functionality:
 
 With KIProtect, you can describe your data protection and data security
 workflows using a simple, declarative configuration language: Just like DevOps
-tools let you describe infrastructure as code, KIProtect is a **PrivacyOps** /
+tools let you describe infrastructure as code, KIProtect is a **PrivacyOps** &
 **SecurityOps** tool that let you describe **privacy and security measures
 as code**.
 
