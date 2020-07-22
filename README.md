@@ -57,6 +57,7 @@ To then run the pseudonymization example, simply type
 
     # pseudonymize the example data and write it to a file named 'pseudonymized.json'
     kiprotect run pseudonymization/examples/data-types/pseudonymize
+
     # depseudonymize the data again and print the result on stdout
     kiprotect run pseudonymization/examples/data-types/depseudonymize
 
@@ -66,6 +67,7 @@ to generate parameters, you can do that too:
 
     # pseudonymize the data with a user-supplied key
     kiprotect run pseudonymization/examples/data-types/pseudonymize-with-key
+
     # depseudonymize with a key as well
     kiprotect run pseudonymization/examples/data-types/depseudonymize-with-key
 
