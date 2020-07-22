@@ -139,7 +139,7 @@ or extend KIProtect and either distribute it or offer it as a service you will h
 to make the source code of your changes available as well. This ensures that improvements
 which you make to KIProtect will benefit the entire user community.
 
-## I can't use this due  to the A-GPL license!
+## I can't use this due to the license!
 
 If you have trouble using KIProtect due to the license terms, please
 [get in touch with us](mailto:ce@kiprotect.com). We offer a commercial license 
