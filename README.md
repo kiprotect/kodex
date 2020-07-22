@@ -123,7 +123,7 @@ that allow you to directly integrate the KIProtect code into closed-source softw
 without disclosing your own code. If you're interested in buying a commercial license,
 [please get in touch with us](mailto:ce@kiprotect.com).
 
-## Why A-GPL?
+## Why Affero GPL?
 
 The Affero GPL license is a strong copyleft license that allows you to freely use
 KIProtect for commercial and non-commercial purposes. If you use the software as a
