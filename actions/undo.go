@@ -124,7 +124,7 @@ func (a *UndoAction) DoWithConfig(item *kiprotect.Item, writer kiprotect.Channel
 			return nil, err
 		}
 		processor, err = kiprotect.MakeProcessor(parameterSet, writer, config)
-		processor.SetSeed(a.key)
+		processor.SetKey(a.key)
 		processor.SetSalt(a.salt)
 	} else {
 		kipId, ok := item.Get("_kip")
