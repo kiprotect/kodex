@@ -104,10 +104,6 @@ func (i *InMemoryProject) SetDescription(description string) error {
 	return nil
 }
 
-func (i *InMemoryProject) MakeSchema() kiprotect.Schema {
-	return MakeInMemorySchema(kiprotect.RandomID(), &kiprotect.DataSchema{}, i)
-}
-
 func (c *InMemoryProject) MakeStream() kiprotect.Stream {
 	id := kiprotect.RandomID()
 	stream, err := MakeInMemoryStream(id, map[string]interface{}{

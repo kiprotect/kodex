@@ -34,7 +34,6 @@ type Project interface {
 	MakeDestination() Destination
 	MakeSource() Source
 	MakeStream() Stream
-	MakeSchema() Schema
 
 	Controller() Controller
 }
