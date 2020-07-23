@@ -139,6 +139,49 @@ var ActionSpecificationForm = forms.Form{
 	},
 }
 
+type IsActionSpecification struct {
+	context map[string]interface{}
+}
+
+func (i IsActionSpecification) ValidateWithContext(value interface{}, values map[string]interface{}, context map[string]interface{}) (interface{}, error) {
+	return i.validate(value, values, context)
+}
+
+func (i IsActionSpecification) Validate(value interface{}, values map[string]interface{}) (interface{}, error) {
+	return i.validate(value, values, nil)
+}
+
+func (i IsActionSpecification) validate(value interface{}, values map[string]interface{}, context map[string]interface{}) (interface{}, error) {
+	// we have validated this before
+	config := value.(map[string]interface{})
+	params, err := ActionSpecificationForm.ValidateWithContext(config, context)
+	if err != nil {
+		return nil, err
+	}
+	return ActionSpecification{
+		Name:        params["name"].(string),
+		Description: params["description"].(string),
+		ID:          params["id"].([]byte),
+		Type:        params["type"].(string),
+		Config:      params["config"].(map[string]interface{}),
+	}, nil
+}
+
+type IsActionSpecifications struct{}
+
+func (f IsActionSpecifications) Validate(value interface{}, values map[string]interface{}) (interface{}, error) {
+	list := value.([]interface{})
+	specs := make([]ActionSpecification, len(list))
+	for i, spec := range list {
+		if actionSpecification, ok := spec.(ActionSpecification); !ok {
+			return nil, fmt.Errorf("entry %d is not an action specification", i)
+		} else {
+			specs[i] = actionSpecification
+		}
+	}
+	return specs, nil
+}
+
 func MakeAction(name, description, actionType string, id []byte, config map[string]interface{}, definitions Definitions) (Action, error) {
 	if definition, ok := definitions.ActionDefinitions[actionType]; !ok {
 		return nil, fmt.Errorf("unknown action type: %s", actionType)
