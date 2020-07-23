@@ -119,7 +119,7 @@ func (p *Processor) SetSalt(salt []byte) {
 	p.salt = salt
 }
 
-func (p *Processor) SetSeed(key []byte) {
+func (p *Processor) SetKey(key []byte) {
 	p.key = key
 }
 

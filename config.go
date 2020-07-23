@@ -39,21 +39,6 @@ const (
 	IgnoreErrors ErrorPolicy = "ignore"
 )
 
-type MessageType string
-
-const (
-	Info  MessageType = "INFO"
-	Debug MessageType = "DEBUG"
-	Quota MessageType = "QUOTA"
-)
-
-type ChannelWriter interface {
-	Message(item *Item, data map[string]interface{}, mt MessageType) error
-	Write(string, []*Item) error
-	Error(*Item, error) error
-	Warning(*Item, error) error
-}
-
 type Config interface {
 	Model
 
@@ -328,7 +313,7 @@ func (b *BaseConfig) Processor() (*Processor, error) {
 		if !ok {
 			return nil, fmt.Errorf("key is not a string")
 		}
-		processor.SetSeed([]byte(keyString))
+		processor.SetKey([]byte(keyString))
 	}
 	if salt, err := settings.Get("salt"); err == nil {
 		saltStr, ok := salt.(string)
