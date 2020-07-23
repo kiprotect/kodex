@@ -41,11 +41,6 @@ type Reader interface {
 
 var EOS = fmt.Errorf("end of stream")
 
-// A SchemaReader is able to generate its own schema
-type SchemaReader interface {
-	Schema() (DataSchema, error)
-}
-
 // A peeking reader is able to "peek" into the data stream, i.e. to read a
 // payload but immediately put it back to
 type PeekingReader interface {

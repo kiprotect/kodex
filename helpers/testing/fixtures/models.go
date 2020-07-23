@@ -116,32 +116,6 @@ func (c Config) Teardown(fixture interface{}) error {
 	return nil
 }
 
-type Schema struct {
-	Project string
-	Config  map[string]interface{}
-}
-
-func (i Schema) Setup(fixtures map[string]interface{}) (interface{}, error) {
-
-	project, ok := fixtures[i.Project].(kiprotect.Project)
-
-	if !ok {
-		return nil, fmt.Errorf("project missing")
-	}
-
-	schema := project.MakeSchema()
-
-	values := map[string]interface{}{
-		"config": i.Config,
-	}
-
-	if err := schema.Create(values); err != nil {
-		return nil, err
-	} else {
-		return schema, schema.Save()
-	}
-}
-
 type Source struct {
 	Name       string
 	Project    string
