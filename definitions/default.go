@@ -28,11 +28,12 @@ import (
 
 func Merge(a, b kiprotect.Definitions) kiprotect.Definitions {
 	c := kiprotect.Definitions{
-		PluginDefinitions:     kiprotect.PluginDefinitions{},
-		ActionDefinitions:     kiprotect.ActionDefinitions{},
-		WriterDefinitions:     kiprotect.WriterDefinitions{},
-		ReaderDefinitions:     kiprotect.ReaderDefinitions{},
-		ControllerDefinitions: kiprotect.ControllerDefinitions{},
+		ParameterStoreDefinitions: kiprotect.ParameterStoreDefinitions{},
+		PluginDefinitions:         kiprotect.PluginDefinitions{},
+		ActionDefinitions:         kiprotect.ActionDefinitions{},
+		WriterDefinitions:         kiprotect.WriterDefinitions{},
+		ReaderDefinitions:         kiprotect.ReaderDefinitions{},
+		ControllerDefinitions:     kiprotect.ControllerDefinitions{},
 	}
 	for _, obj := range []kiprotect.Definitions{a, b} {
 		for k, v := range obj.PluginDefinitions {
@@ -49,6 +50,9 @@ func Merge(a, b kiprotect.Definitions) kiprotect.Definitions {
 		}
 		for k, v := range obj.ControllerDefinitions {
 			c.ControllerDefinitions[k] = v
+		}
+		for k, v := range obj.ParameterStoreDefinitions {
+			c.ParameterStoreDefinitions[k] = v
 		}
 	}
 	return c
