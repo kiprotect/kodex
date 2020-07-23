@@ -59,7 +59,7 @@ func MakeParameterStore(settings Settings, definitions Definitions) (ParameterSt
 
 	if err != nil {
 		config = map[string]interface{}{
-			"type": "in-memory",
+			"type": "inMemory",
 		}
 	}
 
