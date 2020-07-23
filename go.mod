@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
-	github.com/kiprotect/go-helpers v0.0.0-20200723152303-c4f5612c5ab2
+	github.com/kiprotect/go-helpers v0.0.0-20200723155222-3cb0f057c43b
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/streadway/amqp v1.0.0

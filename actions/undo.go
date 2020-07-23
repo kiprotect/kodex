@@ -23,35 +23,6 @@ import (
 	"github.com/kiprotect/kiprotect"
 )
 
-type IsActionSpecification struct{}
-
-func (i IsActionSpecification) Validate(value interface{}, values map[string]interface{}) (interface{}, error) {
-	// we have validated this before
-	config := value.(map[string]interface{})
-	params, err := kiprotect.ActionSpecificationForm.Validate(config)
-	if err != nil {
-		return nil, err
-	}
-	return kiprotect.ActionSpecification{
-		Name:        params["name"].(string),
-		Description: params["description"].(string),
-		ID:          params["id"].([]byte),
-		Type:        params["type"].(string),
-		Config:      params["config"].(map[string]interface{}),
-	}, nil
-}
-
-type IsActionSpecificationList struct{}
-
-func (f IsActionSpecificationList) Validate(value interface{}, values map[string]interface{}) (interface{}, error) {
-	list := value.([]interface{})
-	specs := make([]kiprotect.ActionSpecification, len(list))
-	for i, spec := range list {
-		specs[i] = spec.(kiprotect.ActionSpecification)
-	}
-	return specs, nil
-}
-
 var UndoActionConfigForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the undo form",
 	Fields: []forms.Field{
@@ -64,10 +35,10 @@ var UndoActionConfigForm = forms.Form{
 				forms.IsList{
 					Validators: []forms.Validator{
 						forms.IsStringMap{},
-						IsActionSpecification{},
+						kiprotect.IsActionSpecification{},
 					},
 				},
-				IsActionSpecificationList{},
+				kiprotect.IsActionSpecifications{},
 			},
 		},
 	},
