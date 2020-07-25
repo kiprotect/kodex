@@ -77,6 +77,10 @@ func (f *Item) SerializeJSON() ([]byte, error) {
 	return json.Marshal(f.d)
 }
 
+func (f *Item) MarshalJSON() ([]byte, error) {
+	return f.SerializeJSON()
+}
+
 // Validates the format of a list of items
 type IsItem struct{}
 
