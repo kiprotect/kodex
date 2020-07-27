@@ -158,6 +158,8 @@ func (b *BaseController) InitializePlugins() error {
 					} else {
 						Log.Infof("Successfully initialized plugin '%s'", pluginName)
 					}
+				} else {
+					return fmt.Errorf("plugin '%s' is not registered", pluginNameStr)
 				}
 			}
 		}
