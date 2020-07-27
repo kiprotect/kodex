@@ -16,6 +16,10 @@
 
 package kiprotect
 
+import (
+	"fmt"
+)
+
 type ControllerMaker func(map[string]interface{}, Settings, Definitions) (Controller, error)
 type ControllerDefinitions map[string]ControllerMaker
 
@@ -31,8 +35,10 @@ type Controller interface {
 	// Retrieve Settings
 	Settings() Settings
 
-	// Register a Plugin
-	RegisterPlugin(Plugin) error
+	// Initialize a plugin
+	InitializePlugin(Plugin) error
+	// Initialize all plugins as defined in the settings
+	InitializePlugins() error
 
 	// Streams
 	Streams(filters map[string]interface{}) ([]Stream, error)
@@ -52,8 +58,6 @@ type Controller interface {
 	// Action Configs
 	ActionConfigs(filters map[string]interface{}) ([]ActionConfig, error)
 	ActionConfig(configID []byte) (ActionConfig, error)
-
-	Teardown() error
 
 	Definitions() Definitions
 
@@ -125,7 +129,7 @@ func (b *BaseController) Definitions() Definitions {
 	return b.definitions
 }
 
-func (b *BaseController) RegisterPlugin(plugin Plugin) error {
+func (b *BaseController) InitializePlugin(plugin Plugin) error {
 	return plugin.Initialize(b.definitions)
 }
 
@@ -133,6 +137,30 @@ func (b *BaseController) Settings() Settings {
 	return b.settings
 }
 
-func (b *BaseController) Teardown() error {
+func (b *BaseController) InitializePlugins() error {
+	pluginsSetting, err := b.settings.Get("plugins")
+
+	if err == nil {
+		pluginsList, ok := pluginsSetting.([]interface{})
+		if ok {
+			for _, pluginName := range pluginsList {
+				pluginNameStr, ok := pluginName.(string)
+				if !ok {
+					return fmt.Errorf("expected a string")
+				}
+				if definition, ok := b.definitions.PluginDefinitions[pluginNameStr]; ok {
+					plugin, err := definition.Maker(nil)
+					if err != nil {
+						return err
+					}
+					if err := b.InitializePlugin(plugin); err != nil {
+						return err
+					} else {
+						Log.Infof("Successfully initialized plugin '%s'", pluginName)
+					}
+				}
+			}
+		}
+	}
 	return nil
 }

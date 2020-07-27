@@ -33,7 +33,7 @@ func (o Plugin) Setup(fixtures map[string]interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("controller missing")
 	}
 
-	if err := controller.RegisterPlugin(o.Plugin); err != nil {
+	if err := controller.InitializePlugin(o.Plugin); err != nil {
 		return nil, err
 	}
 

@@ -51,18 +51,14 @@ func (c Controller) Setup(fixtures map[string]interface{}) (interface{}, error) 
 	} else {
 		if err := ctrl.ResetDB(); err != nil {
 			return nil, err
+		} else if err := ctrl.InitializePlugins(); err != nil {
+			return nil, err
 		}
 		return ctrl, nil
 	}
+
 }
 
 func (c Controller) Teardown(fixture interface{}) error {
-	if fixture == nil {
-		return nil
-	}
-	controller, ok := fixture.(kiprotect.Controller)
-	if !ok {
-		return fmt.Errorf("not a controller")
-	}
-	return controller.Teardown()
+	return nil
 }
