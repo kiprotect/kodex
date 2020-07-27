@@ -22,7 +22,8 @@ import (
 )
 
 type Plugin struct {
-	Plugin kiprotect.Plugin
+	Maker  kiprotect.PluginMaker
+	Config map[string]interface{}
 }
 
 func (o Plugin) Setup(fixtures map[string]interface{}) (interface{}, error) {
@@ -33,7 +34,9 @@ func (o Plugin) Setup(fixtures map[string]interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("controller missing")
 	}
 
-	if err := controller.InitializePlugin(o.Plugin); err != nil {
+	if plugin, err := o.Maker(o.Config); err != nil {
+		return nil, err
+	} else if err := controller.InitializePlugin(plugin); err != nil {
 		return nil, err
 	}
 
