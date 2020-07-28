@@ -11,4 +11,4 @@ type CommandsDefinition struct {
 }
 
 type CommandsMaker func(controller Controller) ([]cli.Command, error)
-type CommandsDefinitions map[string]CommandsDefinition
+type CommandsDefinitions []CommandsDefinition
