@@ -132,7 +132,6 @@ func (a *UndoAction) DoWithConfig(item *kiprotect.Item, writer kiprotect.Channel
 			return nil, fmt.Errorf("expected a single item")
 		}
 	}
-	return nil, nil
 }
 
 func (a *UndoAction) Setup() error {
