@@ -305,14 +305,8 @@ func getBlueprintsPaths(settings kiprotect.Settings) ([]string, error) {
 	return blueprintsPathsList, nil
 }
 
-func Settings(c *cli.Context) (kiprotect.Settings, error) {
-	settingsArg := c.GlobalString("settings")
-	var settingsPaths []string
-	if settingsArg != "" {
-		settingsPaths = strings.Split(settingsArg, ":")
-	} else {
-		settingsPaths = kipHelpers.SettingsPaths()
-	}
+func Settings() (kiprotect.Settings, error) {
+	settingsPaths := kipHelpers.SettingsPaths()
 	if settings, err := kipHelpers.Settings(settingsPaths); err != nil {
 		return nil, err
 	} else {
@@ -330,6 +324,14 @@ func KIProtect(definitions kiprotect.Definitions) {
 	var settings kiprotect.Settings
 	var err error
 
+	if settings, err = Settings(); err != nil {
+		kiprotect.Log.Fatal(err)
+	}
+
+	if controller, err = kipHelpers.Controller(settings, definitions); err != nil {
+		kiprotect.Log.Fatal(err)
+	}
+
 	init := func(f func(c *cli.Context) error) func(c *cli.Context) error {
 		return func(c *cli.Context) error {
 
@@ -339,14 +341,6 @@ func KIProtect(definitions kiprotect.Definitions) {
 				return err
 			}
 			kiprotect.Log.SetLevel(logLevel)
-
-			if settings, err = Settings(c); err != nil {
-				return err
-			}
-
-			if controller, err = kipHelpers.Controller(settings, definitions); err != nil {
-				return err
-			}
 
 			runner := func() error { return f(c) }
 			profiler := c.String("profile")
@@ -362,11 +356,6 @@ func KIProtect(definitions kiprotect.Definitions) {
 	app.Name = "KIProtect"
 	app.Usage = "Run all KIProtect commands"
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "settings",
-			Value: "",
-			Usage: "path(s) to load settings from (separated by ':' e.g. 'foo:bar:baz')",
-		},
 		cli.StringFlag{
 			Name:  "level",
 			Value: "info",
@@ -468,7 +457,8 @@ func KIProtect(definitions kiprotect.Definitions) {
 		},
 	}
 
-	for _, commandsDefinition := range definitions.CommandsDefinitions {
+	// we add commands from the definitions
+	for _, commandsDefinition := range controller.Definitions().CommandsDefinitions {
 		if commands, err := commandsDefinition.Maker(controller); err != nil {
 			kiprotect.Log.Fatal(err)
 		} else {
