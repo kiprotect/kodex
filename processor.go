@@ -115,6 +115,14 @@ func MakeProcessor(parameterSet *ParameterSet, channelWriter ChannelWriter, conf
 	return &processor, nil
 }
 
+func (p *Processor) SetWriter(channelWriter ChannelWriter) {
+	p.channelWriter = channelWriter
+}
+
+func (p *Processor) Writer() ChannelWriter {
+	return p.channelWriter
+}
+
 func (p *Processor) SetSalt(salt []byte) {
 	p.salt = salt
 }
