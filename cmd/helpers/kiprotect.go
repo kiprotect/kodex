@@ -468,7 +468,7 @@ func KIProtect(definitions kiprotect.Definitions) {
 		},
 	}
 
-	for _, commandsDefinition := range controller.Definitions().CommandsDefinitions {
+	for _, commandsDefinition := range definitions.CommandsDefinitions {
 		if commands, err := commandsDefinition.Maker(controller); err != nil {
 			kiprotect.Log.Fatal(err)
 		} else {
