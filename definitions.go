@@ -25,3 +25,39 @@ type Definitions struct {
 	ReaderDefinitions         `json:"readers"`
 	ControllerDefinitions     `json:"-"`
 }
+
+func MergeDefinitions(a, b Definitions) Definitions {
+	c := Definitions{
+		CommandsDefinitions:       CommandsDefinitions{},
+		ParameterStoreDefinitions: ParameterStoreDefinitions{},
+		PluginDefinitions:         PluginDefinitions{},
+		ActionDefinitions:         ActionDefinitions{},
+		WriterDefinitions:         WriterDefinitions{},
+		ReaderDefinitions:         ReaderDefinitions{},
+		ControllerDefinitions:     ControllerDefinitions{},
+	}
+	for _, obj := range []Definitions{a, b} {
+		for _, v := range obj.CommandsDefinitions {
+			c.CommandsDefinitions = append(c.CommandsDefinitions, v)
+		}
+		for k, v := range obj.PluginDefinitions {
+			c.PluginDefinitions[k] = v
+		}
+		for k, v := range obj.ActionDefinitions {
+			c.ActionDefinitions[k] = v
+		}
+		for k, v := range obj.WriterDefinitions {
+			c.WriterDefinitions[k] = v
+		}
+		for k, v := range obj.ReaderDefinitions {
+			c.ReaderDefinitions[k] = v
+		}
+		for k, v := range obj.ControllerDefinitions {
+			c.ControllerDefinitions[k] = v
+		}
+		for k, v := range obj.ParameterStoreDefinitions {
+			c.ParameterStoreDefinitions[k] = v
+		}
+	}
+	return c
+}

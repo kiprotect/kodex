@@ -27,42 +27,6 @@ import (
 	"github.com/kiprotect/kiprotect/writers"
 )
 
-func Merge(a, b kiprotect.Definitions) kiprotect.Definitions {
-	c := kiprotect.Definitions{
-		CommandsDefinitions:       kiprotect.CommandsDefinitions{},
-		ParameterStoreDefinitions: kiprotect.ParameterStoreDefinitions{},
-		PluginDefinitions:         kiprotect.PluginDefinitions{},
-		ActionDefinitions:         kiprotect.ActionDefinitions{},
-		WriterDefinitions:         kiprotect.WriterDefinitions{},
-		ReaderDefinitions:         kiprotect.ReaderDefinitions{},
-		ControllerDefinitions:     kiprotect.ControllerDefinitions{},
-	}
-	for _, obj := range []kiprotect.Definitions{a, b} {
-		for _, v := range obj.CommandsDefinitions {
-			c.CommandsDefinitions = append(c.CommandsDefinitions, v)
-		}
-		for k, v := range obj.PluginDefinitions {
-			c.PluginDefinitions[k] = v
-		}
-		for k, v := range obj.ActionDefinitions {
-			c.ActionDefinitions[k] = v
-		}
-		for k, v := range obj.WriterDefinitions {
-			c.WriterDefinitions[k] = v
-		}
-		for k, v := range obj.ReaderDefinitions {
-			c.ReaderDefinitions[k] = v
-		}
-		for k, v := range obj.ControllerDefinitions {
-			c.ControllerDefinitions[k] = v
-		}
-		for k, v := range obj.ParameterStoreDefinitions {
-			c.ParameterStoreDefinitions[k] = v
-		}
-	}
-	return c
-}
-
 var DefaultDefinitions = kiprotect.Definitions{
 	ParameterStoreDefinitions: parameters.ParameterStores,
 	CommandsDefinitions:       cmd.Commands,
