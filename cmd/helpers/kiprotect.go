@@ -23,7 +23,6 @@ import (
 	kipStrings "github.com/kiprotect/go-helpers/strings"
 	"github.com/kiprotect/go-helpers/yaml"
 	"github.com/kiprotect/kiprotect"
-	"github.com/kiprotect/kiprotect/definitions"
 	kipHelpers "github.com/kiprotect/kiprotect/helpers"
 	"github.com/kiprotect/kiprotect/processing"
 	"github.com/urfave/cli"
@@ -145,7 +144,7 @@ func normalizePath(path string) (string, error) {
 	return path, nil
 }
 
-func loadBlueprint(settingsObj kiprotect.Settings, filename, version string) (*kiprotect.Blueprint, error) {
+func LoadBlueprint(settingsObj kiprotect.Settings, filename, version string) (*kiprotect.Blueprint, error) {
 	if filename == "" {
 		filename = ".kiprotect.yml"
 	} else {
@@ -306,7 +305,26 @@ func getBlueprintsPaths(settings kiprotect.Settings) ([]string, error) {
 	return blueprintsPathsList, nil
 }
 
-func KIProtect() {
+func Settings(c *cli.Context) (kiprotect.Settings, error) {
+	settingsArg := c.GlobalString("settings")
+	var settingsPaths []string
+	if settingsArg != "" {
+		settingsPaths = strings.Split(settingsArg, ":")
+	} else {
+		settingsPaths = kipHelpers.SettingsPaths()
+	}
+	if settings, err := kipHelpers.Settings(settingsPaths); err != nil {
+		return nil, err
+	} else {
+		// if no settings were given we use the default settings above
+		if len(settingsPaths) == 0 {
+			settings.Update(defaultSettings)
+		}
+		return settings, nil
+	}
+}
+
+func KIProtect(definitions kiprotect.Definitions) {
 
 	var controller kiprotect.Controller
 	var settings kiprotect.Settings
@@ -322,31 +340,15 @@ func KIProtect() {
 			}
 			kiprotect.Log.SetLevel(logLevel)
 
-			kiprotect.Log.Debug("Initializing settings and controller...")
+			if settings, err = Settings(c); err != nil {
+				return err
+			}
 
-			settingsArg := c.GlobalString("settings")
-			var settingsPaths []string
-			if settingsArg != "" {
-				settingsPaths = strings.Split(settingsArg, ":")
-			} else {
-				settingsPaths = kipHelpers.SettingsPaths()
+			if controller, err = kipHelpers.Controller(settings, definitions); err != nil {
+				return err
 			}
-			if settings, err = kipHelpers.Settings(settingsPaths); err != nil {
-				kiprotect.Log.Error("An error occurred when loadings the settings.")
-				kiprotect.Log.Fatal(err)
-			}
-			// if no settings were given we use the default settings above
-			if len(settingsPaths) == 0 {
-				settings.Update(defaultSettings)
-			}
-			if controller, err = kipHelpers.Controller(settings, definitions.DefaultDefinitions); err != nil {
-				kiprotect.Log.Error("An error occurred when creating the controller.")
-				kiprotect.Log.Fatal(err)
-			}
-			kiprotect.Log.Debug("Initialization successful...")
 
 			runner := func() error { return f(c) }
-
 			profiler := c.String("profile")
 			if profiler != "" {
 				return runWithProfiler(profiler, runner)
@@ -407,7 +409,7 @@ func KIProtect() {
 				cli.Command{
 					Name: "download",
 					Action: func(c *cli.Context) error {
-						blueprintsPaths, err := getBlueprintsPaths(settings)
+						blueprintsPaths, err := getBlueprintsPaths(controller.Settings())
 						if err != nil {
 							return err
 						}
@@ -446,7 +448,7 @@ func KIProtect() {
 				if c.NArg() > 0 {
 					blueprintName = c.Args().Get(0)
 				}
-				blueprint, err := loadBlueprint(settings, blueprintName, c.String("version"))
+				blueprint, err := LoadBlueprint(controller.Settings(), blueprintName, c.String("version"))
 				if err != nil {
 					return err
 				}
@@ -464,6 +466,14 @@ func KIProtect() {
 				return processing.ProcessStream(stream, 0)
 			},
 		},
+	}
+
+	for _, commandsDefinition := range controller.Definitions().CommandsDefinitions {
+		if commands, err := commandsDefinition.Maker(controller); err != nil {
+			kiprotect.Log.Fatal(err)
+		} else {
+			bareCommands = append(bareCommands, commands...)
+		}
 	}
 
 	app.Commands = decorate(bareCommands, init)

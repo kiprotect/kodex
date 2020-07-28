@@ -18,8 +18,9 @@ package main
 
 import (
 	cmdHelpers "github.com/kiprotect/kiprotect/cmd/helpers"
+	"github.com/kiprotect/kiprotect/definitions"
 )
 
 func main() {
-	cmdHelpers.KIProtect()
+	cmdHelpers.KIProtect(definitions.DefaultDefinitions)
 }

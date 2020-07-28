@@ -17,6 +17,7 @@
 package kiprotect
 
 type Definitions struct {
+	CommandsDefinitions       `json:"commands"`
 	ParameterStoreDefinitions `json:"parameters`
 	PluginDefinitions         `json:"plugins"`
 	ActionDefinitions         `json:"actions"`
