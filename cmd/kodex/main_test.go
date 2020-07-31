@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,9 @@
 package main
 
 import (
-	cmdHelpers "github.com/kiprotect/kiprotect/cmd/helpers"
-	"github.com/kiprotect/kiprotect/definitions"
+	"testing"
 )
 
-func main() {
-	cmdHelpers.KIProtect(definitions.DefaultDefinitions)
+func TestKIProtect(t *testing.T) {
+
 }

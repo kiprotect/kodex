@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package kiprotect
+package kodex
 
 import (
 	"bytes"

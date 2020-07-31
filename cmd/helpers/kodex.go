@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -22,9 +22,9 @@ import (
 	"github.com/kiprotect/go-helpers/settings"
 	kipStrings "github.com/kiprotect/go-helpers/strings"
 	"github.com/kiprotect/go-helpers/yaml"
-	"github.com/kiprotect/kiprotect"
-	kipHelpers "github.com/kiprotect/kiprotect/helpers"
-	"github.com/kiprotect/kiprotect/processing"
+	"github.com/kiprotect/kodex"
+	kipHelpers "github.com/kiprotect/kodex/helpers"
+	"github.com/kiprotect/kodex/processing"
 	"github.com/urfave/cli"
 	"io/ioutil"
 	"os"
@@ -56,7 +56,7 @@ type ParametersStruct struct {
 	ParameterSets []map[string]interface{} `json:"parameter-sets"`
 }
 
-func importParameters(controller kiprotect.Controller, path string) error {
+func importParameters(controller kodex.Controller, path string) error {
 	var parametersStruct ParametersStruct
 	parameterStore := controller.ParameterStore()
 	definitions := controller.Definitions()
@@ -66,20 +66,20 @@ func importParameters(controller kiprotect.Controller, path string) error {
 		return err
 	} else {
 		for _, parametersData := range parametersStruct.Parameters {
-			if parameters, err := kiprotect.RestoreParameters(parametersData, parameterStore, definitions); err != nil {
+			if parameters, err := kodex.RestoreParameters(parametersData, parameterStore, definitions); err != nil {
 				return err
 			} else {
 				if err := parameters.Save(); err != nil {
-					kiprotect.Log.Error(err)
+					kodex.Log.Error(err)
 					continue
 				}
 			}
 		}
 		for _, parameterSetData := range parametersStruct.ParameterSets {
-			if parameterSet, err := kiprotect.RestoreParameterSet(parameterSetData, parameterStore); err != nil {
+			if parameterSet, err := kodex.RestoreParameterSet(parameterSetData, parameterStore); err != nil {
 				return err
 			} else if err := parameterSet.Save(); err != nil {
-				kiprotect.Log.Error(err)
+				kodex.Log.Error(err)
 				continue
 			}
 		}
@@ -87,7 +87,7 @@ func importParameters(controller kiprotect.Controller, path string) error {
 	return nil
 }
 
-func exportParameters(controller kiprotect.Controller, path string) error {
+func exportParameters(controller kodex.Controller, path string) error {
 	parameterStore := controller.ParameterStore()
 	allParameterSets, err := parameterStore.AllParameterSets()
 	if err != nil {
@@ -144,9 +144,9 @@ func normalizePath(path string) (string, error) {
 	return path, nil
 }
 
-func LoadBlueprint(settingsObj kiprotect.Settings, filename, version string) (*kiprotect.Blueprint, error) {
+func LoadBlueprint(settingsObj kodex.Settings, filename, version string) (*kodex.Blueprint, error) {
 	if filename == "" {
-		filename = ".kiprotect.yml"
+		filename = ".kodex.yml"
 	} else {
 		if !strings.HasSuffix(filename, ".yml") {
 			filename = filename + ".yml"
@@ -179,7 +179,7 @@ func LoadBlueprint(settingsObj kiprotect.Settings, filename, version string) (*k
 				return nil, err
 			}
 		}
-		return kiprotect.MakeBlueprint(configMap), nil
+		return kodex.MakeBlueprint(configMap), nil
 	}
 }
 
@@ -229,7 +229,7 @@ func compareVersions(a, b string) (int, error) {
 	return 0, nil
 }
 
-func findBlueprint(settings kiprotect.Settings, name string, version string) (string, error) {
+func findBlueprint(settings kodex.Settings, name string, version string) (string, error) {
 	blueprintsPaths, err := getBlueprintsPaths(settings)
 	if err != nil {
 		return "", err
@@ -254,7 +254,7 @@ outer:
 				}
 				for _, subfile := range subfiles {
 					if subfile.Name() == ".blueprints.yml" {
-						kiprotect.Log.Debugf("found blueprints directory: '%s'", filepath.Join(path, file.Name()))
+						kodex.Log.Debugf("found blueprints directory: '%s'", filepath.Join(path, file.Name()))
 						settingsPath := filepath.Join(path, file.Name(), subfile.Name())
 						trialPath := filepath.Join(path, file.Name(), name)
 						if settings, err := blueprintSettings(settingsPath); err != nil {
@@ -286,14 +286,14 @@ outer:
 	}
 	if bestPath != "" {
 		if _, err := os.Stat(bestPath); err == nil {
-			kiprotect.Log.Debugf("found blueprint '%s' at path '%s' (version: '%s')", name, bestPath, bestVersion)
+			kodex.Log.Debugf("found blueprint '%s' at path '%s' (version: '%s')", name, bestPath, bestVersion)
 			return bestPath, nil
 		}
 	}
 	return "", fmt.Errorf("blueprint '%s' with version '%s' not found", name, version)
 }
 
-func getBlueprintsPaths(settings kiprotect.Settings) ([]string, error) {
+func getBlueprintsPaths(settings kodex.Settings) ([]string, error) {
 	blueprintsPaths, err := settings.Get("blueprints.paths")
 	if err != nil {
 		return nil, err
@@ -305,7 +305,7 @@ func getBlueprintsPaths(settings kiprotect.Settings) ([]string, error) {
 	return blueprintsPathsList, nil
 }
 
-func Settings() (kiprotect.Settings, error) {
+func Settings() (kodex.Settings, error) {
 	settingsPaths := kipHelpers.SettingsPaths()
 	if settings, err := kipHelpers.Settings(settingsPaths); err != nil {
 		return nil, err
@@ -318,29 +318,29 @@ func Settings() (kiprotect.Settings, error) {
 	}
 }
 
-func KIProtect(definitions kiprotect.Definitions) {
+func Kodex(definitions kodex.Definitions) {
 
-	var controller kiprotect.Controller
-	var settings kiprotect.Settings
+	var controller kodex.Controller
+	var settings kodex.Settings
 	var err error
 
 	if settings, err = Settings(); err != nil {
-		kiprotect.Log.Fatal(err)
+		kodex.Log.Fatal(err)
 	}
 
 	if controller, err = kipHelpers.Controller(settings, definitions); err != nil {
-		kiprotect.Log.Fatal(err)
+		kodex.Log.Fatal(err)
 	}
 
 	init := func(f func(c *cli.Context) error) func(c *cli.Context) error {
 		return func(c *cli.Context) error {
 
 			level := c.GlobalString("level")
-			logLevel, err := kiprotect.ParseLevel(level)
+			logLevel, err := kodex.ParseLevel(level)
 			if err != nil {
 				return err
 			}
-			kiprotect.Log.SetLevel(logLevel)
+			kodex.Log.SetLevel(logLevel)
 
 			runner := func() error { return f(c) }
 			profiler := c.String("profile")
@@ -460,7 +460,7 @@ func KIProtect(definitions kiprotect.Definitions) {
 	// we add commands from the definitions
 	for _, commandsDefinition := range controller.Definitions().CommandsDefinitions {
 		if commands, err := commandsDefinition.Maker(controller); err != nil {
-			kiprotect.Log.Fatal(err)
+			kodex.Log.Fatal(err)
 		} else {
 			bareCommands = append(bareCommands, commands...)
 		}
@@ -471,7 +471,7 @@ func KIProtect(definitions kiprotect.Definitions) {
 	err = app.Run(os.Args)
 
 	if err != nil {
-		kiprotect.Log.Error(err)
+		kodex.Log.Error(err)
 	}
 
 }

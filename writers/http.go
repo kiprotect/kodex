@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,14 +21,14 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"net/http"
 )
 
 type HTTPWriter struct {
 	Format  string
 	URL     string
-	Config  kiprotect.Config
+	Config  kodex.Config
 	Headers map[string]interface{}
 }
 
@@ -36,12 +36,12 @@ func (s *HTTPWriter) Teardown() error {
 	return nil
 }
 
-func (s *HTTPWriter) Setup(config kiprotect.Config) error {
+func (s *HTTPWriter) Setup(config kodex.Config) error {
 	s.Config = config
 	return nil
 }
 
-func (s *HTTPWriter) Write(payload kiprotect.Payload) error {
+func (s *HTTPWriter) Write(payload kodex.Payload) error {
 
 	b := make([]byte, 0)
 	buf := bytes.NewBuffer(b)
@@ -84,7 +84,7 @@ func (s *HTTPWriter) Write(payload kiprotect.Payload) error {
 	return err
 }
 
-func MakeHTTPWriter(config map[string]interface{}) (kiprotect.Writer, error) {
+func MakeHTTPWriter(config map[string]interface{}) (kodex.Writer, error) {
 	if params, err := HTTPWriterForm.Validate(config); err != nil {
 		return nil, err
 	} else {

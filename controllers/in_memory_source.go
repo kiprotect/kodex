@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,27 +19,27 @@ package controllers
 import (
 	"bytes"
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"time"
 )
 
 type InMemorySource struct {
-	kiprotect.BaseSource
+	kodex.BaseSource
 	name        string
 	description string
 	sourceType  string
 	data        interface{}
-	reader      kiprotect.Reader
+	reader      kodex.Reader
 	configData  map[string]interface{}
 	id          []byte
 }
 
 func MakeInMemorySource(id []byte,
-	project kiprotect.Project) *InMemorySource {
+	project kodex.Project) *InMemorySource {
 
 	source := &InMemorySource{
 		id: id,
-		BaseSource: kiprotect.BaseSource{
+		BaseSource: kodex.BaseSource{
 			Project_: project,
 		},
 	}
@@ -48,9 +48,9 @@ func MakeInMemorySource(id []byte,
 	return source
 }
 
-func (i *InMemorySource) Streams(status kiprotect.SourceStatus) ([]kiprotect.Stream, error) {
+func (i *InMemorySource) Streams(status kodex.SourceStatus) ([]kodex.Stream, error) {
 
-	streams := make([]kiprotect.Stream, 0)
+	streams := make([]kodex.Stream, 0)
 
 	allStreams, err := i.Project().Controller().Streams(map[string]interface{}{})
 
@@ -154,10 +154,10 @@ func (i *InMemorySource) Save() error {
 	return controller.SaveSource(i)
 }
 
-func (i *InMemorySource) Service() kiprotect.Service {
+func (i *InMemorySource) Service() kodex.Service {
 	return nil
 }
 
-func (i *InMemorySource) SetService(kiprotect.Service) error {
+func (i *InMemorySource) SetService(kodex.Service) error {
 	return nil
 }

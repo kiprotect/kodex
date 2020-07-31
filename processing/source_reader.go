@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 package processing
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 // An source reader reads items from an external source and forwards them
@@ -25,12 +25,12 @@ import (
 // distribute the items to all streams that read from the given source
 
 type SourceSupervisor interface {
-	ReaderStopped(SourceReader, kiprotect.SourceMap)
+	ReaderStopped(SourceReader, kodex.SourceMap)
 }
 
 type SourceReader interface {
-	SourceMap() kiprotect.SourceMap
-	Start(SourceSupervisor, kiprotect.SourceMap) error
+	SourceMap() kodex.SourceMap
+	Start(SourceSupervisor, kodex.SourceMap) error
 	Stop(bool) error
 	Stopped() bool
 	ID() []byte

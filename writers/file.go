@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@ package writers
 import (
 	"compress/gzip"
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"io"
 	"os"
 	"path/filepath"
@@ -40,7 +40,7 @@ func (s *FileWriter) Teardown() error {
 	return nil
 }
 
-func (s *FileWriter) Setup(config kiprotect.Config) error {
+func (s *FileWriter) Setup(config kodex.Config) error {
 	if s.BasePath == "" {
 		return nil
 	}
@@ -55,7 +55,7 @@ func (s *FileWriter) Setup(config kiprotect.Config) error {
 	return nil
 }
 
-func (s *FileWriter) Write(payload kiprotect.Payload) error {
+func (s *FileWriter) Write(payload kodex.Payload) error {
 
 	var fileName, extension string
 
@@ -113,7 +113,7 @@ func (s *FileWriter) Write(payload kiprotect.Payload) error {
 	return nil
 }
 
-func MakeFileWriter(config map[string]interface{}) (kiprotect.Writer, error) {
+func MakeFileWriter(config map[string]interface{}) (kodex.Writer, error) {
 
 	if params, err := FileWriterForm.Validate(config); err != nil {
 		return nil, err

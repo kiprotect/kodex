@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,26 +17,26 @@
 package processing
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"sync"
 	"time"
 )
 
 type LocalSourceWorker struct {
-	pool           chan chan kiprotect.Payload
+	pool           chan chan kodex.Payload
 	started        bool
-	streams        []kiprotect.Stream
-	channels       []*kiprotect.InternalChannel
+	streams        []kodex.Stream
+	channels       []*kodex.InternalChannel
 	reader         SourceReader
 	mutex          sync.Mutex
-	payloadChannel chan kiprotect.Payload
+	payloadChannel chan kodex.Payload
 	stop           chan bool
 }
 
-func makeChannels(streams []kiprotect.Stream) ([]*kiprotect.InternalChannel, error) {
-	channels := make([]*kiprotect.InternalChannel, 0)
+func makeChannels(streams []kodex.Stream) ([]*kodex.InternalChannel, error) {
+	channels := make([]*kodex.InternalChannel, 0)
 	for _, stream := range streams {
-		channel := kiprotect.MakeInternalChannel()
+		channel := kodex.MakeInternalChannel()
 		if err := channel.Setup(stream.Project().Controller(), stream); err != nil {
 			return nil, err
 		}
@@ -45,15 +45,15 @@ func makeChannels(streams []kiprotect.Stream) ([]*kiprotect.InternalChannel, err
 	return channels, nil
 }
 
-func MakeLocalSourceWorker(pool chan chan kiprotect.Payload,
-	streams []kiprotect.Stream,
+func MakeLocalSourceWorker(pool chan chan kodex.Payload,
+	streams []kodex.Stream,
 	reader SourceReader) (*LocalSourceWorker, error) {
 	if channels, err := makeChannels(streams); err != nil {
 		return nil, err
 	} else {
 		return &LocalSourceWorker{
 			pool:           pool,
-			payloadChannel: make(chan kiprotect.Payload, 100),
+			payloadChannel: make(chan kodex.Payload, 100),
 			stop:           make(chan bool),
 			streams:        streams,
 			channels:       channels,
@@ -113,19 +113,19 @@ func (w *LocalSourceWorker) Stop() {
 
 	for _, channel := range w.channels {
 		if err := channel.Teardown(); err != nil {
-			kiprotect.Log.Error(err)
+			kodex.Log.Error(err)
 		}
 	}
 	w.started = false
 	w.channels = nil
 }
 
-func (w *LocalSourceWorker) ProcessPayload(payload kiprotect.Payload) error {
+func (w *LocalSourceWorker) ProcessPayload(payload kodex.Payload) error {
 
 	// we send the items from the payload to the designated internal queues
 
 	handleError := func(err error) error {
-		kiprotect.Log.Error(err)
+		kodex.Log.Error(err)
 		return err
 	}
 

@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,27 +18,27 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"time"
 )
 
 type InMemorySourceMap struct {
-	kiprotect.BaseSourceMap
+	kodex.BaseSourceMap
 	name    string
-	status  kiprotect.SourceStatus
+	status  kodex.SourceStatus
 	session interface{}
 	source  *InMemorySource
 	stream  *InMemoryStream
 	id      []byte
 }
 
-func MakeInMemorySourceMap(id []byte, stream *InMemoryStream, source *InMemorySource, status kiprotect.SourceStatus) *InMemorySourceMap {
+func MakeInMemorySourceMap(id []byte, stream *InMemoryStream, source *InMemorySource, status kodex.SourceStatus) *InMemorySourceMap {
 	sourceMap := &InMemorySourceMap{
 		id:            id,
 		source:        source,
 		stream:        stream,
 		status:        status,
-		BaseSourceMap: kiprotect.BaseSourceMap{},
+		BaseSourceMap: kodex.BaseSourceMap{},
 	}
 	sourceMap.Self = sourceMap
 	return sourceMap
@@ -61,24 +61,24 @@ func (i *InMemorySourceMap) SetSession(session interface{}) error {
 	return nil
 }
 
-func (i *InMemorySourceMap) Source() kiprotect.Source {
+func (i *InMemorySourceMap) Source() kodex.Source {
 	return i.source
 }
 
-func (i *InMemorySourceMap) Stream() kiprotect.Stream {
+func (i *InMemorySourceMap) Stream() kodex.Stream {
 	return i.stream
 }
 
-func (i *InMemorySourceMap) Status() kiprotect.SourceStatus {
+func (i *InMemorySourceMap) Status() kodex.SourceStatus {
 	return i.status
 }
 
-func (i *InMemorySourceMap) SetStatus(status kiprotect.SourceStatus) error {
+func (i *InMemorySourceMap) SetStatus(status kodex.SourceStatus) error {
 	i.status = status
 	return nil
 }
 
-func (i *InMemorySourceMap) SetStream(stream kiprotect.Stream) error {
+func (i *InMemorySourceMap) SetStream(stream kodex.Stream) error {
 	inMemoryStream, ok := stream.(*InMemoryStream)
 	if !ok {
 		return fmt.Errorf("not a inMemory stream")
@@ -87,7 +87,7 @@ func (i *InMemorySourceMap) SetStream(stream kiprotect.Stream) error {
 	return nil
 }
 
-func (i *InMemorySourceMap) SetSource(source kiprotect.Source) error {
+func (i *InMemorySourceMap) SetSource(source kodex.Source) error {
 	inMemorySource, ok := source.(*InMemorySource)
 	if !ok {
 		return fmt.Errorf("not a inMemory source")

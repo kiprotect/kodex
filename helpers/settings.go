@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@ package helpers
 
 import (
 	"github.com/kiprotect/go-helpers/settings"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,6 +55,6 @@ func SettingsPaths() []string {
 	return sanitizedValues
 }
 
-func Settings(settingsPaths []string) (kiprotect.Settings, error) {
+func Settings(settingsPaths []string) (kodex.Settings, error) {
 	return settings.MakeSettings(settingsPaths)
 }

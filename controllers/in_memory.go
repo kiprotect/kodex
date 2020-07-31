@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@ package controllers
 import (
 	"bytes"
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"sync"
 )
 
@@ -35,23 +35,23 @@ type Stats struct {
 }
 
 type InMemoryController struct {
-	kiprotect.BaseController
+	kodex.BaseController
 	mutex            sync.Mutex
-	streams          map[string]kiprotect.Stream
-	sources          map[string]kiprotect.Source
-	destinations     map[string]kiprotect.Destination
-	actionConfigs    map[string]kiprotect.ActionConfig
-	projects         map[string]kiprotect.Project
+	streams          map[string]kodex.Stream
+	sources          map[string]kodex.Source
+	destinations     map[string]kodex.Destination
+	actionConfigs    map[string]kodex.ActionConfig
+	projects         map[string]kodex.Project
 	streamStats      map[string]Stats
 	sourceStats      map[string]Stats
 	destinationStats map[string]Stats
 }
 
-func MakeInMemoryController(config map[string]interface{}, settings kiprotect.Settings, definitions kiprotect.Definitions) (kiprotect.Controller, error) {
+func MakeInMemoryController(config map[string]interface{}, settings kodex.Settings, definitions kodex.Definitions) (kodex.Controller, error) {
 	var err error
-	var baseController kiprotect.BaseController
+	var baseController kodex.BaseController
 
-	if baseController, err = kiprotect.MakeBaseController(settings, definitions); err != nil {
+	if baseController, err = kodex.MakeBaseController(settings, definitions); err != nil {
 		return nil, err
 	}
 
@@ -60,17 +60,17 @@ func MakeInMemoryController(config map[string]interface{}, settings kiprotect.Se
 		streamStats:      make(map[string]Stats),
 		sourceStats:      make(map[string]Stats),
 		destinationStats: make(map[string]Stats),
-		destinations:     make(map[string]kiprotect.Destination),
-		actionConfigs:    make(map[string]kiprotect.ActionConfig),
-		projects:         make(map[string]kiprotect.Project),
-		streams:          make(map[string]kiprotect.Stream),
-		sources:          make(map[string]kiprotect.Source),
+		destinations:     make(map[string]kodex.Destination),
+		actionConfigs:    make(map[string]kodex.ActionConfig),
+		projects:         make(map[string]kodex.Project),
+		streams:          make(map[string]kodex.Stream),
+		sources:          make(map[string]kodex.Source),
 	}
 
 	return &controller, nil
 }
 
-func (c *InMemoryController) SaveActionConfig(actionConfig kiprotect.ActionConfig) error {
+func (c *InMemoryController) SaveActionConfig(actionConfig kodex.ActionConfig) error {
 	inMemoryActionConfig, ok := actionConfig.(*InMemoryActionConfig)
 	if !ok {
 		return fmt.Errorf("not an in-memory action config")
@@ -84,7 +84,7 @@ func (c *InMemoryController) SaveActionConfig(actionConfig kiprotect.ActionConfi
 	return nil
 }
 
-func (c *InMemoryController) SaveSource(source kiprotect.Source) error {
+func (c *InMemoryController) SaveSource(source kodex.Source) error {
 	inMemorySource, ok := source.(*InMemorySource)
 	if !ok {
 		return fmt.Errorf("not an in-memory action config")
@@ -98,7 +98,7 @@ func (c *InMemoryController) SaveSource(source kiprotect.Source) error {
 	return nil
 }
 
-func (c *InMemoryController) SaveDestination(destination kiprotect.Destination) error {
+func (c *InMemoryController) SaveDestination(destination kodex.Destination) error {
 	inMemoryDestination, ok := destination.(*InMemoryDestination)
 	if !ok {
 		return fmt.Errorf("not an in-memory action config")
@@ -112,7 +112,7 @@ func (c *InMemoryController) SaveDestination(destination kiprotect.Destination) 
 	return nil
 }
 
-func (c *InMemoryController) SaveStream(stream kiprotect.Stream) error {
+func (c *InMemoryController) SaveStream(stream kodex.Stream) error {
 	inMemoryStream, ok := stream.(*InMemoryStream)
 	if !ok {
 		return fmt.Errorf("not an in-memory action config")
@@ -126,7 +126,7 @@ func (c *InMemoryController) SaveStream(stream kiprotect.Stream) error {
 	return nil
 }
 
-func (c *InMemoryController) SaveProject(project kiprotect.Project) error {
+func (c *InMemoryController) SaveProject(project kodex.Project) error {
 	inMemoryProject, ok := project.(*InMemoryProject)
 	if !ok {
 		return fmt.Errorf("not an in-memory action config")
@@ -156,8 +156,8 @@ func (c *InMemoryController) Rollback() error {
 
 // Return a list of streams identified by the list of IDs and in addition
 // filtered by the given arguments
-func (c *InMemoryController) Streams(filters map[string]interface{}) ([]kiprotect.Stream, error) {
-	streams := make([]kiprotect.Stream, 0)
+func (c *InMemoryController) Streams(filters map[string]interface{}) ([]kodex.Stream, error) {
+	streams := make([]kodex.Stream, 0)
 outer:
 	for _, stream := range c.streams {
 		for key, value := range filters {
@@ -180,7 +180,7 @@ outer:
 	return nil, fmt.Errorf("filtering not implemented")
 }
 
-func (c *InMemoryController) Stream(streamID []byte) (kiprotect.Stream, error) {
+func (c *InMemoryController) Stream(streamID []byte) (kodex.Stream, error) {
 
 	for _, stream := range c.streams {
 		if bytes.Equal(stream.ID(), streamID) {
@@ -191,19 +191,19 @@ func (c *InMemoryController) Stream(streamID []byte) (kiprotect.Stream, error) {
 	return nil, fmt.Errorf("stream not found")
 }
 
-func (c *InMemoryController) Config(configID []byte) (kiprotect.Config, error) {
+func (c *InMemoryController) Config(configID []byte) (kodex.Config, error) {
 	return nil, fmt.Errorf("InMemoryController.Config not implemented")
 }
 
-func (c *InMemoryController) ActionConfig(actionConfigID []byte) (kiprotect.ActionConfig, error) {
+func (c *InMemoryController) ActionConfig(actionConfigID []byte) (kodex.ActionConfig, error) {
 	return nil, fmt.Errorf("InMemoryController.ActionConfig not implemented")
 }
 
 /* Action Config Management */
 
-func (c *InMemoryController) ActionConfigs(filters map[string]interface{}) ([]kiprotect.ActionConfig, error) {
+func (c *InMemoryController) ActionConfigs(filters map[string]interface{}) ([]kodex.ActionConfig, error) {
 	if len(filters) == 0 {
-		actionConfigs := make([]kiprotect.ActionConfig, len(c.actionConfigs))
+		actionConfigs := make([]kodex.ActionConfig, len(c.actionConfigs))
 		i := 0
 		for _, actionConfig := range c.actionConfigs {
 			actionConfigs[i] = actionConfig
@@ -216,9 +216,9 @@ func (c *InMemoryController) ActionConfigs(filters map[string]interface{}) ([]ki
 
 /* Source Management */
 
-func (c *InMemoryController) Sources(filters map[string]interface{}) ([]kiprotect.Source, error) {
+func (c *InMemoryController) Sources(filters map[string]interface{}) ([]kodex.Source, error) {
 	if len(filters) == 0 {
-		sources := make([]kiprotect.Source, len(c.sources))
+		sources := make([]kodex.Source, len(c.sources))
 		i := 0
 		for _, source := range c.sources {
 			sources[i] = source
@@ -229,15 +229,15 @@ func (c *InMemoryController) Sources(filters map[string]interface{}) ([]kiprotec
 	return nil, fmt.Errorf("filtering not implemented")
 }
 
-func (c *InMemoryController) Source(sourceID []byte) (kiprotect.Source, error) {
+func (c *InMemoryController) Source(sourceID []byte) (kodex.Source, error) {
 	return nil, fmt.Errorf("InMemoryController.Source not implemented")
 }
 
 /* Destination Management */
 
-func (c *InMemoryController) Destinations(filters map[string]interface{}) ([]kiprotect.Destination, error) {
+func (c *InMemoryController) Destinations(filters map[string]interface{}) ([]kodex.Destination, error) {
 	if len(filters) == 0 {
-		destinations := make([]kiprotect.Destination, len(c.destinations))
+		destinations := make([]kodex.Destination, len(c.destinations))
 		i := 0
 		for _, destination := range c.destinations {
 			destinations[i] = destination
@@ -248,13 +248,13 @@ func (c *InMemoryController) Destinations(filters map[string]interface{}) ([]kip
 	return nil, fmt.Errorf("filtering not implemented")
 }
 
-func (c *InMemoryController) Destination(destinationID []byte) (kiprotect.Destination, error) {
+func (c *InMemoryController) Destination(destinationID []byte) (kodex.Destination, error) {
 	return nil, fmt.Errorf("InMemoryController.Destination not implemented")
 }
 
-func (c *InMemoryController) StreamsByUrgency(n int) ([]kiprotect.Stream, error) {
+func (c *InMemoryController) StreamsByUrgency(n int) ([]kodex.Stream, error) {
 
-	streams := make([]kiprotect.Stream, 0)
+	streams := make([]kodex.Stream, 0)
 	for _, stream := range c.streams {
 		streams = append(streams, stream)
 		if len(streams) >= n {
@@ -264,9 +264,9 @@ func (c *InMemoryController) StreamsByUrgency(n int) ([]kiprotect.Stream, error)
 	return streams, nil
 }
 
-func (c *InMemoryController) SourcesByUrgency(n int) ([]kiprotect.SourceMap, error) {
+func (c *InMemoryController) SourcesByUrgency(n int) ([]kodex.SourceMap, error) {
 
-	sources := make([]kiprotect.SourceMap, 0)
+	sources := make([]kodex.SourceMap, 0)
 OUTER:
 	for _, stream := range c.streams {
 		streamSources, err := stream.Sources()
@@ -284,8 +284,8 @@ OUTER:
 	return sources, nil
 }
 
-func (c *InMemoryController) DestinationsByUrgency(n int) ([]kiprotect.DestinationMap, error) {
-	destinations := make([]kiprotect.DestinationMap, 0)
+func (c *InMemoryController) DestinationsByUrgency(n int) ([]kodex.DestinationMap, error) {
+	destinations := make([]kodex.DestinationMap, 0)
 OUTER:
 	for _, stream := range c.streams {
 		streamConfigs, err := stream.Configs()
@@ -311,7 +311,7 @@ OUTER:
 	return destinations, nil
 }
 
-func (c *InMemoryController) getTable(processable kiprotect.Processable) (map[string]Stats, error) {
+func (c *InMemoryController) getTable(processable kodex.Processable) (map[string]Stats, error) {
 	switch processable.Type() {
 	case "stream":
 		return c.streamStats, nil
@@ -325,7 +325,7 @@ func (c *InMemoryController) getTable(processable kiprotect.Processable) (map[st
 }
 
 // Acquire a processable entity
-func (c *InMemoryController) Acquire(processable kiprotect.Processable, processorID []byte) (bool, error) {
+func (c *InMemoryController) Acquire(processable kodex.Processable, processorID []byte) (bool, error) {
 
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -356,7 +356,7 @@ func (c *InMemoryController) Acquire(processable kiprotect.Processable, processo
 }
 
 // Release a processable entity
-func (c *InMemoryController) Release(processable kiprotect.Processable, processorID []byte) (bool, error) {
+func (c *InMemoryController) Release(processable kodex.Processable, processorID []byte) (bool, error) {
 
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -376,22 +376,22 @@ func (c *InMemoryController) Release(processable kiprotect.Processable, processo
 }
 
 // Send a pingback with stats for a processable entity
-func (c *InMemoryController) Ping(processable kiprotect.Processable, stats kiprotect.ProcessingStats) error {
+func (c *InMemoryController) Ping(processable kodex.Processable, stats kodex.ProcessingStats) error {
 	return nil
 }
 
 /* Project Management */
 
-func (c *InMemoryController) Project(id []byte) (kiprotect.Project, error) {
+func (c *InMemoryController) Project(id []byte) (kodex.Project, error) {
 	return nil, fmt.Errorf("InMemoryController.Project not implemented")
 }
 
-func (c *InMemoryController) Projects(filters map[string]interface{}) ([]kiprotect.Project, error) {
+func (c *InMemoryController) Projects(filters map[string]interface{}) ([]kodex.Project, error) {
 	return nil, fmt.Errorf("InMemoryController.Projects not implemented")
 }
 
-func (c *InMemoryController) MakeProject() kiprotect.Project {
-	return MakeInMemoryProject(kiprotect.RandomID(), c)
+func (c *InMemoryController) MakeProject() kodex.Project {
+	return MakeInMemoryProject(kodex.RandomID(), c)
 }
 
 func (c *InMemoryController) ResetDB() error {

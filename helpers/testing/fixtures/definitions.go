@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,11 +17,11 @@
 package fixtures
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 type Definitions struct {
-	Definitions kiprotect.Definitions
+	Definitions kodex.Definitions
 }
 
 func (c Definitions) Setup(fixtures map[string]interface{}) (interface{}, error) {

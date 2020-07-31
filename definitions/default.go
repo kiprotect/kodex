@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,17 @@
 package definitions
 
 import (
-	"github.com/kiprotect/kiprotect"
-	"github.com/kiprotect/kiprotect/actions"
-	"github.com/kiprotect/kiprotect/cmd"
-	"github.com/kiprotect/kiprotect/controllers"
-	"github.com/kiprotect/kiprotect/parameters"
-	"github.com/kiprotect/kiprotect/plugins"
-	"github.com/kiprotect/kiprotect/readers"
-	"github.com/kiprotect/kiprotect/writers"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/actions"
+	"github.com/kiprotect/kodex/cmd"
+	"github.com/kiprotect/kodex/controllers"
+	"github.com/kiprotect/kodex/parameters"
+	"github.com/kiprotect/kodex/plugins"
+	"github.com/kiprotect/kodex/readers"
+	"github.com/kiprotect/kodex/writers"
 )
 
-var DefaultDefinitions = kiprotect.Definitions{
+var DefaultDefinitions = kodex.Definitions{
 	ParameterStoreDefinitions: parameters.ParameterStores,
 	CommandsDefinitions:       cmd.Commands,
 	PluginDefinitions:         plugins.Plugins,

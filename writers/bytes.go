@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ import (
 	"bufio"
 	"bytes"
 	"compress/gzip"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"io"
 	"sync"
 )
@@ -36,11 +36,11 @@ func (s *BytesWriter) Teardown() error {
 	return nil
 }
 
-func (s *BytesWriter) Setup(config kiprotect.Config) error {
+func (s *BytesWriter) Setup(config kodex.Config) error {
 	return nil
 }
 
-func (s *BytesWriter) Write(payload kiprotect.Payload) error {
+func (s *BytesWriter) Write(payload kodex.Payload) error {
 
 	var buf *bytes.Buffer
 
@@ -89,7 +89,7 @@ func (s *BytesWriter) Write(payload kiprotect.Payload) error {
 	return nil
 }
 
-func MakeBytesWriter(config map[string]interface{}) (kiprotect.Writer, error) {
+func MakeBytesWriter(config map[string]interface{}) (kodex.Writer, error) {
 	if params, err := BytesWriterForm.Validate(config); err != nil {
 		return nil, err
 	} else {

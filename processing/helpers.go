@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,11 +17,11 @@
 package processing
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"time"
 )
 
-func ProcessStream(stream kiprotect.Stream, timeout time.Duration) error {
+func ProcessStream(stream kodex.Stream, timeout time.Duration) error {
 
 	// we get all the sources for the stream
 	sourceMaps, _ := stream.Sources()
@@ -45,7 +45,7 @@ func ProcessStream(stream kiprotect.Stream, timeout time.Duration) error {
 
 	// we process all destinations using local destination writers
 	destinationWriters := make([]DestinationWriter, 0)
-	destinationMaps := make([]kiprotect.DestinationMap, 0)
+	destinationMaps := make([]kodex.DestinationMap, 0)
 	configs, err := stream.Configs()
 
 	if err != nil {

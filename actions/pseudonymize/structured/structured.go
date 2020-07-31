@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 package structured
 
 import (
-	"github.com/kiprotect/kiprotect/actions/pseudonymize/merengue"
+	"github.com/kiprotect/kodex/actions/pseudonymize/merengue"
 )
 
 func PS(c CompositeType, key []byte) (CompositeType, error) {

@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"io"
 )
 
@@ -35,7 +35,7 @@ type BytesReader struct {
 }
 
 type BytesPayload struct {
-	items       []*kiprotect.Item
+	items       []*kodex.Item
 	endOfStream bool
 	headers     map[string]interface{}
 }
@@ -44,7 +44,7 @@ func (f *BytesPayload) EndOfStream() bool {
 	return f.endOfStream
 }
 
-func (f *BytesPayload) Items() []*kiprotect.Item {
+func (f *BytesPayload) Items() []*kodex.Item {
 	return f.items
 }
 
@@ -66,7 +66,7 @@ func (s *BytesReader) Teardown() error {
 
 func (s *BytesReader) MakeBytesPayload() (*BytesPayload, error) {
 	payload := BytesPayload{
-		items:   make([]*kiprotect.Item, 0),
+		items:   make([]*kodex.Item, 0),
 		headers: s.Headers,
 	}
 	return &payload, nil
@@ -76,7 +76,7 @@ func (f *BytesPayload) Headers() map[string]interface{} {
 	return f.headers
 }
 
-func (s *BytesReader) Read() (kiprotect.Payload, error) {
+func (s *BytesReader) Read() (kodex.Payload, error) {
 
 	payload, err := s.MakeBytesPayload()
 
@@ -84,7 +84,7 @@ func (s *BytesReader) Read() (kiprotect.Payload, error) {
 		return nil, err
 	}
 
-	items := make([]*kiprotect.Item, 0)
+	items := make([]*kodex.Item, 0)
 
 	for i := 0; i < s.ChunkSize; i++ {
 		item := make(map[string]interface{})
@@ -98,7 +98,7 @@ func (s *BytesReader) Read() (kiprotect.Payload, error) {
 			if err != nil {
 				return nil, err
 			}
-			item := kiprotect.MakeItem(item)
+			item := kodex.MakeItem(item)
 			items = append(items, item)
 			break
 		}
@@ -114,7 +114,7 @@ func (s *BytesReader) Read() (kiprotect.Payload, error) {
 
 }
 
-func (b *BytesReader) Setup(stream kiprotect.Stream) error {
+func (b *BytesReader) Setup(stream kodex.Stream) error {
 
 	bytesReader := bytes.NewReader(b.Input)
 
@@ -130,7 +130,7 @@ func (b *BytesReader) Setup(stream kiprotect.Stream) error {
 	return nil
 }
 
-func MakeBytesReader(config map[string]interface{}) (kiprotect.Reader, error) {
+func MakeBytesReader(config map[string]interface{}) (kodex.Reader, error) {
 
 	if params, err := BytesReaderForm.Validate(config); err != nil {
 		return nil, err

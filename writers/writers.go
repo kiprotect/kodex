@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,38 +17,38 @@
 package writers
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
-var Writers = kiprotect.WriterDefinitions{
-	"file": kiprotect.WriterDefinition{
+var Writers = kodex.WriterDefinitions{
+	"file": kodex.WriterDefinition{
 		Maker:    MakeFileWriter,
 		Form:     FileWriterForm,
 		Internal: true,
 	},
-	"http": kiprotect.WriterDefinition{
+	"http": kodex.WriterDefinition{
 		Maker: MakeHTTPWriter,
 		Form:  HTTPWriterForm,
 	},
-	"bytes": kiprotect.WriterDefinition{
+	"bytes": kodex.WriterDefinition{
 		Maker:    MakeBytesWriter,
 		Form:     BytesWriterForm,
 		Internal: true,
 	},
-	"in-memory": kiprotect.WriterDefinition{
+	"in-memory": kodex.WriterDefinition{
 		Maker:    MakeInMemoryWriter,
 		Internal: true,
 	},
-	"stdout": kiprotect.WriterDefinition{
+	"stdout": kodex.WriterDefinition{
 		Maker:    MakeStdoutWriter,
 		Internal: true,
 	},
-	"amqp": kiprotect.WriterDefinition{
+	"amqp": kodex.WriterDefinition{
 		Maker:    MakeAMQPWriter,
 		Form:     AMQPWriterForm,
 		Internal: false,
 	},
-	"count": kiprotect.WriterDefinition{
+	"count": kodex.WriterDefinition{
 		Maker:    MakeCountWriter,
 		Form:     CountWriterForm,
 		Internal: true,

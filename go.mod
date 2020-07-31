@@ -1,4 +1,4 @@
-module github.com/kiprotect/kiprotect
+module github.com/kiprotect/kodex
 
 go 1.13
 

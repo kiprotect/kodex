@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 package writers
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"sync"
 )
 
@@ -30,7 +30,7 @@ func (s *InMemoryWriter) Teardown() error {
 	return nil
 }
 
-func (s *InMemoryWriter) Setup(config kiprotect.Config) error {
+func (s *InMemoryWriter) Setup(config kodex.Config) error {
 	return nil
 }
 
@@ -38,7 +38,7 @@ func (s *InMemoryWriter) Result() []map[string]interface{} {
 	return s.writer
 }
 
-func (s *InMemoryWriter) Write(payload kiprotect.Payload) error {
+func (s *InMemoryWriter) Write(payload kodex.Payload) error {
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -50,7 +50,7 @@ func (s *InMemoryWriter) Write(payload kiprotect.Payload) error {
 	return nil
 }
 
-func MakeInMemoryWriter(params map[string]interface{}) (kiprotect.Writer, error) {
+func MakeInMemoryWriter(params map[string]interface{}) (kodex.Writer, error) {
 
 	return &InMemoryWriter{
 		writer: make([]map[string]interface{}, 0),

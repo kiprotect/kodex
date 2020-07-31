@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@ package processing
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"sync"
 	"time"
 )
@@ -27,16 +27,16 @@ type LocalDestinationWriter struct {
 	maxDestinationWorkers int
 	workers               []*LocalDestinationWorker
 	id                    []byte
-	pool                  chan chan kiprotect.Payload
-	destinationMap        kiprotect.DestinationMap
-	writer                kiprotect.Writer
-	channel               *kiprotect.InternalChannel
+	pool                  chan chan kodex.Payload
+	destinationMap        kodex.DestinationMap
+	writer                kodex.Writer
+	channel               *kodex.InternalChannel
 	stopWriter            chan bool
 	mutex                 sync.Mutex
 	supervisor            DestinationSupervisor
 	stopped               bool
 	stopping              bool
-	payloadChannel        chan kiprotect.Payload
+	payloadChannel        chan kodex.Payload
 }
 
 func MakeLocalDestinationWriter(maxDestinationWorkers int,
@@ -45,7 +45,7 @@ func MakeLocalDestinationWriter(maxDestinationWorkers int,
 		stopWriter:            make(chan bool),
 		stopped:               true,
 		id:                    id,
-		payloadChannel:        make(chan kiprotect.Payload, maxDestinationWorkers*8),
+		payloadChannel:        make(chan kodex.Payload, maxDestinationWorkers*8),
 		maxDestinationWorkers: maxDestinationWorkers,
 	}
 }
@@ -54,7 +54,7 @@ func (d *LocalDestinationWriter) ID() []byte {
 	return d.id
 }
 
-func (d *LocalDestinationWriter) Start(supervisor DestinationSupervisor, destinationMap kiprotect.DestinationMap) error {
+func (d *LocalDestinationWriter) Start(supervisor DestinationSupervisor, destinationMap kodex.DestinationMap) error {
 
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
@@ -76,7 +76,7 @@ func (d *LocalDestinationWriter) Start(supervisor DestinationSupervisor, destina
 		return err
 	}
 
-	d.channel = kiprotect.MakeInternalChannel()
+	d.channel = kodex.MakeInternalChannel()
 
 	if err := d.channel.Setup(destinationMap.Destination().Project().Controller(), destinationMap); err != nil {
 		return err
@@ -97,7 +97,7 @@ func (d *LocalDestinationWriter) run() error {
 		return fmt.Errorf("no destination map defined")
 	}
 
-	d.pool = make(chan chan kiprotect.Payload, d.maxDestinationWorkers)
+	d.pool = make(chan chan kodex.Payload, d.maxDestinationWorkers)
 
 	for i := 0; i < d.maxDestinationWorkers; i++ {
 		worker, err := MakeLocalDestinationWorker(d.pool, d.writer, d)
@@ -121,7 +121,7 @@ func (d *LocalDestinationWriter) Stopped() bool {
 	return d.stopped
 }
 
-func (d *LocalDestinationWriter) DestinationMap() kiprotect.DestinationMap {
+func (d *LocalDestinationWriter) DestinationMap() kodex.DestinationMap {
 	return d.destinationMap
 }
 
@@ -151,11 +151,11 @@ func (d *LocalDestinationWriter) stop(gracefully bool, fromReader bool) error {
 
 	// then we tear down the destination writer
 	if err := d.writer.Teardown(); err != nil {
-		kiprotect.Log.Error(err)
+		kodex.Log.Error(err)
 	}
 
 	if err := d.channel.Teardown(); err != nil {
-		kiprotect.Log.Error(err)
+		kodex.Log.Error(err)
 	}
 
 	d.destinationMap = nil
@@ -178,7 +178,7 @@ func (d *LocalDestinationWriter) write() {
 	stopping := false
 Loop:
 	for {
-		var payload kiprotect.Payload
+		var payload kodex.Payload
 		var err error
 
 		select {

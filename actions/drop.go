@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,15 +17,15 @@
 package actions
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 type DropAction struct {
-	kiprotect.BaseAction
+	kodex.BaseAction
 }
 
-func MakeDropAction(name, description string, id []byte, config map[string]interface{}) (kiprotect.Action, error) {
-	if baseAction, err := kiprotect.MakeBaseAction(name, description, "drop", id, config); err != nil {
+func MakeDropAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
+	if baseAction, err := kodex.MakeBaseAction(name, description, "drop", id, config); err != nil {
 		return nil, err
 	} else {
 		return &DropAction{
@@ -46,7 +46,7 @@ func (a *DropAction) SetParams(params interface{}) error {
 	return nil
 }
 
-func (a *DropAction) Do(item *kiprotect.Item, writer kiprotect.ChannelWriter) (*kiprotect.Item, error) {
+func (a *DropAction) Do(item *kodex.Item, writer kodex.ChannelWriter) (*kodex.Item, error) {
 	return nil, nil
 }
 

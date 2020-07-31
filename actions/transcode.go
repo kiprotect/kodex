@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"github.com/kiprotect/go-helpers/forms"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 var TranscodeConfigForm = forms.Form{
@@ -57,7 +57,7 @@ var TranscodeConfigForm = forms.Form{
 }
 
 type TranscodeAction struct {
-	kiprotect.BaseAction
+	kodex.BaseAction
 	from string
 	to   string
 	key  string
@@ -71,11 +71,11 @@ func base64Encode(source []byte, encoding *base64.Encoding) string {
 	return string(buffer.Bytes())
 }
 
-func (t *TranscodeAction) Undo(item *kiprotect.Item) (*kiprotect.Item, error) {
+func (t *TranscodeAction) Undo(item *kodex.Item) (*kodex.Item, error) {
 	return nil, nil
 }
 
-func (t *TranscodeAction) Do(item *kiprotect.Item) (*kiprotect.Item, error) {
+func (t *TranscodeAction) Do(item *kodex.Item) (*kodex.Item, error) {
 	return nil, nil
 	/*
 		value, ok := item.Get(t.key)
@@ -148,13 +148,13 @@ func (p *TranscodeAction) Params() interface{} {
 	return nil
 }
 
-func MakeTranscodeAction(name, description string, id []byte, config map[string]interface{}) (kiprotect.Action, error) {
+func MakeTranscodeAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
 
 	params, err := TranscodeConfigForm.Validate(config)
 	if err != nil {
 		return nil, err
 	}
-	if baseAction, err := kiprotect.MakeBaseAction(name, description, "pseudonymize", id, config); err != nil {
+	if baseAction, err := kodex.MakeBaseAction(name, description, "pseudonymize", id, config); err != nil {
 		return nil, err
 	} else {
 		return &TranscodeAction{

@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,26 +17,26 @@
 package readers
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
-var Readers = kiprotect.ReaderDefinitions{
-	"file": kiprotect.ReaderDefinition{
+var Readers = kodex.ReaderDefinitions{
+	"file": kodex.ReaderDefinition{
 		Maker:    MakeFileReader,
 		Form:     FileReaderForm,
 		Internal: true,
 	},
-	"generate": kiprotect.ReaderDefinition{
+	"generate": kodex.ReaderDefinition{
 		Maker:    MakeGenerateReader,
 		Form:     GenerateForm,
 		Internal: true,
 	},
-	"bytes": kiprotect.ReaderDefinition{
+	"bytes": kodex.ReaderDefinition{
 		Maker:    MakeBytesReader,
 		Form:     BytesReaderForm,
 		Internal: true,
 	},
-	"amqp": kiprotect.ReaderDefinition{
+	"amqp": kodex.ReaderDefinition{
 		Maker:    MakeAMQPReader,
 		Form:     AMQPReaderForm,
 		Internal: false,

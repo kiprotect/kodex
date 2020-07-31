@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,15 +17,15 @@
 package processing
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 type StreamSupervisor interface {
-	ExecutorStopped(StreamExecutor, kiprotect.Stream)
+	ExecutorStopped(StreamExecutor, kodex.Stream)
 }
 
 type StreamExecutor interface {
-	Start(StreamSupervisor, kiprotect.Stream) error
+	Start(StreamSupervisor, kodex.Stream) error
 	Stop(graceful bool) error
 	Stopped() bool
 	ID() []byte

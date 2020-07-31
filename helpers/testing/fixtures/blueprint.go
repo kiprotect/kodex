@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@ package fixtures
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 type Blueprint struct {
@@ -28,13 +28,13 @@ type Blueprint struct {
 
 func (c Blueprint) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	project, ok := fixtures[c.Project].(kiprotect.Project)
+	project, ok := fixtures[c.Project].(kodex.Project)
 
 	if !ok {
 		return nil, fmt.Errorf("project is missing")
 	}
 
-	blueprint := kiprotect.MakeBlueprint(c.Config)
+	blueprint := kodex.MakeBlueprint(c.Config)
 
 	if err := blueprint.Create(project); err != nil {
 		return nil, err
