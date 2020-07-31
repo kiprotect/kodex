@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/go-helpers/maps"
-	"github.com/kiprotect/kiprotect"
-	"github.com/kiprotect/kiprotect/actions/pseudonymize/merengue"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/actions/pseudonymize/merengue"
 )
 
 var MerengueConfigForm = forms.Form{
@@ -96,13 +96,13 @@ func (p *MerenguePseudonymizer) Depseudonymize(value interface{}) (interface{}, 
 
 func (p *MerenguePseudonymizer) GenerateParams(key, salt []byte) error {
 	if key == nil {
-		randomBytes, err := kiprotect.RandomBytes(64)
+		randomBytes, err := kodex.RandomBytes(64)
 		if err != nil {
 			return err
 		}
 		key = randomBytes
 	}
-	p.key = kiprotect.DeriveKey(key, salt, 64)
+	p.key = kodex.DeriveKey(key, salt, 64)
 	return nil
 }
 

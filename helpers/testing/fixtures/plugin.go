@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,17 +18,17 @@ package fixtures
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 type Plugin struct {
-	Maker  kiprotect.PluginMaker
+	Maker  kodex.PluginMaker
 	Config map[string]interface{}
 }
 
 func (o Plugin) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	controller, ok := fixtures["controller"].(kiprotect.Controller)
+	controller, ok := fixtures["controller"].(kodex.Controller)
 
 	if !ok {
 		return nil, fmt.Errorf("controller missing")

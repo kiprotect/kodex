@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
 package processing
 
 import (
-	"github.com/kiprotect/kiprotect"
-	pt "github.com/kiprotect/kiprotect/helpers/testing"
-	pf "github.com/kiprotect/kiprotect/helpers/testing/fixtures"
+	"github.com/kiprotect/kodex"
+	pt "github.com/kiprotect/kodex/helpers/testing"
+	pf "github.com/kiprotect/kodex/helpers/testing/fixtures"
 	"testing"
 	"time"
 )
@@ -47,10 +47,10 @@ func TestStreamProcessing(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	controller := fixtures["controller"].(kiprotect.Controller)
-	stream := fixtures["stream"].(kiprotect.Stream)
+	controller := fixtures["controller"].(kodex.Controller)
+	stream := fixtures["stream"].(kodex.Stream)
 
-	channel := kiprotect.MakeInternalChannel()
+	channel := kodex.MakeInternalChannel()
 
 	if err := channel.Setup(controller, stream); err != nil {
 		t.Fatal(err)
@@ -59,17 +59,17 @@ func TestStreamProcessing(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	items := []*kiprotect.Item{
-		kiprotect.MakeItem(map[string]interface{}{
+	items := []*kodex.Item{
+		kodex.MakeItem(map[string]interface{}{
 			"foo": "bar",
 		}),
 	}
 
-	if err := channel.Write(kiprotect.MakeBasicPayload(items, map[string]interface{}{}, false)); err != nil {
+	if err := channel.Write(kodex.MakeBasicPayload(items, map[string]interface{}{}, false)); err != nil {
 		t.Fatal(err)
 	}
 
-	var payload kiprotect.Payload
+	var payload kodex.Payload
 
 	i := 0
 	for {

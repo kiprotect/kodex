@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,10 +18,10 @@ package readers_test
 
 import (
 	"github.com/kiprotect/go-helpers/maps"
-	"github.com/kiprotect/kiprotect"
-	pt "github.com/kiprotect/kiprotect/helpers/testing"
-	pf "github.com/kiprotect/kiprotect/helpers/testing/fixtures"
-	"github.com/kiprotect/kiprotect/readers"
+	"github.com/kiprotect/kodex"
+	pt "github.com/kiprotect/kodex/helpers/testing"
+	pf "github.com/kiprotect/kodex/helpers/testing/fixtures"
+	"github.com/kiprotect/kodex/readers"
 	"github.com/streadway/amqp"
 	"testing"
 	"time"
@@ -40,12 +40,12 @@ func TestAMQPReader(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	st, _ := fixtures["settings"].(kiprotect.Settings)
+	st, _ := fixtures["settings"].(kodex.Settings)
 
 	config, err := st.Get("testing.amqp")
 
 	if err != nil {
-		kiprotect.Log.Info("Skipping test, no AMQP URL specified...")
+		kodex.Log.Info("Skipping test, no AMQP URL specified...")
 		return
 	}
 
@@ -114,7 +114,7 @@ func TestAMQPReader(t *testing.T) {
 
 	i = 0
 
-	var payload kiprotect.Payload
+	var payload kodex.Payload
 
 	// we make sure we can read a message from the queue
 

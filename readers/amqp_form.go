@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@ package readers
 
 import (
 	"github.com/kiprotect/go-helpers/forms"
-	"github.com/kiprotect/kiprotect/writers"
+	"github.com/kiprotect/kodex/writers"
 )
 
 var AMQPReaderForm = forms.Form{

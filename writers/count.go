@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 package writers
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"sync"
 )
 
@@ -32,7 +32,7 @@ func (s *CountWriter) Teardown() error {
 	return nil
 }
 
-func (s *CountWriter) Setup(config kiprotect.Config) error {
+func (s *CountWriter) Setup(config kodex.Config) error {
 	return nil
 }
 
@@ -44,7 +44,7 @@ func (s *CountWriter) Count() int64 {
 	return s.count
 }
 
-func (s *CountWriter) Write(payload kiprotect.Payload) error {
+func (s *CountWriter) Write(payload kodex.Payload) error {
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -73,7 +73,7 @@ func (s *CountWriter) Write(payload kiprotect.Payload) error {
 	return nil
 }
 
-func MakeCountWriter(config map[string]interface{}) (kiprotect.Writer, error) {
+func MakeCountWriter(config map[string]interface{}) (kodex.Writer, error) {
 	if params, err := CountWriterForm.Validate(config); err != nil {
 		return nil, err
 	} else {

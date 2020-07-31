@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
 package controllers
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
-var Controllers = map[string]kiprotect.ControllerMaker{
+var Controllers = map[string]kodex.ControllerMaker{
 	"inMemory": MakeInMemoryController,
 }

@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,25 +17,25 @@
 package actions
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
-var Actions = kiprotect.ActionDefinitions{
-	"undo": kiprotect.ActionDefinition{
+var Actions = kodex.ActionDefinitions{
+	"undo": kodex.ActionDefinition{
 		Name:  "Undo",
 		Maker: MakeUndoAction,
 		// to do: add form
 	},
-	"pseudonymize": kiprotect.ActionDefinition{
+	"pseudonymize": kodex.ActionDefinition{
 		Name:  "Pseudonymize",
 		Maker: MakePseudonymizeAction,
 	},
-	"transcode": kiprotect.ActionDefinition{
+	"transcode": kodex.ActionDefinition{
 		Name:  "Transcode",
 		Maker: MakeTranscodeAction,
 		// to do: add form
 	},
-	"drop": kiprotect.ActionDefinition{
+	"drop": kodex.ActionDefinition{
 		Name:  "Drop",
 		Maker: MakeDropAction,
 		// to do: add form

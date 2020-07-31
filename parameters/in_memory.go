@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,53 +20,53 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"sync"
 )
 
 type InMemoryParameterStore struct {
 	mutex         sync.Mutex
-	definitions   kiprotect.Definitions
+	definitions   kodex.Definitions
 	config        map[string]interface{}
-	parameterSets map[string]*kiprotect.ParameterSet
+	parameterSets map[string]*kodex.ParameterSet
 	// stores parameters based on the action ID
-	parameters     map[string]map[string][]*kiprotect.Parameters
-	parametersById map[string]*kiprotect.Parameters
+	parameters     map[string]map[string][]*kodex.Parameters
+	parametersById map[string]*kodex.Parameters
 }
 
-func MakeInMemoryParameterStore(config map[string]interface{}, definitions kiprotect.Definitions) (kiprotect.ParameterStore, error) {
+func MakeInMemoryParameterStore(config map[string]interface{}, definitions kodex.Definitions) (kodex.ParameterStore, error) {
 	return &InMemoryParameterStore{
 		config:         config,
 		definitions:    definitions,
 		mutex:          sync.Mutex{},
-		parameterSets:  make(map[string]*kiprotect.ParameterSet),
-		parameters:     make(map[string]map[string][]*kiprotect.Parameters),
-		parametersById: make(map[string]*kiprotect.Parameters),
+		parameterSets:  make(map[string]*kodex.ParameterSet),
+		parameters:     make(map[string]map[string][]*kodex.Parameters),
+		parametersById: make(map[string]*kodex.Parameters),
 	}, nil
 }
 
-func (p *InMemoryParameterStore) ParametersById(id []byte) (*kiprotect.Parameters, error) {
+func (p *InMemoryParameterStore) ParametersById(id []byte) (*kodex.Parameters, error) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 	parameters, _ := p.parametersById[hex.EncodeToString(id)]
 	return parameters, nil
 }
 
-func (p *InMemoryParameterStore) RestoreParameters(data map[string]interface{}) (*kiprotect.Parameters, error) {
-	return kiprotect.RestoreParameters(data, p, p.definitions)
+func (p *InMemoryParameterStore) RestoreParameters(data map[string]interface{}) (*kodex.Parameters, error) {
+	return kodex.RestoreParameters(data, p, p.definitions)
 }
 
-func (p *InMemoryParameterStore) RestoreParameterSet(data map[string]interface{}) (*kiprotect.ParameterSet, error) {
-	return kiprotect.RestoreParameterSet(data, p)
+func (p *InMemoryParameterStore) RestoreParameterSet(data map[string]interface{}) (*kodex.ParameterSet, error) {
+	return kodex.RestoreParameterSet(data, p)
 }
 
-func (p *InMemoryParameterStore) Parameters(action kiprotect.Action, parameterGroup *kiprotect.ParameterGroup) (*kiprotect.Parameters, error) {
+func (p *InMemoryParameterStore) Parameters(action kodex.Action, parameterGroup *kodex.ParameterGroup) (*kodex.Parameters, error) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 	return p.getParameters(action, parameterGroup)
 }
 
-func (p *InMemoryParameterStore) getParameters(action kiprotect.Action, parameterGroup *kiprotect.ParameterGroup) (*kiprotect.Parameters, error) {
+func (p *InMemoryParameterStore) getParameters(action kodex.Action, parameterGroup *kodex.ParameterGroup) (*kodex.Parameters, error) {
 	if action.ID() == nil {
 		return nil, fmt.Errorf("action has no ID")
 	}
@@ -92,30 +92,30 @@ func (p *InMemoryParameterStore) getParameters(action kiprotect.Action, paramete
 	return nil, nil
 }
 
-func (p *InMemoryParameterStore) AllParameters() ([]*kiprotect.Parameters, error) {
-	parametersList := make([]*kiprotect.Parameters, 0, len(p.parametersById))
+func (p *InMemoryParameterStore) AllParameters() ([]*kodex.Parameters, error) {
+	parametersList := make([]*kodex.Parameters, 0, len(p.parametersById))
 	for _, parameters := range p.parametersById {
 		parametersList = append(parametersList, parameters)
 	}
 	return parametersList, nil
 }
 
-func (p *InMemoryParameterStore) AllParameterSets() ([]*kiprotect.ParameterSet, error) {
-	parameterSets := make([]*kiprotect.ParameterSet, 0, len(p.parameterSets))
+func (p *InMemoryParameterStore) AllParameterSets() ([]*kodex.ParameterSet, error) {
+	parameterSets := make([]*kodex.ParameterSet, 0, len(p.parameterSets))
 	for _, parameterSet := range p.parameterSets {
 		parameterSets = append(parameterSets, parameterSet)
 	}
 	return parameterSets, nil
 }
 
-func (p *InMemoryParameterStore) DeleteParameterSet(parameterSet *kiprotect.ParameterSet) error {
+func (p *InMemoryParameterStore) DeleteParameterSet(parameterSet *kodex.ParameterSet) error {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 	delete(p.parameterSets, hex.EncodeToString(parameterSet.Hash()))
 	return nil
 }
 
-func (p *InMemoryParameterStore) DeleteParameters(parameters *kiprotect.Parameters) error {
+func (p *InMemoryParameterStore) DeleteParameters(parameters *kodex.Parameters) error {
 
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
@@ -137,7 +137,7 @@ func (p *InMemoryParameterStore) DeleteParameters(parameters *kiprotect.Paramete
 	configHashStr := hex.EncodeToString(configHash)
 	for actionConfigHash, configHashParameters := range actionParameters {
 		if actionConfigHash == configHashStr {
-			newActionParameters := make([]*kiprotect.Parameters, 0, len(actionParameters)-1)
+			newActionParameters := make([]*kodex.Parameters, 0, len(actionParameters)-1)
 			for _, existingParameters := range configHashParameters {
 				if bytes.Equal(existingParameters.ParameterGroup().Hash(), parameters.ParameterGroup().Hash()) {
 					continue
@@ -153,7 +153,7 @@ func (p *InMemoryParameterStore) DeleteParameters(parameters *kiprotect.Paramete
 
 }
 
-func (p *InMemoryParameterStore) SaveParameters(parameters *kiprotect.Parameters) (bool, error) {
+func (p *InMemoryParameterStore) SaveParameters(parameters *kodex.Parameters) (bool, error) {
 
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
@@ -182,14 +182,14 @@ func (p *InMemoryParameterStore) SaveParameters(parameters *kiprotect.Parameters
 	actionParameters, ok := p.parameters[id]
 
 	if !ok {
-		actionParameters = make(map[string][]*kiprotect.Parameters)
+		actionParameters = make(map[string][]*kodex.Parameters)
 		p.parameters[id] = actionParameters
 	}
 
 	configHashParameters, ok := actionParameters[configHashStr]
 
 	if !ok {
-		configHashParameters = make([]*kiprotect.Parameters, 0, 10)
+		configHashParameters = make([]*kodex.Parameters, 0, 10)
 	}
 
 	for _, existingParameters := range configHashParameters {
@@ -206,7 +206,7 @@ func (p *InMemoryParameterStore) SaveParameters(parameters *kiprotect.Parameters
 
 }
 
-func (p *InMemoryParameterStore) ParameterSet(hash []byte) (*kiprotect.ParameterSet, error) {
+func (p *InMemoryParameterStore) ParameterSet(hash []byte) (*kodex.ParameterSet, error) {
 
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
@@ -218,7 +218,7 @@ func (p *InMemoryParameterStore) ParameterSet(hash []byte) (*kiprotect.Parameter
 	return parameterSet, nil
 }
 
-func (p *InMemoryParameterStore) SaveParameterSet(parameterSet *kiprotect.ParameterSet) (bool, error) {
+func (p *InMemoryParameterStore) SaveParameterSet(parameterSet *kodex.ParameterSet) (bool, error) {
 
 	p.mutex.Lock()
 	defer p.mutex.Unlock()

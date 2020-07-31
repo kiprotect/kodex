@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,15 +17,15 @@
 package processing
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 type DestinationSupervisor interface {
-	WriterStopped(DestinationWriter, kiprotect.DestinationMap)
+	WriterStopped(DestinationWriter, kodex.DestinationMap)
 }
 
 type DestinationWriter interface {
-	Start(DestinationSupervisor, kiprotect.DestinationMap) error
+	Start(DestinationSupervisor, kodex.DestinationMap) error
 	Stop(bool) error
 	Stopped() bool
 	ID() []byte

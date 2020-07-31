@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,28 +17,28 @@
 package processing
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"sync"
 	"time"
 )
 
 type LocalDestinationWorker struct {
-	pool              chan chan kiprotect.Payload
+	pool              chan chan kodex.Payload
 	started           bool
-	writer            kiprotect.Writer
-	channels          []*kiprotect.InternalChannel
+	writer            kodex.Writer
+	channels          []*kodex.InternalChannel
 	destinationWriter DestinationWriter
 	mutex             sync.Mutex
-	payloadChannel    chan kiprotect.Payload
+	payloadChannel    chan kodex.Payload
 	stop              chan bool
 }
 
-func MakeLocalDestinationWorker(pool chan chan kiprotect.Payload,
-	writer kiprotect.Writer,
+func MakeLocalDestinationWorker(pool chan chan kodex.Payload,
+	writer kodex.Writer,
 	destinationWriter DestinationWriter) (*LocalDestinationWorker, error) {
 	return &LocalDestinationWorker{
 		pool:              pool,
-		payloadChannel:    make(chan kiprotect.Payload, 100),
+		payloadChannel:    make(chan kodex.Payload, 100),
 		stop:              make(chan bool),
 		destinationWriter: destinationWriter,
 		started:           false,
@@ -92,22 +92,22 @@ func (w *LocalDestinationWorker) Stop() {
 
 	for _, channel := range w.channels {
 		if err := channel.Teardown(); err != nil {
-			kiprotect.Log.Error(err)
+			kodex.Log.Error(err)
 		}
 	}
 	w.channels = nil
 	w.started = false
 }
 
-func (w *LocalDestinationWorker) ProcessPayload(payload kiprotect.Payload) error {
+func (w *LocalDestinationWorker) ProcessPayload(payload kodex.Payload) error {
 
 	// we send the items from the payload to the designated internal queues
 
 	handleError := func(err error) error {
 		if err := payload.Reject(); err != nil {
-			kiprotect.Log.Error(err)
+			kodex.Log.Error(err)
 		}
-		kiprotect.Log.Error(err)
+		kodex.Log.Error(err)
 		return err
 	}
 

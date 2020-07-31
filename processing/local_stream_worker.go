@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,29 +17,29 @@
 package processing
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"sync"
 	"time"
 )
 
 type ConfigContext struct {
-	Config       kiprotect.Config
-	Processor    *kiprotect.Processor
-	Destinations map[string][]kiprotect.DestinationMap
+	Config       kodex.Config
+	Processor    *kodex.Processor
+	Destinations map[string][]kodex.DestinationMap
 }
 
 type LocalStreamWorker struct {
-	pool              chan chan kiprotect.Payload
+	pool              chan chan kodex.Payload
 	acknowledgeFailed bool
 	started           bool
 	mutex             sync.Mutex
 	contexts          []*ConfigContext
 	executor          StreamExecutor
-	payloadChannel    chan kiprotect.Payload
+	payloadChannel    chan kodex.Payload
 	stop              chan bool
 }
 
-func MakeLocalStreamWorker(pool chan chan kiprotect.Payload,
+func MakeLocalStreamWorker(pool chan chan kodex.Payload,
 	contexts []*ConfigContext,
 	acknowledgeFailed bool,
 	executor StreamExecutor) (*LocalStreamWorker, error) {
@@ -48,7 +48,7 @@ func MakeLocalStreamWorker(pool chan chan kiprotect.Payload,
 	return &LocalStreamWorker{
 		pool:              pool,
 		acknowledgeFailed: acknowledgeFailed,
-		payloadChannel:    make(chan kiprotect.Payload),
+		payloadChannel:    make(chan kodex.Payload),
 		stop:              make(chan bool),
 		contexts:          contexts,
 		started:           false,
@@ -100,31 +100,31 @@ func (w *LocalStreamWorker) Stop() {
 	w.started = false
 }
 
-func (w *LocalStreamWorker) ProcessPayload(payload kiprotect.Payload) error {
+func (w *LocalStreamWorker) ProcessPayload(payload kodex.Payload) error {
 
 	handleError := func(err error) error {
-		kiprotect.Log.Error(err)
+		kodex.Log.Error(err)
 		if w.acknowledgeFailed {
-			kiprotect.Log.Warning("Acknowledging failed payload...")
+			kodex.Log.Warning("Acknowledging failed payload...")
 			payload.Acknowledge()
 		} else {
-			kiprotect.Log.Warning("Rejecting failed payload...")
+			kodex.Log.Warning("Rejecting failed payload...")
 			payload.Reject()
 		}
 		return err
 	}
 
-	var items, newItems []*kiprotect.Item
+	var items, newItems []*kodex.Item
 	var err error
 
 	items = payload.Items()
 
-	kiprotect.Log.Debugf("Received %d items for payload...", len(items))
+	kodex.Log.Debugf("Received %d items for payload...", len(items))
 
 	for _, context := range w.contexts {
 
 		if newItems, err = context.Processor.Process(items, nil); err != nil {
-			kiprotect.Log.Error("an error occurred")
+			kodex.Log.Error("an error occurred")
 			return handleError(err)
 		}
 
@@ -133,7 +133,7 @@ func (w *LocalStreamWorker) ProcessPayload(payload kiprotect.Payload) error {
 			for _, destinationMap := range destinationMaps {
 
 				// we only write items to active destinations
-				if destinationMap.Status() != kiprotect.ActiveDestination {
+				if destinationMap.Status() != kodex.ActiveDestination {
 					continue
 				}
 
@@ -141,15 +141,15 @@ func (w *LocalStreamWorker) ProcessPayload(payload kiprotect.Payload) error {
 				writer, err := destinationMap.InternalWriter()
 
 				if err != nil {
-					kiprotect.Log.Error("error writing destination items...")
+					kodex.Log.Error("error writing destination items...")
 					return handleError(err)
 				}
 
-				if err := writer.Write(kiprotect.MakeBasicPayload(newItems, payload.Headers(), payload.EndOfStream())); err != nil {
-					kiprotect.Log.Error("error writing items...")
+				if err := writer.Write(kodex.MakeBasicPayload(newItems, payload.Headers(), payload.EndOfStream())); err != nil {
+					kodex.Log.Error("error writing items...")
 					return handleError(err)
 				}
-				kiprotect.Log.Debugf("Wrote %d items", len(newItems))
+				kodex.Log.Debugf("Wrote %d items", len(newItems))
 
 			}
 		}

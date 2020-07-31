@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,14 +17,14 @@
 package parameters
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
-var ParameterStores = kiprotect.ParameterStoreDefinitions{
-	"file": kiprotect.ParameterStoreDefinition{
+var ParameterStores = kodex.ParameterStoreDefinitions{
+	"file": kodex.ParameterStoreDefinition{
 		Maker: MakeFileParameterStore,
 	},
-	"inMemory": kiprotect.ParameterStoreDefinition{
+	"inMemory": kodex.ParameterStoreDefinition{
 		Maker: MakeInMemoryParameterStore,
 	},
 }

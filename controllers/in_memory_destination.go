@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,12 +18,12 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"time"
 )
 
 type InMemoryDestination struct {
-	kiprotect.BaseDestination
+	kodex.BaseDestination
 	name            string
 	description     string
 	data            interface{}
@@ -32,10 +32,10 @@ type InMemoryDestination struct {
 	id              []byte
 }
 
-func MakeInMemoryDestination(id []byte, project kiprotect.Project) *InMemoryDestination {
+func MakeInMemoryDestination(id []byte, project kodex.Project) *InMemoryDestination {
 	destination := &InMemoryDestination{
 		id: id,
-		BaseDestination: kiprotect.BaseDestination{
+		BaseDestination: kodex.BaseDestination{
 			Project_: project,
 		},
 	}

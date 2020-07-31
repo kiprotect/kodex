@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/kiprotect/go-helpers/yaml"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -120,7 +120,7 @@ func ExtractBlueprints(data []byte, dest string) error {
 		versionName = "default"
 	}
 
-	kiprotect.Log.Infof("Extracting blueprints package '%s-%s' to path '%s'", packageName, versionName, dest)
+	kodex.Log.Infof("Extracting blueprints package '%s-%s' to path '%s'", packageName, versionName, dest)
 
 	for _, f := range r.File {
 		if strings.HasPrefix(f.Name, blueprintsPath) {

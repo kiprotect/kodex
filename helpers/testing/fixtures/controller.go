@@ -1,4 +1,4 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,9 +18,9 @@ package fixtures
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
-	"github.com/kiprotect/kiprotect/definitions"
-	"github.com/kiprotect/kiprotect/helpers"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/definitions"
+	"github.com/kiprotect/kodex/helpers"
 )
 
 type Controller struct {
@@ -28,7 +28,7 @@ type Controller struct {
 
 func (c Controller) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	defs, ok := fixtures["definitions"].(kiprotect.Definitions)
+	defs, ok := fixtures["definitions"].(kodex.Definitions)
 
 	if !ok {
 		defs = definitions.DefaultDefinitions
@@ -40,7 +40,7 @@ func (c Controller) Setup(fixtures map[string]interface{}) (interface{}, error) 
 		return nil, fmt.Errorf("no settings found")
 	}
 
-	settingsObj, ok := sett.(kiprotect.Settings)
+	settingsObj, ok := sett.(kodex.Settings)
 
 	if !ok {
 		return nil, fmt.Errorf("not a real settings object")
