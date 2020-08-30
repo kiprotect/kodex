@@ -71,6 +71,7 @@ func (b *BaseProject) MarshalJSON() ([]byte, error) {
 
 	data := map[string]interface{}{
 		"name": b.Self.Name(),
+		"description": b.Self.Description(),
 		"data": b.Self.Data(),
 	}
 
