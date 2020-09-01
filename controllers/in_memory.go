@@ -140,6 +140,20 @@ func (c *InMemoryController) SaveProject(project kodex.Project) error {
 	return nil
 }
 
+func (c *InMemoryController) RunHooks(name string, data interface{}) (interface{}, error) {
+	var err error
+
+	hooks := c.Definitions().HookDefinitions[name]
+	currentData := data
+
+	for _, hook := range hooks {
+		if currentData, err = hook.Hook(data); err != nil {
+			return nil, err
+		}
+	}
+	return currentData, nil
+}
+
 func (c *InMemoryController) Begin() error {
 	return nil
 }

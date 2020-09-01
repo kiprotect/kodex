@@ -28,6 +28,7 @@ type Definitions struct {
 	WriterDefinitions
 	ReaderDefinitions
 	ControllerDefinitions
+	HookDefinitions
 }
 
 func (d Definitions) Marshal() map[string]interface{} {
@@ -38,6 +39,7 @@ func (d Definitions) Marshal() map[string]interface{} {
 		"actions":    d.ActionDefinitions,
 		"writers":    d.WriterDefinitions,
 		"readers":    d.ReaderDefinitions,
+		"hooks":      d.HookDefinitions,
 	}
 }
 
@@ -56,6 +58,7 @@ func MergeDefinitions(a, b Definitions) Definitions {
 		WriterDefinitions:         WriterDefinitions{},
 		ReaderDefinitions:         ReaderDefinitions{},
 		ControllerDefinitions:     ControllerDefinitions{},
+		HookDefinitions:           make(HookDefinitions, 0),
 	}
 	for _, obj := range []Definitions{a, b} {
 		for _, v := range obj.CommandsDefinitions {
@@ -78,6 +81,9 @@ func MergeDefinitions(a, b Definitions) Definitions {
 		}
 		for k, v := range obj.ParameterStoreDefinitions {
 			c.ParameterStoreDefinitions[k] = v
+		}
+		for k, v := range obj.HookDefinitions {
+			c.HookDefinitions[k] = append(c.HookDefinitions[k], v...)
 		}
 	}
 	return c
