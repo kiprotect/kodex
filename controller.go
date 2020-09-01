@@ -114,6 +114,20 @@ func MakeBaseController(settings Settings, definitions Definitions) (BaseControl
 	}, nil
 }
 
+func (b *BaseController) RunHooks(name string, data interface{}) (interface{}, error) {
+	var err error
+
+	hooks := b.definitions.HookDefinitions[name]
+	currentData := data
+
+	for _, hook := range hooks {
+		if currentData, err = hook.Hook(data); err != nil {
+			return nil, err
+		}
+	}
+	return currentData, nil
+}
+
 func (b *BaseController) ParameterStore() ParameterStore {
 	return b.parameterStore
 }
