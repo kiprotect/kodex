@@ -70,9 +70,9 @@ func (b *BaseProject) Create(values map[string]interface{}) error {
 func (b *BaseProject) MarshalJSON() ([]byte, error) {
 
 	data := map[string]interface{}{
-		"name": b.Self.Name(),
+		"name":        b.Self.Name(),
 		"description": b.Self.Description(),
-		"data": b.Self.Data(),
+		"data":        b.Self.Data(),
 	}
 
 	for k, v := range JSONData(b.Self) {

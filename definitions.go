@@ -16,14 +16,35 @@
 
 package kodex
 
+import (
+	"encoding/json"
+)
+
 type Definitions struct {
-	CommandsDefinitions       `json:"commands"`
-	ParameterStoreDefinitions `json:"parameters`
-	PluginDefinitions         `json:"plugins"`
-	ActionDefinitions         `json:"actions"`
-	WriterDefinitions         `json:"writers"`
-	ReaderDefinitions         `json:"readers"`
-	ControllerDefinitions     `json:"-"`
+	CommandsDefinitions
+	ParameterStoreDefinitions
+	PluginDefinitions
+	ActionDefinitions
+	WriterDefinitions
+	ReaderDefinitions
+	ControllerDefinitions
+}
+
+func (d Definitions) Marshal() map[string]interface{} {
+	return map[string]interface{}{
+		"commands":   d.CommandsDefinitions,
+		"parameters": d.ParameterStoreDefinitions,
+		"plugins":    d.PluginDefinitions,
+		"actions":    d.ActionDefinitions,
+		"writers":    d.WriterDefinitions,
+		"readers":    d.ReaderDefinitions,
+	}
+}
+
+// We perform JSON marshalling manually to gain more flexibility...
+func (d Definitions) MarshalJSON() ([]byte, error) {
+	ed := d.Marshal()
+	return json.Marshal(ed)
 }
 
 func MergeDefinitions(a, b Definitions) Definitions {
