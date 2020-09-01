@@ -160,6 +160,10 @@ func (i *InMemoryStream) UpdatedAt() time.Time {
 }
 
 func (i *InMemoryStream) Delete() error {
+	// we call the deletion hooks
+	if _, err := i.Project().Controller().RunHooks("stream.delete", i); err != nil {
+		return err
+	}
 	return fmt.Errorf("InMemoryStream.Delete not implemented")
 }
 

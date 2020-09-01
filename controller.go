@@ -85,6 +85,9 @@ type Controller interface {
 
 	// Parameter store
 	ParameterStore() ParameterStore
+
+	// Run all hooks of the given name
+	RunHooks(name string, data interface{}) (interface{}, error)
 }
 
 /* Base Functionality */
