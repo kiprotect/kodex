@@ -18,12 +18,15 @@ package fixtures
 
 import (
 	"github.com/kiprotect/kodex/helpers"
+	"github.com/kiprotect/kodex"
 )
 
 type Settings struct {
 }
 
 func (c Settings) Setup(fixtures map[string]interface{}) (interface{}, error) {
+	// we set the loglevel to 'debug' so we can see which settings files are being loaded
+	kodex.Log.SetLevel(kodex.DebugLogLevel)
 	return helpers.Settings(helpers.SettingsPaths())
 }
 
