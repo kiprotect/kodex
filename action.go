@@ -182,7 +182,7 @@ func (f IsActionSpecifications) Validate(value interface{}, values map[string]in
 	return specs, nil
 }
 
-func MakeAction(name, description, actionType string, id []byte, config map[string]interface{}, definitions Definitions) (Action, error) {
+func MakeAction(name, description, actionType string, id []byte, config map[string]interface{}, definitions *Definitions) (Action, error) {
 	if definition, ok := definitions.ActionDefinitions[actionType]; !ok {
 		return nil, fmt.Errorf("unknown action type: %s", actionType)
 	} else {
@@ -190,7 +190,7 @@ func MakeAction(name, description, actionType string, id []byte, config map[stri
 	}
 }
 
-func MakeActions(specs []ActionSpecification, definitions Definitions) ([]Action, error) {
+func MakeActions(specs []ActionSpecification, definitions *Definitions) ([]Action, error) {
 	actions := make([]Action, len(specs))
 	for i, specification := range specs {
 		actionDefinition, ok := definitions.ActionDefinitions[specification.Type]

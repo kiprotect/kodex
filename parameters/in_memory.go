@@ -26,7 +26,7 @@ import (
 
 type InMemoryParameterStore struct {
 	mutex         sync.Mutex
-	definitions   kodex.Definitions
+	definitions   *kodex.Definitions
 	config        map[string]interface{}
 	parameterSets map[string]*kodex.ParameterSet
 	// stores parameters based on the action ID
@@ -34,7 +34,7 @@ type InMemoryParameterStore struct {
 	parametersById map[string]*kodex.Parameters
 }
 
-func MakeInMemoryParameterStore(config map[string]interface{}, definitions kodex.Definitions) (kodex.ParameterStore, error) {
+func MakeInMemoryParameterStore(config map[string]interface{}, definitions *kodex.Definitions) (kodex.ParameterStore, error) {
 	return &InMemoryParameterStore{
 		config:         config,
 		definitions:    definitions,

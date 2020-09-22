@@ -31,5 +31,5 @@ type PluginMaker func(map[string]interface{}) (Plugin, error)
 type PluginDefinitions map[string]PluginDefinition
 
 type Plugin interface {
-	Initialize(Definitions) error
+	Initialize(*Definitions) error
 }
