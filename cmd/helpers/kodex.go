@@ -318,7 +318,7 @@ func Settings() (kodex.Settings, error) {
 	}
 }
 
-func Kodex(definitions kodex.Definitions) {
+func Kodex(definitions *kodex.Definitions) {
 
 	var controller kodex.Controller
 	var settings kodex.Settings

@@ -20,7 +20,7 @@ import (
 	"fmt"
 )
 
-type ControllerMaker func(map[string]interface{}, Settings, Definitions) (Controller, error)
+type ControllerMaker func(map[string]interface{}, Settings, *Definitions) (Controller, error)
 type ControllerDefinitions map[string]ControllerMaker
 
 type Controller interface {
@@ -59,7 +59,7 @@ type Controller interface {
 	ActionConfigs(filters map[string]interface{}) ([]ActionConfig, error)
 	ActionConfig(configID []byte) (ActionConfig, error)
 
-	Definitions() Definitions
+	Definitions() *Definitions
 
 	// Retrieve a list of streams by urgency
 	StreamsByUrgency(n int) ([]Stream, error)
@@ -93,13 +93,13 @@ type Controller interface {
 /* Base Functionality */
 
 type BaseController struct {
-	definitions    Definitions
+	definitions    *Definitions
 	parameterStore ParameterStore
 	vars           map[string]interface{}
 	settings       Settings
 }
 
-func MakeBaseController(settings Settings, definitions Definitions) (BaseController, error) {
+func MakeBaseController(settings Settings, definitions *Definitions) (BaseController, error) {
 	parameterStore, err := MakeParameterStore(settings, definitions)
 
 	if err != nil {
@@ -142,7 +142,7 @@ func (b *BaseController) GetVar(key string) (interface{}, bool) {
 	return value, ok
 }
 
-func (b *BaseController) Definitions() Definitions {
+func (b *BaseController) Definitions() *Definitions {
 	return b.definitions
 }
 

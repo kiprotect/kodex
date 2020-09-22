@@ -22,7 +22,7 @@ import (
 	"github.com/kiprotect/kodex"
 )
 
-func ControllerType(controllerType string, config map[string]interface{}, settingsObj kodex.Settings, definitions kodex.Definitions) (kodex.Controller, error) {
+func ControllerType(controllerType string, config map[string]interface{}, settingsObj kodex.Settings, definitions *kodex.Definitions) (kodex.Controller, error) {
 
 	controllerMaker, ok := definitions.ControllerDefinitions[controllerType]
 
@@ -34,11 +34,11 @@ func ControllerType(controllerType string, config map[string]interface{}, settin
 
 }
 
-func InMemoryController(settingsObj kodex.Settings, definitions kodex.Definitions, config map[string]interface{}) (kodex.Controller, error) {
+func InMemoryController(settingsObj kodex.Settings, definitions *kodex.Definitions, config map[string]interface{}) (kodex.Controller, error) {
 	return ControllerType("inMemory", config, settingsObj, definitions)
 }
 
-func Controller(settingsObj kodex.Settings, definitions kodex.Definitions) (kodex.Controller, error) {
+func Controller(settingsObj kodex.Settings, definitions *kodex.Definitions) (kodex.Controller, error) {
 	controllerType, ok := settingsObj.String("controller.type")
 
 	if !ok {

@@ -46,7 +46,7 @@ func (c Controller) Setup(fixtures map[string]interface{}) (interface{}, error) 
 		return nil, fmt.Errorf("not a real settings object")
 	}
 
-	if ctrl, err := helpers.Controller(settingsObj, defs); err != nil {
+	if ctrl, err := helpers.Controller(settingsObj, &defs); err != nil {
 		return nil, err
 	} else {
 		if err := ctrl.ResetDB(); err != nil {

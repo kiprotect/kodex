@@ -510,7 +510,7 @@ var FileParameterStoreForm = forms.Form{
 	},
 }
 
-func MakeFileParameterStore(config map[string]interface{}, definitions kodex.Definitions) (kodex.ParameterStore, error) {
+func MakeFileParameterStore(config map[string]interface{}, definitions *kodex.Definitions) (kodex.ParameterStore, error) {
 	params, err := FileParameterStoreForm.Validate(config)
 	if err != nil {
 		return nil, err

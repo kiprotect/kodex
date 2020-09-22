@@ -36,7 +36,7 @@ type ParameterStoreDefinition struct {
 
 type ParameterStoreDefinitions map[string]ParameterStoreDefinition
 
-type ParameterStoreMaker func(map[string]interface{}, Definitions) (ParameterStore, error)
+type ParameterStoreMaker func(map[string]interface{}, *Definitions) (ParameterStore, error)
 
 // An interface that manages action parameters
 type ParameterStore interface {
@@ -54,7 +54,7 @@ type ParameterStore interface {
 	AllParameterSets() ([]*ParameterSet, error)
 }
 
-func MakeParameterStore(settings Settings, definitions Definitions) (ParameterStore, error) {
+func MakeParameterStore(settings Settings, definitions *Definitions) (ParameterStore, error) {
 	config, err := settings.Get("parameter-store")
 
 	if err != nil {
@@ -419,7 +419,7 @@ func RestoreParameterSet(data map[string]interface{}, parameterStore ParameterSt
 	}, nil
 }
 
-func RestoreParameters(data map[string]interface{}, parameterStore ParameterStore, definitions Definitions) (*Parameters, error) {
+func RestoreParameters(data map[string]interface{}, parameterStore ParameterStore, definitions *Definitions) (*Parameters, error) {
 	config, err := ParameterForm.Validate(data)
 	if err != nil {
 		return nil, err

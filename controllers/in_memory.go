@@ -47,7 +47,7 @@ type InMemoryController struct {
 	destinationStats map[string]Stats
 }
 
-func MakeInMemoryController(config map[string]interface{}, settings kodex.Settings, definitions kodex.Definitions) (kodex.Controller, error) {
+func MakeInMemoryController(config map[string]interface{}, settings kodex.Settings, definitions *kodex.Definitions) (kodex.Controller, error) {
 	var err error
 	var baseController kodex.BaseController
 
