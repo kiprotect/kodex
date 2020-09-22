@@ -332,6 +332,10 @@ func Kodex(definitions kodex.Definitions) {
 		kodex.Log.Fatal(err)
 	}
 
+	if err := controller.InitializePlugins(); err != nil {
+		kodex.Log.Fatal(err)
+	}
+
 	init := func(f func(c *cli.Context) error) func(c *cli.Context) error {
 		return func(c *cli.Context) error {
 
