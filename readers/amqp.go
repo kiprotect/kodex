@@ -236,7 +236,8 @@ func (a *AMQPReader) Read() (kodex.Payload, error) {
 	select {
 	case delivery = <-a.deliveries:
 		found = true
-	case <-time.After(time.Millisecond):
+	// notice: this time is really important
+	case <-time.After(time.Second*1):
 		break
 	}
 
