@@ -139,6 +139,7 @@ func (a *AMQPWriter) Write(payload kodex.Payload) error {
 		false, // immediate
 		amqp.Publishing{
 			ContentType: "application/kiprotect",
+			DeliveryMode: amqp.Persistent,
 			Headers:     headers,
 			Body:        bs,
 		},
