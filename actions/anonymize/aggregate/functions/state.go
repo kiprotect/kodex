@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"github.com/kiprotect/kiprotect/actions/anonymize/aggregate"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
 )
 
 type Int64 struct {

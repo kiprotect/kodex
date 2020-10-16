@@ -20,8 +20,8 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
-	"github.com/kiprotect/kiprotect"
-	"github.com/kiprotect/kiprotect/actions/anonymize/aggregate"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
 	"math"
 	"math/big"
 )
@@ -86,7 +86,7 @@ func (c *Uniques) Merge(groups []aggregate.Group) (aggregate.Group, error) {
 	return newGroup, nil
 }
 
-func (c *Uniques) Add(item *kiprotect.Item, group aggregate.Group) error {
+func (c *Uniques) Add(item *kodex.Item, group aggregate.Group) error {
 	group.Lock()
 	defer group.Unlock()
 	state := group.State()

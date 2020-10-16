@@ -19,9 +19,9 @@ package anonymize
 import (
 	"encoding/base64"
 	"github.com/kiprotect/go-helpers/errors"
-	"github.com/kiprotect/kiprotect"
-	"github.com/kiprotect/kiprotect/actions/anonymize/aggregate"
-	"github.com/kiprotect/kiprotect/actions/anonymize/aggregate/groups"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate/groups"
 	"sync"
 )
 
@@ -84,11 +84,11 @@ func (a *AggregateAnonymizer) SetParams(params interface{}) error {
 	return nil
 }
 
-func (a *AggregateAnonymizer) Anonymize(item *kiprotect.Item, writer kiprotect.ChannelWriter) (*kiprotect.Item, error) {
+func (a *AggregateAnonymizer) Anonymize(item *kodex.Item, writer kodex.ChannelWriter) (*kodex.Item, error) {
 	return a.process(item, writer)
 }
 
-func (a *AggregateAnonymizer) Finalize() ([]*kiprotect.Item, error) {
+func (a *AggregateAnonymizer) Finalize() ([]*kodex.Item, error) {
 	shard, err := a.groupStore.Shard()
 	if err != nil {
 		return nil, errors.MakeExternalError("cannot get a shard", "IN-MEMORY-STORE", nil, err)
@@ -97,7 +97,7 @@ func (a *AggregateAnonymizer) Finalize() ([]*kiprotect.Item, error) {
 	return a.finalizeAllGroups(shard)
 }
 
-func (a *AggregateAnonymizer) process(item *kiprotect.Item, channelWriter kiprotect.ChannelWriter) (*kiprotect.Item, error) {
+func (a *AggregateAnonymizer) process(item *kodex.Item, channelWriter kodex.ChannelWriter) (*kodex.Item, error) {
 	shard, err := a.groupStore.Shard()
 	if err != nil {
 		return nil, errors.MakeExternalError("cannot get a shard", "IN-MEMORY-STORE", nil, err)
@@ -109,15 +109,15 @@ func (a *AggregateAnonymizer) process(item *kiprotect.Item, channelWriter kiprot
 	return item, nil
 }
 
-func (a *AggregateAnonymizer) getGroupByValues(item *kiprotect.Item) ([]map[string]interface{}, error) {
+func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]map[string]interface{}, error) {
 	return nil, nil
 }
 
-func (a *AggregateAnonymizer) getTriggers(item *kiprotect.Item) ([]*aggregate.Trigger, error) {
+func (a *AggregateAnonymizer) getTriggers(item *kodex.Item) ([]*aggregate.Trigger, error) {
 	return nil, nil
 }
 
-func (a *AggregateAnonymizer) getGroups(item *kiprotect.Item, function aggregate.Function, shard aggregate.Shard) ([]aggregate.Group, error) {
+func (a *AggregateAnonymizer) getGroups(item *kodex.Item, function aggregate.Function, shard aggregate.Shard) ([]aggregate.Group, error) {
 	groupByValuesList, err := a.getGroupByValues(item)
 	if err != nil {
 		return nil, errors.MakeExternalError("error getting group-by values",
@@ -131,7 +131,7 @@ func (a *AggregateAnonymizer) getGroups(item *kiprotect.Item, function aggregate
 	}
 	groups := make([]aggregate.Group, 0)
 	for _, groupByValues := range groupByValuesList {
-		hash, err := kiprotect.StructuredHash(groupByValues)
+		hash, err := kodex.StructuredHash(groupByValues)
 		if err != nil {
 			return nil, err
 		}
@@ -154,7 +154,7 @@ func (a *AggregateAnonymizer) getGroups(item *kiprotect.Item, function aggregate
 	return groups, nil
 }
 
-func (a *AggregateAnonymizer) finalizeAllGroups(shard aggregate.Shard) ([]*kiprotect.Item, error) {
+func (a *AggregateAnonymizer) finalizeAllGroups(shard aggregate.Shard) ([]*kodex.Item, error) {
 	allGroups, err := shard.ExpireAllGroups()
 	if err != nil {
 		return nil, err
@@ -162,7 +162,7 @@ func (a *AggregateAnonymizer) finalizeAllGroups(shard aggregate.Shard) ([]*kipro
 	return a.finalizeGroups(allGroups)
 }
 
-func (a *AggregateAnonymizer) finalizeExpiredGroups(shard aggregate.Shard, triggers []*aggregate.Trigger) ([]*kiprotect.Item, error) {
+func (a *AggregateAnonymizer) finalizeExpiredGroups(shard aggregate.Shard, triggers []*aggregate.Trigger) ([]*kodex.Item, error) {
 	expiredGroups, err := shard.ExpireGroups(triggers)
 	if err != nil {
 		return nil, err
@@ -170,13 +170,13 @@ func (a *AggregateAnonymizer) finalizeExpiredGroups(shard aggregate.Shard, trigg
 	return a.finalizeGroups(expiredGroups)
 }
 
-func (a *AggregateAnonymizer) finalizeGroups(groups map[string][]aggregate.Group) ([]*kiprotect.Item, error) {
+func (a *AggregateAnonymizer) finalizeGroups(groups map[string][]aggregate.Group) ([]*kodex.Item, error) {
 
 	encode := func(data []byte) string {
 		return base64.StdEncoding.EncodeToString(data)
 	}
 
-	items := make([]*kiprotect.Item, 0)
+	items := make([]*kodex.Item, 0)
 	for _, hashGroups := range groups {
 		group, err := a.function.Function.Merge(hashGroups)
 		if err != nil {
@@ -190,7 +190,7 @@ func (a *AggregateAnonymizer) finalizeGroups(groups map[string][]aggregate.Group
 		if result == nil {
 			continue
 		}
-		item := kiprotect.MakeItem(map[string]interface{}{
+		item := kodex.MakeItem(map[string]interface{}{
 			a.resultName:  result,
 			"action_id":   a.id,
 			"action_name": a.name,
@@ -202,7 +202,7 @@ func (a *AggregateAnonymizer) finalizeGroups(groups map[string][]aggregate.Group
 	return items, nil
 }
 
-func (a *AggregateAnonymizer) submitResults(items []*kiprotect.Item, channelWriter kiprotect.ChannelWriter) error {
+func (a *AggregateAnonymizer) submitResults(items []*kodex.Item, channelWriter kodex.ChannelWriter) error {
 	for _, channel := range a.channels {
 		if err := channelWriter.Write(channel, items); err != nil {
 			return err
@@ -211,7 +211,7 @@ func (a *AggregateAnonymizer) submitResults(items []*kiprotect.Item, channelWrit
 	return nil
 }
 
-func (a *AggregateAnonymizer) aggregate(item *kiprotect.Item, channelWriter kiprotect.ChannelWriter, shard aggregate.Shard) error {
+func (a *AggregateAnonymizer) aggregate(item *kodex.Item, channelWriter kodex.ChannelWriter, shard aggregate.Shard) error {
 
 	/*
 		- Generate the groups for the items using the group-by clauses
@@ -250,7 +250,7 @@ func (a *AggregateAnonymizer) aggregate(item *kiprotect.Item, channelWriter kipr
 		// we submit the results to the configured destination configs
 		if aggregations != nil && len(aggregations) > 0 {
 			if err := a.submitResults(aggregations, channelWriter); err != nil {
-				kiprotect.Log.Error(err)
+				kodex.Log.Error(err)
 				groupErr = err
 				continue
 			}

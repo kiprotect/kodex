@@ -17,7 +17,7 @@
 package aggregate
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 type Function interface {
@@ -25,7 +25,7 @@ type Function interface {
 	Merge(group []Group) (Group, error)
 	Initialize(group Group) error
 	// Add an item to a given group
-	Add(item *kiprotect.Item, group Group) error
+	Add(item *kodex.Item, group Group) error
 	// Finalize a group and return the result
 	Finalize(group Group) (interface{}, error)
 }

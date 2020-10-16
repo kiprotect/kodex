@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"github.com/kiprotect/go-helpers/errors"
 	"github.com/kiprotect/go-helpers/forms"
-	"github.com/kiprotect/kiprotect/actions/anonymize/aggregate"
-	"github.com/kiprotect/kiprotect/actions/anonymize/aggregate/functions"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate/functions"
 )
 
 type Function struct {

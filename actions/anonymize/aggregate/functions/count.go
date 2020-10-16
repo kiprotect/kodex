@@ -19,8 +19,8 @@ package functions
 import (
 	"github.com/kiprotect/go-helpers/errors"
 	"github.com/kiprotect/go-helpers/forms"
-	"github.com/kiprotect/kiprotect"
-	"github.com/kiprotect/kiprotect/actions/anonymize/aggregate"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
 )
 
 var CountForm = forms.Form{
@@ -49,7 +49,7 @@ func (c *Count) Initialize(group aggregate.Group) error {
 	return group.Initialize(intState)
 }
 
-func (c *Count) Add(item *kiprotect.Item, group aggregate.Group) error {
+func (c *Count) Add(item *kodex.Item, group aggregate.Group) error {
 	group.Lock()
 	defer group.Unlock()
 	state := group.State()

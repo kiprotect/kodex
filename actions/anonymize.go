@@ -19,12 +19,12 @@ package actions
 import (
 	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
-	"github.com/kiprotect/kiprotect"
-	"github.com/kiprotect/kiprotect/actions/anonymize"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/actions/anonymize"
 )
 
 type AnonymizeAction struct {
-	kiprotect.BaseAction
+	kodex.BaseAction
 	anonymizer anonymize.Anonymizer
 	key        string
 	method     string
@@ -35,7 +35,7 @@ func (p *AnonymizeAction) Undoable(interface{}) bool {
 	return true
 }
 
-func (p *AnonymizeAction) process(item *kiprotect.Item, f func(interface{}) (interface{}, error)) (*kiprotect.Item, error) {
+func (p *AnonymizeAction) process(item *kodex.Item, f func(interface{}) (interface{}, error)) (*kodex.Item, error) {
 	value, ok := item.Get(p.key)
 	if !ok {
 		return nil, fmt.Errorf("key %s missing", p.key)
@@ -48,7 +48,7 @@ func (p *AnonymizeAction) process(item *kiprotect.Item, f func(interface{}) (int
 	return item, err
 }
 
-func (p *AnonymizeAction) Do(item *kiprotect.Item, writer kiprotect.ChannelWriter) (*kiprotect.Item, error) {
+func (p *AnonymizeAction) Do(item *kodex.Item, writer kodex.ChannelWriter) (*kodex.Item, error) {
 	return p.anonymizer.Anonymize(item, writer)
 }
 
@@ -72,7 +72,7 @@ func (p *AnonymizeAction) Teardown() error {
 	return p.anonymizer.Teardown()
 }
 
-func MakeAnonymizeAction(name, description string, id []byte, config map[string]interface{}) (kiprotect.Action, error) {
+func MakeAnonymizeAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
 
 	params, err := AnonymizeConfigForm.Validate(config)
 
@@ -94,7 +94,7 @@ func MakeAnonymizeAction(name, description string, id []byte, config map[string]
 		return nil, err
 	}
 
-	if baseAction, err := kiprotect.MakeBaseAction(name, description, "anonymize", id, config); err != nil {
+	if baseAction, err := kodex.MakeBaseAction(name, description, "anonymize", id, config); err != nil {
 		return nil, err
 	} else {
 		return &AnonymizeAction{
