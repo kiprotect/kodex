@@ -1,20 +1,20 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package kiprotect
+package kodex
 
 import (
 	"bytes"
@@ -36,7 +36,7 @@ type ParameterStoreDefinition struct {
 
 type ParameterStoreDefinitions map[string]ParameterStoreDefinition
 
-type ParameterStoreMaker func(map[string]interface{}, Definitions) (ParameterStore, error)
+type ParameterStoreMaker func(map[string]interface{}, *Definitions) (ParameterStore, error)
 
 // An interface that manages action parameters
 type ParameterStore interface {
@@ -50,14 +50,16 @@ type ParameterStore interface {
 	ParameterSet(hash []byte) (*ParameterSet, error)
 	SaveParameterSet(*ParameterSet) (bool, error)
 	SaveParameters(*Parameters) (bool, error)
+	AllParameters() ([]*Parameters, error)
+	AllParameterSets() ([]*ParameterSet, error)
 }
 
-func MakeParameterStore(settings Settings, definitions Definitions) (ParameterStore, error) {
+func MakeParameterStore(settings Settings, definitions *Definitions) (ParameterStore, error) {
 	config, err := settings.Get("parameter-store")
 
 	if err != nil {
 		config = map[string]interface{}{
-			"type": "in-memory",
+			"type": "inMemory",
 		}
 	}
 
@@ -406,7 +408,7 @@ func RestoreParameterSet(data map[string]interface{}, parameterStore ParameterSt
 			return nil, err
 		}
 		if parameters == nil {
-			return nil, fmt.Errorf("parameters not found")
+			return nil, fmt.Errorf("required parameters for parameter set not found")
 		}
 		parametersList[i] = parameters
 	}
@@ -417,7 +419,7 @@ func RestoreParameterSet(data map[string]interface{}, parameterStore ParameterSt
 	}, nil
 }
 
-func RestoreParameters(data map[string]interface{}, parameterStore ParameterStore, definitions Definitions) (*Parameters, error) {
+func RestoreParameters(data map[string]interface{}, parameterStore ParameterStore, definitions *Definitions) (*Parameters, error) {
 	config, err := ParameterForm.Validate(data)
 	if err != nil {
 		return nil, err

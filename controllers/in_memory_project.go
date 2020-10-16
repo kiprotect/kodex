@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -18,22 +18,22 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"time"
 )
 
 type InMemoryProject struct {
-	kiprotect.BaseProject
+	kodex.BaseProject
 	name        string
 	description string
 	data        interface{}
 	id          []byte
 }
 
-func MakeInMemoryProject(id []byte, controller kiprotect.Controller) *InMemoryProject {
+func MakeInMemoryProject(id []byte, controller kodex.Controller) *InMemoryProject {
 	destination := &InMemoryProject{
 		id: id,
-		BaseProject: kiprotect.BaseProject{
+		BaseProject: kodex.BaseProject{
 			Controller_: controller,
 		},
 	}
@@ -104,12 +104,8 @@ func (i *InMemoryProject) SetDescription(description string) error {
 	return nil
 }
 
-func (i *InMemoryProject) MakeSchema() kiprotect.Schema {
-	return MakeInMemorySchema(kiprotect.RandomID(), &kiprotect.DataSchema{}, i)
-}
-
-func (c *InMemoryProject) MakeStream() kiprotect.Stream {
-	id := kiprotect.RandomID()
+func (c *InMemoryProject) MakeStream() kodex.Stream {
+	id := kodex.RandomID()
 	stream, err := MakeInMemoryStream(id, map[string]interface{}{
 		"configs": []map[string]interface{}{},
 		"params":  []map[string]interface{}{},
@@ -121,14 +117,14 @@ func (c *InMemoryProject) MakeStream() kiprotect.Stream {
 	return stream
 }
 
-func (c *InMemoryProject) MakeActionConfig() kiprotect.ActionConfig {
-	return MakeInMemoryActionConfig(kiprotect.RandomID(), c)
+func (c *InMemoryProject) MakeActionConfig() kodex.ActionConfig {
+	return MakeInMemoryActionConfig(kodex.RandomID(), c)
 }
 
-func (c *InMemoryProject) MakeSource() kiprotect.Source {
-	return MakeInMemorySource(kiprotect.RandomID(), c)
+func (c *InMemoryProject) MakeSource() kodex.Source {
+	return MakeInMemorySource(kodex.RandomID(), c)
 }
 
-func (c *InMemoryProject) MakeDestination() kiprotect.Destination {
-	return MakeInMemoryDestination(kiprotect.RandomID(), c)
+func (c *InMemoryProject) MakeDestination() kodex.Destination {
+	return MakeInMemoryDestination(kodex.RandomID(), c)
 }

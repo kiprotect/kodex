@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -19,10 +19,10 @@ package writers_test
 import (
 	"bytes"
 	"github.com/kiprotect/go-helpers/maps"
-	"github.com/kiprotect/kiprotect"
-	pt "github.com/kiprotect/kiprotect/helpers/testing"
-	pf "github.com/kiprotect/kiprotect/helpers/testing/fixtures"
-	"github.com/kiprotect/kiprotect/writers"
+	"github.com/kiprotect/kodex"
+	pt "github.com/kiprotect/kodex/helpers/testing"
+	pf "github.com/kiprotect/kodex/helpers/testing/fixtures"
+	"github.com/kiprotect/kodex/writers"
 	"github.com/streadway/amqp"
 	"testing"
 	"time"
@@ -41,12 +41,12 @@ func TestAMQPWriter(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	st, _ := fixtures["settings"].(kiprotect.Settings)
+	st, _ := fixtures["settings"].(kodex.Settings)
 
 	config, err := st.Get("testing.amqp")
 
 	if err != nil {
-		kiprotect.Log.Info("Skipping test, no AMQP URL specified...")
+		kodex.Log.Info("Skipping test, no AMQP URL specified...")
 		return
 	}
 
@@ -73,11 +73,11 @@ func TestAMQPWriter(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	items := []*kiprotect.Item{
-		kiprotect.MakeItem(map[string]interface{}{"foo": "bar"}),
+	items := []*kodex.Item{
+		kodex.MakeItem(map[string]interface{}{"foo": "bar"}),
 	}
 
-	if err := writer.Write(kiprotect.MakeBasicPayload(items, map[string]interface{}{}, false)); err != nil {
+	if err := writer.Write(kodex.MakeBasicPayload(items, map[string]interface{}{}, false)); err != nil {
 		t.Fatal(err)
 	}
 

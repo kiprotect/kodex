@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -20,37 +20,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
-
-type IsActionSpecification struct{}
-
-func (i IsActionSpecification) Validate(value interface{}, values map[string]interface{}) (interface{}, error) {
-	// we have validated this before
-	config := value.(map[string]interface{})
-	params, err := kiprotect.ActionSpecificationForm.Validate(config)
-	if err != nil {
-		return nil, err
-	}
-	return kiprotect.ActionSpecification{
-		Name:        params["name"].(string),
-		Description: params["description"].(string),
-		ID:          params["id"].([]byte),
-		Type:        params["type"].(string),
-		Config:      params["config"].(map[string]interface{}),
-	}, nil
-}
-
-type IsActionSpecificationList struct{}
-
-func (f IsActionSpecificationList) Validate(value interface{}, values map[string]interface{}) (interface{}, error) {
-	list := value.([]interface{})
-	specs := make([]kiprotect.ActionSpecification, len(list))
-	for i, spec := range list {
-		specs[i] = spec.(kiprotect.ActionSpecification)
-	}
-	return specs, nil
-}
 
 var UndoActionConfigForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the undo form",
@@ -59,37 +30,37 @@ var UndoActionConfigForm = forms.Form{
 			Name: "actions",
 			Validators: []forms.Validator{
 				forms.IsOptional{
-					Default: []kiprotect.ActionSpecification{},
+					Default: []kodex.ActionSpecification{},
 				},
 				forms.IsList{
 					Validators: []forms.Validator{
 						forms.IsStringMap{},
-						IsActionSpecification{},
+						kodex.IsActionSpecification{},
 					},
 				},
-				IsActionSpecificationList{},
+				kodex.IsActionSpecifications{},
 			},
 		},
 	},
 }
 
 type UndoAction struct {
-	kiprotect.BaseAction
-	actionSpecs []kiprotect.ActionSpecification
+	kodex.BaseAction
+	actionSpecs []kodex.ActionSpecification
 	key, salt   []byte
 }
 
-func MakeUndoAction(name, description string, id []byte, config map[string]interface{}) (kiprotect.Action, error) {
+func MakeUndoAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
 	params, err := UndoActionConfigForm.Validate(config)
 	if err != nil {
 		return nil, err
 	}
-	if baseAction, err := kiprotect.MakeBaseAction(name, description, "undo", id, config); err != nil {
+	if baseAction, err := kodex.MakeBaseAction(name, description, "undo", id, config); err != nil {
 		return nil, err
 	} else {
 		return &UndoAction{
 			BaseAction:  baseAction,
-			actionSpecs: params["actions"].([]kiprotect.ActionSpecification),
+			actionSpecs: params["actions"].([]kodex.ActionSpecification),
 		}, nil
 	}
 }
@@ -111,20 +82,20 @@ func (a *UndoAction) SetParams(params interface{}) error {
 	return nil
 }
 
-func (a *UndoAction) DoWithConfig(item *kiprotect.Item, writer kiprotect.ChannelWriter, config kiprotect.Config) (*kiprotect.Item, error) {
-	var processor *kiprotect.Processor
+func (a *UndoAction) DoWithConfig(item *kodex.Item, writer kodex.ChannelWriter, config kodex.Config) (*kodex.Item, error) {
+	var processor *kodex.Processor
 	if a.key != nil {
 		definitions := config.Stream().Project().Controller().Definitions()
-		actions, err := kiprotect.MakeActions(a.actionSpecs, definitions)
+		actions, err := kodex.MakeActions(a.actionSpecs, definitions)
 		if err != nil {
 			return nil, err
 		}
-		parameterSet, err := kiprotect.MakeParameterSet(actions, nil)
+		parameterSet, err := kodex.MakeParameterSet(actions, nil)
 		if err != nil {
 			return nil, err
 		}
-		processor, err = kiprotect.MakeProcessor(parameterSet, writer, config)
-		processor.SetSeed(a.key)
+		processor, err = kodex.MakeProcessor(parameterSet, writer, config)
+		processor.SetKey(a.key)
 		processor.SetSalt(a.salt)
 	} else {
 		kipId, ok := item.Get("_kip")
@@ -144,7 +115,7 @@ func (a *UndoAction) DoWithConfig(item *kiprotect.Item, writer kiprotect.Channel
 		if err != nil || parameterSet == nil {
 			return nil, fmt.Errorf("parameter set not found %s", kipIdStr)
 		}
-		processor, err = kiprotect.MakeProcessor(parameterSet, writer, config)
+		processor, err = kodex.MakeProcessor(parameterSet, writer, config)
 		if err != nil {
 			return nil, err
 		}
@@ -152,7 +123,7 @@ func (a *UndoAction) DoWithConfig(item *kiprotect.Item, writer kiprotect.Channel
 	if err := processor.Setup(); err != nil {
 		return nil, err
 	}
-	if newItems, err := processor.Undo([]*kiprotect.Item{item}, nil); err != nil {
+	if newItems, err := processor.Undo([]*kodex.Item{item}, nil); err != nil {
 		return nil, err
 	} else {
 		if len(newItems) == 1 {
@@ -161,7 +132,6 @@ func (a *UndoAction) DoWithConfig(item *kiprotect.Item, writer kiprotect.Channel
 			return nil, fmt.Errorf("expected a single item")
 		}
 	}
-	return nil, nil
 }
 
 func (a *UndoAction) Setup() error {

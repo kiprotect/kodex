@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -22,7 +22,7 @@ import (
 	"compress/gzip"
 	"encoding/hex"
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"github.com/streadway/amqp"
 	"io"
 	"time"
@@ -42,7 +42,7 @@ type AMQPBase struct {
 	BaseQueueName       string
 	Exchange            string
 	ExchangeType        string
-	Model               kiprotect.Model
+	Model               kodex.Model
 }
 
 type AMQPWriter struct {
@@ -64,7 +64,7 @@ func MakeAMQPBase(params map[string]interface{}) (AMQPBase, error) {
 	}, nil
 }
 
-func MakeAMQPWriter(config map[string]interface{}) (kiprotect.Writer, error) {
+func MakeAMQPWriter(config map[string]interface{}) (kodex.Writer, error) {
 	if params, err := AMQPWriterForm.Validate(config); err != nil {
 		return nil, err
 	} else {
@@ -79,7 +79,7 @@ func MakeAMQPWriter(config map[string]interface{}) (kiprotect.Writer, error) {
 	}
 }
 
-func (a *AMQPWriter) Write(payload kiprotect.Payload) error {
+func (a *AMQPWriter) Write(payload kodex.Payload) error {
 	var buf *bytes.Buffer
 
 	var writer io.Writer
@@ -139,6 +139,7 @@ func (a *AMQPWriter) Write(payload kiprotect.Payload) error {
 		false, // immediate
 		amqp.Publishing{
 			ContentType: "application/kiprotect",
+			DeliveryMode: amqp.Persistent,
 			Headers:     headers,
 			Body:        bs,
 		},
@@ -156,15 +157,15 @@ func (a *AMQPWriter) Write(payload kiprotect.Payload) error {
 	return nil
 }
 
-func (a *AMQPWriter) Setup(config kiprotect.Config) error {
+func (a *AMQPWriter) Setup(config kodex.Config) error {
 	return a.setup(nil)
 }
 
-func (a *AMQPWriter) SetupWithModel(model kiprotect.Model) error {
+func (a *AMQPWriter) SetupWithModel(model kodex.Model) error {
 	return a.setup(model)
 }
 
-func (a *AMQPWriter) setup(model kiprotect.Model) error {
+func (a *AMQPWriter) setup(model kodex.Model) error {
 	if err := a.AMQPBase.SetupWithModel(model); err != nil {
 		return err
 	}
@@ -181,15 +182,15 @@ func (a *AMQPWriter) setup(model kiprotect.Model) error {
 	return nil
 }
 
-func (a *AMQPBase) SetupWithModel(model kiprotect.Model) error {
+func (a *AMQPBase) SetupWithModel(model kodex.Model) error {
 	return a.setup(model)
 }
 
-func (a *AMQPBase) Setup(config kiprotect.Config) error {
+func (a *AMQPBase) Setup(config kodex.Config) error {
 	return a.setup(nil)
 }
 
-func (a *AMQPBase) setup(model kiprotect.Model) error {
+func (a *AMQPBase) setup(model kodex.Model) error {
 	var err error
 
 	a.Model = model
@@ -261,7 +262,7 @@ func (a *AMQPBase) setup(model kiprotect.Model) error {
 func (a *AMQPBase) Teardown() error {
 	if a.Channel != nil {
 		if err := a.Channel.Close(); err != nil {
-			kiprotect.Log.Error(err)
+			kodex.Log.Error(err)
 		}
 	}
 	if a.Connection != nil {

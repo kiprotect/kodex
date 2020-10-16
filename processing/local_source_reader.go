@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -18,7 +18,7 @@ package processing
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"sync"
 	"time"
 )
@@ -27,16 +27,16 @@ type LocalSourceReader struct {
 	maxSourceWorkers int
 	workers          []*LocalSourceWorker
 	id               []byte
-	pool             chan chan kiprotect.Payload
-	sourceMap        kiprotect.SourceMap
-	reader           kiprotect.Reader
-	configs          []kiprotect.Config
+	pool             chan chan kodex.Payload
+	sourceMap        kodex.SourceMap
+	reader           kodex.Reader
+	configs          []kodex.Config
 	stopReader       chan bool
 	mutex            sync.Mutex
 	supervisor       SourceSupervisor
 	stopped          bool
 	stopping         bool
-	payloadChannel   chan kiprotect.Payload
+	payloadChannel   chan kodex.Payload
 }
 
 func MakeLocalSourceReader(maxSourceWorkers int,
@@ -45,7 +45,7 @@ func MakeLocalSourceReader(maxSourceWorkers int,
 		stopReader:       make(chan bool),
 		stopped:          true,
 		id:               id,
-		payloadChannel:   make(chan kiprotect.Payload, maxSourceWorkers*8),
+		payloadChannel:   make(chan kodex.Payload, maxSourceWorkers*8),
 		maxSourceWorkers: maxSourceWorkers,
 	}
 }
@@ -54,7 +54,7 @@ func (d *LocalSourceReader) ID() []byte {
 	return d.id
 }
 
-func (d *LocalSourceReader) Start(supervisor SourceSupervisor, sourceMap kiprotect.SourceMap) error {
+func (d *LocalSourceReader) Start(supervisor SourceSupervisor, sourceMap kodex.SourceMap) error {
 
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
@@ -91,13 +91,13 @@ func (d *LocalSourceReader) run() error {
 	}
 
 	// we retrieve all active streams for this source
-	streams, err := d.sourceMap.Source().Streams(kiprotect.ActiveSource)
+	streams, err := d.sourceMap.Source().Streams(kodex.ActiveSource)
 
 	if err != nil {
 		return err
 	}
 
-	d.pool = make(chan chan kiprotect.Payload, d.maxSourceWorkers)
+	d.pool = make(chan chan kodex.Payload, d.maxSourceWorkers)
 
 	for i := 0; i < d.maxSourceWorkers; i++ {
 		worker, err := MakeLocalSourceWorker(d.pool, streams, d)
@@ -121,7 +121,7 @@ func (d *LocalSourceReader) Stopped() bool {
 	return d.stopped
 }
 
-func (d *LocalSourceReader) SourceMap() kiprotect.SourceMap {
+func (d *LocalSourceReader) SourceMap() kodex.SourceMap {
 	return d.sourceMap
 }
 
@@ -157,7 +157,7 @@ func (d *LocalSourceReader) stop(gracefully bool, fromReader bool) error {
 
 	// then we tear down the source reader
 	if err := d.reader.Teardown(); err != nil {
-		kiprotect.Log.Error(err)
+		kodex.Log.Error(err)
 	}
 
 	d.sourceMap = nil
@@ -173,7 +173,7 @@ func (d *LocalSourceReader) stop(gracefully bool, fromReader bool) error {
 func (d *LocalSourceReader) read() {
 Loop:
 	for {
-		var payload kiprotect.Payload
+		var payload kodex.Payload
 		var err error
 
 		select {
@@ -189,7 +189,7 @@ Loop:
 		// the loop (to reload configuration)
 
 		if payload, err = d.reader.Read(); err != nil {
-			kiprotect.Log.Error(err)
+			kodex.Log.Error(err)
 			break
 		}
 

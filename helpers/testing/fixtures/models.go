@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -18,7 +18,7 @@ package fixtures
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 type Project struct {
@@ -55,7 +55,7 @@ type Stream struct {
 
 func (c Stream) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	project, ok := fixtures[c.Project].(kiprotect.Project)
+	project, ok := fixtures[c.Project].(kodex.Project)
 
 	if !ok {
 		return nil, fmt.Errorf("project missing")
@@ -65,7 +65,7 @@ func (c Stream) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
 	values := map[string]interface{}{
 		"name":        c.Name,
-		"status":      string(kiprotect.ActiveStream),
+		"status":      string(kodex.ActiveStream),
 		"description": "",
 	}
 
@@ -86,12 +86,12 @@ type Config struct {
 	Name    string
 	Version string
 	Source  string
-	Status  kiprotect.ConfigStatus
+	Status  kodex.ConfigStatus
 }
 
 func (c Config) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	stream, ok := fixtures[c.Stream].(kiprotect.Stream)
+	stream, ok := fixtures[c.Stream].(kodex.Stream)
 	if !ok {
 		return nil, fmt.Errorf("not a stream")
 	}
@@ -116,32 +116,6 @@ func (c Config) Teardown(fixture interface{}) error {
 	return nil
 }
 
-type Schema struct {
-	Project string
-	Config  map[string]interface{}
-}
-
-func (i Schema) Setup(fixtures map[string]interface{}) (interface{}, error) {
-
-	project, ok := fixtures[i.Project].(kiprotect.Project)
-
-	if !ok {
-		return nil, fmt.Errorf("project missing")
-	}
-
-	schema := project.MakeSchema()
-
-	values := map[string]interface{}{
-		"config": i.Config,
-	}
-
-	if err := schema.Create(values); err != nil {
-		return nil, err
-	} else {
-		return schema, schema.Save()
-	}
-}
-
 type Source struct {
 	Name       string
 	Project    string
@@ -151,7 +125,7 @@ type Source struct {
 
 func (i Source) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	project, ok := fixtures[i.Project].(kiprotect.Project)
+	project, ok := fixtures[i.Project].(kodex.Project)
 
 	if !ok {
 		return nil, fmt.Errorf("project missing")
@@ -186,7 +160,7 @@ type Destination struct {
 
 func (o Destination) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	project, ok := fixtures[o.Project].(kiprotect.Project)
+	project, ok := fixtures[o.Project].(kodex.Project)
 
 	if !ok {
 		return nil, fmt.Errorf("project missing")
@@ -221,19 +195,19 @@ type DestinationAdder struct {
 
 func (o DestinationAdder) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	psDestination, ok := fixtures[o.Destination].(kiprotect.Destination)
+	psDestination, ok := fixtures[o.Destination].(kodex.Destination)
 
 	if !ok {
 		return nil, fmt.Errorf("destination not found")
 	}
 
-	psConfig, ok := fixtures[o.Config].(kiprotect.Config)
+	psConfig, ok := fixtures[o.Config].(kodex.Config)
 
 	if !ok {
 		return nil, fmt.Errorf("config not found")
 	}
 
-	return nil, psConfig.AddDestination(psDestination, o.Name, kiprotect.DestinationStatus(o.Status))
+	return nil, psConfig.AddDestination(psDestination, o.Name, kodex.DestinationStatus(o.Status))
 
 }
 
@@ -249,19 +223,19 @@ type SourceAdder struct {
 
 func (i SourceAdder) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	psSource, ok := fixtures[i.Source].(kiprotect.Source)
+	psSource, ok := fixtures[i.Source].(kodex.Source)
 
 	if !ok {
 		return nil, fmt.Errorf("source not found")
 	}
 
-	psStream, ok := fixtures[i.Stream].(kiprotect.Stream)
+	psStream, ok := fixtures[i.Stream].(kodex.Stream)
 
 	if !ok {
 		return nil, fmt.Errorf("stream not found")
 	}
 
-	return nil, psStream.AddSource(psSource, kiprotect.SourceStatus(i.Status))
+	return nil, psStream.AddSource(psSource, kodex.SourceStatus(i.Status))
 
 }
 
@@ -277,13 +251,13 @@ type ActionMap struct {
 
 func (a ActionMap) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	config, ok := fixtures[a.Config].(kiprotect.Config)
+	config, ok := fixtures[a.Config].(kodex.Config)
 
 	if !ok {
 		return nil, fmt.Errorf("action map config missing")
 	}
 
-	actionConfig, ok := fixtures[a.Action].(kiprotect.ActionConfig)
+	actionConfig, ok := fixtures[a.Action].(kodex.ActionConfig)
 
 	if !ok {
 		return nil, fmt.Errorf("action config missing")
@@ -309,7 +283,7 @@ type ActionConfig struct {
 
 func (a ActionConfig) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	project, ok := fixtures[a.Project].(kiprotect.Project)
+	project, ok := fixtures[a.Project].(kodex.Project)
 
 	if !ok {
 		return nil, fmt.Errorf("project missing")
@@ -334,7 +308,7 @@ func (a ActionConfig) Teardown(fixture interface{}) error {
 	return nil
 }
 
-func GetController(fixtures map[string]interface{}) (kiprotect.Controller, error) {
+func GetController(fixtures map[string]interface{}) (kodex.Controller, error) {
 
 	controllerObj := fixtures["controller"]
 
@@ -342,7 +316,7 @@ func GetController(fixtures map[string]interface{}) (kiprotect.Controller, error
 		return nil, fmt.Errorf("A controller is required")
 	}
 
-	controller, ok := controllerObj.(kiprotect.Controller)
+	controller, ok := controllerObj.(kodex.Controller)
 
 	if !ok {
 		return nil, fmt.Errorf("Controller should be an controller")

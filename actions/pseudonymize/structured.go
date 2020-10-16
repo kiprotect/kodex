@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/go-helpers/maps"
-	"github.com/kiprotect/kiprotect"
-	"github.com/kiprotect/kiprotect/actions/pseudonymize/structured"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/actions/pseudonymize/structured"
 )
 
 type StructuredPseudonymizer struct {
@@ -200,7 +200,14 @@ func (p *StructuredPseudonymizer) SetParams(params interface{}) error {
 }
 
 func (p *StructuredPseudonymizer) GenerateParams(key, salt []byte) error {
-	p.key = kiprotect.DeriveKey(key, salt, 64)
+	if key == nil {
+		randomBytes, err := kodex.RandomBytes(64)
+		if err != nil {
+			return err
+		}
+		key = randomBytes
+	}
+	p.key = kodex.DeriveKey(key, salt, 64)
 	return nil
 }
 

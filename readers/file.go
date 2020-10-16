@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -21,7 +21,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"io"
 	"os"
 )
@@ -38,7 +38,7 @@ type FileReader struct {
 }
 
 type FilePayload struct {
-	items       []*kiprotect.Item
+	items       []*kodex.Item
 	endOfStream bool
 	headers     map[string]interface{}
 }
@@ -47,7 +47,7 @@ func (f *FilePayload) EndOfStream() bool {
 	return f.endOfStream
 }
 
-func (f *FilePayload) Items() []*kiprotect.Item {
+func (f *FilePayload) Items() []*kodex.Item {
 	return f.items
 }
 
@@ -63,7 +63,7 @@ func (f *FileReader) Purge() error {
 	return nil
 }
 
-func (s *FileReader) Setup(stream kiprotect.Stream) error {
+func (s *FileReader) Setup(stream kodex.Stream) error {
 	if s.File != nil {
 		return nil
 	}
@@ -112,7 +112,7 @@ func (s *FileReader) Teardown() error {
 func (s *FileReader) MakeFilePayload() (*FilePayload, error) {
 
 	payload := FilePayload{
-		items:   make([]*kiprotect.Item, 0),
+		items:   make([]*kodex.Item, 0),
 		headers: s.Headers,
 	}
 	return &payload, nil
@@ -122,7 +122,7 @@ func (f *FilePayload) Headers() map[string]interface{} {
 	return f.headers
 }
 
-func (s *FileReader) Read() (kiprotect.Payload, error) {
+func (s *FileReader) Read() (kodex.Payload, error) {
 
 	payload, err := s.MakeFilePayload()
 
@@ -130,7 +130,7 @@ func (s *FileReader) Read() (kiprotect.Payload, error) {
 		return nil, err
 	}
 
-	items := make([]*kiprotect.Item, 0)
+	items := make([]*kodex.Item, 0)
 
 	endOfFile := false
 
@@ -154,7 +154,7 @@ func (s *FileReader) Read() (kiprotect.Payload, error) {
 			if err != nil {
 				return nil, err
 			}
-			item := kiprotect.MakeItem(item)
+			item := kodex.MakeItem(item)
 			items = append(items, item)
 		}
 	}
@@ -170,7 +170,7 @@ func (s *FileReader) Read() (kiprotect.Payload, error) {
 
 }
 
-func MakeFileReader(config map[string]interface{}) (kiprotect.Reader, error) {
+func MakeFileReader(config map[string]interface{}) (kodex.Reader, error) {
 	if params, err := FileReaderForm.Validate(config); err != nil {
 		return nil, err
 	} else {

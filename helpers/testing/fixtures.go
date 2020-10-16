@@ -1,23 +1,23 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 package testing
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 type Fixture interface {
@@ -34,7 +34,7 @@ func TeardownFixtures(fixtureConfigs []FC, fixtures map[string]interface{}) erro
 	var teardownErr error
 	for _, fixtureConfig := range fixtureConfigs {
 		if err := fixtureConfig.F.Teardown(fixtures[fixtureConfig.Name]); err != nil {
-			kiprotect.Log.Errorf("error tearing down fixture %s", fixtureConfig.Name)
+			kodex.Log.Errorf("error tearing down fixture %s", fixtureConfig.Name)
 			teardownErr = err
 		}
 	}
@@ -49,7 +49,7 @@ func SetupFixtures(fixtureConfigs []FC) (map[string]interface{}, error) {
 		var result interface{}
 		var err error
 		if result, err = fixtureConfig.F.Setup(fixtures); err != nil {
-			kiprotect.Log.Errorf("error creating fixture %s", fixtureConfig.Name)
+			kodex.Log.Errorf("error creating fixture %s", fixtureConfig.Name)
 			return nil, err
 		}
 		if fixtureConfig.Name == "" {

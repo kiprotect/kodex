@@ -1,23 +1,23 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 package readers
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"time"
 )
 
@@ -29,11 +29,11 @@ type GenerateReader struct {
 }
 
 type GeneratePayload struct {
-	items   []*kiprotect.Item
+	items   []*kodex.Item
 	headers map[string]interface{}
 }
 
-func (f *GeneratePayload) Items() []*kiprotect.Item {
+func (f *GeneratePayload) Items() []*kodex.Item {
 	return f.items
 }
 
@@ -55,7 +55,7 @@ func (f *GeneratePayload) Headers() map[string]interface{} {
 
 func MakeGeneratePayload() *BytesPayload {
 	payload := BytesPayload{
-		items:   make([]*kiprotect.Item, 0),
+		items:   make([]*kodex.Item, 0),
 		headers: map[string]interface{}{},
 	}
 	return &payload
@@ -102,7 +102,7 @@ var generators = map[string]GeneratorMaker{
 	"literal":   Literal,
 }
 
-func MakeGenerateReader(config map[string]interface{}) (kiprotect.Reader, error) {
+func MakeGenerateReader(config map[string]interface{}) (kodex.Reader, error) {
 	params, err := GenerateForm.Validate(config)
 	if err != nil {
 		return nil, err
@@ -125,15 +125,15 @@ func (f *GenerateReader) Purge() error {
 	return nil
 }
 
-func (g *GenerateReader) generateItem() *kiprotect.Item {
+func (g *GenerateReader) generateItem() *kodex.Item {
 	d := make(map[string]interface{})
 	for key, generator := range g.generators {
 		d[key] = generator()
 	}
-	return kiprotect.MakeItem(d)
+	return kodex.MakeItem(d)
 }
 
-func (g *GenerateReader) Read() (kiprotect.Payload, error) {
+func (g *GenerateReader) Read() (kodex.Payload, error) {
 	et := time.Since(g.t)
 	nf := g.frequency*float64(et)/1e9 + g.residue
 	n := int64(nf)
@@ -151,7 +151,7 @@ func (g *GenerateReader) Read() (kiprotect.Payload, error) {
 	return payload, nil
 }
 
-func (g *GenerateReader) Setup(stream kiprotect.Stream) error {
+func (g *GenerateReader) Setup(stream kodex.Stream) error {
 	return nil
 }
 

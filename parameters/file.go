@@ -1,20 +1,20 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package stores
+package parameters
 
 import (
 	"bytes"
@@ -23,7 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"io"
 	"os"
 	"os/user"
@@ -34,7 +34,7 @@ import (
 )
 
 const BUFFER_SIZE = 63
-const CHUNK_ID_LENGTH = kiprotect.RANDOM_ID_LENGTH
+const CHUNK_ID_LENGTH = kodex.RANDOM_ID_LENGTH
 const CHUNK_HEADER_SIZE = 8 + CHUNK_ID_LENGTH
 const CHUNK_VERSION = 1
 const ENTRY_VERSION = 1
@@ -254,7 +254,7 @@ func (e *DataEntry) Split() ([]*DataChunk, error) {
 		return nil, fmt.Errorf("data is too large")
 	}
 	dataChunks := make([]*DataChunk, chunks)
-	id := kiprotect.RandomID()
+	id := kodex.RandomID()
 	for i := 0; i < chunks; i++ {
 		end := (i + 1) * effectiveBufferSize
 		if end > len(bytes) {
@@ -264,7 +264,7 @@ func (e *DataEntry) Split() ([]*DataChunk, error) {
 			id, uint16(chunks), uint16(i), bytes[i*effectiveBufferSize:end],
 		)
 	}
-	kiprotect.Log.Debugf("Split into %d entries", len(dataChunks))
+	kodex.Log.Debugf("Split into %d entries", len(dataChunks))
 	return dataChunks, nil
 }
 
@@ -349,7 +349,7 @@ func reassemble(chunks []*DataChunk) ([]*DataEntry, []*DataChunk, error) {
 		Positions: entryPositions,
 	}
 	sort.Sort(sortedByPosition)
-	kiprotect.Log.Debugf("Found %d entries, %d remaining chunks", len(dataEntries), len(remainingChunks))
+	kodex.Log.Debugf("Found %d entries, %d remaining chunks", len(dataEntries), len(remainingChunks))
 	return sortedByPosition.Entries, remainingChunks, nil
 }
 
@@ -417,8 +417,8 @@ func (f *FileDataStore) readChunks() ([]*DataChunk, error) {
 		}
 		if err := chunk.Read(f.rfile); err != nil {
 			if _, seekErr := f.rfile.Seek(position, 0); seekErr != nil {
-				kiprotect.Log.Errorf("Warning, two errors occured.")
-				kiprotect.Log.Error(seekErr)
+				kodex.Log.Errorf("Warning, two errors occured.")
+				kodex.Log.Error(seekErr)
 			}
 			return nil, err
 		}
@@ -510,7 +510,7 @@ var FileParameterStoreForm = forms.Form{
 	},
 }
 
-func MakeFileParameterStore(config map[string]interface{}, definitions kiprotect.Definitions) (kiprotect.ParameterStore, error) {
+func MakeFileParameterStore(config map[string]interface{}, definitions *kodex.Definitions) (kodex.ParameterStore, error) {
 	params, err := FileParameterStoreForm.Validate(config)
 	if err != nil {
 		return nil, err
@@ -542,7 +542,7 @@ func (p *FileParameterStore) update() error {
 		for _, entry := range entries {
 			var data map[string]interface{}
 			if err := json.Unmarshal(entry.Data, &data); err != nil {
-				kiprotect.Log.Errorf("Error when unmarshalling entry '%s', skipping", hex.EncodeToString(entry.ID))
+				kodex.Log.Errorf("Error when unmarshalling entry '%s', skipping", hex.EncodeToString(entry.ID))
 				continue
 			}
 			switch entry.Type {
@@ -550,6 +550,14 @@ func (p *FileParameterStore) update() error {
 				if parameters, err := p.inMemoryStore.RestoreParameters(data); err != nil {
 					return err
 				} else {
+					// we check if there already is a parameter set for this action and parameter
+					// group. If yes, we do not overwrite it.
+					if existingParameters, err := p.inMemoryStore.Parameters(parameters.Action(), parameters.ParameterGroup()); err != nil {
+						return err
+					} else if existingParameters != nil {
+						kodex.Log.Debug("Skipping parameters")
+						continue
+					}
 					if err := parameters.Save(); err != nil {
 						return err
 					}
@@ -559,6 +567,14 @@ func (p *FileParameterStore) update() error {
 				if parameterSet, err := p.inMemoryStore.RestoreParameterSet(data); err != nil {
 					return err
 				} else {
+					// as above we check if there already is a parameter set defined, if yes we
+					// do not overwrite it.
+					if existingParameterSet, err := p.inMemoryStore.ParameterSet(parameterSet.Hash()); err != nil {
+						return err
+					} else if existingParameterSet != nil {
+						kodex.Log.Debug("Skipping parameter set")
+						continue
+					}
 					if err := parameterSet.Save(); err != nil {
 						return err
 					}
@@ -572,34 +588,52 @@ func (p *FileParameterStore) update() error {
 	return nil
 }
 
-func (p *FileParameterStore) writeParameters(parameters *kiprotect.Parameters) error {
+func (p *FileParameterStore) writeParameters(parameters *kodex.Parameters) error {
 	bytes, err := json.Marshal(parameters)
 	if err != nil {
 		return err
 	}
-	return p.dataStore.Write(&DataEntry{
+	// we first write the entry to the data store
+	if err := p.dataStore.Write(&DataEntry{
 		Type: ParametersType,
 		ID:   parameters.ID(),
 		Data: bytes,
-	})
+	}); err != nil {
+		return err
+	}
+	// we make sure the parameters actually exist in the storer now
+	if _, err := p.parametersById(parameters.ID()); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (p *FileParameterStore) writeParameterSet(parameterSet *kiprotect.ParameterSet) error {
+func (p *FileParameterStore) writeParameterSet(parameterSet *kodex.ParameterSet) error {
 	bytes, err := json.Marshal(parameterSet)
 	if err != nil {
 		return err
 	}
-	return p.dataStore.Write(&DataEntry{
+	if err := p.dataStore.Write(&DataEntry{
 		Type: ParameterSetType,
 		ID:   parameterSet.Hash(),
 		Data: bytes,
-	})
+	}); err != nil {
+		return err
+	}
+	// we make sure the parameters actually exist in the storer now
+	if _, err := p.parameterSet(parameterSet.Hash()); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (p *FileParameterStore) ParametersById(id []byte) (*kiprotect.Parameters, error) {
-
+func (p *FileParameterStore) ParametersById(id []byte) (*kodex.Parameters, error) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
+	return p.parametersById(id)
+}
+
+func (p *FileParameterStore) parametersById(id []byte) (*kodex.Parameters, error) {
 
 	if parameters, err := p.inMemoryStore.ParametersById(id); err != nil {
 		return nil, err
@@ -623,7 +657,7 @@ func (p *FileParameterStore) ParametersById(id []byte) (*kiprotect.Parameters, e
 	}
 }
 
-func (p *FileParameterStore) Parameters(action kiprotect.Action, parameterGroup *kiprotect.ParameterGroup) (*kiprotect.Parameters, error) {
+func (p *FileParameterStore) Parameters(action kodex.Action, parameterGroup *kodex.ParameterGroup) (*kodex.Parameters, error) {
 
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
@@ -649,11 +683,13 @@ func (p *FileParameterStore) Parameters(action kiprotect.Action, parameterGroup 
 		}
 	}
 }
-
-func (p *FileParameterStore) ParameterSet(hash []byte) (*kiprotect.ParameterSet, error) {
-
+func (p *FileParameterStore) ParameterSet(hash []byte) (*kodex.ParameterSet, error) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
+	return p.parameterSet(hash)
+}
+
+func (p *FileParameterStore) parameterSet(hash []byte) (*kodex.ParameterSet, error) {
 
 	// we first try to retrieve the parameter set from the in-memory store
 	if parameterSet, err := p.inMemoryStore.ParameterSet(hash); err != nil {
@@ -680,45 +716,64 @@ func (p *FileParameterStore) ParameterSet(hash []byte) (*kiprotect.ParameterSet,
 	}
 }
 
-func (p *FileParameterStore) SaveParameters(parameters *kiprotect.Parameters) (bool, error) {
-
+func (p *FileParameterStore) AllParameters() ([]*kodex.Parameters, error) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	written, err := p.inMemoryStore.SaveParameters(parameters)
-	if err != nil {
-		return false, err
+	if err := p.update(); err != nil {
+		return nil, err
 	}
-	if !written {
-		return false, nil
-	}
-	if err := p.writeParameters(parameters); err != nil {
-		if p.inMemoryStore.DeleteParameters(parameters); err != nil {
-			return false, err
-		}
-		return false, err
-	}
-	return written, nil
+	return p.inMemoryStore.AllParameters()
 }
 
-func (p *FileParameterStore) SaveParameterSet(parameterSet *kiprotect.ParameterSet) (bool, error) {
+func (p *FileParameterStore) AllParameterSets() ([]*kodex.ParameterSet, error) {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	if err := p.update(); err != nil {
+		return nil, err
+	}
+	return p.inMemoryStore.AllParameterSets()
+}
+
+func (p *FileParameterStore) SaveParameters(parameters *kodex.Parameters) (bool, error) {
 
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	written, err := p.inMemoryStore.SaveParameterSet(parameterSet)
-
-	if err != nil {
+	if err := p.update(); err != nil {
 		return false, err
 	}
-	if !written {
+
+	// we check if the parameters already exist in the in-memory store
+	// (in that case they already have been written to disk)
+	if parameters, err := p.inMemoryStore.ParametersById(parameters.ID()); err != nil {
+		return false, err
+	} else if parameters != nil {
 		return false, nil
 	}
-	if err := p.writeParameterSet(parameterSet); err != nil {
-		if p.inMemoryStore.DeleteParameterSet(parameterSet); err != nil {
-			return false, err
-		}
+
+	// if not we write them to disk
+	return true, p.writeParameters(parameters)
+}
+
+func (p *FileParameterStore) SaveParameterSet(parameterSet *kodex.ParameterSet) (bool, error) {
+
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	if err := p.update(); err != nil {
 		return false, err
 	}
-	return written, nil
+
+	// we check if the parameter set already exists in the in-memory store
+	// (in that case it already has been written to disk)
+	if parameters, err := p.inMemoryStore.ParameterSet(parameterSet.Hash()); err != nil {
+		return false, err
+	} else if parameters != nil {
+		return false, nil
+	}
+
+	// if not we write it to disk
+	return true, p.writeParameterSet(parameterSet)
 }

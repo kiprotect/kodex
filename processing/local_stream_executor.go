@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -18,7 +18,7 @@ package processing
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"sync"
 	"time"
 )
@@ -27,16 +27,16 @@ type LocalStreamExecutor struct {
 	maxStreamWorkers int
 	workers          []*LocalStreamWorker
 	id               []byte
-	pool             chan chan kiprotect.Payload
-	stream           kiprotect.Stream
-	channel          *kiprotect.InternalChannel
+	pool             chan chan kodex.Payload
+	stream           kodex.Stream
+	channel          *kodex.InternalChannel
 	contexts         []*ConfigContext
 	stopChannel      chan bool
 	mutex            sync.Mutex
 	supervisor       StreamSupervisor
 	stopped          bool
 	stopping         bool
-	payloadChannel   chan kiprotect.Payload
+	payloadChannel   chan kodex.Payload
 }
 
 func MakeLocalStreamExecutor(maxStreamWorkers int,
@@ -45,7 +45,7 @@ func MakeLocalStreamExecutor(maxStreamWorkers int,
 		stopChannel:      make(chan bool),
 		stopped:          true,
 		id:               id,
-		payloadChannel:   make(chan kiprotect.Payload, maxStreamWorkers*8),
+		payloadChannel:   make(chan kodex.Payload, maxStreamWorkers*8),
 		maxStreamWorkers: maxStreamWorkers,
 	}
 }
@@ -54,9 +54,9 @@ func (d *LocalStreamExecutor) ID() []byte {
 	return d.id
 }
 
-func (d *LocalStreamExecutor) Start(supervisor StreamSupervisor, stream kiprotect.Stream) error {
+func (d *LocalStreamExecutor) Start(supervisor StreamSupervisor, stream kodex.Stream) error {
 
-	kiprotect.Log.Debugf("Executing stream %s", string(stream.ID()))
+	kodex.Log.Debugf("Executing stream %s", string(stream.ID()))
 
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
@@ -67,7 +67,7 @@ func (d *LocalStreamExecutor) Start(supervisor StreamSupervisor, stream kiprotec
 
 	d.stream = stream
 	d.supervisor = supervisor
-	d.channel = kiprotect.MakeInternalChannel()
+	d.channel = kodex.MakeInternalChannel()
 
 	if err := d.channel.Setup(stream.Project().Controller(), stream); err != nil {
 		return err
@@ -95,15 +95,15 @@ func (d *LocalStreamExecutor) run() error {
 		return err
 	}
 
-	activeConfigs := make([]kiprotect.Config, 0)
+	activeConfigs := make([]kodex.Config, 0)
 
 	for _, config := range configs {
-		if config.Status() == kiprotect.ActiveConfig {
+		if config.Status() == kodex.ActiveConfig {
 			activeConfigs = append(activeConfigs, config)
 		}
 	}
 
-	d.pool = make(chan chan kiprotect.Payload, d.maxStreamWorkers)
+	d.pool = make(chan chan kodex.Payload, d.maxStreamWorkers)
 
 	d.contexts, err = makeContexts(activeConfigs)
 
@@ -133,16 +133,16 @@ func (d *LocalStreamExecutor) Stopped() bool {
 	return d.stopped
 }
 
-func (d *LocalStreamExecutor) Stream() kiprotect.Stream {
+func (d *LocalStreamExecutor) Stream() kodex.Stream {
 	return d.stream
 }
 
-func makeContexts(configs []kiprotect.Config) ([]*ConfigContext, error) {
+func makeContexts(configs []kodex.Config) ([]*ConfigContext, error) {
 	contexts := make([]*ConfigContext, 0)
 
 	for _, config := range configs {
-		var processor *kiprotect.Processor
-		var destinations map[string][]kiprotect.DestinationMap
+		var processor *kodex.Processor
+		var destinations map[string][]kodex.DestinationMap
 		var err error
 		if processor, err = config.Processor(); err != nil {
 			return nil, err
@@ -203,25 +203,25 @@ func (d *LocalStreamExecutor) stop(graceful bool) error {
 
 	// then we tear down the stream channel
 	if err := d.channel.Teardown(); err != nil {
-		kiprotect.Log.Error(err)
+		kodex.Log.Error(err)
 	}
 
 	// we tear down all processors and writers...
 	for _, context := range d.contexts {
 
 		if err := context.Processor.Teardown(); err != nil {
-			kiprotect.Log.Error(err)
+			kodex.Log.Error(err)
 		}
 
 		for _, destinationMaps := range context.Destinations {
 			for _, destinationMap := range destinationMaps {
 				writer, err := destinationMap.InternalWriter()
 				if err != nil {
-					kiprotect.Log.Error(err)
+					kodex.Log.Error(err)
 					continue
 				}
 				if err := writer.Teardown(); err != nil {
-					kiprotect.Log.Error(err)
+					kodex.Log.Error(err)
 				}
 			}
 		}
@@ -234,7 +234,7 @@ func (d *LocalStreamExecutor) stop(graceful bool) error {
 func (d *LocalStreamExecutor) read() {
 	var stopping bool
 	for {
-		var payload kiprotect.Payload
+		var payload kodex.Payload
 		var err error
 
 		select {

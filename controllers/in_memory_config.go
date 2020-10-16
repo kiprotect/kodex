@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -19,23 +19,23 @@ package controllers
 import (
 	"bytes"
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"time"
 )
 
 type ActionConfigMap struct {
-	ActionConfig kiprotect.ActionConfig
+	ActionConfig kodex.ActionConfig
 }
 
 type InMemoryConfig struct {
-	kiprotect.BaseConfig
+	kodex.BaseConfig
 	id            []byte
-	status        kiprotect.ConfigStatus
+	status        kodex.ConfigStatus
 	name          string
 	description   string
 	version       string
 	source        string
-	destinations  map[string][]kiprotect.DestinationMap
+	destinations  map[string][]kodex.DestinationMap
 	config        map[string]interface{}
 	data          interface{}
 	actionConfigs []*ActionConfigMap
@@ -44,10 +44,10 @@ type InMemoryConfig struct {
 func MakeInMemoryConfig(stream *InMemoryStream, id []byte, config map[string]interface{}) (*InMemoryConfig, error) {
 	inMemoryConfig := &InMemoryConfig{
 		id: id,
-		BaseConfig: kiprotect.BaseConfig{
+		BaseConfig: kodex.BaseConfig{
 			Stream_: stream,
 		},
-		destinations:  make(map[string][]kiprotect.DestinationMap),
+		destinations:  make(map[string][]kodex.DestinationMap),
 		actionConfigs: make([]*ActionConfigMap, 0, 10),
 		config:        config,
 	}
@@ -68,7 +68,7 @@ func (c *InMemoryConfig) ID() []byte {
 	return c.id
 }
 
-func (c *InMemoryConfig) Destinations() (map[string][]kiprotect.DestinationMap, error) {
+func (c *InMemoryConfig) Destinations() (map[string][]kodex.DestinationMap, error) {
 	return c.destinations, nil
 }
 
@@ -104,15 +104,15 @@ func (c *InMemoryConfig) Delete() error {
 	return stream.DeleteConfig(c)
 }
 
-func (c *InMemoryConfig) ActionConfigs() ([]kiprotect.ActionConfig, error) {
-	actionConfigs := make([]kiprotect.ActionConfig, len(c.actionConfigs))
+func (c *InMemoryConfig) ActionConfigs() ([]kodex.ActionConfig, error) {
+	actionConfigs := make([]kodex.ActionConfig, len(c.actionConfigs))
 	for i, actionConfig := range c.actionConfigs {
 		actionConfigs[i] = actionConfig.ActionConfig
 	}
 	return actionConfigs, nil
 }
 
-func (c *InMemoryConfig) AddActionConfig(actionConfig kiprotect.ActionConfig, index int) error {
+func (c *InMemoryConfig) AddActionConfig(actionConfig kodex.ActionConfig, index int) error {
 	if index > len(c.actionConfigs) || index < 0 {
 		return fmt.Errorf("invalid index: out of bounds")
 	}
@@ -133,7 +133,7 @@ func (c *InMemoryConfig) AddActionConfig(actionConfig kiprotect.ActionConfig, in
 	return nil
 }
 
-func (c *InMemoryConfig) RemoveActionConfig(actionConfig kiprotect.ActionConfig) error {
+func (c *InMemoryConfig) RemoveActionConfig(actionConfig kodex.ActionConfig) error {
 	newActionConfigs := make([]*ActionConfigMap, 0, len(c.actionConfigs)-1)
 	for _, actionConfigMap := range c.actionConfigs {
 		if bytes.Equal(actionConfigMap.ActionConfig.ID(), actionConfig.ID()) {
@@ -145,11 +145,11 @@ func (c *InMemoryConfig) RemoveActionConfig(actionConfig kiprotect.ActionConfig)
 	return nil
 }
 
-func (c *InMemoryConfig) Status() kiprotect.ConfigStatus {
+func (c *InMemoryConfig) Status() kodex.ConfigStatus {
 	return c.status
 }
 
-func (c *InMemoryConfig) SetStatus(status kiprotect.ConfigStatus) error {
+func (c *InMemoryConfig) SetStatus(status kodex.ConfigStatus) error {
 	c.status = status
 	return nil
 }
@@ -190,21 +190,21 @@ func (c *InMemoryConfig) SetSource(source string) error {
 	return nil
 }
 
-func (c *InMemoryConfig) AddDestination(destination kiprotect.Destination, name string, status kiprotect.DestinationStatus) error {
+func (c *InMemoryConfig) AddDestination(destination kodex.Destination, name string, status kodex.DestinationStatus) error {
 	inMemoryDestination, ok := destination.(*InMemoryDestination)
 	if !ok {
 		return fmt.Errorf("not an in-memory source")
 	}
 	if _, ok := c.destinations[name]; !ok {
-		c.destinations[name] = make([]kiprotect.DestinationMap, 0, 1)
+		c.destinations[name] = make([]kodex.DestinationMap, 0, 1)
 	}
-	c.destinations[name] = append(c.destinations[name], MakeInMemoryDestinationMap(kiprotect.RandomID(), name, c, inMemoryDestination, status))
+	c.destinations[name] = append(c.destinations[name], MakeInMemoryDestinationMap(kodex.RandomID(), name, c, inMemoryDestination, status))
 	return nil
 }
 
-func (c *InMemoryConfig) RemoveDestination(destination kiprotect.Destination) error {
+func (c *InMemoryConfig) RemoveDestination(destination kodex.Destination) error {
 	for key, destinations := range c.destinations {
-		newDestinations := make([]kiprotect.DestinationMap, 0, len(destinations))
+		newDestinations := make([]kodex.DestinationMap, 0, len(destinations))
 		found := false
 		for _, existingDestination := range destinations {
 			if string(existingDestination.ID()) == string(destination.ID()) {

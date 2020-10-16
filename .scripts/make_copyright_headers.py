@@ -12,7 +12,7 @@ def read_copyright():
 def format_copyright(text):
     c = context.copy()
     c['year'] = datetime.datetime.now().year
-    return "\n".join(["// "+ t for t in text.format(**c).split("\n")])
+    return "\n".join([("// "+ t).strip() for t in text.format(**c).split("\n")])
 
 def process_file(path, copyright_notice):
     with open(path) as input:

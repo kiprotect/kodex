@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -23,8 +23,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/kiprotect/kiprotect"
-	"github.com/kiprotect/kiprotect/writers"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/writers"
 	"github.com/streadway/amqp"
 	"io"
 	"time"
@@ -36,7 +36,7 @@ type AMQPReader struct {
 	ConsumerName string
 }
 
-func MakeAMQPReader(config map[string]interface{}) (kiprotect.Reader, error) {
+func MakeAMQPReader(config map[string]interface{}) (kodex.Reader, error) {
 	if params, err := AMQPReaderForm.Validate(config); err != nil {
 		return nil, err
 	} else {
@@ -58,7 +58,7 @@ type AMQPPayload struct {
 	acknowledged bool
 	endOfStream  bool
 	format       string
-	items        []*kiprotect.Item
+	items        []*kodex.Item
 	headers      map[string]interface{}
 }
 
@@ -66,7 +66,7 @@ func (f *AMQPPayload) EndOfStream() bool {
 	return f.endOfStream
 }
 
-func (f *AMQPPayload) Items() []*kiprotect.Item {
+func (f *AMQPPayload) Items() []*kodex.Item {
 	return f.items
 }
 
@@ -127,7 +127,7 @@ func (a *AMQPReader) MakeAMQPPayload(delivery amqp.Delivery) (*AMQPPayload, erro
 		delivery:   delivery,
 		compressed: a.Compress,
 		format:     a.Format,
-		items:      make([]*kiprotect.Item, 0),
+		items:      make([]*kodex.Item, 0),
 		headers:    delivery.Headers,
 	}
 	if err := payload.readItems(); err != nil {
@@ -154,7 +154,7 @@ func (a *AMQPPayload) getReader() (*bufio.Reader, error) {
 
 }
 
-func (a *AMQPReader) Peek() (kiprotect.Payload, error) {
+func (a *AMQPReader) Peek() (kodex.Payload, error) {
 	payload, err := a.Read()
 	if err != nil {
 		return payload, err
@@ -166,7 +166,7 @@ func (a *AMQPReader) Peek() (kiprotect.Payload, error) {
 	return payload, err
 }
 
-func (a *AMQPReader) Setup(stream kiprotect.Stream) error {
+func (a *AMQPReader) Setup(stream kodex.Stream) error {
 	return a.AMQPBase.SetupWithModel(nil)
 }
 
@@ -178,7 +178,7 @@ func (a *AMQPPayload) readItems() error {
 		return err
 	}
 
-	items := make([]*kiprotect.Item, 0)
+	items := make([]*kodex.Item, 0)
 
 	var lastErr error
 
@@ -192,12 +192,12 @@ func (a *AMQPPayload) readItems() error {
 		case "json":
 			err := json.Unmarshal(line, &item)
 			if err != nil {
-				kiprotect.Log.Errorf("Error unmarshaling item with format JSON.")
-				kiprotect.Log.Error(err)
+				kodex.Log.Errorf("Error unmarshaling item with format JSON.")
+				kodex.Log.Error(err)
 				lastErr = err
 				continue
 			}
-			item := kiprotect.MakeItem(item)
+			item := kodex.MakeItem(item)
 			items = append(items, item)
 			break
 		}
@@ -222,7 +222,7 @@ func (a *AMQPReader) consume() error {
 	return err
 }
 
-func (a *AMQPReader) Read() (kiprotect.Payload, error) {
+func (a *AMQPReader) Read() (kodex.Payload, error) {
 
 	if a.deliveries == nil {
 		if err := a.consume(); err != nil {
@@ -236,7 +236,8 @@ func (a *AMQPReader) Read() (kiprotect.Payload, error) {
 	select {
 	case delivery = <-a.deliveries:
 		found = true
-	case <-time.After(time.Millisecond):
+	// notice: this time is really important
+	case <-time.After(time.Second*1):
 		break
 	}
 

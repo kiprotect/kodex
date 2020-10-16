@@ -1,16 +1,16 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -18,12 +18,12 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 	"time"
 )
 
 type InMemoryActionConfig struct {
-	kiprotect.BaseActionConfig
+	kodex.BaseActionConfig
 	id          []byte
 	index       int
 	actionType  string
@@ -33,10 +33,10 @@ type InMemoryActionConfig struct {
 	configData  map[string]interface{}
 }
 
-func MakeInMemoryActionConfig(id []byte, project kiprotect.Project) *InMemoryActionConfig {
+func MakeInMemoryActionConfig(id []byte, project kodex.Project) *InMemoryActionConfig {
 	inMemoryActionConfig := &InMemoryActionConfig{
 		id: id,
-		BaseActionConfig: kiprotect.BaseActionConfig{
+		BaseActionConfig: kodex.BaseActionConfig{
 			Project_: project,
 		},
 	}
