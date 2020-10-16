@@ -22,5 +22,5 @@ import (
 )
 
 func main() {
-	cmdHelpers.Kodex(definitions.DefaultDefinitions)
+	cmdHelpers.Kodex(&definitions.DefaultDefinitions)
 }
