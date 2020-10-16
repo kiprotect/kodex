@@ -17,11 +17,11 @@
 package anonymize
 
 import (
-	"github.com/kiprotect/kiprotect"
+	"github.com/kiprotect/kodex"
 )
 
 type Anonymizer interface {
 	Setup() error
 	Teardown() error
-	Anonymize(*kiprotect.Item, kiprotect.ChannelWriter) (*kiprotect.Item, error)
+	Anonymize(*kodex.Item, kodex.ChannelWriter) (*kodex.Item, error)
 }

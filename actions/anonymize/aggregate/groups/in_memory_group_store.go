@@ -19,7 +19,7 @@ package groups
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/kiprotect/kiprotect/actions/anonymize/aggregate"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
 	"sync"
 )
 

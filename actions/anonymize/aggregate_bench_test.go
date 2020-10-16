@@ -17,9 +17,9 @@
 package anonymize_test
 
 import (
-	"github.com/kiprotect/kiprotect"
-	pt "github.com/kiprotect/kiprotect/helpers/testing"
-	pf "github.com/kiprotect/kiprotect/helpers/testing/fixtures"
+	"github.com/kiprotect/kodex"
+	pt "github.com/kiprotect/kodex/helpers/testing"
+	pf "github.com/kiprotect/kodex/helpers/testing/fixtures"
 	"testing"
 )
 
@@ -134,7 +134,7 @@ func BenchmarkAggregate(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	controller := fixtures["controller"].(kiprotect.Controller)
+	controller := fixtures["controller"].(kodex.Controller)
 	streams, err := controller.Streams(map[string]interface{}{"name": "default"})
 
 	if err != nil {
@@ -168,10 +168,10 @@ func BenchmarkAggregate(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	sourceItems := make([]*kiprotect.Item, 0)
+	sourceItems := make([]*kodex.Item, 0)
 
 	for _, item := range simpleBenchmark.Items {
-		sourceItems = append(sourceItems, kiprotect.MakeItem(item))
+		sourceItems = append(sourceItems, kodex.MakeItem(item))
 	}
 
 	b.ResetTimer()

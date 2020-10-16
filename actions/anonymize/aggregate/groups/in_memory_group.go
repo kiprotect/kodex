@@ -17,7 +17,7 @@
 package groups
 
 import (
-	"github.com/kiprotect/kiprotect/actions/anonymize/aggregate"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
 	"sync"
 )
 

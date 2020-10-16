@@ -5,6 +5,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsr
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/google/btree v1.0.0 h1:0udJVsspx3VBr5FwtLhQQtuAsVc79tTq0ocGIPAU6qo=
+github.com/google/btree v1.0.0/go.mod h1:lNA+9X1NB3Zf8V7Ke586lFgjr2dZNuvo3lPJSGZ5JPQ=
 github.com/kiprotect/go-helpers v0.0.0-20200715110110-f13689f87a05 h1:627niAv4Rwlm7rWqohy7h24YKdPdlN3S7S99StI/Wfw=
 github.com/kiprotect/go-helpers v0.0.0-20200715110110-f13689f87a05/go.mod h1:0LFiASSWLhyJjr452sbxRap2Klyv3GMDckMiESuC1ok=
 github.com/kiprotect/go-helpers v0.0.0-20200717085812-65cba18a0135 h1:V2aRBElHL7a466CSJo/gw+15vgH9T46lYsUW9rl6jEE=

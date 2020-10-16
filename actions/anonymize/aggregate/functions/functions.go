@@ -17,7 +17,7 @@
 package functions
 
 import (
-	"github.com/kiprotect/kiprotect/actions/anonymize/aggregate"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
 )
 
 type FunctionMaker func(map[string]interface{}) (aggregate.Function, error)

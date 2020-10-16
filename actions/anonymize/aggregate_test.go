@@ -18,10 +18,10 @@ package anonymize_test
 
 import (
 	"fmt"
-	"github.com/kiprotect/kiprotect"
-	pt "github.com/kiprotect/kiprotect/helpers/testing"
-	pf "github.com/kiprotect/kiprotect/helpers/testing/fixtures"
-	"github.com/kiprotect/kiprotect/writers"
+	"github.com/kiprotect/kodex"
+	pt "github.com/kiprotect/kodex/helpers/testing"
+	pf "github.com/kiprotect/kodex/helpers/testing/fixtures"
+	"github.com/kiprotect/kodex/writers"
 	"testing"
 	"time"
 )
@@ -693,7 +693,7 @@ func TestParallelAggregate(t *testing.T) {
 func testAggregate(t *testing.T, parallel bool) {
 
 	// we set the logging level to "debug"
-	kiprotect.Log.SetLevel(kiprotect.DebugLogLevel)
+	kodex.Log.SetLevel(kodex.DebugLogLevel)
 
 	for testI, test := range tests {
 
@@ -711,7 +711,7 @@ func testAggregate(t *testing.T, parallel bool) {
 			t.Fatal(err)
 		}
 
-		controller := fixtures["controller"].(kiprotect.Controller)
+		controller := fixtures["controller"].(kodex.Controller)
 		streams, err := controller.Streams(map[string]interface{}{"name": "default"})
 
 		if err != nil {
@@ -736,20 +736,20 @@ func testAggregate(t *testing.T, parallel bool) {
 
 		config := configs[0]
 
-		sourceItems := make([]*kiprotect.Item, 1)
+		sourceItems := make([]*kodex.Item, 1)
 
-		sourceItems[0] = kiprotect.MakeItem(map[string]interface{}{
+		sourceItems[0] = kodex.MakeItem(map[string]interface{}{
 			"_ignore": true,
 			"_reset":  true,
 		})
 
 		for _, item := range test.Items {
-			sourceItems = append(sourceItems, kiprotect.MakeItem(item))
+			sourceItems = append(sourceItems, kodex.MakeItem(item))
 		}
 
 		c := make(chan error, len(sourceItems)-1)
 
-		process := func(items []*kiprotect.Item) error {
+		process := func(items []*kodex.Item) error {
 			processor, err := config.Processor()
 			if err != nil {
 				return err
@@ -768,13 +768,13 @@ func testAggregate(t *testing.T, parallel bool) {
 
 		if parallel {
 			// we always reset the group store state at the beginning of a test
-			process([]*kiprotect.Item{sourceItems[0]})
+			process([]*kodex.Item{sourceItems[0]})
 			for i, item := range sourceItems {
 				if i == len(sourceItems)-1 || i == 0 {
 					continue
 				} else {
-					go func(item *kiprotect.Item) {
-						c <- process([]*kiprotect.Item{item})
+					go func(item *kodex.Item) {
+						c <- process([]*kodex.Item{item})
 					}(item)
 				}
 			}
@@ -786,7 +786,7 @@ func testAggregate(t *testing.T, parallel bool) {
 			}
 			// we process the last item only after all others are
 			// finished (as this item will flush the groups)
-			process([]*kiprotect.Item{sourceItems[len(sourceItems)-1]})
+			process([]*kodex.Item{sourceItems[len(sourceItems)-1]})
 		} else {
 			if err := process(sourceItems); err != nil {
 				t.Fatal(err)
