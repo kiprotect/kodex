@@ -123,7 +123,7 @@ func (w *LocalStreamWorker) ProcessPayload(payload kodex.Payload) error {
 
 	for _, context := range w.contexts {
 
-		if newItems, err = context.Processor.Process(items, nil); err != nil {
+		if newItems, err = context.Processor.Process(items, nil, payload.EndOfStream()); err != nil {
 			kodex.Log.Error("an error occurred")
 			return handleError(err)
 		}

@@ -72,7 +72,7 @@ type ScheduledAction interface {
 
 type StatefulAction interface {
 	// Finalizes the action
-	Finalize() error
+	Finalize() ([]*Item, error)
 }
 
 type UndoableAction interface {
