@@ -14,4 +14,5 @@ type GroupByFunctionMaker func(map[string]interface{}) (GroupByFunction, error)
 
 var Functions = map[string]GroupByFunctionMaker{
 	"time-window": MakeTimeWindowFunction,
+	"value":       MakeValueFunction,
 }

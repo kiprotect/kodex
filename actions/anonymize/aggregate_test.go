@@ -181,113 +181,117 @@ var tests = []AggregateTest{
 			},
 		},
 	},
-	/*
-		AggregateTest{
-			Config: map[string]interface{}{
-				"destinations": []map[string]interface{}{
-					{
-						"name":        "counts",
-						"type":        "in-memory",
-						"description": "counts",
-						"config":      map[string]interface{}{},
-					},
+	AggregateTest{
+		Config: map[string]interface{}{
+			"destinations": []map[string]interface{}{
+				{
+					"name":        "counts",
+					"type":        "in-memory",
+					"description": "counts",
+					"config":      map[string]interface{}{},
 				},
-				"actions": []map[string]interface{}{
-					{
-						"name": "count-by-minute",
-						"type": "anonymize",
+			},
+			"actions": []map[string]interface{}{
+				{
+					"name": "count-by-minute",
+					"type": "anonymize",
+					"config": map[string]interface{}{
+						"method":   "aggregate",
+						"function": "count",
 						"config": map[string]interface{}{
-							"method":   "aggregate",
-							"function": "count",
-							"config": map[string]interface{}{
-								"epsilon": 10000,
-							},
-							"group-by": []map[string]interface{}{
-								{
-									"function": "time-window",
-									"config": map[string]interface{}{
-										"field":  "created-at",
-										"window": "minute",
-										"format": "rfc3339",
-									},
-								},
-							},
-							"channels":       []string{"counts"},
-							"finalize-after": -1,
+							"epsilon": 10000,
 						},
-					},
-				},
-				"streams": []map[string]interface{}{
-					{
-						"name": "default",
-						"configs": []map[string]interface{}{
+						"group-by": []map[string]interface{}{
 							{
-								"name":   "default",
-								"status": "active",
-								"actions": []map[string]interface{}{
-									map[string]interface{}{
-										"name": "count-by-minute",
-									},
+								"function": "time-window",
+								"config": map[string]interface{}{
+									"field":  "created-at",
+									"window": "minute",
+									"format": "rfc3339",
 								},
-								"destinations": []map[string]interface{}{
-									map[string]interface{}{
-										"status": "active",
-										"name":   "counts",
-									},
+							},
+							{
+								"function": "value",
+								"config": map[string]interface{}{
+									"field": "type",
 								},
 							},
 						},
+						"channels":       []string{"counts"},
+						"finalize-after": -1,
 					},
 				},
 			},
-			Items: []map[string]interface{}{
-				map[string]interface{}{
-					"created-at": "2009-07-01T10:31:44Z",
-					"type":       "swipe",
-				},
-				map[string]interface{}{
-					"created-at": "2009-07-01T10:33:44Z",
-					"type":       "swipe",
-				},
-				map[string]interface{}{
-					"created-at": "2009-07-01T10:33:46Z",
-					"type":       "swipe",
-				},
-				map[string]interface{}{
-					"created-at": "2009-07-01T10:34:44Z",
-					"type":       "swipe",
-				},
-			},
-			Result: map[string][]map[string]interface{}{
-				"counts": []map[string]interface{}{
-					map[string]interface{}{
-						"count-by-minute": 1,
-						"group": map[string]interface{}{
-							"type": "swipe",
-							"from": "2009-07-01T10:31:00Z",
-							"to":   "2009-07-01T10:32:00Z",
-						},
-					},
-					map[string]interface{}{
-						"count-by-minute": 2,
-						"group": map[string]interface{}{
-							"type": "swipe",
-							"from": "2009-07-01T10:33:00Z",
-							"to":   "2009-07-01T10:34:00Z",
-						},
-					},
-					map[string]interface{}{
-						"count-by-minute": 1,
-						"group": map[string]interface{}{
-							"type": "swipe",
-							"from": "2009-07-01T10:34:00Z",
-							"to":   "2009-07-01T10:35:00Z",
+			"streams": []map[string]interface{}{
+				{
+					"name": "default",
+					"configs": []map[string]interface{}{
+						{
+							"name":   "default",
+							"status": "active",
+							"actions": []map[string]interface{}{
+								map[string]interface{}{
+									"name": "count-by-minute",
+								},
+							},
+							"destinations": []map[string]interface{}{
+								map[string]interface{}{
+									"status": "active",
+									"name":   "counts",
+								},
+							},
 						},
 					},
 				},
 			},
 		},
-	*/
+		Items: []map[string]interface{}{
+			map[string]interface{}{
+				"created-at": "2009-07-01T10:31:44Z",
+				"type":       "swipe",
+			},
+			map[string]interface{}{
+				"created-at": "2009-07-01T10:33:44Z",
+				"type":       "click",
+			},
+			map[string]interface{}{
+				"created-at": "2009-07-01T10:33:46Z",
+				"type":       "click",
+			},
+			map[string]interface{}{
+				"created-at": "2009-07-01T10:34:44Z",
+				"type":       "swipe",
+			},
+		},
+		Result: map[string][]map[string]interface{}{
+			"counts": []map[string]interface{}{
+				map[string]interface{}{
+					"count-by-minute": 1,
+					"group": map[string]interface{}{
+						"type": "swipe",
+						"from": "2009-07-01T10:31:00Z",
+						"to":   "2009-07-01T10:32:00Z",
+					},
+				},
+				map[string]interface{}{
+					"count-by-minute": 2,
+					"group": map[string]interface{}{
+						"type": "click",
+						"from": "2009-07-01T10:33:00Z",
+						"to":   "2009-07-01T10:34:00Z",
+					},
+				},
+				map[string]interface{}{
+					"count-by-minute": 1,
+					"group": map[string]interface{}{
+						"type": "swipe",
+						"from": "2009-07-01T10:34:00Z",
+						"to":   "2009-07-01T10:35:00Z",
+					},
+				},
+			},
+		},
+	},
 	AggregateTest{
 		Config: map[string]interface{}{
 			"destinations": []map[string]interface{}{
