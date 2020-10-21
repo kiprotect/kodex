@@ -96,13 +96,24 @@ var TimeWindowForm = forms.Form{
 	},
 }
 
+var ValueForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "field",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+	},
+}
+
 var GroupByForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the group-by-form",
 	Fields: []forms.Field{
 		{
 			Name: "function",
 			Validators: []forms.Validator{
-				forms.IsIn{Choices: []interface{}{"time-window"}},
+				forms.IsIn{Choices: []interface{}{"time-window", "value"}},
 			},
 		},
 		{
@@ -115,6 +126,11 @@ var GroupByForm = forms.Form{
 						"time-window": {
 							forms.IsStringMap{
 								Form: &TimeWindowForm,
+							},
+						},
+						"value": {
+							forms.IsStringMap{
+								Form: &ValueForm,
 							},
 						},
 					},
