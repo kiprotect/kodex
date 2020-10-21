@@ -221,6 +221,7 @@ var tests = []AggregateTest{
 								"config": map[string]interface{}{
 									"field":  "created-at",
 									"window": "minute",
+									"format": "rfc3339",
 								},
 							},
 						},

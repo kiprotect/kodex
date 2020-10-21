@@ -63,12 +63,27 @@ func timeWindowValues() []interface{} {
 	return values
 }
 
+func timeFormatValues() []interface{} {
+	values := make([]interface{}, 0)
+	for key, _ := range groupByFunctions.TimeParsers {
+		values = append(values, key)
+	}
+	return values
+}
+
 var TimeWindowForm = forms.Form{
 	Fields: []forms.Field{
 		{
 			Name: "field",
 			Validators: []forms.Validator{
 				forms.IsString{},
+			},
+		},
+		{
+			Name: "format",
+			Validators: []forms.Validator{
+				forms.IsString{},
+				forms.IsIn{Choices: timeFormatValues()},
 			},
 		},
 		{

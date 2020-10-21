@@ -19,6 +19,7 @@ package groupByFunctions
 import (
 	"fmt"
 	"github.com/kiprotect/go-helpers/errors"
+	"github.com/kiprotect/kodex"
 	"time"
 )
 
@@ -33,8 +34,55 @@ type TimeWindow struct {
 
 type TimeWindowFunction func(int64) []*TimeWindow
 
+func getItemTime(item *kodex.Item, field string, parser TimeParser) (int64, error) {
+	value, ok := item.Get(field)
+	if !ok {
+		return 0, errors.MakeExternalError("time window value not defined",
+			"VALUE-NOT-DEFINED",
+			field,
+			nil)
+	}
+
+	t, err := parser(value)
+
+	if err != nil {
+		return 0, errors.MakeExternalError("time window invalid",
+			"TIME-WINDOW-INVALID",
+			map[string]interface{}{
+				"field": field,
+				"value": value},
+			err)
+	}
+
+	return t, nil
+}
+
 func MakeTimeWindowFunction(config map[string]interface{}) (GroupByFunction, error) {
-	return nil, nil
+
+	format := config["format"].(string)
+	field := config["field"].(string)
+	window := config["window"].(string)
+
+	timeWindowFunction := TimeWindowFunctions[window]
+	parser := TimeParsers[format]
+
+	return func(item *kodex.Item) ([]map[string]interface{}, error) {
+		if t, err := getItemTime(item, field, parser); err != nil {
+			return nil, err
+		} else {
+			timeWindows := timeWindowFunction(t)
+			groups := make([]map[string]interface{}, len(timeWindows))
+			for i, timeWindow := range timeWindows {
+				groups[i] = map[string]interface{}{
+					"field":  field,
+					"window": window,
+					"from":   timeWindow.FromTime,
+					"to":     timeWindow.ToTime,
+				}
+			}
+			return groups, nil
+		}
+	}, nil
 }
 
 func minute(value int64) []*TimeWindow {
