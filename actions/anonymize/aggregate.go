@@ -21,26 +21,20 @@ import (
 	"github.com/kiprotect/go-helpers/errors"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate/group_by_functions"
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate/groups"
 	"sync"
 )
 
-type GroupByFunction func(item *kodex.Item)
-
-type GroupBy struct {
-	Name     string
-	Function GroupByFunction
-}
-
 type AggregateAnonymizer struct {
-	channels   []string
-	resultName string
-	function   Function
-	id         []byte
-	name       string
-	groupBys   []*GroupBy
-	groupStore aggregate.GroupStore
-	mutex      sync.Mutex
+	channels         []string
+	resultName       string
+	function         Function
+	id               []byte
+	name             string
+	groupByFunctions []groupByFunctions.GroupByFunction
+	groupStore       aggregate.GroupStore
+	mutex            sync.Mutex
 }
 
 func (a *AggregateAnonymizer) Setup() error {
@@ -63,16 +57,30 @@ func MakeAggregateAnonymizer(name string, id []byte, config map[string]interface
 	if params, err := AggregateForm.Validate(config); err != nil {
 		return nil, err
 	} else {
+		gbf := make([]groupByFunctions.GroupByFunction, 0)
+		for _, groupByParams := range params["group-by"].([]interface{}) {
+			groupByParamsMap := groupByParams.(map[string]interface{})
+			functionConfig := groupByParamsMap["config"].(map[string]interface{})
+			functionName := groupByParamsMap["function"].(string)
+			if functionMaker, ok := groupByFunctions.Functions[functionName]; !ok {
+				panic("should never happen")
+			} else if groupByFunction, err := functionMaker(functionConfig); err != nil {
+				return nil, err
+			} else {
+				gbf = append(gbf, groupByFunction)
+			}
+		}
 		resultName, ok := params["result-name"].(string)
 		if !ok {
 			resultName = name
 		}
 		return &AggregateAnonymizer{
-			function:   params["function"].(Function),
-			channels:   params["channels"].([]string),
-			resultName: resultName,
-			name:       name,
-			id:         id,
+			function:         params["function"].(Function),
+			channels:         params["channels"].([]string),
+			groupByFunctions: gbf,
+			resultName:       resultName,
+			name:             name,
+			id:               id,
 		}, nil
 	}
 }
