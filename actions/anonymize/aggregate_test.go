@@ -1,16 +1,16 @@
 // KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -35,15 +35,16 @@ type AggregateTest struct {
 var tests = []AggregateTest{
 	AggregateTest{
 		Config: map[string]interface{}{
-			"destinations": map[string]interface{}{
-				"counts": map[string]interface{}{
+			"destinations": []map[string]interface{}{
+				{
+					"name":        "counts",
 					"type":        "in-memory",
 					"description": "counts",
 					"config":      map[string]interface{}{},
 				},
 			},
-			"actions": map[string]interface{}{
-				"uniques-last-24h": map[string]interface{}{
+			"actions": []map[string]interface{}{
+				{
 					"name": "uniques-last-24h",
 					"type": "anonymize",
 					"config": map[string]interface{}{
@@ -52,22 +53,28 @@ var tests = []AggregateTest{
 						"config": map[string]interface{}{
 							"epsilon": 10000,
 						},
-						"time-window": map[string]interface{}{
-							"field":  "created-at",
-							"window": "week-by-day",
-							"format": "rfc3339",
+						"group-by": []map[string]interface{}{
+							{
+								"function": "time-window",
+								"config": map[string]interface{}{
+									"field":  "created-at",
+									"window": "week-by-day",
+									"format": "rfc3339",
+								},
+							},
 						},
-						"group-by":       []string{},
 						"result-name":    "count",
 						"channels":       []string{"counts"},
 						"finalize-after": -1,
 					},
 				},
 			},
-			"streams": map[string]interface{}{
-				"default": map[string]interface{}{
-					"configs": map[string]interface{}{
-						"default": map[string]interface{}{
+			"streams": []map[string]interface{}{
+				{
+					"name": "default",
+					"configs": []map[string]interface{}{
+						{
+							"name":   "default",
 							"status": "active",
 							"actions": []map[string]interface{}{
 								map[string]interface{}{
@@ -190,15 +197,16 @@ var tests = []AggregateTest{
 	},
 	AggregateTest{
 		Config: map[string]interface{}{
-			"destinations": map[string]interface{}{
-				"counts": map[string]interface{}{
+			"destinations": []map[string]interface{}{
+				{
+					"name":        "counts",
 					"type":        "in-memory",
 					"description": "counts",
 					"config":      map[string]interface{}{},
 				},
 			},
-			"actions": map[string]interface{}{
-				"count-by-minute": map[string]interface{}{
+			"actions": []map[string]interface{}{
+				{
 					"name": "count-by-minute",
 					"type": "anonymize",
 					"config": map[string]interface{}{
@@ -207,20 +215,26 @@ var tests = []AggregateTest{
 						"config": map[string]interface{}{
 							"epsilon": 10000,
 						},
-						"time-window": map[string]interface{}{
-							"field":  "created-at",
-							"window": "minute",
+						"group-by": []map[string]interface{}{
+							{
+								"function": "time-window",
+								"config": map[string]interface{}{
+									"field":  "created-at",
+									"window": "minute",
+								},
+							},
 						},
-						"group-by":       []string{"type"},
 						"channels":       []string{"counts"},
 						"finalize-after": -1,
 					},
 				},
 			},
-			"streams": map[string]interface{}{
-				"default": map[string]interface{}{
-					"configs": map[string]interface{}{
-						"default": map[string]interface{}{
+			"streams": []map[string]interface{}{
+				{
+					"name": "default",
+					"configs": []map[string]interface{}{
+						{
+							"name":   "default",
 							"status": "active",
 							"actions": []map[string]interface{}{
 								map[string]interface{}{
@@ -297,15 +311,16 @@ var tests = []AggregateTest{
 	},
 	AggregateTest{
 		Config: map[string]interface{}{
-			"destinations": map[string]interface{}{
-				"counts": map[string]interface{}{
+			"destinations": []map[string]interface{}{
+				{
+					"name":        "counts",
 					"type":        "in-memory",
 					"description": "counts",
 					"config":      map[string]interface{}{},
 				},
 			},
-			"actions": map[string]interface{}{
-				"uniques-by-hour": map[string]interface{}{
+			"actions": []map[string]interface{}{
+				{
 					"name": "uniques-by-hour",
 					"type": "anonymize",
 					"config": map[string]interface{}{
@@ -315,21 +330,27 @@ var tests = []AggregateTest{
 							"id":      "ios_ifa",
 							"epsilon": 100.0,
 						},
-						"time-window": map[string]interface{}{
-							"field":  "time",
-							"window": "hour",
-							"format": "unix",
+						"group-by": []map[string]interface{}{
+							{
+								"function": "time-window",
+								"config": map[string]interface{}{
+									"field":  "time",
+									"window": "hour",
+									"format": "unix",
+								},
+							},
 						},
-						"group-by":       []string{},
 						"channels":       []string{"counts"},
 						"finalize-after": -1,
 					},
 				},
 			},
-			"streams": map[string]interface{}{
-				"default": map[string]interface{}{
-					"configs": map[string]interface{}{
-						"default": map[string]interface{}{
+			"streams": []map[string]interface{}{
+				{
+					"name": "default",
+					"configs": []map[string]interface{}{
+						{
+							"name":   "default",
 							"status": "active",
 							"actions": []map[string]interface{}{
 								map[string]interface{}{
@@ -757,7 +778,7 @@ func testAggregate(t *testing.T, parallel bool) {
 			if err := processor.Setup(); err != nil {
 				return err
 			}
-			if _, err := processor.Process(items, nil); err != nil {
+			if _, err := processor.Process(items, nil, true); err != nil {
 				return err
 			}
 			if err := processor.Teardown(); err != nil {

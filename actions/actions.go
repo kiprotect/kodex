@@ -30,6 +30,10 @@ var Actions = kodex.ActionDefinitions{
 		Name:  "Pseudonymize",
 		Maker: MakePseudonymizeAction,
 	},
+	"anonymize": kodex.ActionDefinition{
+		Name:  "Anonymize",
+		Maker: MakeAnonymizeAction,
+	},
 	"transcode": kodex.ActionDefinition{
 		Name:  "Transcode",
 		Maker: MakeTranscodeAction,

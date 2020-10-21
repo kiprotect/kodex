@@ -242,8 +242,8 @@ func (p *Processor) processItem(item *Item, paramsMap map[string]interface{}, un
 	}
 	return newItem, nil
 }
-func (p *Processor) Undo(items []*Item, paramsMap map[string]interface{}, endOfStream bool) ([]*Item, error) {
-	return p.process(items, paramsMap, true, endOfStream)
+func (p *Processor) Undo(items []*Item, paramsMap map[string]interface{}) ([]*Item, error) {
+	return p.process(items, paramsMap, true, false)
 }
 
 func (p *Processor) Process(items []*Item, paramsMap map[string]interface{}, endOfStream bool) ([]*Item, error) {

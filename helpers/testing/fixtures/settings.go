@@ -17,8 +17,8 @@
 package fixtures
 
 import (
-	"github.com/kiprotect/kodex/helpers"
 	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/helpers"
 )
 
 type Settings struct {

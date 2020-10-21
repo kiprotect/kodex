@@ -138,10 +138,10 @@ func (a *AMQPWriter) Write(payload kodex.Payload) error {
 		true,  // mandatory
 		false, // immediate
 		amqp.Publishing{
-			ContentType: "application/kiprotect",
+			ContentType:  "application/kiprotect",
 			DeliveryMode: amqp.Persistent,
-			Headers:     headers,
-			Body:        bs,
+			Headers:      headers,
+			Body:         bs,
 		},
 	); err != nil {
 		return err
