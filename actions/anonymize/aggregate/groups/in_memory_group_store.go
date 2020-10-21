@@ -100,11 +100,41 @@ func (g *InMemoryGroupStore) Shard() (aggregate.Shard, error) {
 func (g *InMemoryGroupStore) ExpireGroups(expiration int64) (map[string][]aggregate.Group, error) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	return nil, nil
+	expiredGroups := make(map[string][]aggregate.Group)
+	for _, shard := range g.shards {
+		expiredShardGroups, err := shard.ExpireGroups(expiration)
+		if err != nil {
+			return nil, err
+		}
+		for _, group := range expiredShardGroups {
+			h := string(group.Hash())
+			if _, ok := expiredGroups[h]; ok {
+				expiredGroups[h] = append(expiredGroups[h], group)
+			} else {
+				expiredGroups[h] = []aggregate.Group{group}
+			}
+		}
+	}
+	return expiredGroups, nil
 }
 
 func (g *InMemoryGroupStore) ExpireAllGroups() (map[string][]aggregate.Group, error) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	return nil, nil
+	expiredGroups := make(map[string][]aggregate.Group)
+	for _, shard := range g.shards {
+		expiredShardGroups, err := shard.ExpireAllGroups()
+		if err != nil {
+			return nil, err
+		}
+		for _, group := range expiredShardGroups {
+			h := string(group.Hash())
+			if _, ok := expiredGroups[h]; ok {
+				expiredGroups[h] = append(expiredGroups[h], group)
+			} else {
+				expiredGroups[h] = []aggregate.Group{group}
+			}
+		}
+	}
+	return expiredGroups, nil
 }
