@@ -1,19 +1,3 @@
-// KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-// 
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 package groups
 
 import (
@@ -22,23 +6,23 @@ import (
 )
 
 type InMemoryGroup struct {
-	mutex         sync.Mutex
+	mutex         sync.RWMutex
 	state         aggregate.State
 	shard         *InMemoryShard
 	groupByValues map[string]interface{}
-	triggers      []*aggregate.Trigger
 	hash          []byte
+	expiration    int64
 }
 
 func MakeInMemoryGroup(hash []byte,
 	groupByValues map[string]interface{},
-	triggers []*aggregate.Trigger,
+	expiration int64,
 	shard *InMemoryShard) *InMemoryGroup {
 	return &InMemoryGroup{
 		hash:          hash,
 		shard:         shard,
 		groupByValues: groupByValues,
-		triggers:      triggers,
+		expiration:    expiration,
 	}
 }
 
@@ -48,6 +32,14 @@ func (g *InMemoryGroup) Lock() {
 
 func (g *InMemoryGroup) Unlock() {
 	g.mutex.Unlock()
+}
+
+func (g *InMemoryGroup) RLock() {
+	g.mutex.RLock()
+}
+
+func (g *InMemoryGroup) RUnlock() {
+	g.mutex.RUnlock()
 }
 
 func (g *InMemoryGroup) Clone() (aggregate.Group, error) {
@@ -60,7 +52,7 @@ func (g *InMemoryGroup) Clone() (aggregate.Group, error) {
 		shard:         g.shard,
 		groupByValues: g.groupByValues,
 		hash:          g.hash,
-		triggers:      g.triggers,
+		expiration:    g.expiration,
 	}, nil
 }
 
@@ -88,9 +80,9 @@ func (g *InMemoryGroup) GroupByValues() map[string]interface{} {
 	return g.groupByValues
 }
 
-// Get the upper time boundary for the group
-func (g *InMemoryGroup) Triggers() []*aggregate.Trigger {
-	return g.triggers
+// Get the expiration value for the group
+func (g *InMemoryGroup) Expiration() int64 {
+	return g.expiration
 }
 
 // Get the hash for the group

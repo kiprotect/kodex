@@ -1,16 +1,16 @@
 // KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -25,16 +25,22 @@ import (
 	"sync"
 )
 
+type GroupByFunction func(item *kodex.Item)
+
+type GroupBy struct {
+	Name     string
+	Function GroupByFunction
+}
+
 type AggregateAnonymizer struct {
-	channels       []string
-	resultName     string
-	function       Function
-	id             []byte
-	name           string
-	groupByClauses []aggregate.GroupByClause
-	groupByConfig  []map[string]interface{}
-	groupStore     aggregate.GroupStore
-	mutex          sync.Mutex
+	channels   []string
+	resultName string
+	function   Function
+	id         []byte
+	name       string
+	groupBys   []*GroupBy
+	groupStore aggregate.GroupStore
+	mutex      sync.Mutex
 }
 
 func (a *AggregateAnonymizer) Setup() error {
@@ -62,12 +68,11 @@ func MakeAggregateAnonymizer(name string, id []byte, config map[string]interface
 			resultName = name
 		}
 		return &AggregateAnonymizer{
-			function:      params["function"].(Function),
-			groupByConfig: params["group-by"].([]map[string]interface{}),
-			channels:      params["channels"].([]string),
-			resultName:    resultName,
-			name:          name,
-			id:            id,
+			function:   params["function"].(Function),
+			channels:   params["channels"].([]string),
+			resultName: resultName,
+			name:       name,
+			id:         id,
 		}, nil
 	}
 }
@@ -109,11 +114,13 @@ func (a *AggregateAnonymizer) process(item *kodex.Item, channelWriter kodex.Chan
 	return item, nil
 }
 
-func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]map[string]interface{}, error) {
-	return nil, nil
+type GroupByValues struct {
+	Values     map[string]interface{}
+	Expiration int64
 }
 
-func (a *AggregateAnonymizer) getTriggers(item *kodex.Item) ([]*aggregate.Trigger, error) {
+func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*GroupByValues, error) {
+	// Returns all unique group by value combinations of the given item
 	return nil, nil
 }
 
@@ -125,13 +132,10 @@ func (a *AggregateAnonymizer) getGroups(item *kodex.Item, function aggregate.Fun
 			nil,
 			err)
 	}
-	triggers, err := a.getTriggers(item)
-	if err != nil {
-		return nil, err
-	}
+
 	groups := make([]aggregate.Group, 0)
 	for _, groupByValues := range groupByValuesList {
-		hash, err := kodex.StructuredHash(groupByValues)
+		hash, err := kodex.StructuredHash(groupByValues.Values)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +144,7 @@ func (a *AggregateAnonymizer) getGroups(item *kodex.Item, function aggregate.Fun
 			return nil, err
 		}
 		if group == nil {
-			group, err = shard.CreateGroup(hash, groupByValues, triggers)
+			group, err = shard.CreateGroup(hash, groupByValues.Values, groupByValues.Expiration)
 			if err != nil {
 				return nil, err
 			}
@@ -155,15 +159,25 @@ func (a *AggregateAnonymizer) getGroups(item *kodex.Item, function aggregate.Fun
 }
 
 func (a *AggregateAnonymizer) finalizeAllGroups(shard aggregate.Shard) ([]*kodex.Item, error) {
-	allGroups, err := shard.ExpireAllGroups()
+	allGroups, err := a.groupStore.ExpireAllGroups()
 	if err != nil {
 		return nil, err
 	}
 	return a.finalizeGroups(allGroups)
 }
 
-func (a *AggregateAnonymizer) finalizeExpiredGroups(shard aggregate.Shard, triggers []*aggregate.Trigger) ([]*kodex.Item, error) {
-	expiredGroups, err := shard.ExpireGroups(triggers)
+func (a *AggregateAnonymizer) getMinimumExpiration(groups []aggregate.Group) int64 {
+	var exp int64 = -1
+	for _, group := range groups {
+		if exp < 0 || group.Expiration() < exp {
+			exp = group.Expiration()
+		}
+	}
+	return exp
+}
+
+func (a *AggregateAnonymizer) finalizeExpiredGroups(shard aggregate.Shard, expiration int64) ([]*kodex.Item, error) {
+	expiredGroups, err := a.groupStore.ExpireGroups(expiration)
 	if err != nil {
 		return nil, err
 	}
@@ -227,12 +241,6 @@ func (a *AggregateAnonymizer) aggregate(item *kodex.Item, channelWriter kodex.Ch
 		return err
 	}
 
-	triggers, err := a.getTriggers(item)
-
-	if err != nil {
-		return err
-	}
-
 	var groupErr error
 	// todo: it might be problematic if a single group action fails for an
 	// item, as we do not want to retry it too often (as it will exhaust)
@@ -246,7 +254,7 @@ func (a *AggregateAnonymizer) aggregate(item *kodex.Item, channelWriter kodex.Ch
 		}
 
 		// we finalize all expired groups and return their results
-		aggregations, err := a.finalizeExpiredGroups(shard, triggers)
+		aggregations, err := a.finalizeExpiredGroups(shard, a.getMinimumExpiration(groups))
 		// we submit the results to the configured destination configs
 		if aggregations != nil && len(aggregations) > 0 {
 			if err := a.submitResults(aggregations, channelWriter); err != nil {

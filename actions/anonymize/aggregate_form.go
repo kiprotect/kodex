@@ -1,16 +1,16 @@
 // KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -54,6 +54,44 @@ func (i IsFunction) Validate(input interface{}, values map[string]interface{}) (
 	}, nil
 }
 
+var TimeWindowForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "field",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+	},
+}
+
+var GroupByForm = forms.Form{
+	ErrorMsg: "invalid data encountered in the group-by-form",
+	Fields: []forms.Field{
+		{
+			Name: "function",
+			Validators: []forms.Validator{
+				forms.IsIn{Choices: []interface{}{"time-window"}},
+			},
+		},
+		{
+			Name: "config",
+			Validators: []forms.Validator{
+				forms.Switch{
+					Key: "function",
+					Cases: map[string][]forms.Validator{
+						"time-window": {
+							forms.IsStringMap{
+								Form: &TimeWindowForm,
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
 var AggregateForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the aggregation config",
 	Fields: []forms.Field{
@@ -76,7 +114,13 @@ var AggregateForm = forms.Form{
 			Name: "group-by",
 			Validators: []forms.Validator{
 				forms.IsRequired{},
-				forms.IsList{},
+				forms.IsList{
+					Validators: []forms.Validator{
+						forms.IsStringMap{
+							Form: &GroupByForm,
+						},
+					},
+				},
 			},
 		},
 		{

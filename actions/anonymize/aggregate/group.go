@@ -1,16 +1,16 @@
 // KIProtect (Community Edition - CE) - Privacy & Security Engineering Platform
 // Copyright (C) 2020  KIProtect GmbH (HRB 208395B) - Germany
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -20,27 +20,13 @@ import (
 	"github.com/kiprotect/go-helpers/errors"
 )
 
-type TriggerType string
-
-const (
-	NumericalTrigger TriggerType = "Numerical"
-	ValueTrigger                 = "Value"
-)
-
-// structure describing an expiration trigger
-type Trigger struct {
-	Name  string
-	Type  TriggerType
-	Value interface{}
-}
-
 type Group interface {
 	Initialized() bool
 	Initialize(state State) error
 	State() State
 	GroupByValues() map[string]interface{}
 	Hash() []byte
-	Triggers() []*Trigger
+	Expiration() int64
 	Clone() (Group, error)
 	Lock()
 	Unlock()
@@ -54,13 +40,13 @@ type Shard interface {
 	// Return the shard to the group store so that it can be reused
 	Return() error
 	// Create a group in the shard
-	CreateGroup(hash []byte, groupByValues map[string]interface{}, triggers []*Trigger) (Group, error)
+	CreateGroup(hash []byte, groupByValues map[string]interface{}, expiration int64) (Group, error)
 	// Return a group by its unique hash value
 	GroupByHash(hash []byte) (Group, error)
-	// Expire groups based on a list of triggers
-	ExpireGroups(triggers []*Trigger) (map[string][]Group, error)
+	// Expire groups in the shard based on an expiration index
+	ExpireGroups(expiration int64) ([]Group, error)
 	// Expire all groups in the shard
-	ExpireAllGroups() (map[string][]Group, error)
+	ExpireAllGroups() ([]Group, error)
 }
 
 type GroupStore interface {
@@ -68,6 +54,10 @@ type GroupStore interface {
 	Reset() error
 	// Get a shard from the store
 	Shard() (Shard, error)
+	// Expire groups in all shards based on an expiration index
+	ExpireGroups(expiration int64) (map[string][]Group, error)
+	// Expire all groups in all shards
+	ExpireAllGroups() (map[string][]Group, error)
 }
 
 var AlreadyInitialized = errors.MakeExternalError("group has already been initialized", "GROUP-STORE", nil, nil)
