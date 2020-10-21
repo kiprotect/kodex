@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package aggregate
+package groupByFunctions
 
 import (
 	"fmt"
@@ -32,6 +32,10 @@ type TimeWindow struct {
 }
 
 type TimeWindowFunction func(int64) []*TimeWindow
+
+func MakeTimeWindowFunction(config map[string]interface{}) (GroupByFunction, error) {
+	return nil, nil
+}
 
 func minute(value int64) []*TimeWindow {
 	t := time.Unix(value/1e9, value%1e9).UTC()
