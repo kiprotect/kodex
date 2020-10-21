@@ -105,10 +105,6 @@ var tests = []AggregateTest{
 			map[string]interface{}{
 				"created-at": "2009-07-04T9:34:44Z",
 			},
-			map[string]interface{}{
-				"_ignore": true,
-				"_flush":  true,
-			},
 		},
 		Result: map[string][]map[string]interface{}{
 			"counts": []map[string]interface{}{
@@ -269,10 +265,6 @@ var tests = []AggregateTest{
 			map[string]interface{}{
 				"created-at": "2009-07-01T10:34:44Z",
 				"type":       "swipe",
-			},
-			map[string]interface{}{
-				"_ignore": true,
-				"_flush":  true,
 			},
 		},
 		Result: map[string][]map[string]interface{}{
@@ -601,10 +593,6 @@ var tests = []AggregateTest{
 				"time":            1399556066,
 				"wifi":            true,
 			},
-			map[string]interface{}{
-				"_flush":  true,
-				"_ignore": true,
-			},
 		},
 		Result: map[string][]map[string]interface{}{
 			"counts": []map[string]interface{}{
@@ -758,18 +746,27 @@ func testAggregate(t *testing.T, parallel bool) {
 
 		config := configs[0]
 
-		sourceItems := make([]*kodex.Item, 1)
-
-		sourceItems[0] = kodex.MakeItem(map[string]interface{}{
-			"_ignore": true,
-			"_reset":  true,
-		})
+		sourceItems := make([]*kodex.Item, 0)
 
 		for _, item := range test.Items {
 			sourceItems = append(sourceItems, kodex.MakeItem(item))
 		}
 
 		c := make(chan error, len(sourceItems)-1)
+
+		processor, err := config.Processor()
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if err := processor.Setup(); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := processor.Reset(); err != nil {
+			t.Fatal(err)
+		}
 
 		process := func(items []*kodex.Item) error {
 			processor, err := config.Processor()
@@ -779,7 +776,7 @@ func testAggregate(t *testing.T, parallel bool) {
 			if err := processor.Setup(); err != nil {
 				return err
 			}
-			if _, err := processor.Process(items, nil, true); err != nil {
+			if _, err := processor.Process(items, nil); err != nil {
 				return err
 			}
 			if err := processor.Teardown(); err != nil {
@@ -813,6 +810,10 @@ func testAggregate(t *testing.T, parallel bool) {
 			if err := process(sourceItems); err != nil {
 				t.Fatal(err)
 			}
+		}
+
+		if _, err := processor.Finalize(); err != nil {
+			t.Fatal(err)
 		}
 
 		configDestinations, err := config.Destinations()

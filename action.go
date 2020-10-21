@@ -71,8 +71,10 @@ type ScheduledAction interface {
 }
 
 type StatefulAction interface {
+	// Resets the action
+	Reset() error
 	// Finalizes the action
-	Finalize() ([]*Item, error)
+	Finalize(ChannelWriter) ([]*Item, error)
 }
 
 type UndoableAction interface {

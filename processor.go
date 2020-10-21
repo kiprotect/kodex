@@ -169,11 +169,33 @@ func (p *Processor) Teardown() error {
 	return lastErr
 }
 
-func (p *Processor) finalize(paramsMap map[string]interface{}) ([]*Item, error) {
+func (p *Processor) Reset() error {
+	for _, action := range p.parameterSet.Actions() {
+		if statefulAction, ok := action.(StatefulAction); ok {
+			if err := statefulAction.Reset(); err != nil {
+				switch p.errorPolicy {
+				case ReportErrors:
+					actionError := errors.MakeExternalError("error resetting action", "RESET-ACTION", nil, err)
+					Log.Error(actionError)
+					if err := p.channelWriter.Error(nil, actionError); err != nil {
+						return err
+					}
+					continue
+				case AbortOnError:
+					return errors.MakeExternalError("error resetting action", "RESET-ACTION", map[string]interface{}{"action": action.Name()}, err)
+				}
+			}
+		}
+	}
+	return nil
+
+}
+
+func (p *Processor) Finalize() ([]*Item, error) {
 	finalizedItems := make([]*Item, 0)
 	for _, action := range p.parameterSet.Actions() {
 		if statefulAction, ok := action.(StatefulAction); ok {
-			if newItems, err := statefulAction.Finalize(); err != nil {
+			if newItems, err := statefulAction.Finalize(p.channelWriter); err != nil {
 				switch p.errorPolicy {
 				case ReportErrors:
 					actionError := errors.MakeExternalError("error finalization action", "FINALIZE-ACTION", nil, err)
@@ -243,14 +265,14 @@ func (p *Processor) processItem(item *Item, paramsMap map[string]interface{}, un
 	return newItem, nil
 }
 func (p *Processor) Undo(items []*Item, paramsMap map[string]interface{}) ([]*Item, error) {
-	return p.process(items, paramsMap, true, false)
+	return p.process(items, paramsMap, true)
 }
 
-func (p *Processor) Process(items []*Item, paramsMap map[string]interface{}, endOfStream bool) ([]*Item, error) {
-	return p.process(items, paramsMap, false, endOfStream)
+func (p *Processor) Process(items []*Item, paramsMap map[string]interface{}) ([]*Item, error) {
+	return p.process(items, paramsMap, false)
 }
 
-func (p *Processor) process(items []*Item, paramsMap map[string]interface{}, undo, endOfStream bool) ([]*Item, error) {
+func (p *Processor) process(items []*Item, paramsMap map[string]interface{}, undo bool) ([]*Item, error) {
 	Log.Debugf("Processing %d items with error policy '%s'", len(items), p.errorPolicy)
 	newItems := make([]*Item, 0)
 	for _, item := range items {
@@ -273,13 +295,6 @@ func (p *Processor) process(items []*Item, paramsMap map[string]interface{}, und
 		if newItem != nil {
 			newItems = append(newItems, newItem)
 		}
-	}
-	if endOfStream {
-		finalizedItems, err := p.finalize(paramsMap)
-		if err != nil {
-			return nil, err
-		}
-		newItems = append(newItems, finalizedItems...)
 	}
 	return newItems, nil
 }

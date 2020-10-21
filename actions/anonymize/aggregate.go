@@ -30,6 +30,7 @@ type AggregateAnonymizer struct {
 	channels         []string
 	resultName       string
 	function         Function
+	finalizeAfter    int64
 	id               []byte
 	name             string
 	groupByFunctions []groupByFunctions.GroupByFunction
@@ -77,6 +78,7 @@ func MakeAggregateAnonymizer(name string, id []byte, config map[string]interface
 		return &AggregateAnonymizer{
 			function:         params["function"].(Function),
 			channels:         params["channels"].([]string),
+			finalizeAfter:    params["finalize-after"].(int64),
 			groupByFunctions: gbf,
 			resultName:       resultName,
 			name:             name,
@@ -101,13 +103,19 @@ func (a *AggregateAnonymizer) Anonymize(item *kodex.Item, writer kodex.ChannelWr
 	return a.process(item, writer)
 }
 
-func (a *AggregateAnonymizer) Finalize() ([]*kodex.Item, error) {
-	shard, err := a.groupStore.Shard()
-	if err != nil {
-		return nil, errors.MakeExternalError("cannot get a shard", "IN-MEMORY-STORE", nil, err)
+func (a *AggregateAnonymizer) Reset() error {
+	return a.groupStore.Reset()
+}
+
+func (a *AggregateAnonymizer) Finalize(writer kodex.ChannelWriter) ([]*kodex.Item, error) {
+	if items, err := a.finalizeAllGroups(); err != nil {
+		return nil, err
+	} else {
+		if err := a.submitResults(items, writer); err != nil {
+			return nil, err
+		}
 	}
-	defer shard.Return()
-	return a.finalizeAllGroups(shard)
+	return nil, nil
 }
 
 func (a *AggregateAnonymizer) process(item *kodex.Item, channelWriter kodex.ChannelWriter) (*kodex.Item, error) {
@@ -124,8 +132,15 @@ func (a *AggregateAnonymizer) process(item *kodex.Item, channelWriter kodex.Chan
 
 func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunctions.GroupByValue, error) {
 	// Returns all unique group by value combinations of the given item
-
-	return nil, nil
+	groupByValues := make([]*groupByFunctions.GroupByValue, 0)
+	for _, groupByFunction := range a.groupByFunctions {
+		if functionGroupByValues, err := groupByFunction(item); err != nil {
+			return nil, err
+		} else {
+			groupByValues = append(groupByValues, functionGroupByValues...)
+		}
+	}
+	return groupByValues, nil
 }
 
 func (a *AggregateAnonymizer) getGroups(item *kodex.Item, function aggregate.Function, shard aggregate.Shard) ([]aggregate.Group, error) {
@@ -137,14 +152,14 @@ func (a *AggregateAnonymizer) getGroups(item *kodex.Item, function aggregate.Fun
 			err)
 	}
 
-	groups := make([]aggregate.Group, 0)
+	itemGroups := make([]aggregate.Group, 0)
 	for _, groupByValue := range groupByValuesList {
 		hash, err := kodex.StructuredHash(groupByValue.Values)
 		if err != nil {
 			return nil, err
 		}
 		group, err := shard.GroupByHash(hash)
-		if err != nil {
+		if err != nil && err != aggregate.NotFound {
 			return nil, err
 		}
 		if group == nil {
@@ -157,16 +172,17 @@ func (a *AggregateAnonymizer) getGroups(item *kodex.Item, function aggregate.Fun
 				return nil, err
 			}
 		}
-		groups = append(groups, group)
+		itemGroups = append(itemGroups, group)
 	}
-	return groups, nil
+	return itemGroups, nil
 }
 
-func (a *AggregateAnonymizer) finalizeAllGroups(shard aggregate.Shard) ([]*kodex.Item, error) {
+func (a *AggregateAnonymizer) finalizeAllGroups() ([]*kodex.Item, error) {
 	allGroups, err := a.groupStore.ExpireAllGroups()
 	if err != nil {
 		return nil, err
 	}
+	kodex.Log.Infof("Got %d groups", len(allGroups))
 	return a.finalizeGroups(allGroups)
 }
 
@@ -181,6 +197,9 @@ func (a *AggregateAnonymizer) getMinimumExpiration(groups []aggregate.Group) int
 }
 
 func (a *AggregateAnonymizer) finalizeExpiredGroups(shard aggregate.Shard, expiration int64) ([]*kodex.Item, error) {
+	if a.finalizeAfter == -1 {
+		return nil, nil
+	}
 	expiredGroups, err := a.groupStore.ExpireGroups(expiration)
 	if err != nil {
 		return nil, err
@@ -189,6 +208,8 @@ func (a *AggregateAnonymizer) finalizeExpiredGroups(shard aggregate.Shard, expir
 }
 
 func (a *AggregateAnonymizer) finalizeGroups(groups map[string][]aggregate.Group) ([]*kodex.Item, error) {
+
+	kodex.Log.Infof("Finalizing %d groups", len(groups))
 
 	encode := func(data []byte) string {
 		return base64.StdEncoding.EncodeToString(data)
@@ -206,6 +227,7 @@ func (a *AggregateAnonymizer) finalizeGroups(groups map[string][]aggregate.Group
 		}
 		// we omit reporting null results (to protect privacy)
 		if result == nil {
+			kodex.Log.Info("null result")
 			continue
 		}
 		item := kodex.MakeItem(map[string]interface{}{
@@ -217,6 +239,7 @@ func (a *AggregateAnonymizer) finalizeGroups(groups map[string][]aggregate.Group
 		})
 		items = append(items, item)
 	}
+	kodex.Log.Infof("Got %d items", len(items))
 	return items, nil
 }
 
@@ -244,6 +267,8 @@ func (a *AggregateAnonymizer) aggregate(item *kodex.Item, channelWriter kodex.Ch
 	if err != nil {
 		return err
 	}
+
+	kodex.Log.Infof("Got %d groups", len(groups))
 
 	var groupErr error
 	// todo: it might be problematic if a single group action fails for an

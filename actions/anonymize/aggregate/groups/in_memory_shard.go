@@ -2,6 +2,7 @@ package groups
 
 import (
 	"github.com/google/btree"
+	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
 	"sync"
 	"time"
@@ -170,19 +171,20 @@ func (g *InMemoryShard) CreateGroup(hash []byte,
 
 func (g *InMemoryShard) ExpireAllGroups() ([]aggregate.Group, error) {
 	expiredGroups := make([]aggregate.Group, 0)
-	g.hashMutex.RLock()
-	defer g.hashMutex.RUnlock()
-	for _, group := range g.groupsByHash {
+	g.hashMutex.Lock()
+	kodex.Log.Infof("%d groups in total", len(g.groupsByHash))
+	defer g.hashMutex.Unlock()
+	for h, group := range g.groupsByHash {
 		// we mark it as deleted
 		if err := g.markGroupAsDeleted(group); err != nil {
 			continue
 		}
-		// and delete the group from the full map
-		g.deleteGroupFromMap(group)
-		// and from the to map
+		delete(g.groupsByHash, h)
+		// delete the group from the map
 		g.deleteGroupFromToMap(group)
 		expiredGroups = append(expiredGroups, group)
 	}
+	kodex.Log.Infof("Got %d groups", len(expiredGroups))
 	return expiredGroups, nil
 }
 

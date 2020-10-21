@@ -72,6 +72,14 @@ func (p *AnonymizeAction) Teardown() error {
 	return p.anonymizer.Teardown()
 }
 
+func (p *AnonymizeAction) Finalize(writer kodex.ChannelWriter) ([]*kodex.Item, error) {
+	return p.anonymizer.Finalize(writer)
+}
+
+func (p *AnonymizeAction) Reset() error {
+	return p.anonymizer.Reset()
+}
+
 func MakeAnonymizeAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
 
 	params, err := AnonymizeConfigForm.Validate(config)
