@@ -50,6 +50,16 @@ func addHash(source interface{}, h hash.Hash) error {
 	case []byte:
 		_, err := h.Write(v)
 		return err
+	// to do: replace this with a reflection-based discovery of iterable types
+	case []map[string]interface{}:
+		for i, entry := range v {
+			if err := addHash(i, h); err != nil {
+				return err
+			}
+			if err := addHash(entry, h); err != nil {
+				return err
+			}
+		}
 	case []interface{}:
 		for i, entry := range v {
 			if err := addHash(i, h); err != nil {
@@ -126,7 +136,7 @@ func addHash(source interface{}, h hash.Hash) error {
 	case nil:
 		h.Write([]byte("magic nil value"))
 	default:
-		return fmt.Errorf("unknown type, can't hash")
+		return fmt.Errorf("unknown type '%v', can't hash", v)
 	}
 	return nil
 }
