@@ -122,13 +122,9 @@ func (a *AggregateAnonymizer) process(item *kodex.Item, channelWriter kodex.Chan
 	return item, nil
 }
 
-type GroupByValues struct {
-	Values     map[string]interface{}
-	Expiration int64
-}
-
-func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*GroupByValues, error) {
+func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunctions.GroupByValue, error) {
 	// Returns all unique group by value combinations of the given item
+
 	return nil, nil
 }
 
@@ -142,8 +138,8 @@ func (a *AggregateAnonymizer) getGroups(item *kodex.Item, function aggregate.Fun
 	}
 
 	groups := make([]aggregate.Group, 0)
-	for _, groupByValues := range groupByValuesList {
-		hash, err := kodex.StructuredHash(groupByValues.Values)
+	for _, groupByValue := range groupByValuesList {
+		hash, err := kodex.StructuredHash(groupByValue.Values)
 		if err != nil {
 			return nil, err
 		}
@@ -152,7 +148,7 @@ func (a *AggregateAnonymizer) getGroups(item *kodex.Item, function aggregate.Fun
 			return nil, err
 		}
 		if group == nil {
-			group, err = shard.CreateGroup(hash, groupByValues.Values, groupByValues.Expiration)
+			group, err = shard.CreateGroup(hash, groupByValue.Values, groupByValue.Expiration)
 			if err != nil {
 				return nil, err
 			}

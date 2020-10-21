@@ -66,18 +66,21 @@ func MakeTimeWindowFunction(config map[string]interface{}) (GroupByFunction, err
 	timeWindowFunction := TimeWindowFunctions[window]
 	parser := TimeParsers[format]
 
-	return func(item *kodex.Item) ([]map[string]interface{}, error) {
+	return func(item *kodex.Item) ([]*GroupByValue, error) {
 		if t, err := getItemTime(item, field, parser); err != nil {
 			return nil, err
 		} else {
 			timeWindows := timeWindowFunction(t)
-			groups := make([]map[string]interface{}, len(timeWindows))
+			groups := make([]*GroupByValue, len(timeWindows))
 			for i, timeWindow := range timeWindows {
-				groups[i] = map[string]interface{}{
-					"field":  field,
-					"window": window,
-					"from":   timeWindow.FromTime,
-					"to":     timeWindow.ToTime,
+				groups[i] = &GroupByValue{
+					Values: map[string]interface{}{
+						"field":  field,
+						"window": window,
+						"from":   timeWindow.FromTime,
+						"to":     timeWindow.ToTime,
+					},
+					Expiration: timeWindow.ToTime,
 				}
 			}
 			return groups, nil
