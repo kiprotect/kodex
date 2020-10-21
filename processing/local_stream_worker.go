@@ -123,9 +123,16 @@ func (w *LocalStreamWorker) ProcessPayload(payload kodex.Payload) error {
 
 	for _, context := range w.contexts {
 
-		if newItems, err = context.Processor.Process(items, nil, payload.EndOfStream()); err != nil {
-			kodex.Log.Error("an error occurred")
+		if newItems, err = context.Processor.Process(items, nil); err != nil {
 			return handleError(err)
+		}
+
+		if payload.EndOfStream() {
+			if finalizedItems, err := context.Processor.Finalize(); err != nil {
+				return handleError(err)
+			} else {
+				newItems = append(newItems, finalizedItems...)
+			}
 		}
 
 		for _, destinationMaps := range context.Destinations {

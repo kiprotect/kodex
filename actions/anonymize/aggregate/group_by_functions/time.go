@@ -36,6 +36,7 @@ type TimeWindowFunction func(int64) []*TimeWindow
 
 func getItemTime(item *kodex.Item, field string, parser TimeParser) (int64, error) {
 	value, ok := item.Get(field)
+	kodex.Log.Info(field)
 	if !ok {
 		return 0, errors.MakeExternalError("time window value not defined",
 			"VALUE-NOT-DEFINED",

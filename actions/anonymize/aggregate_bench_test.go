@@ -177,8 +177,11 @@ func BenchmarkAggregate(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		_, err = processor.Process(sourceItems, nil, true)
+		_, err = processor.Process(sourceItems, nil)
 		if err != nil {
+			b.Fatal(err)
+		}
+		if _, err := processor.Finalize(); err != nil {
 			b.Fatal(err)
 		}
 	}
