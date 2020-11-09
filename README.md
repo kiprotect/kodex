@@ -33,7 +33,7 @@ Kodex takes care of the boring and difficult aspects of privacy, such as
 To download and install Kodex from source, simply run
 
     git clone https://github.com/kiprotect/kodex
-    cd kiprotect
+    cd kodex
 
     make
     make install
