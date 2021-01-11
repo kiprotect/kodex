@@ -186,7 +186,7 @@ Loop:
 			// we stop reading any more payloads and return...
 			d.stopWriter <- true
 			break Loop
-		case <-time.After(time.Millisecond):
+		case <-time.After(time.Second):
 			break
 		}
 
@@ -198,10 +198,15 @@ Loop:
 				stopping = true
 				go d.stop(true, true)
 			}
+			continue
 		}
 
 		// we didn't receive any new items...
 		if payload == nil {
+			if !stopping {
+				stopping = true
+				go d.stop(true, true)
+			}
 			continue
 		}
 
