@@ -242,7 +242,7 @@ func (d *LocalStreamExecutor) read() {
 			// we stop reading any more payloads and return...
 			d.stopChannel <- true
 			return
-		case <-time.After(time.Millisecond):
+		case <-time.After(time.Second):
 			break
 		}
 
@@ -259,6 +259,11 @@ func (d *LocalStreamExecutor) read() {
 
 		// we didn't receive any new items...
 		if payload == nil {
+			// we stop processing any further items...
+			if !stopping {
+				stopping = true
+				go d.stop(true)
+			}
 			continue
 		}
 

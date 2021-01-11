@@ -21,8 +21,8 @@ import (
 	"github.com/kiprotect/go-helpers/errors"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
-	"github.com/kiprotect/kodex/actions/anonymize/aggregate/group_by_functions"
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate/filter_functions"
+	"github.com/kiprotect/kodex/actions/anonymize/aggregate/group_by_functions"
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate/groups"
 	"sync"
 )
