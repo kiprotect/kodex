@@ -71,7 +71,7 @@ func timeFormatValues() []interface{} {
 	return values
 }
 
-var TimeWindowForm = forms.Form{
+var GroupByTimeWindowForm = forms.Form{
 	Fields: []forms.Field{
 		{
 			Name: "field",
@@ -96,7 +96,7 @@ var TimeWindowForm = forms.Form{
 	},
 }
 
-var ValueForm = forms.Form{
+var GroupByValueForm = forms.Form{
 	Fields: []forms.Field{
 		{
 			Name: "field",
@@ -107,8 +107,41 @@ var ValueForm = forms.Form{
 	},
 }
 
+var FilterForm = forms.Form{
+	ErrorMsg: "invalid data encountered in the aggregation filter form",
+	Fields: []forms.Field{
+		{
+			Name: "function",
+			Validators: []forms.Validator{
+				forms.IsIn{Choices: []interface{}{}},
+			},
+		},
+		{
+			Name: "config",
+			Validators: []forms.Validator{
+				forms.IsStringMap{},
+				forms.Switch{
+					Key: "function",
+					Cases: map[string][]forms.Validator{
+						"time-window": {
+							forms.IsStringMap{
+								Form: &GroupByTimeWindowForm,
+							},
+						},
+						"value": {
+							forms.IsStringMap{
+								Form: &GroupByValueForm,
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
 var GroupByForm = forms.Form{
-	ErrorMsg: "invalid data encountered in the group-by-form",
+	ErrorMsg: "invalid data encountered in the aggregation group-by form",
 	Fields: []forms.Field{
 		{
 			Name: "function",
@@ -125,12 +158,12 @@ var GroupByForm = forms.Form{
 					Cases: map[string][]forms.Validator{
 						"time-window": {
 							forms.IsStringMap{
-								Form: &TimeWindowForm,
+								Form: &GroupByTimeWindowForm,
 							},
 						},
 						"value": {
 							forms.IsStringMap{
-								Form: &ValueForm,
+								Form: &GroupByValueForm,
 							},
 						},
 					},
@@ -156,6 +189,19 @@ var AggregateForm = forms.Form{
 				forms.IsRequired{},
 				forms.IsString{},
 				IsFunction{},
+			},
+		},
+		{
+			Name: "filters",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: []interface{}{}},
+				forms.IsList{
+					Validators: []forms.Validator{
+						forms.IsStringMap{
+							Form: &FilterForm,
+						},
+					},
+				},
 			},
 		},
 		{
