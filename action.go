@@ -255,6 +255,9 @@ func (b *BaseAction) Teardown() error {
 	return nil
 }
 
+// By default, the config group contains the full config. This can be overwritten
+// by specific actions to only include the config that is relevant for the
+// functioning of the action.
 func (b *BaseAction) ConfigGroup() map[string]interface{} {
 	return b.Config_
 }
