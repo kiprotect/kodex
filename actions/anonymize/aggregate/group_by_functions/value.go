@@ -33,6 +33,22 @@ func MakeValueFunction(config map[string]interface{}) (GroupByFunction, error) {
 				field,
 				nil)
 		}
+		if isList := config["is-list"].(bool); isList {
+			listValue, ok := value.([]interface{})
+			if !ok {
+				return nil, errors.MakeExternalError("expected a list value",
+					"VALUE-EXPECTED-LIST",
+					value,
+					nil)
+			}
+			i := int(config["index"].(int64))
+			if i >= len(listValue) {
+				// the value is undefined, we return an empty list
+				return []*GroupByValue{}, nil
+			} else {
+				value = listValue[i]
+			}
+		}
 		return []*GroupByValue{
 			&GroupByValue{
 				Values: map[string]interface{}{

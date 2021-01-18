@@ -55,6 +55,96 @@ var tests = []AggregateTest{
 						},
 						"group-by": []map[string]interface{}{
 							{
+								"function": "value",
+								"config": map[string]interface{}{
+									"field":   "type",
+									"is-list": true,
+									"index":   0,
+								},
+							},
+						},
+						"result-name":    "count",
+						"channels":       []string{"counts"},
+						"finalize-after": -1,
+					},
+				},
+			},
+			"streams": []map[string]interface{}{
+				{
+					"name": "default",
+					"configs": []map[string]interface{}{
+						{
+							"name":   "default",
+							"status": "active",
+							"actions": []map[string]interface{}{
+								map[string]interface{}{
+									"name": "uniques-last-24h",
+								},
+							},
+							"destinations": []map[string]interface{}{
+								map[string]interface{}{
+									"status": "active",
+									"name":   "counts",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Items: []map[string]interface{}{
+			map[string]interface{}{
+				"type": []interface{}{map[string]interface{}{"device": "desktop"}},
+			},
+			map[string]interface{}{
+				"type": []interface{}{map[string]interface{}{"device": "desktop"}},
+			},
+			map[string]interface{}{
+				"type": []interface{}{map[string]interface{}{"device": "mobile"}},
+			},
+			map[string]interface{}{
+				"type": []interface{}{map[string]interface{}{"device": "mobile"}},
+			},
+		},
+		Result: map[string][]map[string]interface{}{
+			"counts": []map[string]interface{}{
+				map[string]interface{}{
+					"count": 2,
+					"group": map[string]interface{}{
+						"type": map[string]interface{}{"device": "desktop"},
+					},
+				},
+				map[string]interface{}{
+					"count": 2,
+					"group": map[string]interface{}{
+						"type": map[string]interface{}{"device": "mobile"},
+					},
+				},
+			},
+		},
+	},
+	AggregateTest{
+		Config: map[string]interface{}{
+			"destinations": []map[string]interface{}{
+				{
+					"name":        "counts",
+					"type":        "in-memory",
+					"description": "counts",
+					"config":      map[string]interface{}{},
+				},
+			},
+			"actions": []map[string]interface{}{
+				{
+					"name": "uniques-last-24h",
+					"type": "anonymize",
+					"config": map[string]interface{}{
+						"method":   "aggregate",
+						"function": "count",
+						"config": map[string]interface{}{
+							"epsilon": 10000,
+						},
+						"group-by": []map[string]interface{}{
+							{
 								"function": "time-window",
 								"config": map[string]interface{}{
 									"field":  "created-at",

@@ -104,6 +104,20 @@ var GroupByValueForm = forms.Form{
 				forms.IsString{},
 			},
 		},
+		{
+			Name: "is-list",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: false},
+				forms.IsBoolean{},
+			},
+		},
+		{
+			Name: "index",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: 0},
+				forms.IsInteger{HasMin: true, Min: 0},
+			},
+		},
 	},
 }
 

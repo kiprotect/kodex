@@ -18,7 +18,6 @@ package anonymize
 
 import (
 	"encoding/base64"
-	"fmt"
 	"github.com/kiprotect/go-helpers/errors"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
@@ -139,12 +138,12 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 		produce one or more values. We
 	*/
 	// Returns all unique group by value combinations of the given item
-	groupByValues := make([][]*groupByFunctions.GroupByValue, len(a.groupByFunctions))
-	for i, groupByFunction := range a.groupByFunctions {
+	groupByValues := make([][]*groupByFunctions.GroupByValue, 0, len(a.groupByFunctions))
+	for _, groupByFunction := range a.groupByFunctions {
 		if functionGroupByValues, err := groupByFunction(item); err != nil {
 			return nil, err
-		} else {
-			groupByValues[i] = functionGroupByValues
+		} else if len(functionGroupByValues) > 0 {
+			groupByValues = append(groupByValues, functionGroupByValues)
 		}
 	}
 	combinedGroupByValues := make([]*groupByFunctions.GroupByValue, 0)
@@ -166,10 +165,8 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 				Values:     make(map[string]interface{}),
 			}
 			for i := 0; i < n; i++ {
-				fmt.Println(n, groupIndices[i], elementIndices[i], len(groupByValues), len(groupByValues[groupIndices[i]]))
 				groupByValue := groupByValues[groupIndices[i]][elementIndices[i]]
 				for k, v := range groupByValue.Values {
-					fmt.Println(k, v)
 					combinedGroupByValue.Values[k] = v
 				}
 				// we update the expiration value
@@ -177,7 +174,6 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 					combinedGroupByValue.Expiration = groupByValue.Expiration
 				}
 			}
-			fmt.Println(combinedGroupByValue.Expiration)
 			combinedGroupByValues = append(combinedGroupByValues, combinedGroupByValue)
 			found := false
 			// now we increase the index
