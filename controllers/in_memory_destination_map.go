@@ -88,7 +88,7 @@ func (i *InMemoryDestinationMap) SetDestination(destination kodex.Destination) e
 }
 
 func (i *InMemoryDestinationMap) CreatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (i *InMemoryDestinationMap) DeletedAt() *time.Time {
@@ -96,7 +96,7 @@ func (i *InMemoryDestinationMap) DeletedAt() *time.Time {
 }
 
 func (i *InMemoryDestinationMap) UpdatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (i *InMemoryDestinationMap) Save() error {

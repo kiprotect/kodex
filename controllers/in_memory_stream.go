@@ -148,7 +148,7 @@ func (i *InMemoryStream) Refresh() error {
 }
 
 func (i *InMemoryStream) CreatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (i *InMemoryStream) DeletedAt() *time.Time {
@@ -156,7 +156,7 @@ func (i *InMemoryStream) DeletedAt() *time.Time {
 }
 
 func (i *InMemoryStream) UpdatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (i *InMemoryStream) Delete() error {

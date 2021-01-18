@@ -56,7 +56,7 @@ func (i *InMemoryDestination) Delete() error {
 }
 
 func (i *InMemoryDestination) CreatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (i *InMemoryDestination) DeletedAt() *time.Time {
@@ -64,7 +64,7 @@ func (i *InMemoryDestination) DeletedAt() *time.Time {
 }
 
 func (i *InMemoryDestination) UpdatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (i *InMemoryDestination) Save() error {

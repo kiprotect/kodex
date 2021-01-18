@@ -97,7 +97,7 @@ func (i *InMemorySourceMap) SetSource(source kodex.Source) error {
 }
 
 func (i *InMemorySourceMap) CreatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (i *InMemorySourceMap) DeletedAt() *time.Time {
@@ -105,7 +105,7 @@ func (i *InMemorySourceMap) DeletedAt() *time.Time {
 }
 
 func (i *InMemorySourceMap) UpdatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (i *InMemorySourceMap) Save() error {

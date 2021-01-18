@@ -82,7 +82,7 @@ func Timestamp(config map[string]interface{}) (Generator, error) {
 		return nil, err
 	}
 	format := params["format"].(string)
-	start := time.Now()
+	start := time.Now().UTC()
 	inc := time.Duration(time.Second)
 	return func() interface{} {
 		start = start.Add(inc)
@@ -116,7 +116,7 @@ func MakeGenerateReader(config map[string]interface{}) (kodex.Reader, error) {
 
 	return &GenerateReader{
 		frequency:  params["frequency"].(float64),
-		t:          time.Now(),
+		t:          time.Now().UTC(),
 		generators: generators,
 	}, nil
 }
@@ -142,7 +142,7 @@ func (g *GenerateReader) Read() (kodex.Payload, error) {
 	if n == 0 {
 		return nil, nil
 	}
-	g.t = time.Now()
+	g.t = time.Now().UTC()
 	payload := MakeGeneratePayload()
 	for i := int64(0); i < n; i++ {
 		item := g.generateItem()
