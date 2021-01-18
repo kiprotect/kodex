@@ -268,6 +268,27 @@ var tests = []AggregateTest{
 				map[string]interface{}{
 					"count-by-minute": 1,
 					"group": map[string]interface{}{
+						"from": "2009-07-01T10:31:00Z",
+						"to":   "2009-07-01T10:32:00Z",
+					},
+				},
+				map[string]interface{}{
+					"count-by-minute": 2,
+					"group": map[string]interface{}{
+						"from": "2009-07-01T10:33:00Z",
+						"to":   "2009-07-01T10:34:00Z",
+					},
+				},
+				map[string]interface{}{
+					"count-by-minute": 1,
+					"group": map[string]interface{}{
+						"from": "2009-07-01T10:34:00Z",
+						"to":   "2009-07-01T10:35:00Z",
+					},
+				},
+				map[string]interface{}{
+					"count-by-minute": 1,
+					"group": map[string]interface{}{
 						"type": "swipe",
 						"from": "2009-07-01T10:31:00Z",
 						"to":   "2009-07-01T10:32:00Z",
@@ -621,6 +642,11 @@ func numericValue(value interface{}) (float64, bool) {
 }
 
 func equal(a, b map[string]interface{}) bool {
+	// two maps are equal if a contains b and b contains a...
+	return contains(a, b) && contains(b, a)
+}
+
+func contains(a, b map[string]interface{}) bool {
 	for keyA, valueA := range a {
 
 		// we ignore these key values

@@ -18,6 +18,7 @@ package anonymize
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/kiprotect/go-helpers/errors"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
@@ -133,6 +134,10 @@ func (a *AggregateAnonymizer) process(item *kodex.Item, channelWriter kodex.Chan
 }
 
 func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunctions.GroupByValue, error) {
+	/*
+		We calculate the power set of all group-by function values. Each group-by function can
+		produce one or more values. We
+	*/
 	// Returns all unique group by value combinations of the given item
 	groupByValues := make([][]*groupByFunctions.GroupByValue, len(a.groupByFunctions))
 	for i, groupByFunction := range a.groupByFunctions {
@@ -142,30 +147,90 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 			groupByValues[i] = functionGroupByValues
 		}
 	}
-	flattenedGroupByValues := groupByValues[0]
-	for _, groupByValue := range groupByValues[1:len(groupByValues)] {
-		newFlattenedGroupByValues := make([]*groupByFunctions.GroupByValue, 0)
-		if len(flattenedGroupByValues)*len(groupByValue) > 100 {
-			return nil, errors.MakeExternalError("too many aggregation groups", "TOO-MANY-GROUPS", nil, nil)
+	combinedGroupByValues := make([]*groupByFunctions.GroupByValue, 0)
+	// we generate all combinations from 1 to n elements (up to a maximum number of combinations)
+	for n := 1; n <= len(groupByValues); n++ {
+		// the indices of the group-by functions that we add to the given combined group
+		groupIndices := make([]int, n)
+		// we specific groups within each group-by function that we add to the combined group
+		elementIndices := make([]int, n)
+		for i := 0; i < n; i++ {
+			// we start with the first groups
+			groupIndices[i] = i
+			// we start with the first element in each group
+			elementIndices[i] = 0
 		}
-		for _, flattenedGroupByValue := range flattenedGroupByValues {
-			for _, originalGroupByValue := range groupByValue {
-				newGroupByValue := &groupByFunctions.GroupByValue{
-					Values:     make(map[string]interface{}),
-					Expiration: flattenedGroupByValue.Expiration,
+		for {
+			combinedGroupByValue := &groupByFunctions.GroupByValue{
+				Expiration: 0,
+				Values:     make(map[string]interface{}),
+			}
+			for i := 0; i < n; i++ {
+				fmt.Println(n, groupIndices[i], elementIndices[i], len(groupByValues), len(groupByValues[groupIndices[i]]))
+				groupByValue := groupByValues[groupIndices[i]][elementIndices[i]]
+				for k, v := range groupByValue.Values {
+					fmt.Println(k, v)
+					combinedGroupByValue.Values[k] = v
 				}
-				for k, v := range flattenedGroupByValue.Values {
-					newGroupByValue.Values[k] = v
+				// we update the expiration value
+				if combinedGroupByValue.Expiration == 0 || groupByValue.Expiration > combinedGroupByValue.Expiration {
+					combinedGroupByValue.Expiration = groupByValue.Expiration
 				}
-				for k, v := range originalGroupByValue.Values {
-					newGroupByValue.Values[k] = v
+			}
+			fmt.Println(combinedGroupByValue.Expiration)
+			combinedGroupByValues = append(combinedGroupByValues, combinedGroupByValue)
+			found := false
+			// now we increase the index
+			for i := n - 1; i >= 0; i-- {
+				// we can still increase the value within this group
+				if elementIndices[i] < len(groupByValues[i])-1 {
+					elementIndices[i] += 1
+					found = true
+					// we set all larger indices to 0
+					for j := i + 1; j < n; j++ {
+						elementIndices[j] = 0
+					}
+					break
 				}
-				newFlattenedGroupByValues = append(newFlattenedGroupByValues, newGroupByValue)
+			}
+			if !found {
+				// we can't increase any individual index, so we need to increase
+				// the group instead. Please not that the first group will
+				// always be included by convention, as this is usually the group
+				// that contains an expiration key (e.g. a time stamp).
+				for i := n - 1; i >= 1; i-- {
+					if groupIndices[i] < len(groupByValues)-n+i {
+						groupIndices[i] += 1
+						found = true
+						// we reset all element indices now as this is a new
+						// combination of groups
+						for j := 0; j < n; j++ {
+							elementIndices[i] = 0
+						}
+						// we reset the higher group indices
+						for j := i + 1; j < n; j++ {
+							groupIndices[j] = groupIndices[i] + j - i
+						}
+						break
+					}
+				}
+			}
+			if !found {
+				// we've exhausted all combinations of groups for this given
+				// value n, so we increase n instead and continue
+				break
+			}
+			// we stop at 100 groups
+			if len(combinedGroupByValues) >= 100 {
+				break
 			}
 		}
-		flattenedGroupByValues = newFlattenedGroupByValues
+		// we stop at 100 groups
+		if len(combinedGroupByValues) >= 100 {
+			break
+		}
 	}
-	return flattenedGroupByValues, nil
+	return combinedGroupByValues, nil
 }
 
 func (a *AggregateAnonymizer) getGroups(item *kodex.Item, function aggregate.Function, shard aggregate.Shard) ([]aggregate.Group, error) {
