@@ -107,11 +107,11 @@ func (c *InMemoryActionConfig) SetDescription(description string) error {
 }
 
 func (c *InMemoryActionConfig) UpdatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (c *InMemoryActionConfig) CreatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (c *InMemoryActionConfig) DeletedAt() *time.Time {

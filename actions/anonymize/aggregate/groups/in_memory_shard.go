@@ -131,7 +131,7 @@ func (g *InMemoryShard) markGroupAsDeleted(group aggregate.Group) error {
 	if ok {
 		return aggregate.AlreadyDeleted
 	}
-	g.deletedGroups[h] = time.Now().UnixNano()
+	g.deletedGroups[h] = time.Now().UTC().UnixNano()
 	return nil
 
 }

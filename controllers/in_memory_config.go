@@ -73,11 +73,11 @@ func (c *InMemoryConfig) Destinations() (map[string][]kodex.DestinationMap, erro
 }
 
 func (c *InMemoryConfig) UpdatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (c *InMemoryConfig) CreatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (c *InMemoryConfig) DeletedAt() *time.Time {

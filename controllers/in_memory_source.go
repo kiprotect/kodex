@@ -86,7 +86,7 @@ func (c *InMemorySource) InternalID() []byte {
 }
 
 func (i *InMemorySource) CreatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (i *InMemorySource) DeletedAt() *time.Time {
@@ -94,7 +94,7 @@ func (i *InMemorySource) DeletedAt() *time.Time {
 }
 
 func (i *InMemorySource) UpdatedAt() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
 func (i *InMemorySource) ConfigData() map[string]interface{} {

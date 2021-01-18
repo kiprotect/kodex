@@ -65,7 +65,7 @@ func (s *FileWriter) Write(payload kodex.Payload) error {
 		extension = s.Format
 	}
 	if s.AddTime {
-		tn := time.Now().Unix()
+		tn := time.Now().UTC().Unix()
 		//we rotate the files every 60 seconds
 		ts := tn - (tn % 60)
 		fileName = fmt.Sprintf("%s-%d.%s", s.Name, ts, extension)

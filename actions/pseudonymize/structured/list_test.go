@@ -124,7 +124,7 @@ func MakeRangedBitField(min, max, value int64) (*RangedBitField, error) {
 
 func TestCompositeType(t *testing.T) {
 
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	_, err := MakeRangedBitField(0, 2000, 1400)
 	if err != nil {
