@@ -89,8 +89,22 @@ var GroupByTimeWindowForm = forms.Form{
 		{
 			Name: "window",
 			Validators: []forms.Validator{
-				forms.IsString{},
-				forms.IsIn{Choices: timeWindowValues()},
+				forms.Or{
+					Options: [][]forms.Validator{
+						[]forms.Validator{
+							forms.IsString{},
+							forms.IsIn{Choices: timeWindowValues()},
+						},
+						[]forms.Validator{
+							forms.IsList{
+								Validators: []forms.Validator{
+									forms.IsString{},
+									forms.IsIn{Choices: timeWindowValues()},
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	},

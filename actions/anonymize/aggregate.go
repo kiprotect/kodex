@@ -142,7 +142,7 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 	for _, groupByFunction := range a.groupByFunctions {
 		if functionGroupByValues, err := groupByFunction(item); err != nil {
 			return nil, err
-		} else if len(functionGroupByValues) > 0 {
+		} else if functionGroupByValues != nil && len(functionGroupByValues) > 0 {
 			groupByValues = append(groupByValues, functionGroupByValues)
 		}
 	}

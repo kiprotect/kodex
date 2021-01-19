@@ -43,8 +43,8 @@ func MakeValueFunction(config map[string]interface{}) (GroupByFunction, error) {
 			}
 			i := int(config["index"].(int64))
 			if i >= len(listValue) {
-				// the value is undefined, we return an empty list
-				return []*GroupByValue{}, nil
+				// the value is undefined, we return nothing
+				return nil, nil
 			} else {
 				value = listValue[i]
 			}

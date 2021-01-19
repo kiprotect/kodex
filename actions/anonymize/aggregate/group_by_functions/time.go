@@ -61,9 +61,23 @@ func MakeTimeWindowFunction(config map[string]interface{}) (GroupByFunction, err
 
 	format := config["format"].(string)
 	field := config["field"].(string)
-	window := config["window"].(string)
+	windows := make([]string, 0)
+	if windowsList, ok := config["window"].([]interface{}); ok {
+		// we have a list of window values
+		for _, wnd := range windowsList {
+			windows = append(windows, wnd.(string))
+		}
+	} else {
+		// the window is a single string
+		windows = append(windows, config["window"].(string))
+	}
 
-	timeWindowFunction := TimeWindowFunctions[window]
+	timeWindowFunctions := make([]TimeWindowFunction, len(windows))
+
+	for i, window := range windows {
+		timeWindowFunctions[i] = TimeWindowFunctions[window]
+	}
+
 	parser := TimeParsers[format]
 	formatter := TimeFormatters["rfc3339"]
 
@@ -71,15 +85,17 @@ func MakeTimeWindowFunction(config map[string]interface{}) (GroupByFunction, err
 		if t, err := getItemTime(item, field, parser); err != nil {
 			return nil, err
 		} else {
-			timeWindows := timeWindowFunction(t)
-			groups := make([]*GroupByValue, len(timeWindows))
-			for i, timeWindow := range timeWindows {
-				groups[i] = &GroupByValue{
-					Values: map[string]interface{}{
-						"from": formatter(timeWindow.FromTime),
-						"to":   formatter(timeWindow.ToTime),
-					},
-					Expiration: timeWindow.ToTime,
+			groups := make([]*GroupByValue, 0)
+			for _, twf := range timeWindowFunctions {
+				timeWindows := twf(t)
+				for _, timeWindow := range timeWindows {
+					groups = append(groups, &GroupByValue{
+						Values: map[string]interface{}{
+							"from": formatter(timeWindow.FromTime),
+							"to":   formatter(timeWindow.ToTime),
+						},
+						Expiration: timeWindow.ToTime,
+					})
 				}
 			}
 			return groups, nil
