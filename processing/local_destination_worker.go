@@ -23,26 +23,26 @@ import (
 )
 
 type LocalDestinationWorker struct {
-	pool              chan chan kodex.Payload
-	started           bool
-	writer            kodex.Writer
-	channels          []*kodex.InternalChannel
-	destinationWriter DestinationWriter
-	mutex             sync.Mutex
-	payloadChannel    chan kodex.Payload
-	stop              chan bool
+	pool           chan chan kodex.Payload
+	started        bool
+	writer         kodex.Writer
+	channels       []*kodex.InternalChannel
+	executor       Executor
+	mutex          sync.Mutex
+	payloadChannel chan kodex.Payload
+	stop           chan bool
 }
 
 func MakeLocalDestinationWorker(pool chan chan kodex.Payload,
 	writer kodex.Writer,
-	destinationWriter DestinationWriter) (*LocalDestinationWorker, error) {
+	executor Executor) (*LocalDestinationWorker, error) {
 	return &LocalDestinationWorker{
-		pool:              pool,
-		payloadChannel:    make(chan kodex.Payload, 100),
-		stop:              make(chan bool),
-		destinationWriter: destinationWriter,
-		started:           false,
-		writer:            writer,
+		pool:           pool,
+		payloadChannel: make(chan kodex.Payload, 100),
+		stop:           make(chan bool),
+		executor:       executor,
+		started:        false,
+		writer:         writer,
 	}, nil
 }
 

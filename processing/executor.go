@@ -20,13 +20,13 @@ import (
 	"github.com/kiprotect/kodex"
 )
 
-type DestinationSupervisor interface {
-	WriterStopped(DestinationWriter, kodex.DestinationMap)
+type Supervisor interface {
+	ExecutorStopped(Executor, kodex.Processable)
 }
 
-type DestinationWriter interface {
-	Start(DestinationSupervisor, kodex.DestinationMap) error
-	Stop(bool) error
+type Executor interface {
+	Start(Supervisor, kodex.Processable) error
+	Stop(graceful bool) error
 	Stopped() bool
 	ID() []byte
 }

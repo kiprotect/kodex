@@ -33,7 +33,7 @@ type LocalSourceReader struct {
 	configs          []kodex.Config
 	stopReader       chan bool
 	mutex            sync.Mutex
-	supervisor       SourceSupervisor
+	supervisor       Supervisor
 	stopped          bool
 	stopping         bool
 	payloadChannel   chan kodex.Payload
@@ -54,7 +54,13 @@ func (d *LocalSourceReader) ID() []byte {
 	return d.id
 }
 
-func (d *LocalSourceReader) Start(supervisor SourceSupervisor, sourceMap kodex.SourceMap) error {
+func (d *LocalSourceReader) Start(supervisor Supervisor, processable kodex.Processable) error {
+
+	sourceMap, ok := processable.(kodex.SourceMap)
+
+	if !ok {
+		return fmt.Errorf("not a source map")
+	}
 
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
@@ -138,7 +144,7 @@ func (d *LocalSourceReader) stop(gracefully bool, fromReader bool) error {
 	defer func() {
 		d.mutex.Unlock()
 		if supervisor != nil {
-			supervisor.ReaderStopped(d, sourceMap)
+			supervisor.ExecutorStopped(d, sourceMap)
 		}
 	}()
 

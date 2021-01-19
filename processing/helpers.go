@@ -27,7 +27,7 @@ func ProcessStream(stream kodex.Stream, timeout time.Duration) error {
 	sourceMaps, _ := stream.Sources()
 
 	// we create readers for all the sources
-	sourceReaders := make([]SourceReader, 0)
+	sourceReaders := make([]Executor, 0)
 	for _, sourceMap := range sourceMaps {
 		sourceReader := MakeLocalSourceReader(1, []byte("test"))
 		if err := sourceReader.Start(nil, sourceMap); err != nil {
@@ -44,7 +44,7 @@ func ProcessStream(stream kodex.Stream, timeout time.Duration) error {
 	}
 
 	// we process all destinations using local destination writers
-	destinationWriters := make([]DestinationWriter, 0)
+	destinationWriters := make([]Executor, 0)
 	destinationMaps := make([]kodex.DestinationMap, 0)
 	configs, err := stream.Configs()
 

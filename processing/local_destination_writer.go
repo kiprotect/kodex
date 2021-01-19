@@ -33,7 +33,7 @@ type LocalDestinationWriter struct {
 	channel               *kodex.InternalChannel
 	stopWriter            chan bool
 	mutex                 sync.Mutex
-	supervisor            DestinationSupervisor
+	supervisor            Supervisor
 	stopped               bool
 	stopping              bool
 	payloadChannel        chan kodex.Payload
@@ -54,7 +54,13 @@ func (d *LocalDestinationWriter) ID() []byte {
 	return d.id
 }
 
-func (d *LocalDestinationWriter) Start(supervisor DestinationSupervisor, destinationMap kodex.DestinationMap) error {
+func (d *LocalDestinationWriter) Start(supervisor Supervisor, processable kodex.Processable) error {
+
+	destinationMap, ok := processable.(kodex.DestinationMap)
+
+	if !ok {
+		return fmt.Errorf("not a destination map")
+	}
 
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
@@ -121,10 +127,6 @@ func (d *LocalDestinationWriter) Stopped() bool {
 	return d.stopped
 }
 
-func (d *LocalDestinationWriter) DestinationMap() kodex.DestinationMap {
-	return d.destinationMap
-}
-
 func (d *LocalDestinationWriter) stop(gracefully bool, fromReader bool) error {
 
 	if d.stopping || d.stopped {
@@ -165,7 +167,7 @@ func (d *LocalDestinationWriter) stop(gracefully bool, fromReader bool) error {
 	d.supervisor = nil
 
 	if supervisor != nil {
-		supervisor.WriterStopped(d, destinationMap)
+		supervisor.ExecutorStopped(d, destinationMap)
 	}
 
 	d.mutex.Unlock()

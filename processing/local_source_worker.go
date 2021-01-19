@@ -27,7 +27,7 @@ type LocalSourceWorker struct {
 	started        bool
 	streams        []kodex.Stream
 	channels       []*kodex.InternalChannel
-	reader         SourceReader
+	executor       Executor
 	mutex          sync.Mutex
 	payloadChannel chan kodex.Payload
 	stop           chan bool
@@ -47,7 +47,7 @@ func makeChannels(streams []kodex.Stream) ([]*kodex.InternalChannel, error) {
 
 func MakeLocalSourceWorker(pool chan chan kodex.Payload,
 	streams []kodex.Stream,
-	reader SourceReader) (*LocalSourceWorker, error) {
+	executor Executor) (*LocalSourceWorker, error) {
 	if channels, err := makeChannels(streams); err != nil {
 		return nil, err
 	} else {
@@ -58,7 +58,7 @@ func MakeLocalSourceWorker(pool chan chan kodex.Payload,
 			streams:        streams,
 			channels:       channels,
 			started:        false,
-			reader:         reader,
+			executor:       executor,
 		}, nil
 	}
 }
