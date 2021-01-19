@@ -110,15 +110,11 @@ var tests = []AggregateTest{
 			"counts": []map[string]interface{}{
 				map[string]interface{}{
 					"count": 2,
-					"group": map[string]interface{}{
-						"type": map[string]interface{}{"device": "desktop"},
-					},
+					"group": map[string]interface{}{"device": "desktop"},
 				},
 				map[string]interface{}{
 					"count": 2,
-					"group": map[string]interface{}{
-						"type": map[string]interface{}{"device": "mobile"},
-					},
+					"group": map[string]interface{}{"device": "mobile"},
 				},
 			},
 		},

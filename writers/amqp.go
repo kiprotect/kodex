@@ -122,8 +122,9 @@ func (a *AMQPWriter) Write(payload kodex.Payload) error {
 	bs := buf.Bytes()
 
 	headers := amqp.Table{
-		"format":   a.Format,
-		"compress": a.Compress,
+		"format":      a.Format,
+		"compress":    a.Compress,
+		"endOfStream": payload.EndOfStream(),
 	}
 
 	// we add the config ID as a header, if it is defined

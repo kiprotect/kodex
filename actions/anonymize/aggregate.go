@@ -167,7 +167,17 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 			for i := 0; i < n; i++ {
 				groupByValue := groupByValues[groupIndices[i]][elementIndices[i]]
 				for k, v := range groupByValue.Values {
-					combinedGroupByValue.Values[k] = v
+					if existingValue, ok := combinedGroupByValue.Values[k]; ok {
+						// if there's an existing value for the given key already,
+						// we append the new value to it
+						if l, ok := existingValue.([]interface{}); ok {
+							combinedGroupByValue.Values[k] = append(l, v)
+						} else {
+							combinedGroupByValue.Values[k] = []interface{}{existingValue, v}
+						}
+					} else {
+						combinedGroupByValue.Values[k] = v
+					}
 				}
 				// we update the expiration value
 				if combinedGroupByValue.Expiration == 0 || groupByValue.Expiration > combinedGroupByValue.Expiration {
@@ -201,7 +211,7 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 						// we reset all element indices now as this is a new
 						// combination of groups
 						for j := 0; j < n; j++ {
-							elementIndices[i] = 0
+							elementIndices[j] = 0
 						}
 						// we reset the higher group indices
 						for j := i + 1; j < n; j++ {

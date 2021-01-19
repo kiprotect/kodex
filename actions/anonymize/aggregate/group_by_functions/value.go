@@ -46,6 +46,14 @@ func MakeValueFunction(config map[string]interface{}) (GroupByFunction, error) {
 				// the value is undefined, we return nothing
 				return nil, nil
 			} else {
+				if mapValue, ok := listValue[i].(map[string]interface{}); ok {
+					// this is a map value, we return it directly
+					return []*GroupByValue{
+						&GroupByValue{
+							Values: mapValue,
+						},
+					}, nil
+				}
 				value = listValue[i]
 			}
 		}
