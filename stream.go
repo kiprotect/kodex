@@ -37,6 +37,7 @@ type StreamStats struct {
 
 type Stream interface {
 	Processable // Processable includes Model
+	PriorityModel
 	Configs() ([]Config, error)
 	Config([]byte) (Config, error)
 	MakeConfig() Config

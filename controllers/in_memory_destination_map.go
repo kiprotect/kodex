@@ -25,6 +25,8 @@ import (
 type InMemoryDestinationMap struct {
 	kodex.BaseDestinationMap
 	name        string
+	prio        float64
+	prioT       time.Time
 	status      kodex.DestinationStatus
 	destination *InMemoryDestination
 	config      *InMemoryConfig
@@ -38,6 +40,7 @@ func MakeInMemoryDestinationMap(id []byte, name string, config *InMemoryConfig, 
 		destination:        destination,
 		config:             config,
 		status:             status,
+		prioT:              time.Now().UTC(),
 		BaseDestinationMap: kodex.BaseDestinationMap{},
 	}
 	destinationMap.Self = destinationMap
@@ -113,5 +116,31 @@ func (i *InMemoryDestinationMap) Name() string {
 
 func (i *InMemoryDestinationMap) SetName(name string) error {
 	i.name = name
+	return nil
+}
+
+/* Priority Related Functionality */
+
+func (i *InMemoryDestinationMap) SetPriority(value float64) error {
+	i.prio = value
+	return nil
+}
+
+func (i *InMemoryDestinationMap) Priority() float64 {
+	return i.prio
+}
+
+func (i *InMemoryDestinationMap) PriorityTime() time.Time {
+	return i.prioT
+}
+
+func (i *InMemoryDestinationMap) SetPriorityTime(t time.Time) error {
+	i.prioT = t
+	return nil
+}
+
+func (i *InMemoryDestinationMap) SetPriorityAndTime(value float64, t time.Time) error {
+	i.prioT = t
+	i.prio = value
 	return nil
 }

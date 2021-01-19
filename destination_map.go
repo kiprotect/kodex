@@ -23,6 +23,7 @@ import (
 
 type DestinationMap interface {
 	Processable
+	PriorityModel
 	Destination() Destination
 	Config() Config
 	Name() string

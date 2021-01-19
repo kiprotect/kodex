@@ -23,6 +23,7 @@ import (
 
 type SourceMap interface {
 	Processable
+	PriorityModel
 	Source() Source
 	Stream() Stream
 	Status() SourceStatus
