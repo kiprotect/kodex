@@ -24,8 +24,8 @@ import (
 	"strings"
 )
 
-var EnvConfigName = "KIPROTECT_CONFIG"
-var EnvSettingsName = "KIPROTECT_SETTINGS"
+var EnvConfigName = "KODEX_CONFIG"
+var EnvSettingsName = "KODEX_SETTINGS"
 
 func ConfigPaths() []string {
 	envValue := os.Getenv(EnvConfigName)

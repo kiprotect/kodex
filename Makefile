@@ -35,15 +35,15 @@ plugins: plugins/writers/example/example.so
 plugins/writers/example/example.so: plugins/writers/example/example.go
 	@cd plugins/writers/example; make
 
-test: dep plugins
-	@KIPROTECT_CONFIG=$(KIPROTECT_TEST_CONFIG) KIPROTECT_SETTINGS=$(KIPROTECT_TEST_SETTINGS) go test $(testargs) -p 1 -count=1 `go list ./...`
+test: dep
+	@KODEX_CONFIG=$(KIPROTECT_TEST_CONFIG) KODEX_SETTINGS=$(KIPROTECT_TEST_SETTINGS) go test $(testargs) -p 1 -count=1 `go list ./...`
 
-test-races: dep plugins
-	@KIPROTECT_CONFIG=$(KIPROTECT_TEST_CONFIG) KIPROTECT_SETTINGS=$(KIPROTECT_TEST_SETTINGS) go test -race $(testargs) -p 1 -count=1 `go list ./...`
+test-races: dep
+	@KODEX_CONFIG=$(KIPROTECT_TEST_CONFIG) KODEX_SETTINGS=$(KIPROTECT_TEST_SETTINGS) go test -race $(testargs) -p 1 -count=1 `go list ./...`
 
 
 bench: dep
-	@KIPROTECT_CONFIG=$(KIPROTECT_TEST_CONFIG) KIPROTECT_SETTINGS=$(KIPROTECT_TEST_SETTINGS) go test -p 1 -run=NONE -bench=. $(GOFLAGS) `go list ./... | grep -v api/`
+	@KODEX_CONFIG=$(KIPROTECT_TEST_CONFIG) KODEX_SETTINGS=$(KIPROTECT_TEST_SETTINGS) go test -p 1 -run=NONE -bench=. $(GOFLAGS) `go list ./... | grep -v api/`
 
 clean:
 	@go clean $(GOFLAGS) -i ./...
