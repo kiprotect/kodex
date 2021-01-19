@@ -38,7 +38,7 @@ func MakeWriter(config map[string]interface{}) (interface{}, error) {
 func (t *TestWriter) Setup(data interface{}) error {
     if config, ok := data.(Config); !ok {
         return fmt.Errorf("not a config object")
-    } else {        
+    } else {
         fmt.Printf("Setting up writer with config %s", string(config.ID()))
     }
     return nil
