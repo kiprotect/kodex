@@ -123,12 +123,21 @@ func (a *AMQPReader) MakeAMQPPayload(delivery amqp.Delivery) (*AMQPPayload, erro
 		}
 	}
 
+	var endOfStream bool
+
+	if eos, ok := delivery.Headers["endOfStream"]; ok {
+		if eosBool, ok := eos.(bool); ok {
+			endOfStream = eosBool
+		}
+	}
+
 	payload := AMQPPayload{
-		delivery:   delivery,
-		compressed: a.Compress,
-		format:     a.Format,
-		items:      make([]*kodex.Item, 0),
-		headers:    delivery.Headers,
+		delivery:    delivery,
+		compressed:  a.Compress,
+		format:      a.Format,
+		endOfStream: endOfStream,
+		items:       make([]*kodex.Item, 0),
+		headers:     delivery.Headers,
 	}
 	if err := payload.readItems(); err != nil {
 		return nil, err
