@@ -34,7 +34,7 @@ type LocalStreamWorker struct {
 	started           bool
 	mutex             sync.Mutex
 	contexts          []*ConfigContext
-	executor          StreamExecutor
+	executor          Executor
 	payloadChannel    chan kodex.Payload
 	stop              chan bool
 }
@@ -42,7 +42,7 @@ type LocalStreamWorker struct {
 func MakeLocalStreamWorker(pool chan chan kodex.Payload,
 	contexts []*ConfigContext,
 	acknowledgeFailed bool,
-	executor StreamExecutor) (*LocalStreamWorker, error) {
+	executor Executor) (*LocalStreamWorker, error) {
 	// todo: proper error handling
 
 	return &LocalStreamWorker{

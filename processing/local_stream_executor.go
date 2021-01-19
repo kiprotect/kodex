@@ -33,7 +33,7 @@ type LocalStreamExecutor struct {
 	contexts         []*ConfigContext
 	stopChannel      chan bool
 	mutex            sync.Mutex
-	supervisor       StreamSupervisor
+	supervisor       Supervisor
 	stopped          bool
 	stopping         bool
 	payloadChannel   chan kodex.Payload
@@ -54,7 +54,13 @@ func (d *LocalStreamExecutor) ID() []byte {
 	return d.id
 }
 
-func (d *LocalStreamExecutor) Start(supervisor StreamSupervisor, stream kodex.Stream) error {
+func (d *LocalStreamExecutor) Start(supervisor Supervisor, processable kodex.Processable) error {
+
+	stream, ok := processable.(kodex.Stream)
+
+	if !ok {
+		return fmt.Errorf("not a stream")
+	}
 
 	kodex.Log.Debugf("Executing stream %s", string(stream.ID()))
 
