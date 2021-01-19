@@ -30,6 +30,8 @@ type InMemoryStream struct {
 	status      kodex.StreamStatus
 	data        interface{}
 	description string
+	prio        float64
+	prioT       time.Time
 	config      map[string]interface{}
 	configs     []kodex.Config
 	sources     map[string]kodex.SourceMap
@@ -41,6 +43,7 @@ func MakeInMemoryStream(id []byte, config map[string]interface{}, project *InMem
 		BaseStream: kodex.BaseStream{
 			Project_: project,
 		},
+		prioT:   time.Now().UTC(),
 		configs: make([]kodex.Config, 0),
 		sources: make(map[string]kodex.SourceMap),
 		id:      id,
@@ -188,4 +191,30 @@ func (c *InMemoryStream) RemoveSource(source kodex.Source) error {
 
 func (c *InMemoryStream) Sources() (map[string]kodex.SourceMap, error) {
 	return c.sources, nil
+}
+
+/* Priority Related Functionality */
+
+func (i *InMemoryStream) SetPriority(value float64) error {
+	i.prio = value
+	return nil
+}
+
+func (i *InMemoryStream) Priority() float64 {
+	return i.prio
+}
+
+func (i *InMemoryStream) PriorityTime() time.Time {
+	return i.prioT
+}
+
+func (i *InMemoryStream) SetPriorityTime(t time.Time) error {
+	i.prioT = t
+	return nil
+}
+
+func (i *InMemoryStream) SetPriorityAndTime(value float64, t time.Time) error {
+	i.prioT = t
+	i.prio = value
+	return nil
 }

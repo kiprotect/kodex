@@ -36,10 +36,11 @@ type Model interface {
 
 // A model that has an associated priority
 type PriorityModel interface {
-	AddToPriority(value float64) error
+	SetPriority(float64) error
 	Priority() float64
 	PriorityTime() time.Time
-	ResetPriority() error
+	SetPriorityTime(time.Time) error
+	SetPriorityAndTime(float64, time.Time) error
 }
 
 // A model that allows storing/retrieving statistics

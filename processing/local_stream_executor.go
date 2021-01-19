@@ -17,6 +17,7 @@
 package processing
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/kiprotect/kodex"
 	"sync"
@@ -62,7 +63,7 @@ func (d *LocalStreamExecutor) Start(supervisor Supervisor, processable kodex.Pro
 		return fmt.Errorf("not a stream")
 	}
 
-	kodex.Log.Debugf("Executing stream %s", string(stream.ID()))
+	kodex.Log.Debugf("Executing stream %s", hex.EncodeToString(stream.ID()))
 
 	d.mutex.Lock()
 	defer d.mutex.Unlock()

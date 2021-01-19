@@ -25,6 +25,8 @@ import (
 type InMemorySourceMap struct {
 	kodex.BaseSourceMap
 	name    string
+	prio    float64
+	prioT   time.Time
 	status  kodex.SourceStatus
 	session interface{}
 	source  *InMemorySource
@@ -38,6 +40,7 @@ func MakeInMemorySourceMap(id []byte, stream *InMemoryStream, source *InMemorySo
 		source:        source,
 		stream:        stream,
 		status:        status,
+		prioT:         time.Now().UTC(),
 		BaseSourceMap: kodex.BaseSourceMap{},
 	}
 	sourceMap.Self = sourceMap
@@ -113,5 +116,31 @@ func (i *InMemorySourceMap) Save() error {
 }
 
 func (i *InMemorySourceMap) Refresh() error {
+	return nil
+}
+
+/* Priority Related Functionality */
+
+func (i *InMemorySourceMap) SetPriority(value float64) error {
+	i.prio = value
+	return nil
+}
+
+func (i *InMemorySourceMap) Priority() float64 {
+	return i.prio
+}
+
+func (i *InMemorySourceMap) PriorityTime() time.Time {
+	return i.prioT
+}
+
+func (i *InMemorySourceMap) SetPriorityTime(t time.Time) error {
+	i.prioT = t
+	return nil
+}
+
+func (i *InMemorySourceMap) SetPriorityAndTime(value float64, t time.Time) error {
+	i.prioT = t
+	i.prio = value
 	return nil
 }
