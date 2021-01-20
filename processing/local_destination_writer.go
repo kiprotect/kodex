@@ -177,7 +177,6 @@ func (d *LocalDestinationWriter) stop(gracefully bool, fromReader bool) error {
 }
 
 func (d *LocalDestinationWriter) write() {
-	stopping := false
 Loop:
 	for {
 		var payload kodex.Payload
@@ -196,30 +195,21 @@ Loop:
 		// the loop (to reload configuration)
 
 		if payload, err = d.channel.Read(); err != nil {
-			if !stopping {
-				stopping = true
-				go d.stop(true, true)
-			}
-			continue
+			kodex.Log.Error(err)
+			break
 		}
 
 		// we didn't receive any new items...
 		if payload == nil {
-			if !stopping {
-				stopping = true
-				go d.stop(true, true)
-			}
-			continue
+			break
 		}
 
 		workerChannel := <-d.pool
 		workerChannel <- payload
 
 		if payload.EndOfStream() {
-			if !stopping {
-				stopping = true
-				go d.stop(true, true)
-			}
+			break
 		}
 	}
+	d.stop(true, true)
 }
