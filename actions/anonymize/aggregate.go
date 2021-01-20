@@ -148,6 +148,14 @@ func max(a, b int) int {
 	}
 	return b
 }
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunctions.GroupByValue, error) {
 	/*
 		We calculate the power set of all group-by function values. Each group-by function can
@@ -165,7 +173,7 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 
 	combinedGroupByValues := make([]*groupByFunctions.GroupByValue, 0)
 	// we generate all combinations from 1 to n elements (up to a maximum number of combinations)
-	for n := 1 + max(0, a.alwaysIncludedGroups-1); n <= len(groupByValues); n++ {
+	for n := min(1+max(0, a.alwaysIncludedGroups-1), len(groupByValues)); n <= len(groupByValues); n++ {
 		// the indices of the group-by functions that we add to the given combined group
 		groupIndices := make([]int, n)
 		// we specific groups within each group-by function that we add to the combined group
@@ -206,7 +214,7 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 			// now we increase the index
 			for i := n - 1; i >= 0; i-- {
 				// we can still increase the value within this group
-				if elementIndices[i] < len(groupByValues[i])-1 {
+				if elementIndices[i] < len(groupByValues[groupIndices[i]])-1 {
 					elementIndices[i] += 1
 					found = true
 					// we set all larger indices to 0

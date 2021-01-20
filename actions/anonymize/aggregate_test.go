@@ -176,6 +176,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-06-25T00:00:00Z",
 						"to":   "2009-07-02T00:00:00Z",
+						"tw":   "week-by-day",
 					},
 				},
 				map[string]interface{}{
@@ -183,6 +184,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-06-26T00:00:00Z",
 						"to":   "2009-07-03T00:00:00Z",
+						"tw":   "week-by-day",
 					},
 				},
 				map[string]interface{}{
@@ -190,6 +192,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-06-27T00:00:00Z",
 						"to":   "2009-07-04T00:00:00Z",
+						"tw":   "week-by-day",
 					},
 				},
 				map[string]interface{}{
@@ -197,6 +200,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-06-28T00:00:00Z",
 						"to":   "2009-07-05T00:00:00Z",
+						"tw":   "week-by-day",
 					},
 				},
 				map[string]interface{}{
@@ -204,6 +208,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-06-29T00:00:00Z",
 						"to":   "2009-07-06T00:00:00Z",
+						"tw":   "week-by-day",
 					},
 				},
 				map[string]interface{}{
@@ -211,6 +216,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-06-30T00:00:00Z",
 						"to":   "2009-07-07T00:00:00Z",
+						"tw":   "week-by-day",
 					},
 				},
 				map[string]interface{}{
@@ -218,6 +224,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-07-01T00:00:00Z",
 						"to":   "2009-07-08T00:00:00Z",
+						"tw":   "week-by-day",
 					},
 				},
 				map[string]interface{}{
@@ -225,6 +232,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-07-02T00:00:00Z",
 						"to":   "2009-07-09T00:00:00Z",
+						"tw":   "week-by-day",
 					},
 				},
 				map[string]interface{}{
@@ -232,6 +240,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-07-03T00:00:00Z",
 						"to":   "2009-07-10T00:00:00Z",
+						"tw":   "week-by-day",
 					},
 				},
 				map[string]interface{}{
@@ -239,6 +248,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-07-04T00:00:00Z",
 						"to":   "2009-07-11T00:00:00Z",
+						"tw":   "week-by-day",
 					},
 				},
 			},
@@ -323,6 +333,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-07-01T10:31:00Z",
 						"to":   "2009-07-01T10:32:00Z",
+						"tw":   "minute",
 					},
 				},
 				map[string]interface{}{
@@ -330,6 +341,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-07-01T10:33:00Z",
 						"to":   "2009-07-01T10:34:00Z",
+						"tw":   "minute",
 					},
 				},
 				map[string]interface{}{
@@ -337,6 +349,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": "2009-07-01T10:34:00Z",
 						"to":   "2009-07-01T10:35:00Z",
+						"tw":   "minute",
 					},
 				},
 				map[string]interface{}{
@@ -345,6 +358,7 @@ var tests = []AggregateTest{
 						"type": "swipe",
 						"from": "2009-07-01T10:31:00Z",
 						"to":   "2009-07-01T10:32:00Z",
+						"tw":   "minute",
 					},
 				},
 				map[string]interface{}{
@@ -353,6 +367,7 @@ var tests = []AggregateTest{
 						"type": "click",
 						"from": "2009-07-01T10:33:00Z",
 						"to":   "2009-07-01T10:34:00Z",
+						"tw":   "minute",
 					},
 				},
 				map[string]interface{}{
@@ -361,6 +376,7 @@ var tests = []AggregateTest{
 						"type": "swipe",
 						"from": "2009-07-01T10:34:00Z",
 						"to":   "2009-07-01T10:35:00Z",
+						"tw":   "minute",
 					},
 				},
 			},
@@ -654,6 +670,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": time.Unix(1399550400, 0).UTC().Format(time.RFC3339),
 						"to":   time.Unix(1399554000, 0).UTC().Format(time.RFC3339),
+						"tw":   "hour",
 					},
 				},
 				map[string]interface{}{
@@ -661,6 +678,7 @@ var tests = []AggregateTest{
 					"group": map[string]interface{}{
 						"from": time.Unix(1399554000, 0).UTC().Format(time.RFC3339),
 						"to":   time.Unix(1399557600, 0).UTC().Format(time.RFC3339),
+						"tw":   "hour",
 					},
 				},
 			},
