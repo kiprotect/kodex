@@ -66,9 +66,11 @@ func (s *InternalChannel) Teardown() error {
 			// we log this error as it might get overwritten
 			Log.Error(err)
 		}
+		s.InternalReader = nil
 	}
 	if s.InternalWriter != nil {
 		err = s.InternalWriter.Teardown()
+		s.InternalWriter = nil
 	}
 	return err
 }

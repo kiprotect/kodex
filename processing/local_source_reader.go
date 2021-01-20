@@ -201,7 +201,7 @@ Loop:
 
 		// we didn't receive any new items...
 		if payload == nil {
-			continue
+			break
 		}
 
 		workerChannel := <-d.pool

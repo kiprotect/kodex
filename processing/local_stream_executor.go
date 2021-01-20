@@ -84,7 +84,7 @@ func (d *LocalStreamExecutor) Start(supervisor Supervisor, processable kodex.Pro
 }
 
 func (d *LocalStreamExecutor) Stop(graceful bool) error {
-	return d.stop(graceful)
+	return d.stop(graceful, false)
 }
 
 func (d *LocalStreamExecutor) run() error {
@@ -171,7 +171,7 @@ func makeContexts(configs []kodex.Config) ([]*ConfigContext, error) {
 	return contexts, nil
 }
 
-func (d *LocalStreamExecutor) stop(graceful bool) error {
+func (d *LocalStreamExecutor) stop(graceful bool, fromReader bool) error {
 
 	if d.stopping || d.stopped {
 		return nil
@@ -200,8 +200,10 @@ func (d *LocalStreamExecutor) stop(graceful bool) error {
 
 	d.stopping = true
 
-	d.stopChannel <- true
-	<-d.stopChannel
+	if !fromReader {
+		d.stopChannel <- true
+		<-d.stopChannel
+	}
 
 	// then we stop the workers...
 	for _, worker := range d.workers {
@@ -239,7 +241,6 @@ func (d *LocalStreamExecutor) stop(graceful bool) error {
 }
 
 func (d *LocalStreamExecutor) read() {
-	var stopping bool
 	for {
 		var payload kodex.Payload
 		var err error
@@ -255,33 +256,22 @@ func (d *LocalStreamExecutor) read() {
 
 		// to do: check if the stream was updated and if yes break out of
 		// the loop (to reload configuration)
-
 		if payload, err = d.channel.Read(); err != nil {
-			if !stopping {
-				stopping = true
-				go d.stop(true)
-			}
-			continue
+			kodex.Log.Error(err)
+			break
 		}
 
 		// we didn't receive any new items...
 		if payload == nil {
-			// we stop processing any further items...
-			if !stopping {
-				stopping = true
-				go d.stop(true)
-			}
-			continue
+			break
 		}
 
 		workerChannel := <-d.pool
 		workerChannel <- payload
 
 		if payload.EndOfStream() {
-			if !stopping {
-				stopping = true
-				go d.stop(true)
-			}
+			break
 		}
 	}
+	d.stop(true, true)
 }
