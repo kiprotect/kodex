@@ -177,7 +177,6 @@ func (d *LocalDestinationWriter) stop(gracefully bool, fromReader bool) error {
 }
 
 func (d *LocalDestinationWriter) write() {
-Loop:
 	for {
 		var payload kodex.Payload
 		var err error
@@ -186,7 +185,7 @@ Loop:
 		case <-d.stopWriter:
 			// we stop reading any more payloads and return...
 			d.stopWriter <- true
-			break Loop
+			return
 		case <-time.After(time.Second):
 			break
 		}

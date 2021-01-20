@@ -177,7 +177,6 @@ func (d *LocalSourceReader) stop(gracefully bool, fromReader bool) error {
 }
 
 func (d *LocalSourceReader) read() {
-Loop:
 	for {
 		var payload kodex.Payload
 		var err error
@@ -186,7 +185,7 @@ Loop:
 		case <-d.stopReader:
 			// we stop reading any more payloads and return...
 			d.stopReader <- true
-			break Loop
+			return
 		case <-time.After(1 * time.Millisecond):
 			break
 		}
