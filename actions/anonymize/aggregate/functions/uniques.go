@@ -117,22 +117,40 @@ func uniform() (float64, error) {
 func geometricNoise(epsilon float64, symmetric bool) (int64, error) {
 	var k int64
 	p := math.Exp(-epsilon)
+	if pv, err := uniform(); err != nil {
+		return 0, err
+	} else if pv > p {
+		// the probability that we return 0
+		if symmetric {
+			if pv, err := uniform(); err != nil {
+				return 0, err
+			} else if pv > 0.5 {
+				return 0, nil
+			}
+		} else {
+			return 0, nil
+		}
+	}
 	if p < 1e-6 {
 		return 0, nil
 	}
 	if pv, err := uniform(); err != nil {
 		return 0, err
 	} else {
-		k = int64(math.Log(1-pv) / math.Log(p))
-	}
-	if symmetric {
-		if pv, err := uniform(); err != nil {
-			return 0, err
-		} else if pv >= 0.5 {
-			k = -k
+		pe := 1.0 - p + p*pv
+		k = int64(math.Log(1-pe) / math.Log(p))
+
+		if symmetric {
+			if pv, err := uniform(); err != nil {
+				return 0, err
+			} else if pv < 0.5 {
+				k = -k
+			}
 		}
+
+		return k, nil
+
 	}
-	return k, nil
 }
 
 func (c *Uniques) Finalize(group aggregate.Group) (interface{}, error) {

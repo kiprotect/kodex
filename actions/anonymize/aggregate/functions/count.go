@@ -33,11 +33,19 @@ var CountForm = forms.Form{
 				forms.IsFloat{HasMin: true, Min: 0.01, HasMax: false},
 			},
 		},
+		{
+			Name: "treshold",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: 0},
+				forms.IsInteger{HasMin: true, Min: 0, HasMax: false},
+			},
+		},
 	},
 }
 
 type Count struct {
-	epsilon float64
+	epsilon  float64
+	treshold int64
 }
 
 func (c *Count) Initialize(group aggregate.Group) error {
@@ -96,14 +104,16 @@ func (c *Count) Finalize(group aggregate.Group) (interface{}, error) {
 		return nil, errors.MakeInternalError("Expected an integer state", "COUNT", nil, nil)
 	}
 	i := intState.I
-	if noise, err := geometricNoise(c.epsilon, true); err != nil {
+	var noise int64
+	var err error
+	if noise, err = geometricNoise(c.epsilon, true); err != nil {
 		return nil, err
-	} else {
-		if i+noise < 0 {
-			return 0, nil
-		}
-		return i + noise, nil
 	}
+	// we do not report values below or at the treshold
+	if i+noise <= c.treshold {
+		return nil, nil
+	}
+	return i + noise, nil
 }
 
 func MakeCountFunction(config map[string]interface{}) (aggregate.Function, error) {
@@ -112,6 +122,7 @@ func MakeCountFunction(config map[string]interface{}) (aggregate.Function, error
 		return nil, err
 	}
 	return &Count{
-		epsilon: params["epsilon"].(float64),
+		epsilon:  params["epsilon"].(float64),
+		treshold: params["treshold"].(int64),
 	}, nil
 }
