@@ -151,7 +151,7 @@ func makeContexts(configs []kodex.Config) ([]*ConfigContext, error) {
 		var processor *kodex.Processor
 		var destinations map[string][]kodex.DestinationMap
 		var err error
-		if processor, err = config.Processor(); err != nil {
+		if processor, err = config.Processor(true); err != nil {
 			return nil, err
 		}
 		if err = processor.Setup(); err != nil {

@@ -60,7 +60,6 @@ type Source interface {
 type BaseSource struct {
 	Self     Source
 	Project_ Project
-	reader   Reader
 }
 
 func (b *BaseSource) Type() string {
@@ -172,18 +171,6 @@ func (b *BaseSource) update(params map[string]interface{}) error {
 }
 
 func (b *BaseSource) Reader() (Reader, error) {
-	if b.reader != nil {
-		return b.reader, nil
-	}
-	reader, err := b.createReader()
-	if err != nil {
-		return nil, err
-	}
-	b.reader = reader
-	return b.reader, nil
-}
-
-func (b *BaseSource) createReader() (Reader, error) {
 	definitions := b.Self.Project().Controller().Definitions()
 	sourceType := b.Self.SourceType()
 	config := b.Self.ConfigData()
@@ -194,7 +181,6 @@ func (b *BaseSource) createReader() (Reader, error) {
 	}
 
 	return definition.Maker(config)
-
 }
 
 var SourceForm = forms.Form{

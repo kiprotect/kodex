@@ -21,7 +21,6 @@ import (
 	"github.com/kiprotect/kodex"
 	pt "github.com/kiprotect/kodex/helpers/testing"
 	pf "github.com/kiprotect/kodex/helpers/testing/fixtures"
-	"github.com/kiprotect/kodex/writers"
 	"testing"
 	"time"
 )
@@ -35,14 +34,7 @@ type AggregateTest struct {
 var tests = []AggregateTest{
 	AggregateTest{
 		Config: map[string]interface{}{
-			"destinations": []map[string]interface{}{
-				{
-					"name":        "counts",
-					"type":        "in-memory",
-					"description": "counts",
-					"config":      map[string]interface{}{},
-				},
-			},
+			"destinations": []map[string]interface{}{},
 			"actions": []map[string]interface{}{
 				{
 					"name": "uniques-last-24h",
@@ -81,12 +73,7 @@ var tests = []AggregateTest{
 									"name": "uniques-last-24h",
 								},
 							},
-							"destinations": []map[string]interface{}{
-								map[string]interface{}{
-									"status": "active",
-									"name":   "counts",
-								},
-							},
+							"destinations": []map[string]interface{}{},
 						},
 					},
 				},
@@ -121,14 +108,7 @@ var tests = []AggregateTest{
 	},
 	AggregateTest{
 		Config: map[string]interface{}{
-			"destinations": []map[string]interface{}{
-				{
-					"name":        "counts",
-					"type":        "in-memory",
-					"description": "counts",
-					"config":      map[string]interface{}{},
-				},
-			},
+			"destinations": []map[string]interface{}{},
 			"actions": []map[string]interface{}{
 				{
 					"name": "uniques-last-24h",
@@ -167,12 +147,7 @@ var tests = []AggregateTest{
 									"name": "uniques-last-24h",
 								},
 							},
-							"destinations": []map[string]interface{}{
-								map[string]interface{}{
-									"status": "active",
-									"name":   "counts",
-								},
-							},
+							"destinations": []map[string]interface{}{},
 						},
 					},
 				},
@@ -269,14 +244,7 @@ var tests = []AggregateTest{
 	},
 	AggregateTest{
 		Config: map[string]interface{}{
-			"destinations": []map[string]interface{}{
-				{
-					"name":        "counts",
-					"type":        "in-memory",
-					"description": "counts",
-					"config":      map[string]interface{}{},
-				},
-			},
+			"destinations": []map[string]interface{}{},
 			"actions": []map[string]interface{}{
 				{
 					"name": "count-by-minute",
@@ -320,12 +288,7 @@ var tests = []AggregateTest{
 									"name": "count-by-minute",
 								},
 							},
-							"destinations": []map[string]interface{}{
-								map[string]interface{}{
-									"status": "active",
-									"name":   "counts",
-								},
-							},
+							"destinations": []map[string]interface{}{},
 						},
 					},
 				},
@@ -401,14 +364,7 @@ var tests = []AggregateTest{
 	},
 	AggregateTest{
 		Config: map[string]interface{}{
-			"destinations": []map[string]interface{}{
-				{
-					"name":        "counts",
-					"type":        "in-memory",
-					"description": "counts",
-					"config":      map[string]interface{}{},
-				},
-			},
+			"destinations": []map[string]interface{}{},
 			"actions": []map[string]interface{}{
 				{
 					"name": "uniques-by-hour",
@@ -447,12 +403,7 @@ var tests = []AggregateTest{
 									"name": "uniques-by-hour",
 								},
 							},
-							"destinations": []map[string]interface{}{
-								map[string]interface{}{
-									"status": "active",
-									"name":   "counts",
-								},
-							},
+							"destinations": []map[string]interface{}{},
 						},
 					},
 				},
@@ -854,11 +805,14 @@ func testAggregate(t *testing.T, parallel bool) {
 
 		c := make(chan error, len(sourceItems)-1)
 
-		processor, err := config.Processor()
+		processor, err := config.Processor(false)
 
 		if err != nil {
 			t.Fatal(err)
 		}
+
+		channelWriter := kodex.MakeInMemoryChannelWriter()
+		processor.SetWriter(channelWriter)
 
 		if err := processor.Setup(); err != nil {
 			t.Fatal(err)
@@ -869,7 +823,7 @@ func testAggregate(t *testing.T, parallel bool) {
 		}
 
 		process := func(items []*kodex.Item) error {
-			processor, err := config.Processor()
+			processor, err := config.Processor(false)
 			if err != nil {
 				return err
 			}
@@ -916,43 +870,14 @@ func testAggregate(t *testing.T, parallel bool) {
 			t.Fatal(err)
 		}
 
-		configDestinations, err := config.Destinations()
-
-		if err != nil {
-			t.Fatal(err)
-		}
-
 		for key, expectedDestinationItems := range test.Result {
 
-			keyDestinationMaps, ok := configDestinations[key]
+			destinationItems, ok := channelWriter.Items[key]
 
 			if !ok {
-				t.Fatalf("Cannot retrieve destination %s", key)
+				t.Errorf("No items for key %s found for test %d", key, testI)
+				continue
 			}
-
-			if len(keyDestinationMaps) != 1 {
-				t.Fatal("Expected one destination map")
-			}
-
-			keyDestinationMap := keyDestinationMaps[0]
-
-			writer, err := keyDestinationMap.Destination().Writer()
-
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if err := writer.Setup(config); err != nil {
-				t.Fatal(err)
-			}
-
-			inMemoryWriter, ok := writer.(*writers.InMemoryWriter)
-
-			if !ok {
-				t.Fatalf("Not an in-memory writer")
-			}
-
-			destinationItems := inMemoryWriter.Result()
 
 			if len(destinationItems) != len(expectedDestinationItems) {
 				t.Errorf("Expected %d destination items, got %d for test %d",
@@ -964,15 +889,19 @@ func testAggregate(t *testing.T, parallel bool) {
 
 			for i, destinationItem := range destinationItems {
 				kodex.Log.Info(destinationItem)
-				expectedDestinationItem := getMatchingItem(destinationItem["group"], expectedDestinationItems)
+				group, ok := destinationItem.Get("group")
+				if !ok {
+					t.Fatalf("Group information missing")
+				}
+				expectedDestinationItem := getMatchingItem(group, expectedDestinationItems)
 				if expectedDestinationItem == nil {
 					t.Error(expectedDestinationItem, destinationItem)
 					t.Fatalf("Could not find an item with a matching group for test %d and item %d", testI, i)
 				}
-				if !equal(destinationItem, expectedDestinationItem) {
+				if !equal(destinationItem.All(), expectedDestinationItem) {
 					o := ""
 					for k, v := range expectedDestinationItem {
-						vg, _ := destinationItem[k]
+						vg, _ := destinationItem.Get(k)
 						mapV, ok := v.(map[string]interface{})
 						if ok {
 							mapVg, ok := vg.(map[string]interface{})

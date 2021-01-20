@@ -50,7 +50,7 @@ type Config interface {
 	Stream() Stream
 	Data() interface{}
 
-	ChannelWriter() (ChannelWriter, error)
+	ChannelWriter(internal bool) (ChannelWriter, error)
 
 	SetData(interface{}) error
 	SetStatus(ConfigStatus) error
@@ -67,52 +67,65 @@ type Config interface {
 	AddActionConfig(ActionConfig, int) error
 	RemoveActionConfig(ActionConfig) error
 
-	Processor() (*Processor, error)
+	Processor(internal bool) (*Processor, error)
 }
 
 /* Base Functionality */
 
 type BaseChannelWriter struct {
-	config Config
+	writers  []Writer
+	config   Config
+	internal bool
 }
 
 func (b *BaseChannelWriter) Write(channel string, items []*Item) error {
-	destinations, err := b.getDestinations(channel)
+	writers, err := b.getWriters(channel)
 	if err != nil {
 		return err
 	}
 	var lastErr error
-	for _, destination := range destinations {
-		writer, err := destination.Writer()
-		if err != nil {
-			lastErr = err
-			continue
-		}
-		if err := writer.Setup(b.config); err != nil {
-			lastErr = err
-			continue
-		}
+	for _, writer := range writers {
 		if err := writer.Write(MakeBasicPayload(items, map[string]interface{}{}, false)); err != nil {
 			lastErr = err
+		}
+	}
+	// we tear down all the writers
+	for _, writer := range writers {
+		if err := writer.Teardown(); err != nil {
+			Log.Error(err)
 		}
 	}
 	return lastErr
 }
 
-func (b *BaseChannelWriter) getDestinations(channel string) ([]Destination, error) {
-	destinations := make([]Destination, 0)
+func (b *BaseChannelWriter) getWriters(channel string) ([]Writer, error) {
+	writers := make([]Writer, 0)
 	if configDestinations, err := b.config.Destinations(); err != nil {
 		return nil, err
 	} else {
 		for name, destinationMaps := range configDestinations {
 			if name == channel {
 				for _, destinationMap := range destinationMaps {
-					destinations = append(destinations, destinationMap.Destination())
+					var writer Writer
+					var err error
+					if b.internal {
+						if writer, err = destinationMap.InternalWriter(); err != nil {
+							return nil, err
+						}
+					} else {
+						if writer, err = destinationMap.Destination().Writer(); err != nil {
+							return nil, err
+						}
+					}
+					if err = writer.Setup(b.config); err != nil {
+						return nil, err
+					}
+					writers = append(writers, writer)
 				}
 			}
 		}
 	}
-	return destinations, nil
+	return writers, nil
 }
 
 func (b *BaseChannelWriter) Message(
@@ -267,13 +280,14 @@ func (b *BaseConfig) MarshalJSON() ([]byte, error) {
 	return json.Marshal(data)
 }
 
-func (b *BaseConfig) ChannelWriter() (ChannelWriter, error) {
+func (b *BaseConfig) ChannelWriter(internal bool) (ChannelWriter, error) {
 	return &BaseChannelWriter{
-		config: b.Self,
+		config:   b.Self,
+		internal: internal,
 	}, nil
 }
 
-func (b *BaseConfig) Processor() (*Processor, error) {
+func (b *BaseConfig) Processor(internal bool) (*Processor, error) {
 
 	actionConfigs, err := b.Self.ActionConfigs()
 	if err != nil {
@@ -295,7 +309,7 @@ func (b *BaseConfig) Processor() (*Processor, error) {
 	if err != nil {
 		return nil, err
 	}
-	channelWriter, err := b.Self.ChannelWriter()
+	channelWriter, err := b.Self.ChannelWriter(internal)
 
 	if err != nil {
 		return nil, err

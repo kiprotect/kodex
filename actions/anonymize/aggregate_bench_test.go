@@ -159,7 +159,7 @@ func BenchmarkAggregate(b *testing.B) {
 
 	config := configs[0]
 
-	processor, err := config.Processor()
+	processor, err := config.Processor(false)
 	if err != nil {
 		b.Fatal(err)
 	}
