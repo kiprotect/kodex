@@ -86,13 +86,14 @@ func MakeTimeWindowFunction(config map[string]interface{}) (GroupByFunction, err
 			return nil, err
 		} else {
 			groups := make([]*GroupByValue, 0)
-			for _, twf := range timeWindowFunctions {
+			for i, twf := range timeWindowFunctions {
 				timeWindows := twf(t)
 				for _, timeWindow := range timeWindows {
 					groups = append(groups, &GroupByValue{
 						Values: map[string]interface{}{
 							"from": formatter(timeWindow.FromTime),
 							"to":   formatter(timeWindow.ToTime),
+							"tw":   windows[i],
 						},
 						Expiration: timeWindow.ToTime,
 					})
