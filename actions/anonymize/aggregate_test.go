@@ -47,7 +47,8 @@ var tests = []AggregateTest{
 						},
 						"group-by": []map[string]interface{}{
 							{
-								"function": "value",
+								"function":        "value",
+								"always-included": true,
 								"config": map[string]interface{}{
 									"field":   "type",
 									"is-list": true,
@@ -121,7 +122,8 @@ var tests = []AggregateTest{
 						},
 						"group-by": []map[string]interface{}{
 							{
-								"function": "time-window",
+								"function":        "time-window",
+								"always-included": true,
 								"config": map[string]interface{}{
 									"field":  "created-at",
 									"window": "week-by-day",
@@ -257,7 +259,8 @@ var tests = []AggregateTest{
 						},
 						"group-by": []map[string]interface{}{
 							{
-								"function": "time-window",
+								"function":        "time-window",
+								"always-included": true,
 								"config": map[string]interface{}{
 									"field":  "created-at",
 									"window": "minute",
@@ -265,7 +268,8 @@ var tests = []AggregateTest{
 								},
 							},
 							{
-								"function": "value",
+								"function":        "value",
+								"always-included": false,
 								"config": map[string]interface{}{
 									"field": "type",
 								},
@@ -378,7 +382,8 @@ var tests = []AggregateTest{
 						},
 						"group-by": []map[string]interface{}{
 							{
-								"function": "time-window",
+								"function":        "time-window",
+								"always-included": true,
 								"config": map[string]interface{}{
 									"field":  "time",
 									"window": "hour",
