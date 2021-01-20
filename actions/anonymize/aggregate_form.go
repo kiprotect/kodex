@@ -178,6 +178,13 @@ var GroupByForm = forms.Form{
 			},
 		},
 		{
+			Name: "always-included",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: false},
+				forms.IsBoolean{},
+			},
+		},
+		{
 			Name: "config",
 			Validators: []forms.Validator{
 				forms.IsStringMap{},

@@ -28,16 +28,17 @@ import (
 )
 
 type AggregateAnonymizer struct {
-	channels         []string
-	resultName       string
-	function         Function
-	finalizeAfter    int64
-	id               []byte
-	name             string
-	filterFunctions  []filterFunctions.FilterFunction
-	groupByFunctions []groupByFunctions.GroupByFunction
-	groupStore       aggregate.GroupStore
-	mutex            sync.Mutex
+	channels             []string
+	resultName           string
+	function             Function
+	finalizeAfter        int64
+	id                   []byte
+	name                 string
+	filterFunctions      []filterFunctions.FilterFunction
+	groupByFunctions     []groupByFunctions.GroupByFunction
+	alwaysIncludedGroups int
+	groupStore           aggregate.GroupStore
+	mutex                sync.Mutex
 }
 
 func (a *AggregateAnonymizer) Setup() error {
@@ -60,6 +61,7 @@ func MakeAggregateAnonymizer(name string, id []byte, config map[string]interface
 	if params, err := AggregateForm.Validate(config); err != nil {
 		return nil, err
 	} else {
+		alwaysIncludedGroups := 0
 		gbf := make([]groupByFunctions.GroupByFunction, 0)
 		for _, groupByParams := range params["group-by"].([]interface{}) {
 			groupByParamsMap := groupByParams.(map[string]interface{})
@@ -70,7 +72,14 @@ func MakeAggregateAnonymizer(name string, id []byte, config map[string]interface
 			} else if groupByFunction, err := functionMaker(functionConfig); err != nil {
 				return nil, err
 			} else {
-				gbf = append(gbf, groupByFunction)
+				alwaysIncluded := groupByParamsMap["always-included"].(bool)
+				if alwaysIncluded {
+					alwaysIncludedGroups++
+					// we prepend the group so that the always included groups always come first
+					gbf = append([]groupByFunctions.GroupByFunction{groupByFunction}, gbf...)
+				} else {
+					gbf = append(gbf, groupByFunction)
+				}
 			}
 		}
 		resultName, ok := params["result-name"].(string)
@@ -78,13 +87,14 @@ func MakeAggregateAnonymizer(name string, id []byte, config map[string]interface
 			resultName = name
 		}
 		return &AggregateAnonymizer{
-			function:         params["function"].(Function),
-			channels:         params["channels"].([]string),
-			finalizeAfter:    params["finalize-after"].(int64),
-			groupByFunctions: gbf,
-			resultName:       resultName,
-			name:             name,
-			id:               id,
+			function:             params["function"].(Function),
+			channels:             params["channels"].([]string),
+			finalizeAfter:        params["finalize-after"].(int64),
+			groupByFunctions:     gbf,
+			alwaysIncludedGroups: alwaysIncludedGroups,
+			resultName:           resultName,
+			name:                 name,
+			id:                   id,
 		}, nil
 	}
 }
@@ -132,6 +142,12 @@ func (a *AggregateAnonymizer) process(item *kodex.Item, channelWriter kodex.Chan
 	return item, nil
 }
 
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
 func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunctions.GroupByValue, error) {
 	/*
 		We calculate the power set of all group-by function values. Each group-by function can
@@ -146,9 +162,10 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 			groupByValues = append(groupByValues, functionGroupByValues)
 		}
 	}
+
 	combinedGroupByValues := make([]*groupByFunctions.GroupByValue, 0)
 	// we generate all combinations from 1 to n elements (up to a maximum number of combinations)
-	for n := 1; n <= len(groupByValues); n++ {
+	for n := 1 + max(0, a.alwaysIncludedGroups-1); n <= len(groupByValues); n++ {
 		// the indices of the group-by functions that we add to the given combined group
 		groupIndices := make([]int, n)
 		// we specific groups within each group-by function that we add to the combined group
@@ -201,10 +218,9 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 			}
 			if !found {
 				// we can't increase any individual index, so we need to increase
-				// the group instead. Please not that the first group will
-				// always be included by convention, as this is usually the group
-				// that contains an expiration key (e.g. a time stamp).
-				for i := n - 1; i >= 1; i-- {
+				// the group instead. We will not increase the groups that always
+				// need to be included
+				for i := n - 1; i >= a.alwaysIncludedGroups; i-- {
 					if groupIndices[i] < len(groupByValues)-n+i {
 						groupIndices[i] += 1
 						found = true
