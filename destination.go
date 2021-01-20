@@ -55,7 +55,6 @@ type Destination interface {
 type BaseDestination struct {
 	Self     Destination
 	Project_ Project
-	writer   Writer
 }
 
 func (b *BaseDestination) Type() string {
@@ -152,7 +151,7 @@ func (b *BaseDestination) update(params map[string]interface{}) error {
 
 }
 
-func (b *BaseDestination) createWriter() (Writer, error) {
+func (b *BaseDestination) Writer() (Writer, error) {
 	definitions := b.Self.Project().Controller().Definitions()
 	destinationType := b.Self.DestinationType()
 	config := b.Self.ConfigData()
@@ -162,19 +161,6 @@ func (b *BaseDestination) createWriter() (Writer, error) {
 	}
 
 	return definition.Maker(config)
-
-}
-
-func (b *BaseDestination) Writer() (Writer, error) {
-	if b.writer != nil {
-		return b.writer, nil
-	}
-	writer, err := b.createWriter()
-	if err != nil {
-		return nil, err
-	}
-	b.writer = writer
-	return b.writer, nil
 }
 
 var DestinationForm = forms.Form{

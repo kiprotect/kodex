@@ -261,13 +261,16 @@ func (a *AMQPBase) setup(model kodex.Model) error {
 }
 
 func (a *AMQPBase) Teardown() error {
+	var err error
 	if a.Channel != nil {
-		if err := a.Channel.Close(); err != nil {
-			kodex.Log.Error(err)
-		}
+		err = a.Channel.Close()
+		a.Channel = nil
 	}
 	if a.Connection != nil {
-		return a.Connection.Close()
+		if !a.Connection.IsClosed() {
+			err = a.Connection.Close()
+		}
+		a.Connection = nil
 	}
-	return nil
+	return err
 }

@@ -36,8 +36,7 @@ type DestinationMap interface {
 /* Base Functionality */
 
 type BaseDestinationMap struct {
-	Self   DestinationMap
-	writer Writer
+	Self DestinationMap
 }
 
 func (b *BaseDestinationMap) Type() string {
@@ -61,15 +60,11 @@ func (b *BaseDestinationMap) createWriter() (Writer, error) {
 }
 
 func (b *BaseDestinationMap) InternalWriter() (Writer, error) {
-	if b.writer != nil {
-		return b.writer, nil
-	}
-	writer, err := b.createWriter()
-	if err != nil {
+	channel := MakeInternalChannel()
+	if err := channel.Setup(b.Self.Destination().Project().Controller(), b.Self); err != nil {
 		return nil, err
 	}
-	b.writer = writer
-	return b.writer, nil
+	return MakeInternalWriter(channel), nil
 }
 
 func (b *BaseDestinationMap) MarshalJSON() ([]byte, error) {
