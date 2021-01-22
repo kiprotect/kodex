@@ -92,7 +92,7 @@ func (d *LocalDestinationWriter) Start(supervisor Supervisor, processable kodex.
 }
 
 func (d *LocalDestinationWriter) Stop(graceful bool) error {
-	return d.stop(true, false)
+	return d.stop(graceful)
 }
 
 func (d *LocalDestinationWriter) run() error {
@@ -127,7 +127,7 @@ func (d *LocalDestinationWriter) Stopped() bool {
 	return d.stopped
 }
 
-func (d *LocalDestinationWriter) stop(gracefully bool, fromReader bool) error {
+func (d *LocalDestinationWriter) stop(graceful bool) error {
 
 	if d.stopping || d.stopped {
 		return nil
@@ -140,11 +140,18 @@ func (d *LocalDestinationWriter) stop(gracefully bool, fromReader bool) error {
 
 	d.stopping = true
 
-	if !fromReader {
-		// first we stop the destination writer to stop reading more payloads..
-		d.stopWriter <- true
-		<-d.stopWriter
-	}
+	defer func() {
+		d.mutex.Unlock()
+		d.destinationMap = nil
+		d.writer = nil
+		d.stopped = true
+		d.stopping = false
+		d.supervisor = nil
+	}()
+
+	// first we stop the destination writer to stop reading more payloads..
+	d.stopWriter <- true
+	<-d.stopWriter
 
 	// then we stop the workers...
 	for _, worker := range d.workers {
@@ -160,23 +167,25 @@ func (d *LocalDestinationWriter) stop(gracefully bool, fromReader bool) error {
 		kodex.Log.Error(err)
 	}
 
-	d.destinationMap = nil
-	d.writer = nil
-	d.stopped = true
-	d.stopping = false
-	d.supervisor = nil
-
 	if supervisor != nil {
 		supervisor.ExecutorStopped(d, destinationMap)
 	}
-
-	d.mutex.Unlock()
 
 	return nil
 
 }
 
 func (d *LocalDestinationWriter) write() {
+
+	stopping := false
+
+	stop := func() {
+		if !stopping {
+			stopping = true
+			go d.stop(true)
+		}
+	}
+
 	for {
 		var payload kodex.Payload
 		var err error
@@ -190,25 +199,31 @@ func (d *LocalDestinationWriter) write() {
 			break
 		}
 
+		if stopping {
+			continue
+		}
+
 		// to do: check if the destination was updated and if yes break out of
 		// the loop (to reload configuration)
 
 		if payload, err = d.channel.Read(); err != nil {
 			kodex.Log.Error(err)
-			break
+			stop()
+			continue
 		}
 
 		// we didn't receive any new items...
 		if payload == nil {
-			break
+			stop()
+			continue
 		}
 
 		workerChannel := <-d.pool
 		workerChannel <- payload
 
 		if payload.EndOfStream() {
-			break
+			stop()
+			continue
 		}
 	}
-	d.stop(true, true)
 }

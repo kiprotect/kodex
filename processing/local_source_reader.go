@@ -85,7 +85,7 @@ func (d *LocalSourceReader) Start(supervisor Supervisor, processable kodex.Proce
 }
 
 func (d *LocalSourceReader) Stop(graceful bool) error {
-	return d.stop(true, false)
+	return d.stop(graceful)
 }
 
 func (d *LocalSourceReader) run() error {
@@ -131,7 +131,7 @@ func (d *LocalSourceReader) SourceMap() kodex.SourceMap {
 	return d.sourceMap
 }
 
-func (d *LocalSourceReader) stop(gracefully bool, fromReader bool) error {
+func (d *LocalSourceReader) stop(graceful bool) error {
 
 	if d.stopping || d.stopped {
 		return nil
@@ -142,6 +142,11 @@ func (d *LocalSourceReader) stop(gracefully bool, fromReader bool) error {
 	sourceMap := d.sourceMap
 	supervisor := d.supervisor
 	defer func() {
+		d.sourceMap = nil
+		d.reader = nil
+		d.stopped = true
+		d.stopping = false
+		d.supervisor = nil
 		d.mutex.Unlock()
 		if supervisor != nil {
 			supervisor.ExecutorStopped(d, sourceMap)
@@ -150,11 +155,9 @@ func (d *LocalSourceReader) stop(gracefully bool, fromReader bool) error {
 
 	d.stopping = true
 
-	if !fromReader {
-		// first we stop the source reader to stop reading more payloads..
-		d.stopReader <- true
-		<-d.stopReader
-	}
+	// first we stop the source reader to stop reading more payloads..
+	d.stopReader <- true
+	<-d.stopReader
 
 	// then we stop the workers...
 	for _, worker := range d.workers {
@@ -166,17 +169,20 @@ func (d *LocalSourceReader) stop(gracefully bool, fromReader bool) error {
 		kodex.Log.Error(err)
 	}
 
-	d.sourceMap = nil
-	d.reader = nil
-	d.stopped = true
-	d.stopping = false
-	d.supervisor = nil
-
 	return nil
 
 }
 
 func (d *LocalSourceReader) read() {
+	stopping := false
+
+	stop := func() {
+		if !stopping {
+			stopping = true
+			go d.stop(true)
+		}
+	}
+
 	for {
 		var payload kodex.Payload
 		var err error
@@ -190,26 +196,32 @@ func (d *LocalSourceReader) read() {
 			break
 		}
 
+		if stopping {
+			continue
+		}
+
 		// to do: check if the source was updated and if yes break out of
 		// the loop (to reload configuration)
 
 		if payload, err = d.reader.Read(); err != nil {
 			kodex.Log.Error(err)
-			break
+			stop()
+			continue
 		}
 
 		// we didn't receive any new items...
 		if payload == nil {
-			break
+			stop()
+			continue
 		}
 
 		workerChannel := <-d.pool
 		workerChannel <- payload
 
 		if payload.EndOfStream() {
-			break
+			stop()
+			continue
 		}
 
 	}
-	d.stop(true, true)
 }
