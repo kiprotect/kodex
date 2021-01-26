@@ -347,7 +347,7 @@ func Kodex(definitions *kodex.Definitions) {
 			kodex.Log.SetLevel(logLevel)
 
 			runner := func() error { return f(c) }
-			profiler := c.String("profile")
+			profiler := c.GlobalString("profile")
 			if profiler != "" {
 				return runWithProfiler(profiler, runner)
 			}

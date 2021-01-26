@@ -18,12 +18,15 @@ package helpers
 
 import (
 	"fmt"
+	"github.com/kiprotect/kodex"
 	"os"
 	"runtime"
 	"runtime/pprof"
 )
 
 func runWithProfiler(name string, runner func() error) error {
+
+	kodex.Log.Info("Running with profiler...")
 
 	fc, err := os.Create(fmt.Sprintf("%s-cpu.pprof", name))
 
