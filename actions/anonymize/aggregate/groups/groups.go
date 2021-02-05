@@ -20,7 +20,7 @@ import (
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
 )
 
-type GroupStoreMaker func([]byte) (aggregate.GroupStore, error)
+type GroupStoreMaker func(map[string]interface{}, []byte) (aggregate.GroupStore, error)
 
 var GroupStores = map[string]GroupStoreMaker{
 	"in-memory": MakeInMemoryGroupStore,

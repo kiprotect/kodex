@@ -154,14 +154,10 @@ func MakeTranscodeAction(name, description string, id []byte, config map[string]
 	if err != nil {
 		return nil, err
 	}
-	if baseAction, err := kodex.MakeBaseAction(name, description, "pseudonymize", id, config); err != nil {
-		return nil, err
-	} else {
-		return &TranscodeAction{
-			BaseAction: baseAction,
-			from:       params["from"].(string),
-			to:         params["to"].(string),
-			key:        params["key"].(string),
-		}, nil
-	}
+	return &TranscodeAction{
+		BaseAction: kodex.MakeBaseAction(name, description, "transcode", id, config),
+		from:       params["from"].(string),
+		to:         params["to"].(string),
+		key:        params["key"].(string),
+	}, nil
 }

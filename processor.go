@@ -141,7 +141,7 @@ func (p *Processor) ErrorPolicy() ErrorPolicy {
 
 func (p *Processor) Setup() error {
 	for i, action := range p.parameterSet.Actions() {
-		if err := action.Setup(); err != nil {
+		if err := action.Setup(p.config.Stream().Project().Controller().Settings()); err != nil {
 			// we tear down the actions that were already set up
 			for j, otherAction := range p.parameterSet.Actions() {
 				if j >= i {

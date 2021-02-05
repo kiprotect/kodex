@@ -90,16 +90,12 @@ func MakePseudonymizeAction(name, description string, id []byte, config map[stri
 		return nil, err
 	}
 
-	if baseAction, err := kodex.MakeBaseAction(name, description, "pseudonymize", id, config); err != nil {
-		return nil, err
-	} else {
-		return &PseudonymizeTransformation{
-			pseudonymizer: ps,
-			method:        method,
-			key:           params["key"].(string),
-			BaseAction:    baseAction,
-		}, nil
-	}
+	return &PseudonymizeTransformation{
+		pseudonymizer: ps,
+		method:        method,
+		key:           params["key"].(string),
+		BaseAction:    kodex.MakeBaseAction(name, description, "pseudonymize", id, config),
+	}, nil
 
 }
 

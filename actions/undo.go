@@ -55,14 +55,10 @@ func MakeUndoAction(name, description string, id []byte, config map[string]inter
 	if err != nil {
 		return nil, err
 	}
-	if baseAction, err := kodex.MakeBaseAction(name, description, "undo", id, config); err != nil {
-		return nil, err
-	} else {
-		return &UndoAction{
-			BaseAction:  baseAction,
-			actionSpecs: params["actions"].([]kodex.ActionSpecification),
-		}, nil
-	}
+	return &UndoAction{
+		BaseAction:  kodex.MakeBaseAction(name, description, "undo", id, config),
+		actionSpecs: params["actions"].([]kodex.ActionSpecification),
+	}, nil
 }
 
 func (a *UndoAction) HasParams() bool {
@@ -132,12 +128,4 @@ func (a *UndoAction) DoWithConfig(item *kodex.Item, writer kodex.ChannelWriter, 
 			return nil, fmt.Errorf("expected a single item")
 		}
 	}
-}
-
-func (a *UndoAction) Setup() error {
-	return nil
-}
-
-func (a *UndoAction) Teardown() error {
-	return nil
 }

@@ -25,13 +25,9 @@ type DropAction struct {
 }
 
 func MakeDropAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
-	if baseAction, err := kodex.MakeBaseAction(name, description, "drop", id, config); err != nil {
-		return nil, err
-	} else {
-		return &DropAction{
-			BaseAction: baseAction,
-		}, nil
-	}
+	return &DropAction{
+		BaseAction: kodex.MakeBaseAction(name, description, "drop", id, config),
+	}, nil
 }
 
 func (a *DropAction) Params() interface{} {
@@ -48,12 +44,4 @@ func (a *DropAction) SetParams(params interface{}) error {
 
 func (a *DropAction) Do(item *kodex.Item, writer kodex.ChannelWriter) (*kodex.Item, error) {
 	return nil, nil
-}
-
-func (a *DropAction) Setup() error {
-	return nil
-}
-
-func (a *DropAction) Teardown() error {
-	return nil
 }

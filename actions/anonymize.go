@@ -64,8 +64,8 @@ func (p *AnonymizeAction) Params() interface{} {
 	return nil
 }
 
-func (p *AnonymizeAction) Setup() error {
-	return p.anonymizer.Setup()
+func (p *AnonymizeAction) Setup(settings kodex.Settings) error {
+	return p.anonymizer.Setup(settings)
 }
 
 func (p *AnonymizeAction) Teardown() error {
@@ -106,15 +106,11 @@ func MakeAnonymizeAction(name, description string, id []byte, config map[string]
 		return nil, err
 	}
 
-	if baseAction, err := kodex.MakeBaseAction(name, description, "anonymize", id, config); err != nil {
-		return nil, err
-	} else {
-		return &AnonymizeAction{
-			anonymizer: anonymizer,
-			method:     method,
-			BaseAction: baseAction,
-		}, nil
-	}
+	return &AnonymizeAction{
+		anonymizer: anonymizer,
+		method:     method,
+		BaseAction: kodex.MakeBaseAction(name, description, "anonymize", id, config),
+	}, nil
 
 }
 

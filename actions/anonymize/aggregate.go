@@ -41,11 +41,11 @@ type AggregateAnonymizer struct {
 	mutex                sync.Mutex
 }
 
-func (a *AggregateAnonymizer) Setup() error {
+func (a *AggregateAnonymizer) Setup(settings kodex.Settings) error {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 	var err error
-	if a.groupStore, err = groups.GroupStores["in-memory"](a.id); err != nil {
+	if a.groupStore, err = groups.GroupStores["in-memory"](map[string]interface{}{}, a.id); err != nil {
 		return errors.MakeExternalError("in-memory store not defined", "IN-MEMORY-STORE", nil, err)
 	}
 	return nil
@@ -54,7 +54,7 @@ func (a *AggregateAnonymizer) Setup() error {
 func (a *AggregateAnonymizer) Teardown() error {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
-	return nil
+	return a.groupStore.Teardown()
 }
 
 func MakeAggregateAnonymizer(name string, id []byte, config map[string]interface{}) (Anonymizer, error) {

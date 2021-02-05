@@ -35,7 +35,7 @@ var Store map[string]*InMemoryGroupStore
 var mutex sync.Mutex
 
 // Create a new InMemoryGroupStore object for the given config
-func MakeInMemoryGroupStore(id []byte) (aggregate.GroupStore, error) {
+func MakeInMemoryGroupStore(config map[string]interface{}, id []byte) (aggregate.GroupStore, error) {
 	if Store == nil {
 		mutex.Lock()
 		if Store == nil {
@@ -56,6 +56,10 @@ func MakeInMemoryGroupStore(id []byte) (aggregate.GroupStore, error) {
 		mutex.Unlock()
 	}
 	return Store[strId], nil
+}
+
+func (g *InMemoryGroupStore) Teardown() error {
+	return nil
 }
 
 func (g *InMemoryGroupStore) Return(id int) error {
