@@ -120,6 +120,7 @@ func (a *AggregateAnonymizer) Reset() error {
 }
 
 func (a *AggregateAnonymizer) Advance(writer kodex.ChannelWriter) ([]*kodex.Item, error) {
+	kodex.Log.Info("Advancing aggregate anonymizer...")
 	return nil, nil
 }
 

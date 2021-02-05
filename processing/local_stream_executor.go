@@ -249,6 +249,13 @@ func (d *LocalStreamExecutor) read() {
 		}
 	}
 
+	// we generate an empty payload that we send to one of the processors, which triggers
+	// e.g. the 'Advance()' method for stateful actions...
+	payload := kodex.MakeBasicPayload([]*kodex.Item{}, map[string]interface{}{}, false)
+
+	workerChannel := <-d.pool
+	workerChannel <- payload
+
 	for {
 		var payload kodex.Payload
 		var err error

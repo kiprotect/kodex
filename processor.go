@@ -272,9 +272,43 @@ func (p *Processor) Process(items []*Item, paramsMap map[string]interface{}) ([]
 	return p.process(items, paramsMap, false)
 }
 
+func (p *Processor) Advance() ([]*Item, error) {
+	newItems := make([]*Item, 0)
+	for _, action := range p.parameterSet.Actions() {
+		if statefulAction, ok := action.(StatefulAction); ok {
+			if advanceItems, err := statefulAction.Advance(p.channelWriter); err != nil {
+				switch p.errorPolicy {
+				case ReportErrors:
+					advanceErr := errors.MakeExternalError("error advancing action", "ADVANCE-ACTION", action.Name(), err)
+					Log.Error(advanceErr)
+					if err := p.channelWriter.Error(nil, advanceErr); err != nil {
+						return newItems, err
+					}
+					continue
+				case AbortOnError:
+					return newItems, errors.MakeExternalError("error advancing action", "ADVANCE-ACTION", action.Name(), err)
+				}
+			} else {
+				newItems = append(newItems, advanceItems...)
+			}
+		}
+	}
+	return newItems, nil
+}
+
 func (p *Processor) process(items []*Item, paramsMap map[string]interface{}, undo bool) ([]*Item, error) {
 	Log.Debugf("Processing %d items with error policy '%s'", len(items), p.errorPolicy)
 	newItems := make([]*Item, 0)
+	// we first perform the Advance() method (for stateful actions)
+	if advanceItems, err := p.Advance(); err != nil {
+		advanceErr := errors.MakeExternalError("error advancing actions", "ADVANCE-ACTIONS", nil, err)
+		Log.Error(advanceErr)
+		if err := p.channelWriter.Error(nil, advanceErr); err != nil {
+			return newItems, err
+		}
+	} else {
+		newItems = append(newItems, advanceItems...)
+	}
 	for _, item := range items {
 		newItem, err := p.processItem(item, paramsMap, undo)
 		if err != nil {
