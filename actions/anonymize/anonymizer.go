@@ -21,7 +21,7 @@ import (
 )
 
 type Anonymizer interface {
-	Setup() error
+	Setup(kodex.Settings) error
 	Teardown() error
 	Reset() error
 	Advance(kodex.ChannelWriter) ([]*kodex.Item, error)

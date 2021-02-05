@@ -48,7 +48,7 @@ type Action interface {
 	Description() string
 	Type() string
 	Config() map[string]interface{}
-	Setup() error
+	Setup(Settings) error
 	Teardown() error
 }
 
@@ -210,14 +210,14 @@ func MakeActions(specs []ActionSpecification, definitions *Definitions) ([]Actio
 	return actions, nil
 }
 
-func MakeBaseAction(name, description, actionType string, id []byte, config map[string]interface{}) (BaseAction, error) {
+func MakeBaseAction(name, description, actionType string, id []byte, config map[string]interface{}) BaseAction {
 	return BaseAction{
 		Description_: description,
 		Name_:        name,
 		Type_:        actionType,
 		ID_:          id,
 		Config_:      config,
-	}, nil
+	}
 }
 
 func (b *BaseAction) HasParams() bool {
@@ -249,7 +249,7 @@ func (b *BaseAction) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (b *BaseAction) Setup() error {
+func (b *BaseAction) Setup(Settings) error {
 	return nil
 }
 

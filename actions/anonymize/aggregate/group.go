@@ -50,6 +50,8 @@ type Shard interface {
 }
 
 type GroupStore interface {
+	// Tear down the group store
+	Teardown() error
 	// Reset the entire state of the group store
 	Reset() error
 	// Get a shard from the store
