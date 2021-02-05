@@ -79,6 +79,15 @@ Make:
 
     make test
 
+## Testing Plugins
+
+The plugin test may fail with an error message "plugin was built with a different version of package internal/cpu"
+which can occur if the compile flags used for compiling the main code and the plugin differ. This might happen
+e.g. if you perform race condition detection tests. To fix the problem, go to the plugin folder and run
+
+    make clean
+    make
+
 # Running the benchmarks
 
 Kodex also comes with a number of benchmarks that you can run as follows:
