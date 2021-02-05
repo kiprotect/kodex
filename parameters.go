@@ -45,6 +45,7 @@ type ParameterStore interface {
 	// there is an error (e.g. parameters exist for the same action config
 	// as identified by their ID but they are incompatible) and error will
 	// be returned.
+	Definitions() *Definitions
 	ParametersById(id []byte) (*Parameters, error)
 	Parameters(action Action, parameterGroup *ParameterGroup) (*Parameters, error)
 	ParameterSet(hash []byte) (*ParameterSet, error)
@@ -419,13 +420,14 @@ func RestoreParameterSet(data map[string]interface{}, parameterStore ParameterSt
 	}, nil
 }
 
-func RestoreParameters(data map[string]interface{}, parameterStore ParameterStore, definitions *Definitions) (*Parameters, error) {
+func RestoreParameters(data map[string]interface{}, parameterStore ParameterStore) (*Parameters, error) {
 	config, err := ParameterForm.Validate(data)
 	if err != nil {
 		return nil, err
 	}
 	actionConfig := config["action"].(map[string]interface{})
-	action, err := MakeAction(actionConfig["name"].(string), actionConfig["description"].(string), actionConfig["type"].(string), actionConfig["id"].([]byte), actionConfig["config"].(map[string]interface{}), definitions)
+	action, err := MakeAction(actionConfig["name"].(string), actionConfig["description"].(string), actionConfig["type"].(string), actionConfig["id"].([]byte), actionConfig["config"].(map[string]interface{}), parameterStore.
+		Definitions())
 	if err != nil {
 		return nil, err
 	}

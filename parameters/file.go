@@ -534,6 +534,10 @@ func MakeFileParameterStore(config map[string]interface{}, definitions *kodex.De
 	}, nil
 }
 
+func (p *FileParameterStore) Definitions() *kodex.Definitions {
+	return p.inMemoryStore.Definitions()
+}
+
 // Updates the parameter store by reading from the data store
 func (p *FileParameterStore) update() error {
 	if entries, err := p.dataStore.Read(); err != nil {

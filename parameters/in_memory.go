@@ -52,8 +52,12 @@ func (p *InMemoryParameterStore) ParametersById(id []byte) (*kodex.Parameters, e
 	return parameters, nil
 }
 
+func (p *InMemoryParameterStore) Definitions() *kodex.Definitions {
+	return p.definitions
+}
+
 func (p *InMemoryParameterStore) RestoreParameters(data map[string]interface{}) (*kodex.Parameters, error) {
-	return kodex.RestoreParameters(data, p, p.definitions)
+	return kodex.RestoreParameters(data, p)
 }
 
 func (p *InMemoryParameterStore) RestoreParameterSet(data map[string]interface{}) (*kodex.ParameterSet, error) {

@@ -59,14 +59,13 @@ type ParametersStruct struct {
 func importParameters(controller kodex.Controller, path string) error {
 	var parametersStruct ParametersStruct
 	parameterStore := controller.ParameterStore()
-	definitions := controller.Definitions()
 	if bytes, err := ioutil.ReadFile(path); err != nil {
 		return err
 	} else if err := json.Unmarshal(bytes, &parametersStruct); err != nil {
 		return err
 	} else {
 		for _, parametersData := range parametersStruct.Parameters {
-			if parameters, err := kodex.RestoreParameters(parametersData, parameterStore, definitions); err != nil {
+			if parameters, err := kodex.RestoreParameters(parametersData, parameterStore); err != nil {
 				return err
 			} else {
 				if err := parameters.Save(); err != nil {
