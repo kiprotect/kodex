@@ -75,6 +75,8 @@ type StatefulAction interface {
 	Reset() error
 	// Finalizes the action
 	Finalize(ChannelWriter) ([]*Item, error)
+	// Advances the action
+	Advance(ChannelWriter) ([]*Item, error)
 }
 
 type UndoableAction interface {
