@@ -76,6 +76,10 @@ func (p *AnonymizeAction) Finalize(writer kodex.ChannelWriter) ([]*kodex.Item, e
 	return p.anonymizer.Finalize(writer)
 }
 
+func (p *AnonymizeAction) Advance(writer kodex.ChannelWriter) ([]*kodex.Item, error) {
+	return p.anonymizer.Advance(writer)
+}
+
 func (p *AnonymizeAction) Reset() error {
 	return p.anonymizer.Reset()
 }

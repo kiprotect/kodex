@@ -24,6 +24,7 @@ type Anonymizer interface {
 	Setup() error
 	Teardown() error
 	Reset() error
+	Advance(kodex.ChannelWriter) ([]*kodex.Item, error)
 	Finalize(kodex.ChannelWriter) ([]*kodex.Item, error)
 	Anonymize(*kodex.Item, kodex.ChannelWriter) (*kodex.Item, error)
 }

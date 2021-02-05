@@ -119,6 +119,10 @@ func (a *AggregateAnonymizer) Reset() error {
 	return a.groupStore.Reset()
 }
 
+func (a *AggregateAnonymizer) Advance(writer kodex.ChannelWriter) ([]*kodex.Item, error) {
+	return nil, nil
+}
+
 func (a *AggregateAnonymizer) Finalize(writer kodex.ChannelWriter) ([]*kodex.Item, error) {
 	if items, err := a.finalizeAllGroups(); err != nil {
 		return nil, err
