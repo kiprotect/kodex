@@ -25,6 +25,7 @@ import (
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate/group_by_functions"
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate/groups"
 	"sync"
+	"time"
 )
 
 type AggregateAnonymizer struct {
@@ -119,8 +120,28 @@ func (a *AggregateAnonymizer) Reset() error {
 	return a.groupStore.Reset()
 }
 
-func (a *AggregateAnonymizer) Advance(writer kodex.ChannelWriter) ([]*kodex.Item, error) {
-	kodex.Log.Info("Advancing aggregate anonymizer...")
+func (a *AggregateAnonymizer) Advance(channelWriter kodex.ChannelWriter) ([]*kodex.Item, error) {
+
+	shard, err := a.groupStore.Shard()
+	if err != nil {
+		return nil, errors.MakeExternalError("cannot get a shard", "IN-MEMORY-STORE", nil, err)
+	}
+	defer shard.Return()
+
+	// we finalize all expired groups and return their results
+	aggregations, err := a.finalizeExpiredGroups(shard, time.Now().UnixNano())
+
+	if err != nil {
+		return nil, err
+	}
+
+	// we submit the results to the configured destination configs
+	if aggregations != nil && len(aggregations) > 0 {
+		if err := a.submitResults(aggregations, channelWriter); err != nil {
+			return nil, err
+		}
+	}
+
 	return nil, nil
 }
 
@@ -176,6 +197,11 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 		}
 	}
 
+	fa := a.finalizeAfter
+	if fa == -1 {
+		fa = 0
+	}
+
 	combinedGroupByValues := make([]*groupByFunctions.GroupByValue, 0)
 	// we generate all combinations from 1 to n elements (up to a maximum number of combinations)
 	for n := min(1+max(0, a.alwaysIncludedGroups-1), len(groupByValues)); n <= len(groupByValues); n++ {
@@ -191,7 +217,8 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 		}
 		for {
 			combinedGroupByValue := &groupByFunctions.GroupByValue{
-				Expiration: 0,
+				// the minimum expiration time is the current system time plus the chosen "finalizeAfter" time
+				Expiration: time.Now().Add(time.Duration(fa) * time.Second).UnixNano(),
 				Values:     make(map[string]interface{}),
 			}
 			for i := 0; i < n; i++ {
@@ -210,7 +237,7 @@ func (a *AggregateAnonymizer) getGroupByValues(item *kodex.Item) ([]*groupByFunc
 					}
 				}
 				// we update the expiration value
-				if combinedGroupByValue.Expiration == 0 || groupByValue.Expiration > combinedGroupByValue.Expiration {
+				if groupByValue.Expiration > combinedGroupByValue.Expiration {
 					combinedGroupByValue.Expiration = groupByValue.Expiration
 				}
 			}
@@ -310,16 +337,6 @@ func (a *AggregateAnonymizer) finalizeAllGroups() ([]*kodex.Item, error) {
 	return a.finalizeGroups(allGroups)
 }
 
-func (a *AggregateAnonymizer) getMinimumExpiration(groups []aggregate.Group) int64 {
-	var exp int64 = -1
-	for _, group := range groups {
-		if exp < 0 || group.Expiration() < exp {
-			exp = group.Expiration()
-		}
-	}
-	return exp
-}
-
 func (a *AggregateAnonymizer) finalizeExpiredGroups(shard aggregate.Shard, expiration int64) ([]*kodex.Item, error) {
 	if a.finalizeAfter == -1 {
 		return nil, nil
@@ -399,20 +416,27 @@ func (a *AggregateAnonymizer) aggregate(item *kodex.Item, channelWriter kodex.Ch
 			groupErr = err
 			continue
 		}
-
-		// we finalize all expired groups and return their results
-		aggregations, err := a.finalizeExpiredGroups(shard, a.getMinimumExpiration(groups))
-		// we submit the results to the configured destination configs
-		if aggregations != nil && len(aggregations) > 0 {
-			if err := a.submitResults(aggregations, channelWriter); err != nil {
-				kodex.Log.Error(err)
-				groupErr = err
-				continue
-			}
-		}
 		if err != nil {
 			groupErr = err
 		}
 	}
-	return groupErr
+
+	if groupErr != nil {
+		return groupErr
+	}
+
+	// we finalize all expired groups and return their results
+	aggregations, err := a.finalizeExpiredGroups(shard, time.Now().UnixNano())
+
+	if err != nil {
+		return err
+	}
+
+	// we submit the results to the configured destination configs
+	if aggregations != nil && len(aggregations) > 0 {
+		return a.submitResults(aggregations, channelWriter)
+	}
+
+	return nil
+
 }
