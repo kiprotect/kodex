@@ -186,6 +186,8 @@ func (d *LocalDestinationWriter) write() {
 		}
 	}
 
+	noPayloadIterations := 0
+
 	for {
 		var payload kodex.Payload
 		var err error
@@ -214,7 +216,9 @@ func (d *LocalDestinationWriter) write() {
 
 		// we didn't receive any new items...
 		if payload == nil {
-			stop()
+			if noPayloadIterations++; noPayloadIterations > 1 {
+				stop()
+			}
 			continue
 		}
 

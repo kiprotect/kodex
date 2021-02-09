@@ -256,6 +256,8 @@ func (d *LocalStreamExecutor) read() {
 	workerChannel := <-d.pool
 	workerChannel <- payload
 
+	noPayloadIterations := 0
+
 	for {
 		var payload kodex.Payload
 		var err error
@@ -283,6 +285,9 @@ func (d *LocalStreamExecutor) read() {
 
 		// we didn't receive any new items...
 		if payload == nil {
+			if noPayloadIterations++; noPayloadIterations > 1 {
+				stop()
+			}
 			stop()
 			continue
 		}

@@ -183,6 +183,8 @@ func (d *LocalSourceReader) read() {
 		}
 	}
 
+	noPayloadIterations := 0
+
 	for {
 		var payload kodex.Payload
 		var err error
@@ -192,7 +194,7 @@ func (d *LocalSourceReader) read() {
 			// we stop reading any more payloads and return...
 			d.stopReader <- true
 			return
-		case <-time.After(1 * time.Millisecond):
+		case <-time.After(time.Second):
 			break
 		}
 
@@ -211,7 +213,9 @@ func (d *LocalSourceReader) read() {
 
 		// we didn't receive any new items...
 		if payload == nil {
-			stop()
+			if noPayloadIterations++; noPayloadIterations > 1 {
+				stop()
+			}
 			continue
 		}
 

@@ -911,7 +911,6 @@ func testAggregate(t *testing.T, parallel bool) {
 			}
 
 			for i, destinationItem := range destinationItems {
-				kodex.Log.Info(destinationItem)
 				group, ok := destinationItem.Get("group")
 				if !ok {
 					t.Fatalf("Group information missing")
