@@ -64,5 +64,4 @@ type GroupStore interface {
 
 var AlreadyInitialized = errors.MakeExternalError("group has already been initialized", "GROUP-STORE", nil, nil)
 var AlreadyFinalized = errors.MakeExternalError("group has already been finalized", "GROUP-STORE", nil, nil)
-var AlreadyDeleted = errors.MakeExternalError("group has already been deleted", "GROUP-STORE", nil, nil)
 var NotFound = errors.MakeExternalError("group not found", "GROUP-STORE", nil, nil)

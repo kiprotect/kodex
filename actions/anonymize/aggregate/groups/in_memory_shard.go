@@ -20,18 +20,15 @@ import (
 	"github.com/google/btree"
 	"github.com/kiprotect/kodex/actions/anonymize/aggregate"
 	"sync"
-	"time"
 )
 
 type InMemoryShard struct {
-	id            int
-	returned      bool
-	store         *InMemoryGroupStore
-	groupsByHash  map[string]aggregate.Group
-	groupsByTo    *MutexBTree
-	deletedGroups map[string]int64
-	deleteMutex   sync.RWMutex
-	hashMutex     sync.RWMutex
+	id           int
+	returned     bool
+	store        *InMemoryGroupStore
+	groupsByHash map[string]aggregate.Group
+	groupsByTo   *MutexBTree
+	hashMutex    sync.RWMutex
 }
 
 type MutexConfigGroup struct {
@@ -60,24 +57,15 @@ func (g *GroupsByTo) Less(b btree.Item) bool {
 // Create a new InMemoryShard object
 func MakeInMemoryShard(id int, store *InMemoryGroupStore) *InMemoryShard {
 	return &InMemoryShard{
-		groupsByHash:  make(map[string]aggregate.Group),
-		groupsByTo:    &MutexBTree{Tree: btree.New(2)},
-		deletedGroups: make(map[string]int64),
-		store:         store,
-		id:            id,
+		groupsByHash: make(map[string]aggregate.Group),
+		groupsByTo:   &MutexBTree{Tree: btree.New(2)},
+		store:        store,
+		id:           id,
 	}
 }
 
 // Return a group based on its hash
 func (g *InMemoryShard) GroupByHash(hash []byte) (aggregate.Group, error) {
-
-	g.deleteMutex.RLock()
-	_, ok := g.deletedGroups[string(hash)]
-	g.deleteMutex.RUnlock()
-
-	if ok {
-		return nil, aggregate.AlreadyDeleted
-	}
 
 	g.hashMutex.RLock()
 	group, ok := g.groupsByHash[string(hash)]
@@ -123,19 +111,6 @@ func (g *InMemoryShard) deleteGroupFromToMap(group aggregate.Group) {
 	g.groupsByTo.Mutex.Unlock()
 }
 
-func (g *InMemoryShard) markGroupAsDeleted(group aggregate.Group) error {
-	h := string(group.Hash())
-	g.deleteMutex.Lock()
-	defer g.deleteMutex.Unlock()
-	_, ok := g.deletedGroups[h]
-	if ok {
-		return aggregate.AlreadyDeleted
-	}
-	g.deletedGroups[h] = time.Now().UTC().UnixNano()
-	return nil
-
-}
-
 func (g *InMemoryShard) deleteGroupFromMap(group aggregate.Group) {
 	h := string(group.Hash())
 	g.hashMutex.Lock()
@@ -151,13 +126,6 @@ func (g *InMemoryShard) ID() interface{} {
 func (g *InMemoryShard) CreateGroup(hash []byte,
 	groupByFields map[string]interface{}, expiration int64) (aggregate.Group, error) {
 	h := string(hash)
-
-	g.deleteMutex.RLock()
-	_, ok := g.deletedGroups[h]
-	g.deleteMutex.RUnlock()
-	if ok {
-		return nil, aggregate.AlreadyDeleted
-	}
 
 	group := MakeInMemoryGroup(hash, groupByFields, expiration, g)
 
@@ -189,10 +157,6 @@ func (g *InMemoryShard) ExpireAllGroups() ([]aggregate.Group, error) {
 	g.hashMutex.Lock()
 	defer g.hashMutex.Unlock()
 	for h, group := range g.groupsByHash {
-		// we mark it as deleted
-		if err := g.markGroupAsDeleted(group); err != nil {
-			continue
-		}
 		delete(g.groupsByHash, h)
 		// delete the group from the map
 		g.deleteGroupFromToMap(group)
@@ -231,9 +195,6 @@ func (g *InMemoryShard) ExpireGroups(expiration int64) ([]aggregate.Group, error
 			panic("should not happen")
 		}
 		for key, group := range gi.Groups {
-			if err := g.markGroupAsDeleted(group); err != nil {
-				continue
-			}
 			g.deleteGroupFromMap(group)
 			delete(gi.Groups, key)
 			if len(gi.Groups) == 0 {
