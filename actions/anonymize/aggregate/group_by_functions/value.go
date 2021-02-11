@@ -50,7 +50,8 @@ func MakeValueFunction(config map[string]interface{}) (GroupByFunction, error) {
 					// this is a map value, we return it directly
 					return []*GroupByValue{
 						&GroupByValue{
-							Values: mapValue,
+							Values:     mapValue,
+							Expiration: 0,
 						},
 					}, nil
 				}
@@ -62,6 +63,7 @@ func MakeValueFunction(config map[string]interface{}) (GroupByFunction, error) {
 				Values: map[string]interface{}{
 					field: value,
 				},
+				Expiration: 0,
 			},
 		}, nil
 	}, nil
