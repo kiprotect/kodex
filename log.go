@@ -63,6 +63,10 @@ func (l *Logger) Errorf(format string, args ...interface{}) {
 	log.Errorf(format, args...)
 }
 
+func (l *Logger) Warningf(format string, args ...interface{}) {
+	log.Warningf(format, args...)
+}
+
 func (l *Logger) Error(args ...interface{}) {
 	log.Error(args...)
 }
