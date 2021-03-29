@@ -1,4 +1,4 @@
-![](https://kiprotect.com/static/images/logos/kip-logo-blue.png)
+![](https://heykodex.com/static/images/logos/kodexlogo-blue.png)
 
 **Kodex (Community Edition - CE)** is an open-source toolkit for
 **privacy and security engineering**. It helps you to automate data
@@ -40,7 +40,7 @@ To download and install Kodex from source, simply run
 
 # Documentation
 
-You can find the official documentation at https://kiprotect.com/docs.
+You can find the official documentation at https://heykodex.com/docs.
 
 # Transforming data
 
@@ -53,7 +53,7 @@ install these blueprints via Kodex (requires Internet access):
     kodex blueprints download
 
 Alternatively, you can copy them to your machine manually, please refer to the
-[documentation](https://kiprotect.com/docs/components/blueprints) for more details.
+[documentation](https://heykodex.com/docs/blueprints) for more details.
 To then run the pseudonymization example, simply type
 
     # pseudonymize the example data and write it to a file named 'pseudonymized.json'
@@ -123,7 +123,7 @@ enterprise environment. It includes e.g. the following functionality:
 - Role-based access control mechanism.
 
 Are you interested to learn more about Kodex EE? Just visit
-[our website](https://kiprotect.com) or [get in touch with us](mailto:kodex-ee@kiprotect.com)!
+[our website](https://heykodex.com) or [get in touch with us](mailto:kodex@kiprotect.com)!
 
 # License
 
@@ -131,7 +131,7 @@ Kodex is currently licensed under the Affero GPL license, version 3 (AGPL-3.0). 
 [license file](LICENSE) for details. In addition, we also offer a commercial license
 that allow you to directly integrate the Kodex code into closed-source software
 without disclosing your own code. If you're interested in buying a commercial license,
-[please get in touch with us](mailto:kodex-ce@kiprotect.com).
+[please get in touch with us](mailto:kodex@kiprotect.com).
 
 ## Why Affero GPL?
 
@@ -149,10 +149,10 @@ or extend Kodex and either distribute it or offer it as a service you will have
 to make the source code of your changes available as well. This ensures that improvements
 which you make to Kodex will benefit the entire user community.
 
-## I can't use this due to the license!
+## I need a different license
 
-If you have trouble using Kodex due to the license terms, please
-[get in touch with us](mailto:kodex-ce@kiprotect.com). We offer a commercial license 
+If you have trouble using Kodex-CE due to the license terms, please
+[get in touch with us](mailto:kodex@kiprotect.com). We offer a commercial license 
 that enables you to integrate Kodex with your own software code without
 being affected by the terms of the AGPL license.
 
@@ -161,7 +161,7 @@ being affected by the terms of the AGPL license.
 Do you have trouble getting Kodex to run? Do you want to suggest a new
 feature or report a bug? Please open an issue in this issue tracker. If
 it's something that you'd like to discuss directly with us, please
-[send us an e-mail](kodex-ce@kiprotect.com), we love to hear from you!
+[send us an e-mail](kodex@kiprotect.com), we love to hear from you!
 
 # Spread the word
 
