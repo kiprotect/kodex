@@ -40,7 +40,7 @@ To download and install Kodex from source, simply run
 
 # Documentation
 
-You can find the official documentation at https://kiprotect.com/docs.
+You can find the official documentation at https://heykodex.com/docs/.
 
 # Transforming data
 
