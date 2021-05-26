@@ -32,6 +32,7 @@ type LocalSourceReader struct {
 	reader           kodex.Reader
 	configs          []kodex.Config
 	stopReader       chan bool
+	endOfStream      bool
 	mutex            sync.Mutex
 	supervisor       Supervisor
 	stopped          bool
@@ -159,10 +160,22 @@ func (d *LocalSourceReader) stop(graceful bool) error {
 	d.stopReader <- true
 	<-d.stopReader
 
+	itemsProcessed := 0
+
 	// then we stop the workers...
-	for _, worker := range d.workers {
+	for i, worker := range d.workers {
+		// we submit the "end of stream" payload to the last active worker
+		// to ensure it will be processed as the last payload
+		if d.endOfStream && i == len(d.workers)-1 {
+			endOfStreamPayload := kodex.MakeBasicPayload([]*kodex.Item{}, map[string]interface{}{}, true)
+			workerChannel := <-d.pool
+			workerChannel <- endOfStreamPayload
+		}
 		worker.Stop()
+		itemsProcessed += worker.ItemsProcessed
 	}
+
+	kodex.Log.Debugf("%d items processed by reader workers", itemsProcessed)
 
 	// then we tear down the source reader
 	if err := d.reader.Teardown(); err != nil {
@@ -183,8 +196,6 @@ func (d *LocalSourceReader) read() {
 		}
 	}
 
-	noPayloadIterations := 0
-
 	for {
 		var payload kodex.Payload
 		var err error
@@ -192,14 +203,9 @@ func (d *LocalSourceReader) read() {
 		select {
 		case <-d.stopReader:
 			// we stop reading any more payloads and return...
-			d.stopReader <- true
-			return
-		case <-time.After(time.Second):
+			stopping = true
+		case <-time.After(time.Millisecond):
 			break
-		}
-
-		if stopping {
-			continue
 		}
 
 		// to do: check if the source was updated and if yes break out of
@@ -213,14 +219,26 @@ func (d *LocalSourceReader) read() {
 
 		// we didn't receive any new items...
 		if payload == nil {
-			if noPayloadIterations++; noPayloadIterations > 1 {
-				stop()
+			if stopping {
+				d.stopReader <- true
+				return
 			}
 			continue
 		}
 
-		workerChannel := <-d.pool
-		workerChannel <- payload
+		if payload.EndOfStream() {
+			// we replace the "end of stream payload" and instead send a replacement
+			// payload during the stop process to ensure that it will be processed last
+			replacedPayload := kodex.MakeBasicPayload(payload.Items(), payload.Headers(), false)
+			workerChannel := <-d.pool
+			workerChannel <- replacedPayload
+			d.mutex.Lock()
+			d.endOfStream = true
+			d.mutex.Unlock()
+		} else {
+			workerChannel := <-d.pool
+			workerChannel <- payload
+		}
 
 		if payload.EndOfStream() {
 			stop()

@@ -32,6 +32,7 @@ type LocalStreamWorker struct {
 	pool              chan chan kodex.Payload
 	acknowledgeFailed bool
 	started           bool
+	ItemsProcessed    int
 	mutex             sync.Mutex
 	contexts          []*ConfigContext
 	executor          Executor
@@ -66,6 +67,7 @@ func (w *LocalStreamWorker) Start() {
 		for {
 			select {
 			case payload := <-w.payloadChannel:
+				w.ItemsProcessed += len(payload.Items())
 				w.ProcessPayload(payload)
 				w.pool <- w.payloadChannel
 				break
@@ -73,6 +75,28 @@ func (w *LocalStreamWorker) Start() {
 				stop = true
 			case <-time.After(time.Millisecond):
 				if stop && len(w.payloadChannel) == 0 {
+					// we remove the worker channel from the pool of channels
+					channels := make([]chan kodex.Payload, 0)
+				loop:
+					for {
+						select {
+						case wc := <-w.pool:
+							if wc != w.payloadChannel {
+								channels = append(channels, wc)
+							} else {
+								// we have found the channel, we break
+								break loop
+							}
+						default: // no more worker channels
+							break loop
+						}
+					}
+					// we resubmit the other channels
+					for _, channel := range channels {
+						w.pool <- channel
+					}
+					// we close the payload channel
+					close(w.payloadChannel)
 					w.stop <- true
 					return
 				}

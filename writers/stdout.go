@@ -36,7 +36,7 @@ func (s *StdoutWriter) Setup(config kodex.Config) error {
 
 func (s *StdoutWriter) Write(payload kodex.Payload) error {
 	for _, item := range payload.Items() {
-		v, err := json.MarshalIndent(item.All(), "", "  ")
+		v, err := json.Marshal(item.All())
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		} else {
