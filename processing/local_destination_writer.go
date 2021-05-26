@@ -153,10 +153,15 @@ func (d *LocalDestinationWriter) stop(graceful bool) error {
 	d.stopWriter <- true
 	<-d.stopWriter
 
+	itemsProcessed := 0
+
 	// then we stop the workers...
 	for _, worker := range d.workers {
 		worker.Stop()
+		itemsProcessed += worker.ItemsProcessed
 	}
+
+	kodex.Log.Infof("%d items processed by destination workers", itemsProcessed)
 
 	// then we tear down the destination writer
 	if err := d.writer.Teardown(); err != nil {
@@ -186,7 +191,7 @@ func (d *LocalDestinationWriter) write() {
 		}
 	}
 
-	noPayloadIterations := 0
+	itemsProcessed := 0
 
 	for {
 		var payload kodex.Payload
@@ -195,14 +200,9 @@ func (d *LocalDestinationWriter) write() {
 		select {
 		case <-d.stopWriter:
 			// we stop reading any more payloads and return...
-			d.stopWriter <- true
-			return
-		case <-time.After(time.Second):
+			stopping = true
+		case <-time.After(time.Millisecond):
 			break
-		}
-
-		if stopping {
-			continue
 		}
 
 		// to do: check if the destination was updated and if yes break out of
@@ -216,11 +216,15 @@ func (d *LocalDestinationWriter) write() {
 
 		// we didn't receive any new items...
 		if payload == nil {
-			if noPayloadIterations++; noPayloadIterations > 1 {
-				stop()
+			if stopping {
+				d.stopWriter <- true
+				kodex.Log.Infof("%d items processed for destination...", itemsProcessed)
+				return
 			}
 			continue
 		}
+
+		itemsProcessed += len(payload.Items())
 
 		workerChannel := <-d.pool
 		workerChannel <- payload

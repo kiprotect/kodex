@@ -35,6 +35,7 @@ type LocalStreamExecutor struct {
 	stopChannel      chan bool
 	mutex            sync.Mutex
 	supervisor       Supervisor
+	endOfStream      bool
 	stopped          bool
 	stopping         bool
 	payloadChannel   chan kodex.Payload
@@ -203,10 +204,22 @@ func (d *LocalStreamExecutor) stop(graceful bool) error {
 	d.stopChannel <- true
 	<-d.stopChannel
 
+	itemsProcessed := 0
+
 	// then we stop the workers...
-	for _, worker := range d.workers {
+	for i, worker := range d.workers {
+		// we submit the "end of stream" payload to the last active worker
+		// to ensure it will be processed as the last payload
+		if d.endOfStream && i == len(d.workers)-1 {
+			endOfStreamPayload := kodex.MakeBasicPayload([]*kodex.Item{}, map[string]interface{}{}, true)
+			workerChannel := <-d.pool
+			workerChannel <- endOfStreamPayload
+		}
 		worker.Stop()
+		itemsProcessed += worker.ItemsProcessed
 	}
+
+	kodex.Log.Debugf("%d items processed by stream workers", itemsProcessed)
 
 	// then we tear down the stream channel
 	if err := d.channel.Teardown(); err != nil {
@@ -256,7 +269,7 @@ func (d *LocalStreamExecutor) read() {
 	workerChannel := <-d.pool
 	workerChannel <- payload
 
-	noPayloadIterations := 0
+	itemsProcessed := 0
 
 	for {
 		var payload kodex.Payload
@@ -264,19 +277,11 @@ func (d *LocalStreamExecutor) read() {
 
 		select {
 		case <-d.stopChannel:
-			// we stop reading any more payloads and return...
-			d.stopChannel <- true
-			return
-		case <-time.After(time.Second):
+			stopping = true
+		case <-time.After(time.Millisecond):
 			break
 		}
 
-		if stopping {
-			continue
-		}
-
-		// to do: check if the stream was updated and if yes break out of
-		// the loop (to reload configuration)
 		if payload, err = d.channel.Read(); err != nil {
 			kodex.Log.Error(err)
 			stop()
@@ -285,15 +290,29 @@ func (d *LocalStreamExecutor) read() {
 
 		// we didn't receive any new items...
 		if payload == nil {
-			if noPayloadIterations++; noPayloadIterations > 1 {
-				stop()
+			if stopping {
+				d.stopChannel <- true
+				kodex.Log.Debugf("%d items processed in stream", itemsProcessed)
+				return
 			}
-			stop()
 			continue
 		}
 
-		workerChannel := <-d.pool
-		workerChannel <- payload
+		itemsProcessed += len(payload.Items())
+
+		if payload.EndOfStream() {
+			// we replace the "end of stream payload" and instead send a replacement
+			// payload during the stop process to ensure that it will be processed last
+			replacedPayload := kodex.MakeBasicPayload(payload.Items(), payload.Headers(), false)
+			workerChannel := <-d.pool
+			workerChannel <- replacedPayload
+			d.mutex.Lock()
+			d.endOfStream = true
+			d.mutex.Unlock()
+		} else {
+			workerChannel := <-d.pool
+			workerChannel <- payload
+		}
 
 		if payload.EndOfStream() {
 			stop()

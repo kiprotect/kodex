@@ -159,6 +159,8 @@ func (s *FileReader) Read() (kodex.Payload, error) {
 		}
 	}
 
+	kodex.Log.Debugf("Read %d items...", len(items))
+
 	if len(items) == 0 {
 		return nil, nil
 	}

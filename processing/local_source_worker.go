@@ -25,6 +25,7 @@ import (
 type LocalSourceWorker struct {
 	pool           chan chan kodex.Payload
 	started        bool
+	ItemsProcessed int
 	streams        []kodex.Stream
 	channels       []*kodex.InternalChannel
 	executor       Executor
@@ -80,12 +81,35 @@ func (w *LocalSourceWorker) Start() {
 		for {
 			select {
 			case payload := <-w.payloadChannel:
+				w.ItemsProcessed += len(payload.Items())
 				w.ProcessPayload(payload)
 				w.pool <- w.payloadChannel
 			case <-w.stop:
 				stop = true
 			case <-time.After(time.Millisecond):
 				if stop && len(w.payloadChannel) == 0 {
+					// we remove the worker channel from the pool of channels
+					channels := make([]chan kodex.Payload, 0)
+				loop:
+					for {
+						select {
+						case wc := <-w.pool:
+							if wc != w.payloadChannel {
+								channels = append(channels, wc)
+							} else {
+								// we have found the channel, we break
+								break loop
+							}
+						default: // no more worker channels
+							break loop
+						}
+					}
+					// we resubmit the other channels
+					for _, channel := range channels {
+						w.pool <- channel
+					}
+					// we close the payload channel
+					close(w.payloadChannel)
 					w.started = false
 					w.stop <- true
 					return

@@ -25,6 +25,7 @@ import (
 type LocalDestinationWorker struct {
 	pool           chan chan kodex.Payload
 	started        bool
+	ItemsProcessed int
 	writer         kodex.Writer
 	channels       []*kodex.InternalChannel
 	executor       Executor
@@ -59,6 +60,7 @@ func (w *LocalDestinationWorker) Start() {
 		for {
 			select {
 			case payload := <-w.payloadChannel:
+				w.ItemsProcessed += len(payload.Items())
 				w.ProcessPayload(payload)
 				w.pool <- w.payloadChannel
 			case <-w.stop:
