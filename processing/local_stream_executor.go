@@ -74,6 +74,7 @@ func (d *LocalStreamExecutor) Start(supervisor Supervisor, processable kodex.Pro
 	}
 
 	d.stream = stream
+	d.endOfStream = false
 	d.supervisor = supervisor
 	d.channel = kodex.MakeInternalChannel()
 

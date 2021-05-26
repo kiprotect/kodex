@@ -67,6 +67,28 @@ func (w *LocalDestinationWorker) Start() {
 				stop = true
 			case <-time.After(time.Millisecond):
 				if stop && len(w.payloadChannel) == 0 {
+					// we remove the worker channel from the pool of channels
+					channels := make([]chan kodex.Payload, 0)
+				loop:
+					for {
+						select {
+						case wc := <-w.pool:
+							if wc != w.payloadChannel {
+								channels = append(channels, wc)
+							} else {
+								// we have found the channel, we break
+								break loop
+							}
+						default: // no more worker channels
+							break loop
+						}
+					}
+					// we resubmit the other channels
+					for _, channel := range channels {
+						w.pool <- channel
+					}
+					// we close the payload channel
+					close(w.payloadChannel)
 					w.started = false
 					w.stop <- true
 					return

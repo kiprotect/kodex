@@ -31,7 +31,7 @@ type LocalSourceReader struct {
 	sourceMap        kodex.SourceMap
 	reader           kodex.Reader
 	configs          []kodex.Config
-	stopReader       chan bool
+	stopChannel      chan bool
 	endOfStream      bool
 	mutex            sync.Mutex
 	supervisor       Supervisor
@@ -43,7 +43,7 @@ type LocalSourceReader struct {
 func MakeLocalSourceReader(maxSourceWorkers int,
 	id []byte) *LocalSourceReader {
 	return &LocalSourceReader{
-		stopReader:       make(chan bool),
+		stopChannel:      make(chan bool),
 		stopped:          true,
 		id:               id,
 		payloadChannel:   make(chan kodex.Payload, maxSourceWorkers*8),
@@ -70,6 +70,7 @@ func (d *LocalSourceReader) Start(supervisor Supervisor, processable kodex.Proce
 		return fmt.Errorf("busy")
 	}
 
+	d.endOfStream = false
 	d.sourceMap = sourceMap
 	d.supervisor = supervisor
 
@@ -157,8 +158,8 @@ func (d *LocalSourceReader) stop(graceful bool) error {
 	d.stopping = true
 
 	// first we stop the source reader to stop reading more payloads..
-	d.stopReader <- true
-	<-d.stopReader
+	d.stopChannel <- true
+	<-d.stopChannel
 
 	itemsProcessed := 0
 
@@ -201,7 +202,7 @@ func (d *LocalSourceReader) read() {
 		var err error
 
 		select {
-		case <-d.stopReader:
+		case <-d.stopChannel:
 			// we stop reading any more payloads and return...
 			stopping = true
 		case <-time.After(time.Millisecond):
@@ -220,7 +221,7 @@ func (d *LocalSourceReader) read() {
 		// we didn't receive any new items...
 		if payload == nil {
 			if stopping {
-				d.stopReader <- true
+				d.stopChannel <- true
 				return
 			}
 			continue

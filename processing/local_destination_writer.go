@@ -30,8 +30,9 @@ type LocalDestinationWriter struct {
 	pool                  chan chan kodex.Payload
 	destinationMap        kodex.DestinationMap
 	writer                kodex.Writer
+	endOfStream           bool
 	channel               *kodex.InternalChannel
-	stopWriter            chan bool
+	stopChannel           chan bool
 	mutex                 sync.Mutex
 	supervisor            Supervisor
 	stopped               bool
@@ -42,7 +43,7 @@ type LocalDestinationWriter struct {
 func MakeLocalDestinationWriter(maxDestinationWorkers int,
 	id []byte) *LocalDestinationWriter {
 	return &LocalDestinationWriter{
-		stopWriter:            make(chan bool),
+		stopChannel:           make(chan bool),
 		stopped:               true,
 		id:                    id,
 		payloadChannel:        make(chan kodex.Payload, maxDestinationWorkers*8),
@@ -69,6 +70,7 @@ func (d *LocalDestinationWriter) Start(supervisor Supervisor, processable kodex.
 		return fmt.Errorf("busy")
 	}
 
+	d.endOfStream = false
 	d.destinationMap = destinationMap
 	d.supervisor = supervisor
 
@@ -150,18 +152,25 @@ func (d *LocalDestinationWriter) stop(graceful bool) error {
 	}()
 
 	// first we stop the destination writer to stop reading more payloads..
-	d.stopWriter <- true
-	<-d.stopWriter
+	d.stopChannel <- true
+	<-d.stopChannel
 
 	itemsProcessed := 0
 
 	// then we stop the workers...
-	for _, worker := range d.workers {
+	for i, worker := range d.workers {
+		// we submit the "end of stream" payload to the last active worker
+		// to ensure it will be processed as the last payload
+		if d.endOfStream && i == len(d.workers)-1 {
+			endOfStreamPayload := kodex.MakeBasicPayload([]*kodex.Item{}, map[string]interface{}{}, true)
+			workerChannel := <-d.pool
+			workerChannel <- endOfStreamPayload
+		}
 		worker.Stop()
 		itemsProcessed += worker.ItemsProcessed
 	}
 
-	kodex.Log.Infof("%d items processed by destination workers", itemsProcessed)
+	kodex.Log.Debugf("%d items processed by destination workers", itemsProcessed)
 
 	// then we tear down the destination writer
 	if err := d.writer.Teardown(); err != nil {
@@ -198,7 +207,7 @@ func (d *LocalDestinationWriter) write() {
 		var err error
 
 		select {
-		case <-d.stopWriter:
+		case <-d.stopChannel:
 			// we stop reading any more payloads and return...
 			stopping = true
 		case <-time.After(time.Millisecond):
@@ -217,8 +226,8 @@ func (d *LocalDestinationWriter) write() {
 		// we didn't receive any new items...
 		if payload == nil {
 			if stopping {
-				d.stopWriter <- true
-				kodex.Log.Infof("%d items processed for destination...", itemsProcessed)
+				d.stopChannel <- true
+				kodex.Log.Debugf("%d items processed in stream", itemsProcessed)
 				return
 			}
 			continue
@@ -226,8 +235,19 @@ func (d *LocalDestinationWriter) write() {
 
 		itemsProcessed += len(payload.Items())
 
-		workerChannel := <-d.pool
-		workerChannel <- payload
+		if payload.EndOfStream() {
+			// we replace the "end of stream payload" and instead send a replacement
+			// payload during the stop process to ensure that it will be processed last
+			replacedPayload := kodex.MakeBasicPayload(payload.Items(), payload.Headers(), false)
+			workerChannel := <-d.pool
+			workerChannel <- replacedPayload
+			d.mutex.Lock()
+			d.endOfStream = true
+			d.mutex.Unlock()
+		} else {
+			workerChannel := <-d.pool
+			workerChannel <- payload
+		}
 
 		if payload.EndOfStream() {
 			stop()
