@@ -84,9 +84,9 @@ func (p *AnonymizeAction) Reset() error {
 	return p.anonymizer.Reset()
 }
 
-func MakeAnonymizeAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
+func MakeAnonymizeAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 
-	params, err := AnonymizeConfigForm.Validate(config)
+	params, err := AnonymizeConfigForm.Validate(spec.Config)
 
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func MakeAnonymizeAction(name, description string, id []byte, config map[string]
 		return nil, fmt.Errorf("Unknown anonymizer method %s", method)
 	}
 
-	anonymizer, err := anonymizerMaker(name, id, config)
+	anonymizer, err := anonymizerMaker(spec.Name, spec.ID, spec.Config)
 
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func MakeAnonymizeAction(name, description string, id []byte, config map[string]
 	return &AnonymizeAction{
 		anonymizer: anonymizer,
 		method:     method,
-		BaseAction: kodex.MakeBaseAction(name, description, "anonymize", id, config),
+		BaseAction: kodex.MakeBaseAction(spec, "anonymize"),
 	}, nil
 
 }

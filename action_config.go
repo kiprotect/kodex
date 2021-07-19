@@ -109,8 +109,17 @@ func (b *BaseActionConfig) checkActionConfig(actionType string, config map[strin
 	definitions := b.Self.Project().Controller().Definitions()
 	if definition, ok := definitions.ActionDefinitions[actionType]; !ok {
 		return fmt.Errorf("invalid action type: %s", actionType)
-	} else if _, err := definition.Maker(b.Self.Name(), b.Self.Description(), b.Self.ID(), config); err != nil {
-		return err
+	} else {
+		spec := ActionSpecification{
+			Name:        b.Self.Name(),
+			Description: b.Self.Description(),
+			ID:          b.Self.ID(),
+			Config:      config,
+			Definitions: definitions,
+		}
+		if _, err := definition.Maker(spec); err != nil {
+			return err
+		}
 	}
 	return nil
 }

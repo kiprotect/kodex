@@ -17,33 +17,39 @@
 package readers
 
 import (
-	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/go-helpers/forms"
 )
 
-var Readers = kodex.ReaderDefinitions{
-	"file": kodex.ReaderDefinition{
-		Maker:    MakeFileReader,
-		Form:     FileReaderForm,
-		Internal: true,
-	},
-	"stdin": kodex.ReaderDefinition{
-		Maker:    MakeStdinReader,
-		Form:     StdinReaderForm,
-		Internal: true,
-	},
-	"generate": kodex.ReaderDefinition{
-		Maker:    MakeGenerateReader,
-		Form:     GenerateForm,
-		Internal: true,
-	},
-	"bytes": kodex.ReaderDefinition{
-		Maker:    MakeBytesReader,
-		Form:     BytesReaderForm,
-		Internal: true,
-	},
-	"amqp": kodex.ReaderDefinition{
-		Maker:    MakeAMQPReader,
-		Form:     AMQPReaderForm,
-		Internal: false,
+var StdinReaderForm = forms.Form{
+	ErrorMsg: "invalid data encountered in the stdin reader form",
+	Fields: []forms.Field{
+		{
+			Name: "format",
+			Validators: []forms.Validator{
+				forms.IsRequired{},
+				forms.IsIn{Choices: []interface{}{"json"}},
+			},
+		},
+		{
+			Name: "compressed",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: false},
+				forms.IsBoolean{},
+			},
+		},
+		{
+			Name: "chunk-size",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: 10},
+				forms.IsInteger{HasMin: true, Min: 0, HasMax: true, Max: 10000},
+			},
+		},
+		{
+			Name: "headers",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: map[string]interface{}{}},
+				forms.IsStringMap{},
+			},
+		},
 	},
 }

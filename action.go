@@ -32,7 +32,14 @@ type ActionDefinition struct {
 	Form        forms.Form  `json:"form"`
 }
 
-type ActionMaker func(name, description string, id []byte, config map[string]interface{}) (Action, error)
+type ActionMakerParams struct {
+	Name        string
+	Description string
+	ID          []byte
+	Config      map[string]interface{}
+}
+
+type ActionMaker func(params ActionSpecification) (Action, error)
 type ActionDefinitions map[string]ActionDefinition
 
 type Action interface {
@@ -48,7 +55,13 @@ type Action interface {
 	Description() string
 	Type() string
 	Config() map[string]interface{}
+}
+
+type SetupAction interface {
 	Setup(Settings) error
+}
+
+type TeardownAction interface {
 	Teardown() error
 }
 
@@ -87,16 +100,14 @@ type UndoableAction interface {
 /* Base Functionality */
 
 type BaseAction struct {
-	Name_        string
-	Description_ string
-	Type_        string
-	ID_          []byte
-	Config_      map[string]interface{}
-	configHash   []byte
+	Spec       ActionSpecification
+	Type_      string
+	configHash []byte
 }
 
 type ActionSpecification struct {
 	Name, Description, Type string
+	Definitions             *Definitions
 	ID                      []byte
 	Config                  map[string]interface{}
 }
@@ -190,7 +201,14 @@ func MakeAction(name, description, actionType string, id []byte, config map[stri
 	if definition, ok := definitions.ActionDefinitions[actionType]; !ok {
 		return nil, fmt.Errorf("unknown action type: %s", actionType)
 	} else {
-		return definition.Maker(name, description, id, config)
+		spec := ActionSpecification{
+			Name:        name,
+			Description: description,
+			ID:          id,
+			Config:      config,
+			Definitions: definitions,
+		}
+		return definition.Maker(spec)
 	}
 }
 
@@ -201,7 +219,14 @@ func MakeActions(specs []ActionSpecification, definitions *Definitions) ([]Actio
 		if !ok {
 			return nil, fmt.Errorf("unknown action type: %s", specification.Type)
 		}
-		action, err := actionDefinition.Maker(specification.Name, specification.Description, specification.ID, specification.Config)
+		spec := ActionSpecification{
+			Name:        specification.Name,
+			Description: specification.Description,
+			ID:          specification.ID,
+			Config:      specification.Config,
+			Definitions: definitions,
+		}
+		action, err := actionDefinition.Maker(spec)
 		if err != nil {
 			return nil, err
 		}
@@ -210,13 +235,10 @@ func MakeActions(specs []ActionSpecification, definitions *Definitions) ([]Actio
 	return actions, nil
 }
 
-func MakeBaseAction(name, description, actionType string, id []byte, config map[string]interface{}) BaseAction {
+func MakeBaseAction(spec ActionSpecification, actionType string) BaseAction {
 	return BaseAction{
-		Description_: description,
-		Name_:        name,
-		Type_:        actionType,
-		ID_:          id,
-		Config_:      config,
+		Spec:  spec,
+		Type_: actionType,
 	}
 }
 
@@ -241,27 +263,19 @@ func (b *BaseAction) ConfigHash() ([]byte, error) {
 
 func (b *BaseAction) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]interface{}{
-		"name":        b.Name_,
-		"description": b.Description_,
+		"name":        b.Spec.Name,
+		"description": b.Spec.Description,
 		"type":        b.Type_,
-		"id":          hex.EncodeToString(b.ID_),
-		"config":      b.Config_,
+		"id":          hex.EncodeToString(b.Spec.ID),
+		"config":      b.Spec.Config,
 	})
-}
-
-func (b *BaseAction) Setup(Settings) error {
-	return nil
-}
-
-func (b *BaseAction) Teardown() error {
-	return nil
 }
 
 // By default, the config group contains the full config. This can be overwritten
 // by specific actions to only include the config that is relevant for the
 // functioning of the action.
 func (b *BaseAction) ConfigGroup() map[string]interface{} {
-	return b.Config_
+	return b.Spec.Config
 }
 
 func (b *BaseAction) Type() string {
@@ -269,19 +283,19 @@ func (b *BaseAction) Type() string {
 }
 
 func (b *BaseAction) Name() string {
-	return b.Name_
+	return b.Spec.Name
 }
 
 func (b *BaseAction) ID() []byte {
-	return b.ID_
+	return b.Spec.ID
 }
 
 func (b *BaseAction) Config() map[string]interface{} {
-	return b.Config_
+	return b.Spec.Config
 }
 
 func (b *BaseAction) Description() string {
-	return b.Description_
+	return b.Spec.Description
 }
 
 // Returns the parameter group for a specific item

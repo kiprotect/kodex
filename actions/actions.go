@@ -30,6 +30,14 @@ var Actions = kodex.ActionDefinitions{
 		Name:  "Pseudonymize",
 		Maker: MakePseudonymizeAction,
 	},
+	"quantize": kodex.ActionDefinition{
+		Name:  "Quantize",
+		Maker: MakeQuantizeAction,
+	},
+	"form": kodex.ActionDefinition{
+		Name:  "Form Validation",
+		Maker: MakeFormAction,
+	},
 	"anonymize": kodex.ActionDefinition{
 		Name:  "Anonymize",
 		Maker: MakeAnonymizeAction,

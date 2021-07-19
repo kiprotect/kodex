@@ -68,9 +68,9 @@ func (p *PseudonymizeTransformation) Params() interface{} {
 	return p.pseudonymizer.Params()
 }
 
-func MakePseudonymizeAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
+func MakePseudonymizeAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 
-	params, err := PseudonymizeConfigForm.Validate(config)
+	params, err := PseudonymizeConfigForm.Validate(spec.Config)
 
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func MakePseudonymizeAction(name, description string, id []byte, config map[stri
 		return nil, fmt.Errorf("Unknown pseudonymizer method %s", method)
 	}
 
-	ps, err := psMaker(config)
+	ps, err := psMaker(spec.Config)
 
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func MakePseudonymizeAction(name, description string, id []byte, config map[stri
 		pseudonymizer: ps,
 		method:        method,
 		key:           params["key"].(string),
-		BaseAction:    kodex.MakeBaseAction(name, description, "pseudonymize", id, config),
+		BaseAction:    kodex.MakeBaseAction(spec, "pseudonymize"),
 	}, nil
 
 }
@@ -115,7 +115,7 @@ var PseudonymizeConfigForm = forms.Form{
 		{
 			Name: "key",
 			Validators: []forms.Validator{
-				forms.IsRequired{},
+				forms.IsOptional{Default: "_"},
 				forms.IsString{},
 			},
 		},
