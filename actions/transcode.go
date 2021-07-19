@@ -148,14 +148,14 @@ func (p *TranscodeAction) Params() interface{} {
 	return nil
 }
 
-func MakeTranscodeAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
+func MakeTranscodeAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 
-	params, err := TranscodeConfigForm.Validate(config)
+	params, err := TranscodeConfigForm.Validate(spec.Config)
 	if err != nil {
 		return nil, err
 	}
 	return &TranscodeAction{
-		BaseAction: kodex.MakeBaseAction(name, description, "transcode", id, config),
+		BaseAction: kodex.MakeBaseAction(spec, "transcode"),
 		from:       params["from"].(string),
 		to:         params["to"].(string),
 		key:        params["key"].(string),

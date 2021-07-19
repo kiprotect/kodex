@@ -47,13 +47,13 @@ func (p *Processor) updateParams(item *Item, undo bool) error {
 		i := 0
 		for {
 			i += 1
-			var actionParams *Parameters
+			var spec *Parameters
 			var loaded bool
 			var err error
 			// if a key is specified, we generate all parameters from it and
 			// do not persist anything to the parameter store
 			if p.key == nil {
-				actionParams, loaded, err = p.parameterSet.ParametersFor(action, parameterGroup)
+				spec, loaded, err = p.parameterSet.ParametersFor(action, parameterGroup)
 				if err != nil {
 					// this might be a race condition with another processor
 					if i > 2 {
@@ -62,7 +62,7 @@ func (p *Processor) updateParams(item *Item, undo bool) error {
 					continue
 				}
 			}
-			if actionParams == nil {
+			if spec == nil {
 				if undo && p.key == nil {
 					return errors.MakeExternalError("error getting parameters", "GET-ACTION-PARAMS", nil, nil)
 				}
@@ -89,7 +89,7 @@ func (p *Processor) updateParams(item *Item, undo bool) error {
 					updated = true
 				}
 				// the action might have changed
-				if err = actionParams.Action().SetParams(actionParams.Parameters()); err != nil {
+				if err = spec.Action().SetParams(spec.Parameters()); err != nil {
 					return errors.MakeExternalError("error setting params", "SET-PARAMS", nil, err)
 				}
 			}
@@ -141,17 +141,23 @@ func (p *Processor) ErrorPolicy() ErrorPolicy {
 
 func (p *Processor) Setup() error {
 	for i, action := range p.parameterSet.Actions() {
-		if err := action.Setup(p.config.Stream().Project().Controller().Settings()); err != nil {
-			// we tear down the actions that were already set up
-			for j, otherAction := range p.parameterSet.Actions() {
-				if j >= i {
-					break
+		if setupAction, ok := action.(SetupAction); ok {
+			controller := p.config.Stream().Project().Controller()
+			if err := setupAction.Setup(controller.Settings()); err != nil {
+				// we tear down the actions that were already set up
+				for j, otherAction := range p.parameterSet.Actions() {
+					if j >= i {
+						break
+					}
+					if teardownAction, ok := otherAction.(TeardownAction); ok {
+						if err := teardownAction.Teardown(); err != nil {
+							Log.Error(err)
+						}
+					}
 				}
-				if err := otherAction.Teardown(); err != nil {
-					Log.Error(err)
-				}
+				return err
 			}
-			return err
+
 		}
 	}
 	return nil
@@ -161,9 +167,11 @@ func (p *Processor) Teardown() error {
 	// to do: make a proper error list here
 	var lastErr error
 	for _, action := range p.parameterSet.Actions() {
-		if err := action.Teardown(); err != nil {
-			Log.Error(err)
-			lastErr = err
+		if teardownAction, ok := action.(TeardownAction); ok {
+			if err := teardownAction.Teardown(); err != nil {
+				Log.Error(err)
+				lastErr = err
+			}
 		}
 	}
 	return lastErr

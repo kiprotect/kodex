@@ -24,9 +24,9 @@ type DropAction struct {
 	kodex.BaseAction
 }
 
-func MakeDropAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
+func MakeDropAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 	return &DropAction{
-		BaseAction: kodex.MakeBaseAction(name, description, "drop", id, config),
+		BaseAction: kodex.MakeBaseAction(spec, "drop"),
 	}, nil
 }
 

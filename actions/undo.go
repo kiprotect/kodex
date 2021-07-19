@@ -50,13 +50,13 @@ type UndoAction struct {
 	key, salt   []byte
 }
 
-func MakeUndoAction(name, description string, id []byte, config map[string]interface{}) (kodex.Action, error) {
-	params, err := UndoActionConfigForm.Validate(config)
+func MakeUndoAction(spec kodex.ActionSpecification) (kodex.Action, error) {
+	params, err := UndoActionConfigForm.Validate(spec.Config)
 	if err != nil {
 		return nil, err
 	}
 	return &UndoAction{
-		BaseAction:  kodex.MakeBaseAction(name, description, "undo", id, config),
+		BaseAction:  kodex.MakeBaseAction(spec, "undo"),
 		actionSpecs: params["actions"].([]kodex.ActionSpecification),
 	}, nil
 }
