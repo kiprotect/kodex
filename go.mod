@@ -17,4 +17,4 @@ require (
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
-replace github.com/kiprotect/go-helpers => ../go-helpers
+// replace github.com/kiprotect/go-helpers => ../go-helpers
