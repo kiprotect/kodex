@@ -119,15 +119,12 @@ func geometricNoise(epsilon float64, symmetric bool) (int64, error) {
 	p := math.Exp(-epsilon)
 	if pv, err := uniform(); err != nil {
 		return 0, err
-	} else if pv > p {
-		// the probability that we return 0
+	} else {
 		if symmetric {
-			if pv, err := uniform(); err != nil {
-				return 0, err
-			} else if pv > 0.5 {
+			if pv < (1-p)/(1+p) {
 				return 0, nil
 			}
-		} else {
+		} else if pv > p {
 			return 0, nil
 		}
 	}
