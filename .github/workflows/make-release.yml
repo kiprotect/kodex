@@ -15,7 +15,7 @@ jobs:
     env:
       GOPATH: /tmp/go
       GOARCH: 
-    stkodex:
+    steps:
       - name: create Go path
         run: |
           mkdir -p /tmp/go
