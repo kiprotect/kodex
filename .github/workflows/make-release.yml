@@ -28,7 +28,7 @@ jobs:
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: run tests
-        if: ${{ matrix.arch == 'linux-amd64' }} # we only run the tests on Linux
+        if: ${{ matrix.arch == 'linux_amd64' }} # we only run the tests on Linux
         run: |
           export GOARCH=`echo ${{matrix.arch}} | sed 's/[a-z0-9]*_//g'`
           export GOOS=`echo ${{matrix.arch}} | sed 's/\([a-z0-9]*\)_[a-z0-9]*$/\1/g'`
