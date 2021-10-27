@@ -5,6 +5,7 @@ package api
 
 import (
 	"encoding/json"
+	"encoding/hex"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
 	"regexp"
@@ -23,8 +24,8 @@ func (b *BaseObjectRole) Type() string {
 func (b *BaseObjectRole) MarshalJSON() ([]byte, error) {
 
 	data := map[string]interface{}{
-		"organization_id":   b.Self.OrganizationID(),
-		"object_id":         b.Self.ObjectID(),
+		"organization_id":   hex.EncodeToString(b.Self.OrganizationID()),
+		"object_id":         hex.EncodeToString(b.Self.ObjectID()),
 		"organization_role": b.Self.OrganizationRole(),
 		"object_role":       b.Self.ObjectRole(),
 		"object_type":       b.Self.ObjectType(),
