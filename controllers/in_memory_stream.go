@@ -167,7 +167,11 @@ func (i *InMemoryStream) Delete() error {
 	if _, err := i.Project().Controller().RunHooks("stream.delete", i); err != nil {
 		return err
 	}
-	return fmt.Errorf("InMemoryStream.Delete not implemented")
+	if controller, ok := i.Project().Controller().(*InMemoryController); !ok {
+		return fmt.Errorf("expected an in-memory controller")
+	} else {
+		return controller.DeleteStream(i)
+	}
 }
 
 func (c *InMemoryStream) AddSource(source kodex.Source, status kodex.SourceStatus) error {

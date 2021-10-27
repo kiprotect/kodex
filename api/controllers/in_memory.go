@@ -65,8 +65,12 @@ func (m *InMemoryController) ObjectRole(id []byte) (api.ObjectRole, error) {
 	return nil, fmt.Errorf("not found")
 }
 
+func (m *InMemoryController) DeleteObjectRole(objectRole *InMemoryObjectRole) error {
+	delete(m.objectRoles, string(objectRole.ID()))
+	return nil
+}
+
 func (m *InMemoryController) SaveObjectRole(objectRole *InMemoryObjectRole) error {
-	kodex.Log.Info("Saving object role...")
 	m.objectRoles[string(objectRole.ID())] = objectRole
 	return nil
 }
