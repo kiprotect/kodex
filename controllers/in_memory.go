@@ -112,6 +112,11 @@ func (c *InMemoryController) SaveDestination(destination kodex.Destination) erro
 	return nil
 }
 
+func (c *InMemoryController) DeleteStream(stream *InMemoryStream) error {
+	delete(c.streams, string(stream.ID()))
+	return nil
+}
+
 func (c *InMemoryController) SaveStream(stream kodex.Stream) error {
 	inMemoryStream, ok := stream.(*InMemoryStream)
 	if !ok {

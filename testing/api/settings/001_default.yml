@@ -12,8 +12,3 @@ meter:
     password: ""
 controller:
   type: inMemory
-internal-channel:
-  type: bytes
-  config:
-    format: json
-    input: ""

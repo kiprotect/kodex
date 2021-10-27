@@ -17,7 +17,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/kiprotect/kodex/api"
 	"time"
 )
@@ -53,7 +52,7 @@ func (c *InMemoryObjectRole) Save() error {
 }
 
 func (c *InMemoryObjectRole) Delete() error {
-	return fmt.Errorf("not implemented")
+	return c.controller.DeleteObjectRole(c)
 }
 
 func (c *InMemoryObjectRole) Refresh() error {
