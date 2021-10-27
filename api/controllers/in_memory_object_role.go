@@ -20,21 +20,23 @@ type InMemoryObjectRole struct {
 	objectType       string
 	objectRole       string
 	organizationRole string
+	controller       *InMemoryController
 }
 
-func MakeInMemoryObjectRole(id, organizationID, objectID []byte, objectType string) api.ObjectRole {
+func MakeInMemoryObjectRole(id, organizationID, objectID []byte, objectType string, controller *InMemoryController) api.ObjectRole {
 	inMemoryRole := &InMemoryObjectRole{
 		id:             id,
 		organizationID: organizationID,
 		objectID:       objectID,
 		objectType:     objectType,
+		controller:     controller,
 	}
 	inMemoryRole.Self = inMemoryRole
 	return inMemoryRole
 }
 
 func (c *InMemoryObjectRole) Save() error {
-	return nil
+	return c.controller.SaveObjectRole(c)
 }
 
 func (c *InMemoryObjectRole) Delete() error {
@@ -94,8 +96,4 @@ func (c *InMemoryObjectRole) ObjectRole() string {
 
 func (c *InMemoryObjectRole) OrganizationRole() string {
 	return c.organizationRole
-}
-
-func (c *InMemoryObjectRole) MarshalJSON() ([]byte, error) {
-	return nil, fmt.Errorf("not implemented")
 }

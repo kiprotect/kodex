@@ -6,8 +6,8 @@ package metering
 import (
 	"fmt"
 	"github.com/go-redis/redis"
-	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/go-helpers/forms"
+	"github.com/kiprotect/kodex"
 	"regexp"
 	"sort"
 	"strconv"

@@ -71,7 +71,7 @@ func (a ActionConfigAdaptor) Objects(c *gin.Context) []kodex.Model {
 	}
 
 	sources, err := controller.ActionConfigs(map[string]interface{}{
-		"action_project_id_project.ext_id": project.ID(),
+		"ProjectID": project.ID(),
 	})
 
 	if err != nil {

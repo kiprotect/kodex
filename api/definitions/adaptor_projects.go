@@ -55,7 +55,7 @@ func (a ProjectAdaptor) Objects(c *gin.Context) []kodex.Model {
 	}
 
 	projects, err := controller.Projects(map[string]interface{}{
-		"ext_id": api.In{Values: ids},
+		"ID": api.In{Values: ids},
 	})
 
 	if err != nil {
