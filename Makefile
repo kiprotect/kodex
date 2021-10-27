@@ -9,6 +9,7 @@ export KIPROTECT_TEST = yes
 
 KIPROTECT_TEST_CONFIG ?= "$(shell pwd)/config"
 KIPROTECT_TEST_SETTINGS ?= "$(shell pwd)/testing/settings"
+KIPROTECT_TEST_API_SETTINGS ?= "$(shell pwd)/testing/api/settings"
 
 all: dep install
 
@@ -36,7 +37,10 @@ plugins/writers/example/example.so: plugins/writers/example/example.go
 	@cd plugins/writers/example; make
 
 test: dep
-	@KODEX_CONFIG=$(KIPROTECT_TEST_CONFIG) KODEX_SETTINGS=$(KIPROTECT_TEST_SETTINGS) go test $(testargs) -p 1 -count=1 `go list ./...`
+	@KODEX_CONFIG=$(KIPROTECT_TEST_CONFIG) KODEX_SETTINGS=$(KIPROTECT_TEST_SETTINGS) go test $(GOTAGS) $(testargs) -p 1 -count=1 `go list ./... | grep -v api/`
+
+test-api: dep
+	@KODEX_CONFIG=$(KIPROTECT_TEST_CONFIG) KODEX_SETTINGS=$(KIPROTECT_TEST_API_SETTINGS) go test $(GOTAGS) $(testargs) -p 1 -count=1 `go list ./... | grep api/`
 
 test-races: dep
 	@KODEX_CONFIG=$(KIPROTECT_TEST_CONFIG) KODEX_SETTINGS=$(KIPROTECT_TEST_SETTINGS) go test -race $(testargs) -p 1 -count=1 `go list ./...`

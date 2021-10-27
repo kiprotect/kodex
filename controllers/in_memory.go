@@ -177,7 +177,6 @@ outer:
 		streams = append(streams, stream)
 	}
 	return streams, nil
-	return nil, fmt.Errorf("filtering not implemented")
 }
 
 func (c *InMemoryController) Stream(streamID []byte) (kodex.Stream, error) {
@@ -192,64 +191,127 @@ func (c *InMemoryController) Stream(streamID []byte) (kodex.Stream, error) {
 }
 
 func (c *InMemoryController) Config(configID []byte) (kodex.Config, error) {
-	return nil, fmt.Errorf("InMemoryController.Config not implemented")
+	for _, stream := range c.streams {
+		configs, err := stream.Configs()
+		if err != nil {
+			return nil, err
+		}
+		for _, config := range configs {
+			if bytes.Equal(config.ID(), configID) {
+				return config, nil
+			}			
+		}
+	}
+	return nil, fmt.Errorf("config not found")
 }
 
 func (c *InMemoryController) ActionConfig(actionConfigID []byte) (kodex.ActionConfig, error) {
-	return nil, fmt.Errorf("InMemoryController.ActionConfig not implemented")
+	for _, actionConfig := range c.actionConfigs {
+		if bytes.Equal(actionConfig.ID(), actionConfigID) {
+			return actionConfig, nil
+		}
+	}
+	return nil, fmt.Errorf("action config not found")
 }
 
 /* Action Config Management */
 
 func (c *InMemoryController) ActionConfigs(filters map[string]interface{}) ([]kodex.ActionConfig, error) {
-	if len(filters) == 0 {
-		actionConfigs := make([]kodex.ActionConfig, len(c.actionConfigs))
-		i := 0
-		for _, actionConfig := range c.actionConfigs {
-			actionConfigs[i] = actionConfig
-			i++
+
+	actionConfigs := make([]kodex.ActionConfig, 0, len(c.actionConfigs))
+
+outer:
+	for _, actionConfig := range c.actionConfigs {
+		for key, value := range filters {
+			switch key {
+			case "name":
+				strValue, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("expected a name")
+				}
+				if actionConfig.Name() != strValue {
+					continue outer
+				}
+			default:
+				return nil, fmt.Errorf("unknown filter key: %s", key)
+			}
 		}
-		return actionConfigs, nil
+		actionConfigs = append(actionConfigs, actionConfig)
 	}
-	return nil, fmt.Errorf("filtering not implemented")
+
+	return actionConfigs, nil
 }
 
 /* Source Management */
 
 func (c *InMemoryController) Sources(filters map[string]interface{}) ([]kodex.Source, error) {
-	if len(filters) == 0 {
-		sources := make([]kodex.Source, len(c.sources))
-		i := 0
-		for _, source := range c.sources {
-			sources[i] = source
-			i++
+	sources := make([]kodex.Source, 0, len(c.sources))
+
+outer:
+	for _, source := range c.sources {
+		for key, value := range filters {
+			switch key {
+			case "name":
+				strValue, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("expected a name")
+				}
+				if source.Name() != strValue {
+					continue outer
+				}
+			default:
+				return nil, fmt.Errorf("unknown filter key: %s", key)
+			}
 		}
-		return sources, nil
+		sources = append(sources, source)
 	}
-	return nil, fmt.Errorf("filtering not implemented")
+
+	return sources, nil
 }
 
 func (c *InMemoryController) Source(sourceID []byte) (kodex.Source, error) {
-	return nil, fmt.Errorf("InMemoryController.Source not implemented")
+	for _, source := range c.sources {
+		if bytes.Equal(source.ID(), sourceID) {
+			return source, nil
+		}
+	}
+	return nil, fmt.Errorf("not found")
 }
 
 /* Destination Management */
 
 func (c *InMemoryController) Destinations(filters map[string]interface{}) ([]kodex.Destination, error) {
-	if len(filters) == 0 {
-		destinations := make([]kodex.Destination, len(c.destinations))
-		i := 0
-		for _, destination := range c.destinations {
-			destinations[i] = destination
-			i++
+	destinations := make([]kodex.Destination, 0, len(c.sources))
+
+outer:
+	for _, destination := range c.destinations {
+		for key, value := range filters {
+			switch key {
+			case "name":
+				strValue, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("expected a name")
+				}
+				if destination.Name() != strValue {
+					continue outer
+				}
+			default:
+				return nil, fmt.Errorf("unknown filter key: %s", key)
+			}
 		}
-		return destinations, nil
+		destinations = append(destinations, destination)
 	}
-	return nil, fmt.Errorf("filtering not implemented")
+
+	return destinations, nil
 }
 
 func (c *InMemoryController) Destination(destinationID []byte) (kodex.Destination, error) {
-	return nil, fmt.Errorf("InMemoryController.Destination not implemented")
+	for _, destination := range c.destinations {
+		if bytes.Equal(destination.ID(), destinationID) {
+			return destination, nil
+		}
+	}
+	return nil, fmt.Errorf("not found")
 }
 
 func (c *InMemoryController) StreamsByUrgency(n int) ([]kodex.Stream, error) {
@@ -383,7 +445,12 @@ func (c *InMemoryController) Ping(processable kodex.Processable, stats kodex.Pro
 /* Project Management */
 
 func (c *InMemoryController) Project(id []byte) (kodex.Project, error) {
-	return nil, fmt.Errorf("InMemoryController.Project not implemented")
+	for _, project := range c.projects {
+		if bytes.Equal(project.ID(), id) {
+			return project, nil
+		}
+	}
+	return nil, fmt.Errorf("not found")
 }
 
 func (c *InMemoryController) Projects(filters map[string]interface{}) ([]kodex.Project, error) {
