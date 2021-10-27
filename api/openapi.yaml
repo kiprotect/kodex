@@ -1,0 +1,960 @@
+openapi: "3.0.0"
+info:
+  version: 0.0.1
+  title: KIProtect API
+  description: An API to secure sensitive and personal data.
+  termsOfService: https://kiprotect.com/product/terms
+  contact:
+    name: KIProtect Team
+    email: api@kiprotect.com
+    url: https://kiprotect.com
+  license:
+    name: Proprietary
+servers:
+  - url: https://api.kiprotect.com/v1
+  - url: http://localhost:8000/v1
+paths:
+  /hello:
+    get:
+      tags: [Base API]
+      description: >
+        This is an end point returning all models an application will want after
+        logging in.
+      parameters: []
+      responses:
+        200:
+          description: user profile response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/UserProfile'
+        default:
+          description: The user has not provided a valid authorization.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - Malformed/missing authorization header
+  /user:
+    get:
+      tags: [Base API]
+      description: |
+        Returns the current user profile.
+      operationId: getUserProfile
+      parameters: []
+      responses:
+        200:
+          description: user profile response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /orgs/{organizationId}/projects:
+    parameters:
+      - $ref: "#/components/parameters/OrganizationIDOrDefault"
+    post:
+      tags: [Base API]
+      description: Create an project
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Project'
+        400:
+          description: invalid source
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - Transformation key missing
+  /projects:
+    get:
+      tags: [Base API]
+      description: Returns the list of projects the user can see
+      responses:
+        '200':
+          description: projects response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+  /projects/{projectId}:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+    get:
+      tags: [Base API]
+      description: Returns the details of a project
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Project'
+    delete:
+      tags: [Base API]
+      description: Deletes a project
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - success
+    patch:
+      tags: [Base API]
+      description: Updates a project
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Project'
+  /projects/{projectId}/streams:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+    post:
+      tags: [Base API]
+      description: Create a new stream in the given project.
+      responses:
+        201:
+          description: success
+    get:
+      tags: [Base API]
+      description: Returns the list of streams for the given project.
+      responses:
+        '200':
+          description: streams response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Stream'
+  /streams/{streamId}:
+    parameters:
+      - $ref: "#/components/parameters/StreamID"
+    get:
+      tags: [Base API]
+      description: Returns the details of a stream
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Stream'
+    delete:
+      tags: [Base API]
+      description: Deletes a stream
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - success
+    patch:
+      tags: [Base API]
+      description: Updates a stream
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Stream'
+  /streams/{streamId}/configs:
+    parameters:
+      - $ref: "#/components/parameters/StreamID"
+    get:
+      tags: [Base API]
+      description: List the configs for a stream.
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Config'
+    post:
+      tags: [Base API]
+      description: Creates a new config for a stream and organization
+      responses:
+        200:
+          description: success
+  /streams/{streamId}/sources:
+    parameters:
+      - $ref: "#/components/parameters/StreamID"
+    post:
+      tags: [Base API]
+      description: Create a new source.
+      responses:
+        201:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Source'
+    get:
+      tags: [Base API]
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Source'
+  /streams/{streamId}/sources/{sourceId}:
+    parameters:
+      - $ref: "#/components/parameters/StreamID"
+      - $ref: "#/components/parameters/SourceID"
+    post:
+      tags: [Base API]
+      responses:
+        200:
+          description: success
+    delete:
+      tags: [Base API]
+      description: Delete an source from a stream.
+      responses:
+        200:
+          description: success
+  /projects/{projectId}/sources:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+    post:
+      tags: [Base API]
+      description: Create a new source in the given project.
+      responses:
+        201:
+          description: success
+    get:
+      tags: [Base API]
+      description: Returns the list of sources that the user can see.
+      responses:
+        200:
+          description: sources response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Source'
+  /sources/{sourceId}:
+    parameters:
+      - $ref: "#/components/parameters/SourceID"
+    get:
+      tags: [Base API]
+      description: Returns the details of an source
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Source'
+    delete:
+      tags: [Base API]
+      description: Deletes an source
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - success
+    patch:
+      tags: [Base API]
+      description: Updates an source
+      responses:
+        200:
+          description: success
+  /projects/{projectId}/destinations:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+    post:
+      tags: [Base API]
+      description: Create a new destination.
+      responses:
+        201:
+          description: success
+    get:
+      tags: [Base API]
+      description: Returns the list of destinations that the user can see.
+      responses:
+        200:
+          description: destinations response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Destination'
+  /destinations/{destinationId}:
+    parameters:
+      - $ref: "#/components/parameters/DestinationID"
+    get:
+      tags: [Base API]
+      description: Returns the details of an destination
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Destination'
+    delete:
+      tags: [Base API]
+      description: Deletes an destination
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - success
+    patch:
+      tags: [Base API]
+      description: Updates an destination
+      responses:
+        200:
+          description: success
+  /configs/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ID"
+    get:
+      tags: [Base API]
+      description: Returns the details of a config
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Config'
+    delete:
+      tags: [Base API]
+      description: Deletes a config
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - success
+    patch:
+      tags: [Base API]
+      description: Updates a config
+      responses:
+        200:
+          description: success
+  /configs/{id}/actions:
+    parameters:
+      - $ref: "#/components/parameters/ID"
+    get:
+      tags: [Base API]
+      description: Returns the list of actions of a config
+      responses:
+        200:
+          description: success
+  /configs/{id}/actions/{actionId}:
+    parameters:
+      - $ref: "#/components/parameters/ID"
+      - $ref: "#/components/parameters/ActionID"
+    post:
+      tags: [Base API]
+      description: Add an action to a config
+      responses:
+        200:
+          description: success
+    delete:
+      tags: [Base API]
+      description: Delete an action from a config
+      responses:
+        200:
+          description: success
+  /configs/{id}/destinations:
+    parameters:
+      - $ref: "#/components/parameters/ID"
+    get:
+      tags: [Base API]
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Destination'
+  /configs/{id}/destinations/{destinationId}:
+    parameters:
+      - $ref: "#/components/parameters/ID"
+      - $ref: "#/components/parameters/DestinationID"
+    post:
+      tags: [Base API]
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Destination'
+    delete:
+      tags: [Base API]
+      description: Delete an destination from a config.
+      responses:
+        200:
+          description: success
+  /projects/{projectId}/actions:
+    parameters:
+      - $ref: "#/components/parameters/ProjectID"
+    post:
+      tags: [Base API]
+      description: Create an action
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Action'
+        400:
+          description: invalid source
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - Transformation key missing
+    get:
+      tags: [Base API]
+      description: Returns the list of destinations that the user can see.
+      responses:
+        200:
+          description: actions response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Action'
+        default:
+          description: error
+  /actions/{actionId}:
+    parameters:
+      - $ref: "#/components/parameters/ActionID"
+    get:
+      tags: [Base API]
+      description: Returns the details of an action
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Action'
+    delete:
+      tags: [Base API]
+      description: Deletes an action
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - success
+    patch:
+      tags: [Base API]
+      description: Updates an action
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Action'
+  /transform:
+    post:
+      tags: [Base API]
+      responses:
+        200:
+          description: transformation destination response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _kip:
+                              type: string
+                              example: 64656661756c74
+                      params:
+                        description: A list of params for transformations which match to the _kip property of items
+                        type: object
+                        example:
+                          64656661756c74:
+                            pseudonymize-action:
+                              key: hSCZDT/bGdP3HBvOtK3JwfOj8vs667nXDxsTAN2YsDQ=
+        400:
+          description: invalid list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - invalid data encountered in the transform form
+                  code:
+                    type: string
+                    enum:
+                      - FORM-ERROR
+                  errors:
+                    type: object
+                    example:
+                      items:
+                        - not a list
+  /transform/{id}:
+    parameters:
+     - $ref: "#/components/parameters/ID"
+    post:
+      tags: [Base API]
+      responses:
+        200:
+          description: success
+  /protect/pcap:
+    post:
+      tags: [Base API]
+      description: Protect a PCAP file
+      responses:
+        200:
+          description: success
+  /unprotect/pcap:
+    post:
+      tags: [Base API]
+      description: Unprotect a PCAP file
+      responses:
+        200:
+          description: Unprotect a PCAP file
+  /submit/{streamId}:
+    parameters:
+     - $ref: "#/components/parameters/StreamID"
+    post:
+      tags: [Base API]
+      responses:
+        200:
+          description: success
+  /definitions:
+    get:
+      tags: [Base API]
+      responses:
+        200:
+          description: success
+components:
+  parameters:
+    ProjectID:
+      name: projectId
+      in: path
+      description: ID of project
+      example: 2b25c63afc8a55746c91d0e7e178fda7
+      required: true
+      schema:
+        type: string
+    ActionID:
+      name: actionId
+      in: path
+      description: ID of action
+      example: 2b25c63afc8a55746c91d0e7e178fda7
+      required: true
+      schema:
+        type: string
+    DependentID:
+      name: dependent_id
+      in: path
+      description: ID of dependent object to fetch
+      required: true
+      schema:
+        type: string
+    ID:
+      name: id
+      in: path
+      description: ID of object
+      example: 64285d4b655dde786882f9b6f40ef1d9
+      required: true
+      schema:
+        type: string
+    SourceID:
+      name: sourceId
+      in: path
+      description: ID of an source object
+      example: b59d65cc6ccf3544bbc2a37aa43674b1
+      required: true
+      schema:
+        type: string
+    DestinationID:
+      name: destinationId
+      in: path
+      description: ID of an destination object
+      example: eca109cd2d3630e2cc05fe78d3ef9c3a
+      required: true
+      schema:
+        type: string
+    OrganizationID:
+      name: organizationId
+      in: path
+      description: ID of an organization
+      example: c5c407b743b5416c8d98a6037fb442ed
+      required: true
+      schema:
+        type: string
+    OrganizationIDOrDefault:
+      name: organizationId
+      in: path
+      description: ID of an organization or "default" for a user's default organization
+      example: default
+      required: true
+      schema:
+        type: string
+    StreamID:
+      name: streamId
+      in: path
+      description: ID of a stream object
+      example: dcc00efe285905cadf798a8a610a754a
+      required: true
+      schema:
+        type: string
+  schemas:
+    Project:
+      type: object
+      properties:
+        created_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+        description:
+          type: string
+          example: this is just an example action
+        id:
+          $ref: "#/components/parameters/ActionID"
+        name:
+          type: string
+          example: example action
+        update_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+    AccessToken:
+      allOf:
+        - $ref: "#/components/schemas/BaseAccessToken"
+    Action:
+      type: object
+      properties:
+        created_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+        description:
+          type: string
+          example: this is just an example action
+        id:
+          $ref: "#/components/parameters/ActionID"
+        name:
+          type: string
+          example: example action
+        update_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+    Base:
+      type: object
+    BaseAccessToken:
+      type: object
+      properties:
+        scopes:
+          type: array
+          items:
+            type: string
+            example: "admin"
+    BaseOrganization:
+      type: object
+      properties:
+        default:
+          type: boolean
+          example: false
+        description:
+          type: string
+          example: this is just an example organization
+        name:
+          type: string
+          example: example org
+        source:
+          type: string
+          example: worf
+        source_id:
+          type: string
+    BaseOrganizationRole:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            type: string
+            example: admin
+        organization:
+          $ref: "#/components/schemas/Organization"
+    Config:
+      type: object
+      properties:
+        created_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+        description:
+          type: string
+          example: this is just an example config
+        id:
+          $ref: "#/components/parameters/ID"
+        name:
+          type: string
+          example: example config
+        source:
+          type: string
+          example: analytics
+        status:
+          type: string
+          example: active
+        stream:
+          $ref: "#/components/schemas/Stream"
+        update_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+    Error:
+      type: object
+    OrganizationRole:
+      allOf:
+        - $ref: "#/components/schemas/BaseOrganizationRole"
+    Organization:
+      allOf:
+        - $ref: "#/components/schemas/BaseOrganization"
+        - $ref: "#/components/schemas/Base"
+    Source:
+      type: object
+      properties:
+        created_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+        description:
+          type: string
+          example: this is just an example source
+        id:
+          $ref: "#/components/parameters/SourceID"
+        name:
+          type: string
+          example: example source
+        update_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+    Destination:
+      type: object
+      properties:
+        created_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+        config:
+          type: object
+        description:
+          type: string
+          example: this is just an example destination
+        id:
+          $ref: "#/components/parameters/DestinationID"
+        name:
+          type: string
+          example: example destination
+        type:
+          type: string
+          example: analytics
+        update_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+    Stream:
+      type: object
+      properties:
+        created_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+        description:
+          type: string
+          example: this is just an example stream
+        id:
+          $ref: "#/components/parameters/StreamID"
+        name:
+          type: string
+          example: example stream
+        status:
+          type: string
+          enum:
+            - active
+            - disabled
+            - testing
+        update_at:
+          type: string
+          example: "2019-10-08T09:41:56.742325Z"
+    UserProfile:
+      type: object
+      properties:
+        source_id:
+          type: string
+        source:
+          type: string
+          example: worf
+        email:
+          type: string
+          format: email
+          example: max.mustermann@muster.com
+        display_name:
+          type: string
+          example: Max Mustermann
+        access_token:
+          $ref: "#/components/schemas/AccessToken"
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrganizationRole"
+tags:
+  - name: Base API
+    description: KIProtect Base API

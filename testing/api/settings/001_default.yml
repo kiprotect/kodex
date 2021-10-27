@@ -1,0 +1,17 @@
+test: true
+user-profile-provider:
+  disable: true
+meter:
+  ip-key: super-secret-random-key-used-for-ip-hashing #change me
+  disable: false
+  type: redis
+  config:
+    database: 1
+    addresses:
+      - localhost:6379
+    password: ""
+controller:
+  type: inMemory
+internal-channel:
+  type: bytes
+  config: {}

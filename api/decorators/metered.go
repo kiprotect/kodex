@@ -1,0 +1,130 @@
+// Kodex (Enterprise Edition - EE) - Privacy & Security Engineering Platform
+// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - All Rights Reserved
+
+package decorators
+
+import (
+	"encoding/hex"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/api"
+	"strings"
+	"time"
+)
+
+var tws = []kodex.TimeWindowFunc{
+	kodex.Minute,
+	kodex.Hour,
+	kodex.Day,
+	kodex.Week,
+	kodex.Month,
+}
+
+func MeterEndpointCalls(meter kodex.Meter, meterId string) func(*gin.Context) {
+
+	return func(c *gin.Context) {
+
+		var id string
+
+		if meterId != "global" {
+			idObj, ok := c.Get(meterId)
+
+			if !ok {
+				api.HandleError(c, 500, fmt.Errorf("meter ID is undefined"))
+				return
+			}
+
+			id, ok = idObj.(string)
+			if !ok {
+				api.HandleError(c, 500, fmt.Errorf("invalid meter ID"))
+				return
+			}
+		} else {
+			id = "global"
+		}
+
+		path := c.Request.URL.Path
+
+		pathComponents := strings.Split(path, "/")
+
+		now := time.Now().UTC().UnixNano()
+		for _, twt := range tws {
+
+			// we submit statistics for the full path
+			tw := twt(now)
+			if err := meter.Add(id, "endpoints", map[string]string{"path": path}, tw, 1); err != nil {
+				continue
+			}
+
+			// we submit statistics for partial paths as well
+			partialPaths := []string{}
+			for i, pathComponent := range pathComponents {
+				if i == len(pathComponents)-1 {
+					break
+				}
+				partialPaths = append(partialPaths, pathComponent)
+				if err := meter.Add(id, "endpoints", map[string]string{"path": strings.Join(append(partialPaths, "*"), "/")}, tw, 1); err != nil {
+					continue
+				}
+			}
+		}
+
+	}
+
+}
+
+func OrganizationMeterId(settings kodex.Settings) gin.HandlerFunc {
+	decorator := func(c *gin.Context) {
+
+		up, ok := c.Get("userProfile")
+		if !ok {
+			return
+		}
+
+		userProfile, ok := up.(api.UserProfile)
+
+		if !ok {
+			api.HandleError(c, 500, fmt.Errorf("cannot get user profile"))
+			return
+		}
+
+		var id string
+
+		if len(userProfile.Roles()) == 0 {
+			api.HandleError(c, 400, fmt.Errorf("you need to be associated with an organization to use this endpoint"))
+			return
+		}
+
+		orgId := hex.EncodeToString(userProfile.Roles()[0].Organization().ID())
+
+		// to do: select a given organization based on the access token
+		id = "org:" + orgId
+
+		c.Set("organizationMeterId", id)
+
+	}
+	return decorator
+
+}
+
+func Metered(settings kodex.Settings, meter kodex.Meter) gin.HandlerFunc {
+
+	testDecorator := func(c *gin.Context) {}
+
+	decorator := func(c *gin.Context) {
+
+		if disabled, ok := settings.Bool("meter.disable"); ok && disabled {
+			kodex.Log.Info("Metering is disabled...")
+			return
+		}
+
+		c.Set("meter", meter)
+
+	}
+
+	if test, _ := settings.Bool("test"); test {
+		return testDecorator
+	}
+	return decorator
+}

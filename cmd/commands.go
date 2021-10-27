@@ -18,6 +18,12 @@ package cmd
 
 import (
 	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/cmd/api"
 )
 
-var Commands = kodex.CommandsDefinitions{}
+var Commands = kodex.CommandsDefinitions{
+	kodex.CommandsDefinition{
+		Name:  "api",
+		Maker: api.API,
+	},
+}
