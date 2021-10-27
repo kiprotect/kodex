@@ -27,8 +27,7 @@ type UserProfileProvider interface {
 	Stop()
 }
 
-var providers = map[string]UserProfileProviderMaker{
-}
+var providers = map[string]UserProfileProviderMaker{}
 
 func MakeUserProfileProvider(settings kodex.Settings) (UserProfileProvider, error) {
 	providerType, ok := settings.String("user-profile-provider.type")

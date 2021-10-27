@@ -49,7 +49,7 @@ func (a StreamAdaptor) Objects(c *gin.Context) []kodex.Model {
 	}
 
 	streams, err := controller.Streams(map[string]interface{}{
-		"stream_project_id_project.ext_id": project.ID(),
+		"ProjectID": project.ID(),
 	})
 
 	if err != nil {

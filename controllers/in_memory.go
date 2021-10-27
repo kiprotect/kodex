@@ -162,6 +162,14 @@ outer:
 	for _, stream := range c.streams {
 		for key, value := range filters {
 			switch key {
+			case "ProjectID":
+				bytesValue, ok := value.([]byte)
+				if !ok {
+					return nil, fmt.Errorf("expected at name")
+				}
+				if !bytes.Equal(stream.Project().ID(), bytesValue) {
+					continue outer
+				}
 			case "name":
 				strValue, ok := value.(string)
 				if !ok {
@@ -199,7 +207,7 @@ func (c *InMemoryController) Config(configID []byte) (kodex.Config, error) {
 		for _, config := range configs {
 			if bytes.Equal(config.ID(), configID) {
 				return config, nil
-			}			
+			}
 		}
 	}
 	return nil, fmt.Errorf("config not found")
@@ -224,6 +232,14 @@ outer:
 	for _, actionConfig := range c.actionConfigs {
 		for key, value := range filters {
 			switch key {
+			case "ProjectID":
+				bytesValue, ok := value.([]byte)
+				if !ok {
+					return nil, fmt.Errorf("expected at name")
+				}
+				if !bytes.Equal(actionConfig.Project().ID(), bytesValue) {
+					continue outer
+				}
 			case "name":
 				strValue, ok := value.(string)
 				if !ok {
@@ -251,6 +267,14 @@ outer:
 	for _, source := range c.sources {
 		for key, value := range filters {
 			switch key {
+			case "ProjectID":
+				bytesValue, ok := value.([]byte)
+				if !ok {
+					return nil, fmt.Errorf("expected at name")
+				}
+				if !bytes.Equal(source.Project().ID(), bytesValue) {
+					continue outer
+				}
 			case "name":
 				strValue, ok := value.(string)
 				if !ok {
@@ -287,6 +311,14 @@ outer:
 	for _, destination := range c.destinations {
 		for key, value := range filters {
 			switch key {
+			case "ProjectID":
+				bytesValue, ok := value.([]byte)
+				if !ok {
+					return nil, fmt.Errorf("expected at name")
+				}
+				if !bytes.Equal(destination.Project().ID(), bytesValue) {
+					continue outer
+				}
 			case "name":
 				strValue, ok := value.(string)
 				if !ok {

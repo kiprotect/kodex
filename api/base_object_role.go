@@ -4,7 +4,9 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/kiprotect/go-helpers/forms"
+	"github.com/kiprotect/kodex"
 	"regexp"
 )
 
@@ -16,6 +18,23 @@ type BaseObjectRole struct {
 
 func (b *BaseObjectRole) Type() string {
 	return "object_role"
+}
+
+func (b *BaseObjectRole) MarshalJSON() ([]byte, error) {
+
+	data := map[string]interface{}{
+		"organization_id":   b.Self.OrganizationID(),
+		"object_id":         b.Self.ObjectID(),
+		"organization_role": b.Self.OrganizationRole(),
+		"object_role":       b.Self.ObjectRole(),
+		"object_type":       b.Self.ObjectType(),
+	}
+
+	for k, v := range kodex.JSONData(b.Self) {
+		data[k] = v
+	}
+
+	return json.Marshal(data)
 }
 
 func (b *BaseObjectRole) Update(values map[string]interface{}) error {

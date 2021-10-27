@@ -4,6 +4,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/kiprotect/kodex/api"
 	"time"
 )
@@ -32,7 +33,7 @@ func MakeInMemoryOrganization(id []byte,
 }
 
 func (i *InMemoryOrganization) Delete() error {
-	return nil
+	return fmt.Errorf("not implemented")
 }
 
 func (i *InMemoryOrganization) ID() []byte {
@@ -101,5 +102,9 @@ func (i *InMemoryOrganization) Refresh() error {
 }
 
 func (i *InMemoryOrganization) Save() error {
-	return nil
+	inMemoryController, ok := i.Controller().(*InMemoryController)
+	if !ok {
+		return fmt.Errorf("expected an InMemory controller")
+	}
+	return inMemoryController.SaveOrganization(i)
 }

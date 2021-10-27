@@ -49,7 +49,7 @@ func (a DestinationAdaptor) Objects(c *gin.Context) []kodex.Model {
 	}
 
 	destinations, err := controller.Destinations(map[string]interface{}{
-		"destination_project_id_project.ext_id": project.ID(),
+		"ProjectID": project.ID(),
 	})
 
 	if err != nil {

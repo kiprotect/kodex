@@ -198,22 +198,33 @@ func (c *InMemoryConfig) AddDestination(destination kodex.Destination, name stri
 	if _, ok := c.destinations[name]; !ok {
 		c.destinations[name] = make([]kodex.DestinationMap, 0, 1)
 	}
+	for _, destinationMap := range c.destinations[name] {
+		if bytes.Equal(destinationMap.Destination().ID(), destination.ID()) && destinationMap.Name() == name {
+			// this destination map already exists, we just update it...
+			destinationMap.SetStatus(status)
+			return nil
+		}
+	}
 	c.destinations[name] = append(c.destinations[name], MakeInMemoryDestinationMap(kodex.RandomID(), name, c, inMemoryDestination, status))
 	return nil
 }
 
 func (c *InMemoryConfig) RemoveDestination(destination kodex.Destination) error {
-	for key, destinations := range c.destinations {
-		newDestinations := make([]kodex.DestinationMap, 0, len(destinations))
+	for key, destinationMaps := range c.destinations {
+		newDestinationMaps := make([]kodex.DestinationMap, 0, len(destinationMaps))
 		found := false
-		for _, existingDestination := range destinations {
-			if string(existingDestination.ID()) == string(destination.ID()) {
+		for _, existingDestinationMap := range destinationMaps {
+			if string(existingDestinationMap.Destination().ID()) == string(destination.ID()) {
 				found = true
 				continue
 			}
-			newDestinations = append(newDestinations, existingDestination)
+			newDestinationMaps = append(newDestinationMaps, existingDestinationMap)
 		}
-		c.destinations[key] = newDestinations
+		if len(newDestinationMaps) == 0 {
+			delete(c.destinations, key)
+		} else {
+			c.destinations[key] = newDestinationMaps
+		}
 		if found {
 			return nil
 		}

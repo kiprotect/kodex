@@ -85,7 +85,7 @@ func TestAddConfigDestination(t *testing.T) {
 		}
 
 		if len(destinations) != 1 {
-			t.Fatalf("expected 1 destination")
+			t.Fatalf("expected 1 destination, got %d", len(destinations))
 		}
 
 		var destinationName string
@@ -94,10 +94,8 @@ func TestAddConfigDestination(t *testing.T) {
 			break
 		}
 
-		kodex.Log.Error(destinationName)
-
 		if len(destinationMaps) != 1 {
-			t.Fatal("Expected one destination map")
+			t.Fatalf("Expected 1 destination map, got %d", len(destinationMaps))
 		}
 
 		destinationMap := destinationMaps[0]

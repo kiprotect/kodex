@@ -54,7 +54,7 @@ func (a SourceAdaptor) Objects(c *gin.Context) []kodex.Model {
 	}
 
 	sources, err := controller.Sources(map[string]interface{}{
-		"source_project_id_project.ext_id": project.ID(),
+		"ProjectID": project.ID(),
 	})
 
 	if err != nil {
