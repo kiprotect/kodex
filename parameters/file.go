@@ -605,7 +605,7 @@ func (p *FileParameterStore) writeParameters(parameters *kodex.Parameters) error
 	}); err != nil {
 		return err
 	}
-	// we make sure the parameters actually exist in the storer now
+	// we make sure the parameters actually exist in the store now
 	if _, err := p.parametersById(parameters.ID()); err != nil {
 		return err
 	}
@@ -668,11 +668,9 @@ func (p *FileParameterStore) Parameters(action kodex.Action, parameterGroup *kod
 
 	if parameters, err := p.inMemoryStore.Parameters(action, parameterGroup); err != nil {
 		return nil, err
-	} else {
-		if parameters != nil {
-			parameters.SetParameterStore(p)
-			return parameters, nil
-		}
+	} else if parameters != nil {
+		parameters.SetParameterStore(p)
+		return parameters, nil
 	}
 	if err := p.update(); err != nil {
 		return nil, err

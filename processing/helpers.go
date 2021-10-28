@@ -86,6 +86,8 @@ func ProcessStream(stream kodex.Stream, timeout time.Duration) error {
 		time.Sleep(time.Millisecond)
 	}
 
+	kodex.Log.Infof("Readers stopped...")
+
 	// we wait for the stream executor to finish its work
 	for {
 		if streamExecutor.Stopped() {

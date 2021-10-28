@@ -72,7 +72,7 @@ func (p *Processor) updateParams(item *Item, undo bool) error {
 					return errors.MakeExternalError("error generating params", "GEN-PARAMS", nil, err)
 				}
 				if p.key == nil && action.HasParams() {
-					// we update the action parametrs
+					// we update the action parameters
 					if err := p.parameterSet.UpdateParameters(action, action.Params(), parameterGroup); err != nil {
 						// this might be a race condition with another processor
 						if i > 2 {
