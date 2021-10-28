@@ -25,6 +25,13 @@ var TransformForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the transform form",
 	Fields: []forms.Field{
 		{
+			Name: "undo",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: false},
+				forms.IsBoolean{},
+			},
+		},
+		{
 			Name: "key",
 			Validators: []forms.Validator{
 				forms.IsOptional{},
