@@ -17,8 +17,8 @@
 package api
 
 import (
-	"encoding/json"
 	"encoding/hex"
+	"encoding/json"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
 	"regexp"

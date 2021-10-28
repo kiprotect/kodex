@@ -100,7 +100,15 @@ func TransformEndpoint(meter kodex.Meter) func(c *gin.Context) {
 		processor.SetKey(key)
 		processor.SetSalt(salt)
 
-		if newItems, err := processor.Process(items, nil); err != nil {
+		process := func() ([]*kodex.Item, error) {
+			if params["undo"].(bool) {
+				return processor.Undo(items, nil)
+			} else {
+				return processor.Process(items, nil)
+			}
+		}
+
+		if newItems, err := process(); err != nil {
 			api.HandleError(c, 500, err)
 			return
 		} else {

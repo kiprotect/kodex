@@ -92,6 +92,7 @@ func OrganizationMeterId(settings kodex.Settings) gin.HandlerFunc {
 
 		up, ok := c.Get("userProfile")
 		if !ok {
+			c.Set("organizationMeterId", "org:anonymous")
 			return
 		}
 
