@@ -29,9 +29,23 @@ func Meter(settings kodex.Settings) (kodex.Meter, error) {
 	}
 	meterType, ok := settings.String("meter.type")
 	if !ok {
-		return nil, fmt.Errorf("No meter type given")
+		meterType = "in-memory"
 	}
 	switch meterType {
+	case "in-memory":
+		config, err := settings.Get("meter.config")
+		if err != nil {
+			config = map[string]interface{}{}
+		}
+		configMap, ok := maps.ToStringMap(config)
+		if !ok {
+			return nil, fmt.Errorf("not a string map")
+		}
+		meter, err := metering.MakeInMemoryMeter(configMap)
+		if err != nil {
+			return nil, err
+		}
+		return meter, nil
 	case "redis":
 		config, err := settings.Get("meter.config")
 		if err != nil {

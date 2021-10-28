@@ -43,7 +43,7 @@ type LocalSourceReader struct {
 func MakeLocalSourceReader(maxSourceWorkers int,
 	id []byte) *LocalSourceReader {
 	return &LocalSourceReader{
-		stopChannel:      make(chan bool),
+		stopChannel:      make(chan bool, 1),
 		stopped:          true,
 		id:               id,
 		payloadChannel:   make(chan kodex.Payload, maxSourceWorkers*8),
@@ -189,10 +189,11 @@ func (d *LocalSourceReader) stop(graceful bool) error {
 
 func (d *LocalSourceReader) read() {
 	stopping := false
+	stopRequested := false
 
 	stop := func() {
-		if !stopping {
-			stopping = true
+		if !stopRequested && !stopping {
+			stopRequested = true
 			go d.stop(true)
 		}
 	}
@@ -213,13 +214,12 @@ func (d *LocalSourceReader) read() {
 		// the loop (to reload configuration)
 
 		if payload, err = d.reader.Read(); err != nil {
-			kodex.Log.Error(err)
 			stop()
 			continue
 		}
 
 		// we didn't receive any new items...
-		if payload == nil {
+		if payload == nil || len(payload.Items()) == 0 {
 			if stopping {
 				d.stopChannel <- true
 				return

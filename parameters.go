@@ -159,8 +159,10 @@ func (p *ParameterSet) ParametersFor(action Action, parameterGroup *ParameterGro
 		// the action config does not exist, this should not happen
 		return nil, false, fmt.Errorf("action not found")
 	}
+
 	// we try to load valid parameters from the store
 	validParameters, err := p.parameterStore.Parameters(action, parameterGroup)
+
 	if err != nil {
 		return nil, false, err
 	}
@@ -432,6 +434,7 @@ func RestoreParameters(data map[string]interface{}, parameterStore ParameterStor
 		return nil, err
 	}
 	parameterGroupConfig := config["parameter_group"].(map[string]interface{})
+
 	return &Parameters{
 		action:         action,
 		id:             config["id"].([]byte),
@@ -502,6 +505,7 @@ func (p *Parameters) Valid(action Action, parameterGroup *ParameterGroup) (bool,
 	if err != nil {
 		return false, err
 	}
+
 	return bytes.Equal(action.ID(), p.Action().ID()) && bytes.Equal(configHashA, configHashB) && p.parameterGroup != nil && bytes.Equal(p.parameterGroup.Hash(), parameterGroup.Hash()), nil
 }
 

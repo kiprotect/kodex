@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// https://github.com/kiprotect/kodex/blob/master/hash_test.go
+
 package kodex
 
 import (
@@ -21,10 +23,22 @@ import (
 	"testing"
 )
 
+type MyStruct struct {
+	Map  map[string]interface{}
+	Ptr  interface{}
+	List []string
+}
+
 func TestBasicHash(t *testing.T) {
+	m := map[string]interface{}{"foo": "bara"}
 	s := map[string]interface{}{
-		"foo":   "bar",
-		"zoo":   "db",
+		"foo": "bar",
+		"zoo": "db",
+		"bar": MyStruct{
+			Map:  map[string]interface{}{"foo": "bar"},
+			List: []string{"a", "b", "c"},
+			Ptr:  &m,
+		},
 		"value": "another",
 		"fooz":  []byte{10, 32, 111, 54, 63},
 	}

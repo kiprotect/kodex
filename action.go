@@ -250,6 +250,7 @@ func (b *BaseAction) ConfigHash() ([]byte, error) {
 	if b.configHash != nil {
 		return b.configHash, nil
 	}
+
 	configHash, err := StructuredHash(map[string]interface{}{
 		"config": b.ConfigGroup(),
 		"type":   b.Type(),
@@ -257,6 +258,7 @@ func (b *BaseAction) ConfigHash() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	b.configHash = configHash
 	return configHash, nil
 }

@@ -112,7 +112,7 @@ func MakeFormAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 }
 
 func (a *FormAction) Params() interface{} {
-	return nil
+	return map[string]interface{}{}
 }
 
 func (a *FormAction) GenerateParams(key, salt []byte) error {
