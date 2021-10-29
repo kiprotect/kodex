@@ -1,6 +1,4 @@
 test: true
-user-profile-provider:
-  disable: true
 meter:
   ip-key: super-secret-random-key-used-for-ip-hashing #change me
   disable: false

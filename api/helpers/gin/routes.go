@@ -37,7 +37,7 @@ func InitializeRouterGroup(engine *gin.Engine,
 	var err error
 	var profileProvider provider.UserProfileProvider
 
-	if disable, ok := controller.Settings().Bool("user-profile-provider.disable"); !(ok && disable) {
+	if _, ok := controller.Settings().Bool("user-profile-provider.type"); ok {
 		if profileProvider, err = provider.MakeUserProfileProvider(controller.Settings()); err != nil {
 			return nil, err
 		}
