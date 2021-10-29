@@ -80,7 +80,6 @@ func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.Han
 
 	testDecorator := func(c *gin.Context) {
 		c.Set("userId", "test")
-		c.Set("accessTokenId", "foobar")
 	}
 
 	decorator := func(c *gin.Context) {
@@ -127,7 +126,6 @@ func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.Han
 		c.Set("userId", userProfile.SourceID())
 		c.Set("userSource", userProfile.Source())
 		c.Set("userProfile", userProfile)
-		c.Set("accessTokenId", accessToken)
 	}
 
 	if test, _ := settings.Bool("test"); test {
