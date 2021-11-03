@@ -3,17 +3,18 @@ users:
     id: max-mustermann
     accessToken:
       token: aabbccdd # the token use to authenticate against the API
-      scopes: "kiprotect:api" # grants access to everything
+      scopes: [kiprotect:api] # grants access to everything
     roles: # the roles the user has in different organizations
       - roles: [superuser]
+        organizationID: muster-org
         organization:
-          name: Muster Org
-          default: true
-          description: An example organization
-          id: muster-org
+          - name: Muster Org
+            default: true
+            description: An example organization
+            id: muster-org
 roles: # the roles the given organization has in the default project
   - organizationID: muster-org
-    objectID: default-project
+    objectID: default
     objectType: project
     objectRole: admin
     organizationRole: superuser
