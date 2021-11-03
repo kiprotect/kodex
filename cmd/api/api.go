@@ -51,7 +51,20 @@ func API(controller kodex.Controller) ([]cli.Command, error) {
 					},
 					Usage: "Run the KIProtect API.",
 					Action: func(c *cli.Context) error {
-						return runAPI(controller)
+
+						blueprintName := ""
+
+						if c.NArg() > 0 {
+							blueprintName = c.Args().Get(0)
+						}
+
+						apiBlueprintName := ""
+
+						if c.NArg() > 1 {
+							apiBlueprintName = c.Args().Get(1)
+						}
+
+						return runAPI(controller, blueprintName, apiBlueprintName)
 					},
 				},
 			},
@@ -60,7 +73,7 @@ func API(controller kodex.Controller) ([]cli.Command, error) {
 
 }
 
-func runAPI(controller kodex.Controller) error {
+func runAPI(controller kodex.Controller, blueprintName, apiBlueprintName string) error {
 	kodex.Log.Info("KIProtect - API", ginHelpers.ApiVersion)
 
 	var wg sync.WaitGroup
@@ -82,6 +95,45 @@ func runAPI(controller kodex.Controller) error {
 
 	if err != nil {
 		return err
+	}
+
+	if blueprintName != "" {
+
+		project := controller.MakeProject()
+		project.SetName("default")
+
+		if err := project.Save(); err != nil {
+			return err
+		}
+
+		blueprintConfig, err := kodex.LoadBlueprintConfig(controller.Settings(), blueprintName, "")
+
+		if err != nil {
+			return err
+		}
+
+		blueprint := kodex.MakeBlueprint(blueprintConfig)
+
+		if err := blueprint.Create(project); err != nil {
+			return err
+		}
+
+		if apiBlueprintName != "" {
+
+			blueprintConfig, err := kodex.LoadBlueprintConfig(controller.Settings(), apiBlueprintName, "")
+
+			if err != nil {
+				return err
+			}
+
+			blueprint := api.MakeBlueprint(blueprintConfig)
+
+			if err := blueprint.Create(apiController); err != nil {
+				return err
+			}
+
+		}
+
 	}
 
 	var addr = host + ":" + strconv.Itoa(port)

@@ -1,5 +1,5 @@
-// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - Germany
+// IRIS Endpoint-Server (EPS)
+// Copyright (C) 2021-2021 The IRIS Endpoint-Server Authors (see AUTHORS.md)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -18,25 +18,17 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/kiprotect/kodex/api"
 )
 
-func User(c *gin.Context) api.User {
-	userObj, ok := c.Get("user")
-
+func UserProvider(controller api.Controller) (api.UserProvider, error) {
+	userProviderType, ok := controller.Settings().String("user-provider.type")
 	if !ok {
-		api.HandleError(c, 500, fmt.Errorf("no user defined in context"))
-		return nil
+		return nil, fmt.Errorf("user provider type missing")
 	}
-
-	user, ok := userObj.(api.User)
-
+	definition, ok := controller.APIDefinitions().UserProviders[userProviderType]
 	if !ok {
-		api.HandleError(c, 500, fmt.Errorf("no user defined in context"))
-		return nil
+		return nil, fmt.Errorf("invalid user provider type '%s'", userProviderType)
 	}
-
-	return user
-
+	return definition.Maker(controller.Settings())
 }

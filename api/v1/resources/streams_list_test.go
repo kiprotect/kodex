@@ -73,7 +73,7 @@ func TestStreams(t *testing.T) {
 
 	withUser := func(c *gin.Context) {
 		user := fixtures["userA"]
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := at.Router(controller, withUser)

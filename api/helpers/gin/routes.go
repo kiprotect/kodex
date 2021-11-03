@@ -20,7 +20,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/api/decorators"
-	"github.com/kiprotect/kodex/api/user_provider"
 )
 
 func InitializeRouterGroup(engine *gin.Engine,
@@ -34,20 +33,8 @@ func InitializeRouterGroup(engine *gin.Engine,
 	//attach settings to all handlers
 	endpoints.Use(decorators.WithSettings(controller.Settings()))
 
-	var err error
-	var profileProvider provider.UserProfileProvider
-
-	if _, ok := controller.Settings().Bool("user-profile-provider.type"); ok {
-		if profileProvider, err = provider.MakeUserProfileProvider(controller.Settings()); err != nil {
-			return nil, err
-		}
-
-		profileProvider.Start()
-
-		// we add the profile provider so the WithUser decorator can use it
-		endpoints.Use(decorators.WithValue("profileProvider", profileProvider))
-
-	}
+	// we add the user provider so the WithUser decorator can use it
+	endpoints.Use(decorators.WithValue("userProvider", controller.UserProvider()))
 
 	// we add the CORS handler
 	engine.NoRoute(decorators.Cors(controller.Settings(), true))

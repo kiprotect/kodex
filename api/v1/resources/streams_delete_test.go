@@ -116,7 +116,7 @@ func TestDeleteStream(t *testing.T) {
 
 	withUser := func(c *gin.Context) {
 		user := fixtures["user"]
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := at.Router(controller, withUser)

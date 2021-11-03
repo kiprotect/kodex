@@ -48,11 +48,11 @@ func Initialize(group *gin.RouterGroup,
 	// Hello, world endpoint
 	endpoints.GET("/hello", resources.SayHello)
 
-	// User profile endpoint
+	// User endpoint
 
 	userEndpoints := endpoints.Group("")
 	userEndpoints.Use(decorators.ValidUser(settings, []string{"kiprotect:api:user"}, false))
-	userEndpoints.GET("/user", resources.UserProfile)
+	userEndpoints.GET("/user", resources.User)
 
 	transformEndpoints := endpoints.Group("")
 	transformEndpoints.Use(decorators.ValidUser(settings, []string{"kiprotect:api:transform"}, false))

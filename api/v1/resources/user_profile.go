@@ -22,7 +22,7 @@ import (
 )
 
 // Return the profile of the logged in user
-func UserProfile(c *gin.Context) {
+func User(c *gin.Context) {
 
 	controller := helpers.Controller(c)
 
@@ -30,12 +30,12 @@ func UserProfile(c *gin.Context) {
 		return
 	}
 
-	userProfile := helpers.UserProfile(c)
+	user := helpers.User(c)
 
-	if userProfile == nil {
+	if user == nil {
 		return
 	}
 
-	c.JSON(200, map[string]interface{}{"data": userProfile})
+	c.JSON(200, map[string]interface{}{"data": user})
 
 }

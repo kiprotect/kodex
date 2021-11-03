@@ -58,7 +58,7 @@ func TestAddConfigDestination(t *testing.T) {
 
 	withUser := func(c *gin.Context) {
 		user := fixtures["user"]
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := at.Router(controller, withUser)
@@ -147,7 +147,7 @@ func TestRemoveConfigDestination(t *testing.T) {
 
 	withUser := func(c *gin.Context) {
 		user := fixtures["user"]
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	controller := fixtures["controller"].(api.Controller)

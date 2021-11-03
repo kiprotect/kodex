@@ -22,8 +22,8 @@ import (
 	"github.com/kiprotect/kodex/api"
 )
 
-type TestUserProfile struct {
-	api.BaseUserProfile
+type TestUser struct {
+	api.BaseUser
 	email       string
 	displayName string
 	sourceID    []byte
@@ -33,35 +33,35 @@ type TestUserProfile struct {
 	roles       []api.OrganizationRoles
 }
 
-func (t *TestUserProfile) Source() string {
+func (t *TestUser) Source() string {
 	return "test"
 }
 
-func (t *TestUserProfile) Limits() map[string]interface{} {
+func (t *TestUser) Limits() map[string]interface{} {
 	return t.limits
 }
 
-func (t *TestUserProfile) SourceID() []byte {
+func (t *TestUser) SourceID() []byte {
 	return t.sourceID
 }
 
-func (t *TestUserProfile) SuperUser() bool {
+func (t *TestUser) SuperUser() bool {
 	return t.superUser
 }
 
-func (t *TestUserProfile) EMail() string {
+func (t *TestUser) EMail() string {
 	return t.email
 }
 
-func (t *TestUserProfile) DisplayName() string {
+func (t *TestUser) DisplayName() string {
 	return t.displayName
 }
 
-func (t *TestUserProfile) AccessToken() api.AccessToken {
+func (t *TestUser) AccessToken() api.AccessToken {
 	return t.token
 }
 
-func (t *TestUserProfile) Roles() []api.OrganizationRoles {
+func (t *TestUser) Roles() []api.OrganizationRoles {
 	return t.roles
 }
 
@@ -176,7 +176,7 @@ func (u User) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
 	roles.Self = roles
 
-	profile := &TestUserProfile{
+	user := &TestUser{
 		limits:    u.Limits,
 		email:     u.EMail,
 		superUser: u.SuperUser,
@@ -184,9 +184,9 @@ func (u User) Setup(fixtures map[string]interface{}) (interface{}, error) {
 		token:     token,
 	}
 
-	profile.Self = profile
+	user.Self = user
 
-	return profile, nil
+	return user, nil
 }
 
 func (u User) Teardown(fixture interface{}) error {

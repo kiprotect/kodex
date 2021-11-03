@@ -26,10 +26,10 @@ import (
 	"net/http/httptest"
 )
 
-func Request(controller api.Controller, user api.UserProfile, reader *bytes.Reader, method, path string) (*gin.Engine, *http.Request, error) {
+func Request(controller api.Controller, user api.User, reader *bytes.Reader, method, path string) (*gin.Engine, *http.Request, error) {
 
 	withUser := func(c *gin.Context) {
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := Router(controller, withUser)
@@ -54,7 +54,7 @@ func Serve(request *http.Request, router *gin.Engine) (*httptest.ResponseRecorde
 	return resp, nil
 }
 
-func PostPut(controller api.Controller, user api.UserProfile, method, path string, data interface{}) (*httptest.ResponseRecorder, error) {
+func PostPut(controller api.Controller, user api.User, method, path string, data interface{}) (*httptest.ResponseRecorder, error) {
 
 	jsonData, err := json.Marshal(data)
 
@@ -75,7 +75,7 @@ func PostPut(controller api.Controller, user api.UserProfile, method, path strin
 	return Serve(req, router)
 }
 
-func GetDelete(controller api.Controller, user api.UserProfile, method, path string, params interface{}) (*httptest.ResponseRecorder, error) {
+func GetDelete(controller api.Controller, user api.User, method, path string, params interface{}) (*httptest.ResponseRecorder, error) {
 
 	reader := bytes.NewReader(nil)
 	router, req, err := Request(controller, user, reader, method, path)
@@ -109,18 +109,18 @@ func GetDelete(controller api.Controller, user api.UserProfile, method, path str
 	return Serve(req, router)
 }
 
-func Get(controller api.Controller, user api.UserProfile, path string, params interface{}) (*httptest.ResponseRecorder, error) {
+func Get(controller api.Controller, user api.User, path string, params interface{}) (*httptest.ResponseRecorder, error) {
 	return GetDelete(controller, user, "GET", path, params)
 }
 
-func Del(controller api.Controller, user api.UserProfile, path string, params interface{}) (*httptest.ResponseRecorder, error) {
+func Del(controller api.Controller, user api.User, path string, params interface{}) (*httptest.ResponseRecorder, error) {
 	return GetDelete(controller, user, "DELETE", path, params)
 }
 
-func Post(controller api.Controller, user api.UserProfile, path string, data interface{}) (*httptest.ResponseRecorder, error) {
+func Post(controller api.Controller, user api.User, path string, data interface{}) (*httptest.ResponseRecorder, error) {
 	return PostPut(controller, user, "POST", path, data)
 }
 
-func Put(controller api.Controller, user api.UserProfile, path string, data interface{}) (*httptest.ResponseRecorder, error) {
+func Put(controller api.Controller, user api.User, path string, data interface{}) (*httptest.ResponseRecorder, error) {
 	return PostPut(controller, user, "PATCH", path, data)
 }

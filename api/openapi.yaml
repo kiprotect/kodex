@@ -23,7 +23,7 @@ paths:
       parameters: []
       responses:
         200:
-          description: user profile response
+          description: user response
           content:
             application/json:
               schema:
@@ -33,7 +33,7 @@ paths:
                     type: object
                     properties:
                       user:
-                        $ref: '#/components/schemas/UserProfile'
+                        $ref: '#/components/schemas/User'
         default:
           description: The user has not provided a valid authorization.
           content:
@@ -49,19 +49,19 @@ paths:
     get:
       tags: [Base API]
       description: |
-        Returns the current user profile.
-      operationId: getUserProfile
+        Returns the current user.
+      operationId: getUser
       parameters: []
       responses:
         200:
-          description: user profile response
+          description: user response
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/UserProfile'
+                    $ref: '#/components/schemas/User'
         default:
           description: unexpected error
           content:
@@ -934,7 +934,7 @@ components:
         update_at:
           type: string
           example: "2019-10-08T09:41:56.742325Z"
-    UserProfile:
+    User:
       type: object
       properties:
         source_id:

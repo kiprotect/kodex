@@ -48,7 +48,7 @@ func (f ProjectAdaptor) Get(controller api.Controller, c *gin.Context, id []byte
 func (a ProjectAdaptor) Objects(c *gin.Context) []kodex.Model {
 
 	controller := helpers.Controller(c)
-	user := helpers.UserProfile(c)
+	user := helpers.User(c)
 
 	if controller == nil || user == nil {
 		return nil

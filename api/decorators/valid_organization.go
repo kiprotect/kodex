@@ -39,17 +39,17 @@ func ValidOrganization(orgRoles []string) gin.HandlerFunc {
 			return
 		}
 
-		up, ok := c.Get("userProfile")
+		up, ok := c.Get("user")
 
 		if !ok {
 			api.HandleError(c, 401, fmt.Errorf("unauthorized"))
 			return
 		}
 
-		userProfile, ok := up.(api.UserProfile)
+		user, ok := up.(api.User)
 
 		if !ok {
-			api.HandleError(c, 500, fmt.Errorf("corrupt user profile"))
+			api.HandleError(c, 500, fmt.Errorf("corrupt user"))
 			return
 		}
 
@@ -78,7 +78,7 @@ func ValidOrganization(orgRoles []string) gin.HandlerFunc {
 		var err error
 
 		// to do: take into account the given organization
-		for _, organizationRoles := range userProfile.Roles() {
+		for _, organizationRoles := range user.Roles() {
 			org = organizationRoles.Organization()
 			if err != nil {
 				api.HandleError(c, 500, err)

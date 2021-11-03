@@ -62,12 +62,12 @@ func TestUpdateStream(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(api.UserProfile)
+	user := fixtures["user"].(api.User)
 	stream := fixtures["stream"].(kodex.Stream)
 	controller := fixtures["controller"].(api.Controller)
 
 	withUser := func(c *gin.Context) {
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := at.Router(controller, withUser)
@@ -198,12 +198,12 @@ func TestUpdateStreamAuthorization(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(api.UserProfile)
+	user := fixtures["user"].(api.User)
 	stream := fixtures["stream"].(kodex.Stream)
 	controller := fixtures["controller"].(api.Controller)
 
 	withUser := func(c *gin.Context) {
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := at.Router(controller, withUser)

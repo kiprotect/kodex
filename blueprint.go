@@ -19,10 +19,192 @@ package kodex
 import (
 	"fmt"
 	"github.com/kiprotect/go-helpers/maps"
+	"github.com/kiprotect/go-helpers/settings"
+	kipStrings "github.com/kiprotect/go-helpers/strings"
+	"github.com/kiprotect/go-helpers/yaml"
+	"io/ioutil"
+	"os"
+	"os/user"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 type Blueprint struct {
 	config map[string]interface{}
+}
+
+func GetBlueprintsPaths(settings Settings) ([]string, error) {
+	blueprintsPaths, err := settings.Get("blueprints.paths")
+	if err != nil {
+		return []string{}, nil
+	}
+	blueprintsPathsList, err := kipStrings.ToListOfStr(blueprintsPaths)
+	if err != nil {
+		return nil, err
+	}
+	return blueprintsPathsList, nil
+}
+
+func blueprintSettings(path string) (map[string]interface{}, error) {
+	var settings map[string]interface{}
+	if f, err := os.OpenFile(path, os.O_RDONLY, 0700); err != nil {
+		return nil, err
+	} else if data, err := ioutil.ReadAll(f); err != nil {
+		return nil, err
+	} else if err := yaml.Unmarshal(data, &settings); err != nil {
+		return nil, err
+	}
+	return settings, nil
+}
+
+var versionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.(\d+)(?:(\-|\+)(.*))?$`)
+
+func compareVersions(a, b string) (int, error) {
+	matchA := versionRegexp.FindStringSubmatch(a)
+	matchB := versionRegexp.FindStringSubmatch(b)
+	if matchA == nil || matchB == nil {
+		return 0, fmt.Errorf("not a valid semantic version")
+	}
+	i := 0
+	for i = 0; i < 3; i++ {
+		vA, err := strconv.Atoi(matchA[i+1])
+		if err != nil {
+			// should never happen
+			return 0, err
+		}
+		vB, err := strconv.Atoi(matchB[i+1])
+		if err != nil {
+			// should never happen
+			return 0, err
+		}
+		if vA > vB {
+			return 1, nil
+		} else if vB != vA {
+			return -1, nil
+		}
+	}
+	// if the extra part does not match we return an error (better safe than sorry)
+	if matchA[4] != matchB[4] {
+		return 0, fmt.Errorf("cannot determine highest version between '%s' and '%s', please specify", a, b)
+	}
+	// versions match
+	return 0, nil
+}
+
+func findBlueprint(settings Settings, name string, version string) (string, error) {
+	blueprintsPaths, err := GetBlueprintsPaths(settings)
+	if err != nil {
+		return "", err
+	}
+	var bestPath string
+	var bestVersion string
+outer:
+	for _, path := range blueprintsPaths {
+		var err error
+		if path, err = NormalizePath(path); err != nil {
+			return "", err
+		}
+		files, err := ioutil.ReadDir(path)
+		if err != nil {
+			return "", err
+		}
+		for _, file := range files {
+			if file.IsDir() {
+				subfiles, err := ioutil.ReadDir(filepath.Join(path, file.Name()))
+				if err != nil {
+					return "", err
+				}
+				for _, subfile := range subfiles {
+					if subfile.Name() == ".blueprints.yml" {
+						Log.Debugf("found blueprints directory: '%s'", filepath.Join(path, file.Name()))
+						settingsPath := filepath.Join(path, file.Name(), subfile.Name())
+						trialPath := filepath.Join(path, file.Name(), name)
+						if settings, err := blueprintSettings(settingsPath); err != nil {
+							return "", err
+						} else {
+							if versionInfo, ok := settings["version"].(string); !ok {
+								return "", fmt.Errorf("version information missing in settings file '%s'", settingsPath)
+							} else if version != "" && version == versionInfo {
+								// this is not the version we're looking for
+								bestVersion = versionInfo
+								bestPath = trialPath
+								break outer
+							} else if version == "" {
+								if bestVersion == "" {
+									bestVersion = versionInfo
+									bestPath = trialPath
+								} else if cp, err := compareVersions(versionInfo, bestVersion); err != nil {
+									return "", err
+								} else if cp > 0 {
+									bestVersion = versionInfo
+									bestPath = trialPath
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if bestPath != "" {
+		if _, err := os.Stat(bestPath); err == nil {
+			Log.Debugf("found blueprint '%s' at path '%s' (version: '%s')", name, bestPath, bestVersion)
+			return bestPath, nil
+		}
+	}
+	return "", fmt.Errorf("blueprint '%s' with version '%s' not found", name, version)
+}
+
+func NormalizePath(path string) (string, error) {
+	if strings.HasPrefix(path, "~") {
+		usr, err := user.Current()
+		if err != nil {
+			return "", err
+		}
+		return usr.HomeDir + path[1:len(path)], nil
+	}
+	return path, nil
+}
+
+func LoadBlueprintConfig(settingsObj Settings, filename, version string) (map[string]interface{}, error) {
+	if filename == "" {
+		filename = ".yml"
+	} else {
+		if !strings.HasSuffix(filename, ".yml") {
+			filename = filename + ".yml"
+		}
+		var err error
+		if filename, err = NormalizePath(filename); err != nil {
+			return nil, err
+		}
+		// we check if we can directly locate the blueprint. If not, we try to
+		// find it using the blueprints directories.
+		if _, err := os.Stat(filename); err != nil {
+			var err error
+			if filename, err = findBlueprint(settingsObj, filename, version); err != nil {
+				return nil, err
+			}
+		}
+	}
+	if _, err := os.Stat(filename); err != nil {
+		return nil, fmt.Errorf("blueprint '%s' not found", filename)
+	}
+	if config, err := settings.LoadYaml(filename); err != nil {
+		return nil, err
+	} else if configMap, ok := config.(map[string]interface{}); !ok {
+		return nil, fmt.Errorf("expected a map")
+	} else {
+		if values, err := settings.ParseVars(configMap); err != nil {
+			return nil, err
+		} else {
+			if err := settings.InsertVars(configMap, values); err != nil {
+				return nil, err
+			}
+		}
+		return configMap, nil
+	}
 }
 
 func initSources(project Project, config map[string]interface{}) error {

@@ -21,21 +21,23 @@ import (
 	"fmt"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
-	kiprotectControllers "github.com/kiprotect/kodex/controllers"
+	"github.com/kiprotect/kodex/api/helpers"
+	kodexControllers "github.com/kiprotect/kodex/controllers"
 )
 
 type InMemoryController struct {
 	api.BaseController
 	objectRoles   map[string]api.ObjectRole
 	organizations map[string]api.Organization
-	*kiprotectControllers.InMemoryController
+	*kodexControllers.InMemoryController
 }
 
 func MakeInMemoryController(config map[string]interface{}, controller kodex.Controller, definitions *api.Definitions) (api.Controller, error) {
-	inMemoryController, ok := controller.(*kiprotectControllers.InMemoryController)
+	inMemoryController, ok := controller.(*kodexControllers.InMemoryController)
 	if !ok {
 		return nil, fmt.Errorf("not an InMemory controller")
 	}
+
 	apiController := &InMemoryController{
 		organizations:      make(map[string]api.Organization),
 		objectRoles:        make(map[string]api.ObjectRole),
@@ -43,6 +45,12 @@ func MakeInMemoryController(config map[string]interface{}, controller kodex.Cont
 		BaseController: api.BaseController{
 			Definitions_: definitions,
 		},
+	}
+
+	if userProvider, err := helpers.UserProvider(apiController); err != nil {
+		return nil, err
+	} else {
+		apiController.UserProvider_ = userProvider
 	}
 
 	apiController.Self = apiController

@@ -21,8 +21,8 @@ import (
 	"encoding/json"
 )
 
-type BaseUserProfile struct {
-	Self UserProfile
+type BaseUser struct {
+	Self User
 }
 
 type BaseOrganizationRoles struct {
@@ -81,7 +81,7 @@ func (b *BaseUserOrganization) ApiOrganization(controller Controller) (Organizat
 	return b.apiOrg, nil
 }
 
-func (b *BaseUserProfile) MarshalJSON() ([]byte, error) {
+func (b *BaseUser) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]interface{}{
 		"source":       b.Self.Source(),
 		"source_id":    hex.EncodeToString(b.Self.SourceID()),
