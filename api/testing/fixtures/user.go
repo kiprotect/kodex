@@ -22,100 +22,6 @@ import (
 	"github.com/kiprotect/kodex/api"
 )
 
-type TestUser struct {
-	api.BaseUser
-	email       string
-	displayName string
-	sourceID    []byte
-	superUser   bool
-	limits      map[string]interface{}
-	token       *TestAccessToken
-	roles       []api.OrganizationRoles
-}
-
-func (t *TestUser) Source() string {
-	return "test"
-}
-
-func (t *TestUser) Limits() map[string]interface{} {
-	return t.limits
-}
-
-func (t *TestUser) SourceID() []byte {
-	return t.sourceID
-}
-
-func (t *TestUser) SuperUser() bool {
-	return t.superUser
-}
-
-func (t *TestUser) EMail() string {
-	return t.email
-}
-
-func (t *TestUser) DisplayName() string {
-	return t.displayName
-}
-
-func (t *TestUser) AccessToken() api.AccessToken {
-	return t.token
-}
-
-func (t *TestUser) Roles() []api.OrganizationRoles {
-	return t.roles
-}
-
-type TestAccessToken struct {
-	api.BaseAccessToken
-	scopes []string
-}
-
-func (t *TestAccessToken) Scopes() []string {
-	return t.scopes
-}
-
-type TestOrganization struct {
-	api.BaseUserOrganization
-	name        string
-	description string
-	org         api.Organization
-	id          []byte
-}
-
-func (t *TestOrganization) Default() bool {
-	return true
-}
-
-func (t *TestOrganization) Name() string {
-	return t.name
-}
-
-func (t *TestOrganization) Source() string {
-	return "test"
-}
-
-func (t *TestOrganization) Description() string {
-	return t.description
-}
-
-func (t *TestOrganization) ID() []byte {
-	return t.id
-}
-
-type TestOrganizationRoles struct {
-	api.BaseOrganizationRoles
-	organization *TestOrganization
-	roles        []string
-}
-
-func (t *TestOrganizationRoles) Roles() []string {
-	return t.roles
-}
-
-func (t *TestOrganizationRoles) Organization() api.UserOrganization {
-	return t.organization
-}
-
 type Organization struct {
 	Name string
 }
@@ -155,36 +61,13 @@ func (u User) Setup(fixtures map[string]interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("no organization defined")
 	}
 
-	org := &TestOrganization{
-		name:        apiOrg.Name(),
-		description: apiOrg.Description(),
-		id:          apiOrg.SourceID(),
-	}
+	org := api.MakeUserOrganization("test", apiOrg.Name(), apiOrg.Description(), apiOrg.SourceID())
 
-	org.Self = org
+	token := api.MakeAccessToken(u.Scopes)
 
-	token := &TestAccessToken{
-		scopes: u.Scopes,
-	}
+	roles := api.MakeOrganizationRoles(org, u.Roles)
 
-	token.Self = token
-
-	roles := &TestOrganizationRoles{
-		organization: org,
-		roles:        u.Roles,
-	}
-
-	roles.Self = roles
-
-	user := &TestUser{
-		limits:    u.Limits,
-		email:     u.EMail,
-		superUser: u.SuperUser,
-		roles:     []api.OrganizationRoles{roles},
-		token:     token,
-	}
-
-	user.Self = user
+	user := api.MakeUser("test", u.EMail, u.SuperUser, []*api.OrganizationRoles{roles}, u.Limits, token)
 
 	return user, nil
 }

@@ -35,7 +35,7 @@ func ValidateInMemoryUserProviderSettings(settings map[string]interface{}) (inte
 }
 
 type InMemoryUserProvider struct {
-	users map[string]*InMemoryUser
+	users map[string]*api.User
 }
 
 func MakeInMemoryUserProvider(settings kodex.Settings) (api.UserProvider, error) {
@@ -43,111 +43,8 @@ func MakeInMemoryUserProvider(settings kodex.Settings) (api.UserProvider, error)
 	return &InMemoryUserProvider{}, nil
 }
 
-type InMemoryAccessToken struct {
-	scopes []string `json:"scopes"`
-	token  []byte
-}
-
-func (i *InMemoryAccessToken) Scopes() []string {
-	return i.scopes
-}
-
-func (i *InMemoryAccessToken) Token() []byte {
-	return i.token
-}
-
-type InMemoryOrganizationRoles struct {
-	roles        []string                  `json:"roles"`
-	organization *InMemoryUserOrganization `json:"organization"`
-}
-
-func (i *InMemoryOrganizationRoles) Roles() []string {
-	return i.roles
-}
-
-func (i *InMemoryOrganizationRoles) Organization() api.UserOrganization {
-	return i.organization
-}
-
-type InMemoryUserOrganization struct {
-	name        string `json:"name"`
-	isDefault   bool   `json:"default"`
-	description string `json:"description"`
-	id          []byte `json:"id"`
-}
-
-func (i *InMemoryUserOrganization) Name() string {
-	return i.name
-}
-
-func (i *InMemoryUserOrganization) Source() string {
-	return "inMemory"
-}
-
-func (i *InMemoryUserOrganization) Default() bool {
-	return i.isDefault
-}
-
-func (i *InMemoryUserOrganization) Description() string {
-	return i.description
-}
-
-func (i *InMemoryUserOrganization) ID() []byte {
-	return i.id
-}
-
-func (i *InMemoryUserOrganization) ApiOrganization(controller api.Controller) (api.Organization, error) {
-	return controller.Organization("inMemory", i.id)
-}
-
-type InMemoryUser struct {
-	sourceID    []byte                       `json:"sourceID"`
-	email       string                       `json:"email"`
-	displayName string                       `json:"displayName"`
-	superuser   bool                         `json:"superuser"`
-	accessToken *InMemoryAccessToken         `json:"accessToken"`
-	roles       []*InMemoryOrganizationRoles `json:"roles"`
-	limits      map[string]interface{}       `json:"limits"`
-}
-
-func (i *InMemoryUser) Source() string {
-	return "inMemory"
-}
-
-func (i *InMemoryUser) SourceID() []byte {
-	return i.sourceID
-}
-
-func (i *InMemoryUser) EMail() string {
-	return i.email
-}
-
-func (i *InMemoryUser) SuperUser() bool {
-	return i.superuser
-}
-
-func (i *InMemoryUser) DisplayName() string {
-	return i.displayName
-}
-
-func (i *InMemoryUser) AccessToken() api.AccessToken {
-	return i.accessToken
-}
-
-func (i *InMemoryUser) Roles() []api.OrganizationRoles {
-	roles := make([]api.OrganizationRoles, len(i.roles))
-	for i, role := range i.roles {
-		roles[i] = role
-	}
-	return roles
-}
-
-func (i *InMemoryUser) Limits() map[string]interface{} {
-	return i.limits
-}
-
 // Return a user with the given access token
-func (i *InMemoryUserProvider) Get(string) (api.User, error) {
+func (i *InMemoryUserProvider) Get(string) (*api.User, error) {
 	return nil, fmt.Errorf("access token missing")
 }
 func (i *InMemoryUserProvider) Start() {

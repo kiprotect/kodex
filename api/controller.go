@@ -40,10 +40,10 @@ type Controller interface {
 	UserProvider() UserProvider
 
 	// Object roles
-	CanAccess(user User, object kodex.Model, objectRoles []string) (bool, error)
+	CanAccess(user *User, object kodex.Model, objectRoles []string) (bool, error)
 	ObjectRole(id []byte) (ObjectRole, error)
 	RolesForObject(object kodex.Model) ([]ObjectRole, error)
-	ObjectRolesForUser(objectType string, user User) ([]ObjectRole, error)
+	ObjectRolesForUser(objectType string, user *User) ([]ObjectRole, error)
 	ObjectRolesForOrganizationRoles(objectType string, organizationRoles []string, organizationID []byte) ([]ObjectRole, error)
 	MakeObjectRole(object kodex.Model, organization Organization) ObjectRole
 

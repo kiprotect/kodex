@@ -46,7 +46,7 @@ func ValidOrganization(orgRoles []string) gin.HandlerFunc {
 			return
 		}
 
-		user, ok := up.(api.User)
+		user, ok := up.(*api.User)
 
 		if !ok {
 			api.HandleError(c, 500, fmt.Errorf("corrupt user"))
@@ -74,7 +74,7 @@ func ValidOrganization(orgRoles []string) gin.HandlerFunc {
 			orgID = params["object_id"].([]byte)
 		}
 
-		var org api.UserOrganization
+		var org *api.UserOrganization
 		var err error
 
 		// to do: take into account the given organization
