@@ -90,27 +90,27 @@ func MeterEndpointCalls(meter kodex.Meter, meterId string) func(*gin.Context) {
 func OrganizationMeterId(settings kodex.Settings) gin.HandlerFunc {
 	decorator := func(c *gin.Context) {
 
-		up, ok := c.Get("userProfile")
+		up, ok := c.Get("user")
 		if !ok {
 			c.Set("organizationMeterId", "org:anonymous")
 			return
 		}
 
-		userProfile, ok := up.(api.UserProfile)
+		user, ok := up.(api.User)
 
 		if !ok {
-			api.HandleError(c, 500, fmt.Errorf("cannot get user profile"))
+			api.HandleError(c, 500, fmt.Errorf("cannot get user"))
 			return
 		}
 
 		var id string
 
-		if len(userProfile.Roles()) == 0 {
+		if len(user.Roles()) == 0 {
 			api.HandleError(c, 400, fmt.Errorf("you need to be associated with an organization to use this endpoint"))
 			return
 		}
 
-		orgId := hex.EncodeToString(userProfile.Roles()[0].Organization().ID())
+		orgId := hex.EncodeToString(user.Roles()[0].Organization().ID())
 
 		// to do: select a given organization based on the access token
 		id = "org:" + orgId

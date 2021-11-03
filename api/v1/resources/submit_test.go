@@ -55,7 +55,7 @@ func TestSubmit(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(api.UserProfile)
+	user := fixtures["user"].(api.User)
 	stream := fixtures["stream"].(kodex.Stream)
 	controller := fixtures["controller"].(api.Controller)
 

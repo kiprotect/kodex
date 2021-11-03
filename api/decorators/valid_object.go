@@ -42,25 +42,25 @@ func ValidObject(settings kodex.Settings, objectType string, objectRoles []strin
 
 	return func(c *gin.Context) {
 
-		var userProfile api.UserProfile
+		var user api.User
 
 		if len(objectRoles) > 0 || len(scopes) > 0 {
-			up, ok := c.Get("userProfile")
+			up, ok := c.Get("user")
 
 			if !ok {
 				api.HandleError(c, 401, fmt.Errorf("unauthorized"))
 				return
 			}
 
-			userProfile, ok = up.(api.UserProfile)
+			user, ok = up.(api.User)
 
 			if !ok {
-				api.HandleError(c, 500, fmt.Errorf("corrupt user profile"))
+				api.HandleError(c, 500, fmt.Errorf("corrupt user"))
 				return
 			}
 
-			if len(scopes) > 0 && !CheckScopes(scopes, userProfile.AccessToken().Scopes()) {
-				api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": userProfile.AccessToken().Scopes(), "required_scopes": scopes}, nil))
+			if len(scopes) > 0 && !CheckScopes(scopes, user.AccessToken().Scopes()) {
+				api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": user.AccessToken().Scopes(), "required_scopes": scopes}, nil))
 				return
 			}
 
@@ -114,7 +114,7 @@ func ValidObject(settings kodex.Settings, objectType string, objectRoles []strin
 		}
 
 		if len(objectRoles) > 0 {
-			if ok, err := apiController.CanAccess(userProfile, roleObject, objectRoles); !ok || err != nil {
+			if ok, err := apiController.CanAccess(user, roleObject, objectRoles); !ok || err != nil {
 				if err != nil {
 					api.HandleError(c, 500, err)
 				} else {

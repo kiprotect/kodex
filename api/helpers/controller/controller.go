@@ -25,22 +25,22 @@ import (
 )
 
 func InMemoryController(settings kodex.Settings, config map[string]interface{}, definitions *api.Definitions) (api.Controller, error) {
-	kiprotectController, err := helpers.InMemoryController(settings, &definitions.Definitions, config)
+	kodexController, err := helpers.InMemoryController(settings, &definitions.Definitions, config)
 	if err != nil {
 		return nil, err
 	}
-	return ControllerType("inMemory", config, kiprotectController, definitions)
+	return ControllerType("inMemory", config, kodexController, definitions)
 }
 
-func ApiController(kiprotectController kodex.Controller, definitions *api.Definitions) (api.Controller, error) {
+func ApiController(kodexController kodex.Controller, definitions *api.Definitions) (api.Controller, error) {
 
-	apiControllerType, ok := kiprotectController.Settings().String("controller.type")
+	apiControllerType, ok := kodexController.Settings().String("controller.type")
 
 	if !ok {
 		return nil, fmt.Errorf("No controller type given (controller.type)!")
 	}
 
-	config, err := kiprotectController.Settings().Get("controller")
+	config, err := kodexController.Settings().Get("controller")
 
 	if err != nil {
 		return nil, err
@@ -52,23 +52,23 @@ func ApiController(kiprotectController kodex.Controller, definitions *api.Defini
 		return nil, fmt.Errorf("Invalid config")
 	}
 
-	return ControllerType(apiControllerType, strMapConfig, kiprotectController, definitions)
+	return ControllerType(apiControllerType, strMapConfig, kodexController, definitions)
 
 }
 
 func Controller(settings kodex.Settings, definitions *api.Definitions) (api.Controller, error) {
 
-	kiprotectController, err := helpers.Controller(settings, &definitions.Definitions)
+	kodexController, err := helpers.Controller(settings, &definitions.Definitions)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return ApiController(kiprotectController, definitions)
+	return ApiController(kodexController, definitions)
 
 }
 
-func ControllerType(apiControllerType string, config map[string]interface{}, kiprotectController kodex.Controller, definitions *api.Definitions) (api.Controller, error) {
+func ControllerType(apiControllerType string, config map[string]interface{}, kodexController kodex.Controller, definitions *api.Definitions) (api.Controller, error) {
 
 	maker, ok := definitions.APIControllerDefinitions[apiControllerType]
 
@@ -76,5 +76,5 @@ func ControllerType(apiControllerType string, config map[string]interface{}, kip
 		return nil, fmt.Errorf("unknown API controller type: %s", apiControllerType)
 	}
 
-	return maker(config, kiprotectController, definitions)
+	return maker(config, kodexController, definitions)
 }

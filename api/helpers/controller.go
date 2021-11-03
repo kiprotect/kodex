@@ -22,7 +22,7 @@ import (
 	"github.com/kiprotect/kodex/api"
 )
 
-// Get the controller and user profile (as created by the decorators)
+// Get the controller and user (as created by the decorators)
 func Controller(c *gin.Context) api.Controller {
 
 	controller, ok := c.Get("controller")

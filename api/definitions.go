@@ -28,6 +28,7 @@ type Definitions struct {
 	Routes                   []Routes
 	ObjectAdaptors           map[string]ObjectAdaptor
 	AssociateAdaptors        map[string]AssociateAdaptor
+	UserProviders            map[string]UserProviderDefinition
 }
 
 func (d Definitions) Marshal() map[string]interface{} {
@@ -62,6 +63,7 @@ func MergeDefinitions(a, b Definitions) Definitions {
 		APIControllerDefinitions: map[string]APIControllerMaker{},
 		ObjectAdaptors:           map[string]ObjectAdaptor{},
 		AssociateAdaptors:        map[string]AssociateAdaptor{},
+		UserProviders:            map[string]UserProviderDefinition{},
 	}
 	for _, obj := range []Definitions{a, b} {
 		for _, route := range obj.Routes {
@@ -75,6 +77,9 @@ func MergeDefinitions(a, b Definitions) Definitions {
 		}
 		for k, v := range obj.AssociateAdaptors {
 			c.AssociateAdaptors[k] = v
+		}
+		for k, v := range obj.UserProviders {
+			c.UserProviders[k] = v
 		}
 	}
 	return c

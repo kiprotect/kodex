@@ -16,7 +16,21 @@
 
 package api
 
-type UserProfile interface {
+import (
+	"github.com/kiprotect/kodex"
+)
+
+type UserProviderDefinition struct {
+	Name              string            `json:"name"`
+	Description       string            `json:"description"`
+	Maker             UserProviderMaker `json:"-"`
+	SettingsValidator SettingsValidator `json:"-"`
+}
+
+type UserProviderDefinitions map[string]UserProviderDefinition
+type UserProviderMaker func(settings kodex.Settings) (UserProvider, error)
+
+type User interface {
 	Source() string
 	SourceID() []byte
 	EMail() string
@@ -45,8 +59,8 @@ type UserOrganization interface {
 	ApiOrganization(Controller) (Organization, error)
 }
 
-type UserProfileProvider interface {
-	Get(string) (UserProfile, error)
+type UserProvider interface {
+	Get(string) (User, error)
 	Start()
 	Stop()
 }

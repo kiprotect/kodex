@@ -105,7 +105,7 @@ var deleteObjectRoleForm = forms.Form{
 // Delete a object role
 func DeleteObjectRole(c *gin.Context) {
 	controller := helpers.Controller(c)
-	user := helpers.UserProfile(c)
+	user := helpers.User(c)
 
 	if controller == nil || user == nil {
 		return

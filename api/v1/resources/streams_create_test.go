@@ -66,11 +66,11 @@ func TestCreateStream(t *testing.T) {
 	}
 
 	controller := fixtures["controller"].(api.Controller)
-	user := fixtures["user"].(api.UserProfile)
+	user := fixtures["user"].(api.User)
 	project := fixtures["project"].(kodex.Project)
 
 	withUser := func(c *gin.Context) {
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := at.Router(controller, withUser)
@@ -143,12 +143,12 @@ func TestInvalidCreateStream(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["userB"].(api.UserProfile)
+	user := fixtures["userB"].(api.User)
 	controller := fixtures["controller"].(api.Controller)
 	project := fixtures["project"].(kodex.Project)
 
 	withUser := func(c *gin.Context) {
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := at.Router(controller, withUser)

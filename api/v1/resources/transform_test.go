@@ -115,11 +115,11 @@ func TestTransform(t *testing.T) {
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)
 
-	user := fixtures["user"].(api.UserProfile)
+	user := fixtures["user"].(api.User)
 	controller := fixtures["controller"].(api.Controller)
 
 	withUser := func(c *gin.Context) {
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := at.Router(controller, withUser)

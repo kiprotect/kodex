@@ -18,11 +18,9 @@ package api
 
 import (
 	"github.com/kiprotect/go-helpers/forms"
-	"github.com/kiprotect/kodex/api"
-	"github.com/kiprotect/kodex/api/user_provider"
 )
 
-var InMemoryUserProfileForm = forms.Form{
+var InMemoryUserForm = forms.Form{
 	Fields: []forms.Field{},
 }
 
@@ -38,7 +36,7 @@ var BlueprintConfigForm = forms.Form{
 				forms.IsList{
 					Validators: []forms.Validator{
 						forms.IsStringMap{
-							Form: &InMemoryUserProfileForm,
+							Form: &InMemoryUserForm,
 						},
 					},
 				},
@@ -63,16 +61,11 @@ type Blueprint struct {
 	config map[string]interface{}
 }
 
-type BlueprintConfig struct {
-	Users []*provider.InMemoryUserProfile       `json:"user"`
-	Roles []*provider.InMemoryOrganizationRoles `json:"roles"`
-}
-
-func initRoles(controller api.Controller, config map[string]interface{}) error {
+func initRoles(controller Controller, config map[string]interface{}) error {
 	return nil
 }
 
-func initUsers(controller api.Controller, config map[string]interface{}) error {
+func initUsers(controller Controller, config map[string]interface{}) error {
 	return nil
 }
 
@@ -82,7 +75,7 @@ func MakeBlueprint(config map[string]interface{}) *Blueprint {
 	}
 }
 
-func (b *Blueprint) Create(controller api.Controller) error {
+func (b *Blueprint) Create(controller Controller) error {
 	if err := initUsers(controller, b.config); err != nil {
 		return err
 	}

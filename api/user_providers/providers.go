@@ -1,5 +1,5 @@
-// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - Germany
+// IRIS Endpoint-Server (EPS)
+// Copyright (C) 2021-2021 The IRIS Endpoint-Server Authors (see AUTHORS.md)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,29 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package helpers
+package providers
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/kiprotect/kodex/api"
 )
 
-func User(c *gin.Context) api.User {
-	userObj, ok := c.Get("user")
-
-	if !ok {
-		api.HandleError(c, 500, fmt.Errorf("no user defined in context"))
-		return nil
-	}
-
-	user, ok := userObj.(api.User)
-
-	if !ok {
-		api.HandleError(c, 500, fmt.Errorf("no user defined in context"))
-		return nil
-	}
-
-	return user
-
+var Definitions = api.UserProviderDefinitions{
+	"inMemory": api.UserProviderDefinition{
+		Name:              "InMemory",
+		Description:       "InMemory based user provider",
+		Maker:             MakeInMemoryUserProvider,
+		SettingsValidator: ValidateInMemoryUserProviderSettings,
+	},
 }

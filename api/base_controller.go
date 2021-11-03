@@ -22,15 +22,20 @@ import (
 )
 
 type BaseController struct {
-	Definitions_ *Definitions
-	Self         Controller
+	Definitions_  *Definitions
+	UserProvider_ UserProvider
+	Self          Controller
 }
 
 func (b *BaseController) APIDefinitions() *Definitions {
 	return b.Definitions_
 }
 
-func (b *BaseController) ObjectRolesForUser(objectType string, user UserProfile) ([]ObjectRole, error) {
+func (b *BaseController) UserProvider() UserProvider {
+	return b.UserProvider_
+}
+
+func (b *BaseController) ObjectRolesForUser(objectType string, user User) ([]ObjectRole, error) {
 	objectRoles := make([]ObjectRole, 0)
 	for _, organizationRoles := range user.Roles() {
 		// we retrieve the organization of the user
@@ -47,7 +52,7 @@ func (b *BaseController) ObjectRolesForUser(objectType string, user UserProfile)
 	return objectRoles, nil
 }
 
-func (b *BaseController) CanAccess(user UserProfile, object kodex.Model, objectRoles []string) (bool, error) {
+func (b *BaseController) CanAccess(user User, object kodex.Model, objectRoles []string) (bool, error) {
 
 	// we retrive all organization roles for this object
 	roles, err := b.Self.RolesForObject(object)

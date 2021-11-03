@@ -1,11 +1,13 @@
-package provider
+package providers
 
 import (
+	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
+	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
 )
 
-var InMemoryUserProfileForm = forms.Form{
+var InMemoryUserForm = forms.Form{
 	Fields: []forms.Field{
 		{
 			Name: "displayName",
@@ -17,8 +19,28 @@ var InMemoryUserProfileForm = forms.Form{
 	},
 }
 
-type InMemoryUserProfileProvider struct {
-	userProfiles map[string]*InMemoryUserProfile
+type InMemoryUserProviderSettings struct {
+}
+
+func ValidateInMemoryUserProviderSettings(settings map[string]interface{}) (interface{}, error) {
+	if params, err := InMemoryUserForm.Validate(settings); err != nil {
+		return nil, err
+	} else {
+		providerSettings := &InMemoryUserProviderSettings{}
+		if err := InMemoryUserForm.Coerce(providerSettings, params); err != nil {
+			return nil, err
+		}
+		return providerSettings, nil
+	}
+}
+
+type InMemoryUserProvider struct {
+	users map[string]*InMemoryUser
+}
+
+func MakeInMemoryUserProvider(settings kodex.Settings) (api.UserProvider, error) {
+	kodex.Log.Info("Making in-memory user provider")
+	return &InMemoryUserProvider{}, nil
 }
 
 type InMemoryAccessToken struct {
@@ -78,7 +100,7 @@ func (i *InMemoryUserOrganization) ApiOrganization(controller api.Controller) (a
 	return controller.Organization("inMemory", i.id)
 }
 
-type InMemoryUserProfile struct {
+type InMemoryUser struct {
 	sourceID    []byte                       `json:"sourceID"`
 	email       string                       `json:"email"`
 	displayName string                       `json:"displayName"`
@@ -88,31 +110,31 @@ type InMemoryUserProfile struct {
 	limits      map[string]interface{}       `json:"limits"`
 }
 
-func (i *InMemoryUserProfile) Source() string {
+func (i *InMemoryUser) Source() string {
 	return "inMemory"
 }
 
-func (i *InMemoryUserProfile) SourceID() []byte {
+func (i *InMemoryUser) SourceID() []byte {
 	return i.sourceID
 }
 
-func (i *InMemoryUserProfile) EMail() string {
+func (i *InMemoryUser) EMail() string {
 	return i.email
 }
 
-func (i *InMemoryUserProfile) SuperUser() bool {
+func (i *InMemoryUser) SuperUser() bool {
 	return i.superuser
 }
 
-func (i *InMemoryUserProfile) DisplayName() string {
+func (i *InMemoryUser) DisplayName() string {
 	return i.displayName
 }
 
-func (i *InMemoryUserProfile) AccessToken() api.AccessToken {
+func (i *InMemoryUser) AccessToken() api.AccessToken {
 	return i.accessToken
 }
 
-func (i *InMemoryUserProfile) Roles() []api.OrganizationRoles {
+func (i *InMemoryUser) Roles() []api.OrganizationRoles {
 	roles := make([]api.OrganizationRoles, len(i.roles))
 	for i, role := range i.roles {
 		roles[i] = role
@@ -120,18 +142,18 @@ func (i *InMemoryUserProfile) Roles() []api.OrganizationRoles {
 	return roles
 }
 
-func (i *InMemoryUserProfile) Limits() map[string]interface{} {
+func (i *InMemoryUser) Limits() map[string]interface{} {
 	return i.limits
 }
 
-// Return a user profile with the given access token
-func (i *InMemoryUserProfileProvider) Get(string) (api.UserProfile, error) {
-	return nil, nil
+// Return a user with the given access token
+func (i *InMemoryUserProvider) Get(string) (api.User, error) {
+	return nil, fmt.Errorf("access token missing")
 }
-func (i *InMemoryUserProfileProvider) Start() {
-
+func (i *InMemoryUserProvider) Start() {
+	kodex.Log.Info("Starting in-memory user provider...")
 }
 
-func (i *InMemoryUserProfileProvider) Stop() {
+func (i *InMemoryUserProvider) Stop() {
 
 }

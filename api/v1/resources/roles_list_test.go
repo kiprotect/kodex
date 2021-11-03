@@ -64,12 +64,12 @@ func TestListRoles(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(api.UserProfile)
+	user := fixtures["user"].(api.User)
 	project := fixtures["project"].(kodex.Project)
 	controller := fixtures["controller"].(api.Controller)
 
 	withUser := func(c *gin.Context) {
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := at.Router(controller, withUser)
@@ -161,12 +161,12 @@ func TestRoleListAuthorization(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(api.UserProfile)
+	user := fixtures["user"].(api.User)
 	project := fixtures["project"].(kodex.Project)
 	controller := fixtures["controller"].(api.Controller)
 
 	withUser := func(c *gin.Context) {
-		c.Set("userProfile", user)
+		c.Set("user", user)
 	}
 
 	router, err := at.Router(controller, withUser)

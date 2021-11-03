@@ -24,7 +24,7 @@ import (
 // Simply return a 200 if the access token works
 func SayHello(c *gin.Context) {
 
-	user := helpers.UserProfile(c)
+	user := helpers.User(c)
 
 	if user == nil {
 		return

@@ -1,0 +1,4 @@
+controller:
+  type: inMemory
+user-provider:
+  type: inMemory

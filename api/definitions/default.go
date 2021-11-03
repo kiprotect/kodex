@@ -19,6 +19,7 @@ package definitions
 import (
 	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/api/controllers"
+	"github.com/kiprotect/kodex/api/user_providers"
 	"github.com/kiprotect/kodex/api/v1"
 )
 
@@ -40,4 +41,5 @@ var DefaultDefinitions = api.Definitions{
 		"stream-source":      AssociateStreamSourceAdaptor{},
 		"config-destination": AssociateConfigDestinationAdaptor{},
 	},
+	UserProviders: providers.Definitions,
 }

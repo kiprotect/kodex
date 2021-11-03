@@ -27,10 +27,10 @@ import (
 	"testing"
 )
 
-type UserProfile struct {
+type User struct {
 }
 
-func TestUserProfile(t *testing.T) {
+func TestUser(t *testing.T) {
 
 	var fixturesConfig = []pt.FC{
 
@@ -45,7 +45,7 @@ func TestUserProfile(t *testing.T) {
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)
 
-	user := fixtures["user"].(api.UserProfile)
+	user := fixtures["user"].(api.User)
 	controller := fixtures["controller"].(api.Controller)
 
 	resp, err := at.Get(controller, user, "/v1/user", map[string]interface{}{})

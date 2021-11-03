@@ -22,7 +22,6 @@ import (
 	"github.com/kiprotect/go-helpers/errors"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
-	"github.com/kiprotect/kodex/api/user_provider"
 	"regexp"
 	"strings"
 )
@@ -75,7 +74,7 @@ func CheckScopes(requiredScopes, userScopes []string) bool {
 }
 
 //Makes sure that the user has provided a valid access token.
-//Stores the token, user ID and user profile in the context.
+//Stores the token, user ID and user in the context.
 func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.HandlerFunc {
 
 	testDecorator := func(c *gin.Context) {
@@ -84,17 +83,17 @@ func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.Han
 
 	decorator := func(c *gin.Context) {
 
-		ch, ok := c.Get("profileProvider")
+		ch, ok := c.Get("userProvider")
 
 		if !ok {
-			api.HandleError(c, 500, fmt.Errorf("internal server error"))
+			api.HandleError(c, 500, fmt.Errorf("internal server error: user provider missing"))
 			return
 		}
 
-		profileProvider, ok := ch.(provider.UserProfileProvider)
+		userProvider, ok := ch.(api.UserProvider)
 
 		if !ok {
-			api.HandleError(c, 500, fmt.Errorf("internal server error"))
+			api.HandleError(c, 500, fmt.Errorf("internal server error: user provider missing"))
 			return
 		}
 
@@ -105,27 +104,27 @@ func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.Han
 			return
 		}
 
-		userProfile, err := profileProvider.Get(accessToken)
+		user, err := userProvider.Get(accessToken)
 
 		if err != nil {
 			api.HandleError(c, 401, fmt.Errorf("invalid access token"))
 			return
 		}
 
-		if superUser && !userProfile.SuperUser() {
+		if superUser && !user.SuperUser() {
 			api.HandleError(c, 403, fmt.Errorf("access denied"))
 			return
 		}
 
-		if !CheckScopes(scopes, userProfile.AccessToken().Scopes()) {
-			api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": userProfile.AccessToken().Scopes(), "required_scopes": scopes}, nil))
+		if !CheckScopes(scopes, user.AccessToken().Scopes()) {
+			api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": user.AccessToken().Scopes(), "required_scopes": scopes}, nil))
 			return
 		}
 
 		//if successful, we set the userId to the given value
-		c.Set("userId", userProfile.SourceID())
-		c.Set("userSource", userProfile.Source())
-		c.Set("userProfile", userProfile)
+		c.Set("userId", user.SourceID())
+		c.Set("userSource", user.Source())
+		c.Set("user", user)
 	}
 
 	if test, _ := settings.Bool("test"); test {
