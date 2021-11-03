@@ -96,7 +96,7 @@ func OrganizationMeterId(settings kodex.Settings) gin.HandlerFunc {
 			return
 		}
 
-		user, ok := up.((*api.User))
+		user, ok := up.(*api.User)
 
 		if !ok {
 			api.HandleError(c, 500, fmt.Errorf("cannot get user"))
