@@ -61,7 +61,7 @@ func TestCreateRole(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].((*api.User))
+	user := fixtures["user"].(*api.User)
 	org := fixtures["org"].(api.Organization)
 	project := fixtures["project"].(kodex.Project)
 	controller := fixtures["controller"].(api.Controller)
@@ -181,7 +181,7 @@ func TestRoleCreateAuthorization(t *testing.T) {
 	}
 
 	controller := fixtures["controller"].(api.Controller)
-	user := fixtures["user"].((*api.User))
+	user := fixtures["user"].(*api.User)
 	org := fixtures["org"].(api.Organization)
 	project := fixtures["project"].(kodex.Project)
 

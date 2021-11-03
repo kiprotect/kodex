@@ -70,7 +70,7 @@ func TestTransformActionConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].((*api.User))
+	user := fixtures["user"].(*api.User)
 	action := fixtures["action"].(kodex.ActionConfig)
 	controller := fixtures["controller"].(api.Controller)
 
@@ -125,7 +125,7 @@ func TestTransformActionConfigError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].((*api.User))
+	user := fixtures["user"].(*api.User)
 	action := fixtures["action"].(kodex.ActionConfig)
 	controller := fixtures["controller"].(api.Controller)
 

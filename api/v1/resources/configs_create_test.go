@@ -63,7 +63,7 @@ func TestCreateConfig(t *testing.T) {
 	}
 
 	controller := fixtures["controller"].(api.Controller)
-	user := fixtures["user"].((*api.User))
+	user := fixtures["user"].(*api.User)
 	stream := fixtures["stream"].(kodex.Stream)
 
 	sourceData := map[string]interface{}{
