@@ -20,12 +20,140 @@ import (
 	"github.com/kiprotect/go-helpers/forms"
 )
 
-var InMemoryUserForm = forms.Form{
-	Fields: []forms.Field{},
+var BPObjectRoleForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "objectType",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "organizationID",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "objectID",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "organizationRole",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "objectRole",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+	},
 }
 
-var InMemoryOrganizationRolesForm = forms.Form{
-	Fields: []forms.Field{},
+var BPOrganizationForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "name",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "id",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+	},
+}
+
+var AccessTokenForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "token",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "scopes",
+			Validators: []forms.Validator{
+				forms.IsList{
+					Validators: []forms.Validator{
+						forms.IsString{},
+					},
+				},
+			},
+		},
+	},
+}
+
+var RoleForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "roles",
+			Validators: []forms.Validator{
+				forms.IsStringList{},
+			},
+		},
+		{
+			Name: "organizationID",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+	},
+}
+
+var UserForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "email",
+			Validators: []forms.Validator{
+				forms.IsOptional{},
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "displayName",
+			Validators: []forms.Validator{
+				forms.IsOptional{},
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "superuser",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: false},
+				forms.IsBoolean{},
+			},
+		},
+		{
+			Name: "accessToken",
+			Validators: []forms.Validator{
+				forms.IsStringMap{
+					Form: &AccessTokenForm,
+				},
+			},
+		},
+		{
+			Name: "roles",
+			Validators: []forms.Validator{
+				forms.IsList{
+					Validators: []forms.Validator{
+						forms.IsStringMap{
+							Form: &RoleForm,
+						},
+					},
+				},
+			},
+		},
+	},
 }
 
 var BlueprintConfigForm = forms.Form{
@@ -36,7 +164,7 @@ var BlueprintConfigForm = forms.Form{
 				forms.IsList{
 					Validators: []forms.Validator{
 						forms.IsStringMap{
-							Form: &InMemoryUserForm,
+							Form: &UserForm,
 						},
 					},
 				},
@@ -48,7 +176,19 @@ var BlueprintConfigForm = forms.Form{
 				forms.IsList{
 					Validators: []forms.Validator{
 						forms.IsStringMap{
-							Form: &InMemoryOrganizationRolesForm,
+							Form: &BPObjectRoleForm,
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "organizations",
+			Validators: []forms.Validator{
+				forms.IsList{
+					Validators: []forms.Validator{
+						forms.IsStringMap{
+							Form: &BPOrganizationForm,
 						},
 					},
 				},
