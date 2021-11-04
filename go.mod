@@ -1,6 +1,6 @@
 module github.com/kiprotect/kodex
 
-go 1.13
+go 1.16
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
@@ -8,7 +8,7 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/btree v1.0.0
 	github.com/google/gopacket v1.1.19
-	github.com/kiprotect/go-helpers v0.0.0-20210719141457-5b87e3cc7847
+	github.com/kiprotect/go-helpers v0.0.0-20211101182157-f0e20ba043aa
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/streadway/amqp v1.0.0

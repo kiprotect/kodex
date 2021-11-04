@@ -294,7 +294,13 @@ func LoadBlueprintConfig(settingsObj Settings, filename, version string) (map[st
 	if _, err := os.Stat(filename); err != nil {
 		return nil, fmt.Errorf("blueprint '%s' not found", filename)
 	}
-	if config, err := settings.LoadYaml(filename); err != nil {
+	if absFilename, err := filepath.Abs(filename); err != nil {
+		return nil, err
+	} else {
+		// we remove the leading '/' as that's illegal for the FS interface
+		filename = absFilename[1:]
+	}
+	if config, err := settings.LoadYaml(filename, os.DirFS("/")); err != nil {
 		return nil, err
 	} else if configMap, ok := config.(map[string]interface{}); !ok {
 		return nil, fmt.Errorf("expected a map")

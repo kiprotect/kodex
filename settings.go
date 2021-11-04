@@ -16,6 +16,13 @@
 
 package kodex
 
+import (
+	"embed"
+)
+
+//go:embed settings
+var DefaultSettings embed.FS
+
 type Settings interface {
 	Set(string, interface{})
 	Get(string) (interface{}, error)
