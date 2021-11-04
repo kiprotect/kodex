@@ -33,7 +33,7 @@ type Project interface {
 	MakeActionConfig() ActionConfig
 	MakeDestination() Destination
 	MakeSource() Source
-	MakeStream() Stream
+	MakeStream(id []byte) Stream
 
 	Controller() Controller
 }

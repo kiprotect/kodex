@@ -104,5 +104,5 @@ func (a ConfigAdaptor) MakeObject(c *gin.Context) kodex.Model {
 		return nil
 	}
 
-	return stream.MakeConfig()
+	return stream.MakeConfig(nil)
 }

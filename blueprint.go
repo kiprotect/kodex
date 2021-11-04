@@ -32,6 +32,108 @@ import (
 	"strings"
 )
 
+var BlueprintProjectForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "id",
+			Validators: []forms.Validator{
+				forms.IsBytes{Encoding: "hex"},
+			},
+		},
+		{
+			Name: "name",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "description",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: ""},
+				forms.IsString{},
+			},
+		},
+	},
+}
+
+var BlueprintStreamForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "id",
+			Validators: []forms.Validator{
+				forms.IsOptional{},
+				forms.IsBytes{Encoding: "hex"},
+			},
+		},
+		{
+			Name: "name",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "description",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: ""},
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "data",
+			Validators: []forms.Validator{
+				forms.IsOptional{},
+				forms.IsStringMap{},
+			},
+		},
+		{
+			Name: "status",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: "active"},
+				forms.IsIn{Choices: []interface{}{"active", "inactive", "testing"}},
+			},
+		},
+	},
+}
+
+var BlueprintConfigForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "id",
+			Validators: []forms.Validator{
+				forms.IsOptional{},
+				forms.IsBytes{Encoding: "hex"},
+			},
+		},
+		{
+			Name: "name",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "description",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: ""},
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "status",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: "active"},
+				forms.IsIn{Choices: []interface{}{"active", "inactive", "testing"}},
+			},
+		},
+		{
+			Name: "data",
+			Validators: []forms.Validator{
+				forms.IsOptional{},
+				forms.IsStringMap{},
+			},
+		},
+	},
+}
+
 type Blueprint struct {
 	config map[string]interface{}
 }
@@ -316,29 +418,31 @@ func initStreams(project Project, config map[string]interface{}) error {
 		if !ok {
 			return fmt.Errorf("stream config missing")
 		}
-		Log.Debugf("Creating stream: %s", name)
-		stream := project.MakeStream()
-		values := map[string]interface{}{
-			"name":        name,
-			"description": "",
-			"status":      string(ActiveStream),
+
+		if params, err := BlueprintStreamForm.Validate(streamConfigMap); err != nil {
+			return err
+		} else {
+			Log.Debugf("Creating stream: %s", name)
+			streamID, _ := streamConfigMap["id"].([]byte)
+			stream := project.MakeStream(streamID)
+
+			if err := stream.Create(params); err != nil {
+				return err
+			}
+
+			if err := stream.Save(); err != nil {
+				return err
+			}
+
+			if err := initStreamSources(stream, streamConfigMap); err != nil {
+				return err
+			}
+
+			if err := initStreamConfigs(stream, streamConfigMap); err != nil {
+				return err
+			}
 		}
 
-		if err := stream.Create(values); err != nil {
-			return err
-		}
-
-		if err := stream.Save(); err != nil {
-			return err
-		}
-
-		if err := initStreamSources(stream, streamConfigMap); err != nil {
-			return err
-		}
-
-		if err := initStreamConfigs(stream, streamConfigMap); err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -400,36 +504,33 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 		if !ok {
 			return fmt.Errorf("invalid config: %s", name)
 		}
-		config := stream.MakeConfig()
 
-		status, ok := mapConfigConfig["status"]
-
-		if !ok {
-			status = "active"
-		}
-
-		values := map[string]interface{}{
-			"name":   name,
-			"status": status,
-		}
-
-		if err := config.Create(values); err != nil {
+		if params, err := BlueprintConfigForm.Validate(mapConfigConfig); err != nil {
 			return err
-		}
+		} else {
 
-		if err := config.Save(); err != nil {
-			return err
-		}
+			id, _ := params["id"].([]byte)
 
-		if err := initConfigDestinations(config, mapConfigConfig); err != nil {
-			return err
-		}
+			config := stream.MakeConfig(id)
 
-		if err := initConfigActions(config, mapConfigConfig); err != nil {
-			return err
-		}
+			if err := config.Create(params); err != nil {
+				return err
+			}
 
-		Log.Debugf("Created config '%s'", name)
+			if err := config.Save(); err != nil {
+				return err
+			}
+
+			if err := initConfigDestinations(config, mapConfigConfig); err != nil {
+				return err
+			}
+
+			if err := initConfigActions(config, mapConfigConfig); err != nil {
+				return err
+			}
+
+			Log.Debugf("Created config '%s'", name)
+		}
 	}
 
 	return nil
@@ -489,30 +590,6 @@ func initConfigDestinations(config Config, configData map[string]interface{}) er
 	}
 
 	return nil
-}
-
-var BlueprintProjectForm = forms.Form{
-	Fields: []forms.Field{
-		{
-			Name: "id",
-			Validators: []forms.Validator{
-				forms.IsBytes{Encoding: "hex"},
-			},
-		},
-		{
-			Name: "name",
-			Validators: []forms.Validator{
-				forms.IsString{},
-			},
-		},
-		{
-			Name: "description",
-			Validators: []forms.Validator{
-				forms.IsOptional{Default: ""},
-				forms.IsString{},
-			},
-		},
-	},
 }
 
 func initProject(controller Controller, configData map[string]interface{}) (Project, error) {

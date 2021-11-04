@@ -104,8 +104,10 @@ func (i *InMemoryProject) SetDescription(description string) error {
 	return nil
 }
 
-func (c *InMemoryProject) MakeStream() kodex.Stream {
-	id := kodex.RandomID()
+func (c *InMemoryProject) MakeStream(id []byte) kodex.Stream {
+	if id == nil {
+		id = kodex.RandomID()
+	}
 	stream, err := MakeInMemoryStream(id, map[string]interface{}{
 		"configs": []map[string]interface{}{},
 		"params":  []map[string]interface{}{},

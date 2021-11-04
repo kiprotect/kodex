@@ -81,8 +81,11 @@ func (c *InMemoryStream) DeleteConfig(dc *InMemoryConfig) error {
 	return nil
 }
 
-func (c *InMemoryStream) MakeConfig() kodex.Config {
-	config, err := MakeInMemoryConfig(c, kodex.RandomID(), map[string]interface{}{})
+func (c *InMemoryStream) MakeConfig(id []byte) kodex.Config {
+	if id == nil {
+		id = kodex.RandomID()
+	}
+	config, err := MakeInMemoryConfig(c, id, map[string]interface{}{})
 	if err != nil {
 		panic(err)
 	}

@@ -105,7 +105,7 @@ func ValidObject(settings kodex.Settings, objectType string, objectRoles []strin
 		object, roleObject, err = adaptor.Get(apiController, c, objectID)
 
 		if err != nil {
-			if cErr, ok := err.(errors.ChainableError); ok && cErr.Code() == "NOT-FOUND" {
+			if err == kodex.NotFound {
 				api.HandleError(c, 404, fmt.Errorf("object not found"))
 			} else {
 				api.HandleError(c, 500, err)
