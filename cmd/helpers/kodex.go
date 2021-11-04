@@ -252,13 +252,6 @@ func Kodex(definitions *kodex.Definitions) {
 			},
 			Action: func(c *cli.Context) error {
 
-				project := controller.MakeProject()
-				project.SetName("default")
-
-				if err := project.Save(); err != nil {
-					return err
-				}
-
 				blueprintName := ""
 
 				if c.NArg() > 0 {
@@ -273,7 +266,7 @@ func Kodex(definitions *kodex.Definitions) {
 
 				blueprint := kodex.MakeBlueprint(blueprintConfig)
 
-				if err := blueprint.Create(project); err != nil {
+				if err := blueprint.Create(controller); err != nil {
 					return err
 				}
 

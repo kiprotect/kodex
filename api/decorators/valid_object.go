@@ -59,8 +59,8 @@ func ValidObject(settings kodex.Settings, objectType string, objectRoles []strin
 				return
 			}
 
-			if len(scopes) > 0 && !CheckScopes(scopes, user.AccessToken().Scopes()) {
-				api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": user.AccessToken().Scopes(), "required_scopes": scopes}, nil))
+			if len(scopes) > 0 && !CheckScopes(scopes, user.AccessToken.Scopes) {
+				api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": user.AccessToken.Scopes, "required_scopes": scopes}, nil))
 				return
 			}
 

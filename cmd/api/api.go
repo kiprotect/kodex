@@ -58,13 +58,7 @@ func API(controller kodex.Controller) ([]cli.Command, error) {
 							blueprintName = c.Args().Get(0)
 						}
 
-						apiBlueprintName := ""
-
-						if c.NArg() > 1 {
-							apiBlueprintName = c.Args().Get(1)
-						}
-
-						return runAPI(controller, blueprintName, apiBlueprintName)
+						return runAPI(controller, blueprintName)
 					},
 				},
 			},
@@ -73,7 +67,7 @@ func API(controller kodex.Controller) ([]cli.Command, error) {
 
 }
 
-func runAPI(controller kodex.Controller, blueprintName, apiBlueprintName string) error {
+func runAPI(controller kodex.Controller, blueprintName string) error {
 	kodex.Log.Info("KIProtect - API", ginHelpers.ApiVersion)
 
 	var wg sync.WaitGroup
@@ -91,7 +85,7 @@ func runAPI(controller kodex.Controller, blueprintName, apiBlueprintName string)
 	definitions := api.MergeDefinitions(api.Definitions{}, apiDefinitions.DefaultDefinitions)
 	definitions.Definitions = kodex.MergeDefinitions(kodex.Definitions{}, *controller.Definitions())
 
-	apiController, err := controllerHelpers.Controller(controller.Settings(), &definitions)
+	apiController, err := controllerHelpers.ApiController(controller, &definitions)
 
 	if err != nil {
 		return err
@@ -99,14 +93,7 @@ func runAPI(controller kodex.Controller, blueprintName, apiBlueprintName string)
 
 	if blueprintName != "" {
 
-		project := controller.MakeProject()
-		project.SetName("default")
-
-		if err := project.Save(); err != nil {
-			return err
-		}
-
-		blueprintConfig, err := kodex.LoadBlueprintConfig(controller.Settings(), blueprintName, "")
+		blueprintConfig, err := kodex.LoadBlueprintConfig(apiController.Settings(), blueprintName, "")
 
 		if err != nil {
 			return err
@@ -114,24 +101,20 @@ func runAPI(controller kodex.Controller, blueprintName, apiBlueprintName string)
 
 		blueprint := kodex.MakeBlueprint(blueprintConfig)
 
-		if err := blueprint.Create(project); err != nil {
+		if err := blueprint.Create(apiController); err != nil {
 			return err
 		}
 
-		if apiBlueprintName != "" {
+		apiBlueprintConfig, err := kodex.LoadBlueprintConfig(apiController.Settings(), blueprintName, "")
 
-			blueprintConfig, err := kodex.LoadBlueprintConfig(controller.Settings(), apiBlueprintName, "")
+		if err != nil {
+			return err
+		}
 
-			if err != nil {
-				return err
-			}
+		apiBlueprint := api.MakeBlueprint(apiBlueprintConfig)
 
-			blueprint := api.MakeBlueprint(blueprintConfig)
-
-			if err := blueprint.Create(apiController); err != nil {
-				return err
-			}
-
+		if err := apiBlueprint.Create(apiController); err != nil {
+			return err
 		}
 
 	}

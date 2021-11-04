@@ -18,6 +18,7 @@ package kodex
 
 import (
 	"fmt"
+	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/go-helpers/maps"
 	"github.com/kiprotect/go-helpers/settings"
 	kipStrings "github.com/kiprotect/go-helpers/strings"
@@ -490,6 +491,50 @@ func initConfigDestinations(config Config, configData map[string]interface{}) er
 	return nil
 }
 
+var BlueprintProjectForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "id",
+			Validators: []forms.Validator{
+				forms.IsBytes{Encoding: "hex"},
+			},
+		},
+		{
+			Name: "name",
+			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "description",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: ""},
+				forms.IsString{},
+			},
+		},
+	},
+}
+
+func initProject(controller Controller, configData map[string]interface{}) (Project, error) {
+	projectConfigData, ok := configData["project"]
+	if !ok {
+		project := controller.MakeProject(nil)
+		project.SetName("default")
+		return project, project.Save()
+	}
+	projectConfig, ok := maps.ToStringMap(projectConfigData)
+
+	if params, err := BlueprintProjectForm.Validate(projectConfig); err != nil {
+		return nil, err
+	} else {
+		project := controller.MakeProject(params["id"].([]byte))
+		if err := project.Create(params); err != nil {
+			return nil, err
+		}
+		return project, project.Save()
+	}
+}
+
 func initConfigActions(config Config, configData map[string]interface{}) error {
 
 	actionConfigConfigs, ok := maps.ToStringMapList(configData["actions"])
@@ -559,7 +604,14 @@ func MakeBlueprint(config map[string]interface{}) *Blueprint {
 	}
 }
 
-func (b *Blueprint) Create(project Project) error {
+func (b *Blueprint) Create(controller Controller) error {
+
+	project, err := initProject(controller, b.config)
+
+	if err != nil {
+		return err
+	}
+
 	if err := initSources(project, b.config); err != nil {
 		return err
 	}

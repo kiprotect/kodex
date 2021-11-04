@@ -123,8 +123,7 @@ func BenchmarkAggregate(b *testing.B) {
 	var fixtureConfig = []pt.FC{
 		pt.FC{pf.Settings{}, "settings"},
 		pt.FC{pf.Controller{}, "controller"},
-		pt.FC{pf.Project{Name: "test"}, "project"},
-		pt.FC{pf.Blueprint{Config: simpleBenchmark.Config, Project: "project"}, "blueprint"},
+		pt.FC{pf.Blueprint{Config: simpleBenchmark.Config}, "blueprint"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixtureConfig)

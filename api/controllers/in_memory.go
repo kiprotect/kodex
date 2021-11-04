@@ -90,8 +90,6 @@ func (m *InMemoryController) MakeObjectRole(object kodex.Model, organization api
 func (m *InMemoryController) RolesForObject(object kodex.Model) ([]api.ObjectRole, error) {
 	osrs := make([]api.ObjectRole, 0)
 
-	kodex.Log.Info(m.objectRoles)
-
 	for _, objectRole := range m.objectRoles {
 		if bytes.Equal(objectRole.ObjectID(), object.ID()) {
 			osrs = append(osrs, objectRole)
@@ -161,7 +159,7 @@ func (c *InMemoryController) Organization(source string, sourceID []byte) (api.O
 			return organization, nil
 		}
 	}
-	return nil, nil
+	return nil, kodex.NotFound
 }
 
 func (c *InMemoryController) SaveOrganization(organization *InMemoryOrganization) error {

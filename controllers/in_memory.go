@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/api"
 	"sync"
 )
 
@@ -487,15 +488,59 @@ func (c *InMemoryController) Project(id []byte) (kodex.Project, error) {
 			return project, nil
 		}
 	}
-	return nil, fmt.Errorf("not found")
+	return nil, kodex.NotFound
 }
 
 func (c *InMemoryController) Projects(filters map[string]interface{}) ([]kodex.Project, error) {
-	return nil, fmt.Errorf("InMemoryController.Projects not implemented")
+	projects := make([]kodex.Project, 0, len(c.projects))
+outer:
+	for _, project := range c.projects {
+		for key, value := range filters {
+			switch key {
+			case "ID":
+				switch tv := value.(type) {
+				case []byte:
+					if !bytes.Equal(project.ID(), tv) {
+						continue outer
+					}
+				case api.In:
+					found := false
+					for _, id := range tv.Values {
+						if bytesID, ok := id.([]byte); !ok {
+							return nil, fmt.Errorf("invalid ID")
+						} else if bytes.Equal(project.ID(), bytesID) {
+							found = true
+						}
+					}
+					if !found {
+						continue outer
+					}
+				default:
+					return nil, fmt.Errorf("invalid type")
+				}
+			case "name":
+				strValue, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("expected a name")
+				}
+				if project.Name() != strValue {
+					continue outer
+				}
+			default:
+				return nil, fmt.Errorf("unknown filter key: %s", key)
+			}
+		}
+		projects = append(projects, project)
+	}
+
+	return projects, nil
 }
 
-func (c *InMemoryController) MakeProject() kodex.Project {
-	return MakeInMemoryProject(kodex.RandomID(), c)
+func (c *InMemoryController) MakeProject(id []byte) kodex.Project {
+	if id == nil {
+		id = kodex.RandomID()
+	}
+	return MakeInMemoryProject(id, c)
 }
 
 func (c *InMemoryController) ResetDB() error {

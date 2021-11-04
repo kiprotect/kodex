@@ -2,3 +2,5 @@ controller:
   type: inMemory
 user-provider:
   type: inMemory
+meter:
+  disable: true
