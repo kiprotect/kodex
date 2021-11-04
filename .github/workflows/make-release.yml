@@ -32,6 +32,7 @@ jobs:
         run: |
           export GOARCH=`echo ${{matrix.arch}} | sed 's/[a-z0-9]*_//g'`
           export GOOS=`echo ${{matrix.arch}} | sed 's/\([a-z0-9]*\)_[a-z0-9]*$/\1/g'`
+          make plugins # we build the plugins first
           make test
       - name: build binaries
         run: |
