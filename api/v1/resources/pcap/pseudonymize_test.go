@@ -32,7 +32,13 @@ import (
 )
 
 func getRouter() (*gin.Engine, error) {
-	settings, err := helpers.Settings(helpers.SettingsPaths())
+	paths, fS, err := helpers.SettingsPaths()
+
+	if err != nil {
+		return nil, err
+	}
+
+	settings, err := helpers.Settings(paths, fS)
 
 	if err != nil {
 		return nil, err

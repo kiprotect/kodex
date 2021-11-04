@@ -98,21 +98,6 @@ func exportParameters(controller kodex.Controller, path string) error {
 	}
 }
 
-var defaultSettings = map[string]interface{}{
-	"controller": map[string]interface{}{
-		"type": "inMemory",
-	},
-	"parameter-store": map[string]interface{}{
-		"type":     "file",
-		"filename": "~/.kiprotect/parameters.kip",
-	},
-	"blueprints": map[string]interface{}{
-		"paths": []interface{}{
-			"~/.kiprotect/blueprints",
-		},
-	},
-}
-
 func downloadBlueprints(path, url string) error {
 	if data, err := Download(url); err != nil {
 		return err
@@ -125,14 +110,11 @@ func downloadBlueprints(path, url string) error {
 }
 
 func Settings() (kodex.Settings, error) {
-	settingsPaths := kipHelpers.SettingsPaths()
-	if settings, err := kipHelpers.Settings(settingsPaths); err != nil {
+	if settingsPaths, fS, err := kipHelpers.SettingsPaths(); err != nil {
+		return nil, err
+	} else if settings, err := kipHelpers.Settings(settingsPaths, fS); err != nil {
 		return nil, err
 	} else {
-		// if no settings were given we use the default settings above
-		if len(settingsPaths) == 0 {
-			settings.Update(defaultSettings)
-		}
 		return settings, nil
 	}
 }

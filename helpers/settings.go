@@ -19,6 +19,7 @@ package helpers
 import (
 	"github.com/kiprotect/go-helpers/settings"
 	"github.com/kiprotect/kodex"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -39,10 +40,10 @@ func ConfigPaths() []string {
 	return strings.Split(envValue, ":")
 }
 
-func SettingsPaths() []string {
+func SettingsPaths() ([]string, fs.FS, error) {
 	envValue := os.Getenv(EnvSettingsName)
 	if envValue == "" {
-		return []string{}
+		return []string{"settings"}, kodex.DefaultSettings, nil
 	}
 	values := strings.Split(envValue, ":")
 	sanitizedValues := make([]string, 0, len(values))
@@ -50,11 +51,16 @@ func SettingsPaths() []string {
 		if value == "" {
 			continue
 		}
+		var err error
+		if value, err = filepath.Abs(value); err != nil {
+			return nil, nil, err
+		}
+		value = value[1:]
 		sanitizedValues = append(sanitizedValues, value)
 	}
-	return sanitizedValues
+	return sanitizedValues, os.DirFS("/"), nil
 }
 
-func Settings(settingsPaths []string) (kodex.Settings, error) {
-	return settings.MakeSettings(settingsPaths)
+func Settings(settingsPaths []string, fS fs.FS) (kodex.Settings, error) {
+	return settings.MakeSettings(settingsPaths, fS)
 }
