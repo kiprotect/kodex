@@ -61,7 +61,7 @@ func (c Stream) Setup(fixtures map[string]interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("project missing")
 	}
 
-	stream := project.MakeStream()
+	stream := project.MakeStream(nil)
 
 	values := map[string]interface{}{
 		"name":        c.Name,
@@ -96,7 +96,7 @@ func (c Config) Setup(fixtures map[string]interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("not a stream")
 	}
 
-	config := stream.MakeConfig()
+	config := stream.MakeConfig(nil)
 
 	values := map[string]interface{}{
 		"status":  string(c.Status),

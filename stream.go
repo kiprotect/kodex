@@ -40,7 +40,7 @@ type Stream interface {
 	PriorityModel
 	Configs() ([]Config, error)
 	Config([]byte) (Config, error)
-	MakeConfig() Config
+	MakeConfig(id []byte) Config
 
 	AddSource(Source, SourceStatus) error
 	RemoveSource(Source) error

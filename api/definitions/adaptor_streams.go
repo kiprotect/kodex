@@ -86,5 +86,5 @@ func (a StreamAdaptor) MakeObject(c *gin.Context) kodex.Model {
 		return nil
 	}
 
-	return project.MakeStream()
+	return project.MakeStream(nil)
 }

@@ -77,6 +77,9 @@ func TransformConfigEndpoint(meter kodex.Meter) func(*gin.Context) {
 			for k, v := range writer.Items {
 				channels[k] = v
 			}
+			channels["errors"] = writer.Errors
+			channels["messages"] = writer.Messages
+			channels["warnings"] = writer.Warnings
 			data := map[string]interface{}{
 				"data": channels,
 			}

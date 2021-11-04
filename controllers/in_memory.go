@@ -201,7 +201,7 @@ func (c *InMemoryController) Stream(streamID []byte) (kodex.Stream, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("stream not found")
+	return nil, kodex.NotFound
 }
 
 func (c *InMemoryController) Config(configID []byte) (kodex.Config, error) {
@@ -216,7 +216,7 @@ func (c *InMemoryController) Config(configID []byte) (kodex.Config, error) {
 			}
 		}
 	}
-	return nil, fmt.Errorf("config not found")
+	return nil, kodex.NotFound
 }
 
 func (c *InMemoryController) ActionConfig(actionConfigID []byte) (kodex.ActionConfig, error) {
@@ -225,7 +225,7 @@ func (c *InMemoryController) ActionConfig(actionConfigID []byte) (kodex.ActionCo
 			return actionConfig, nil
 		}
 	}
-	return nil, fmt.Errorf("action config not found")
+	return nil, kodex.NotFound
 }
 
 /* Action Config Management */
@@ -305,7 +305,7 @@ func (c *InMemoryController) Source(sourceID []byte) (kodex.Source, error) {
 			return source, nil
 		}
 	}
-	return nil, fmt.Errorf("not found")
+	return nil, kodex.NotFound
 }
 
 /* Destination Management */
@@ -349,7 +349,7 @@ func (c *InMemoryController) Destination(destinationID []byte) (kodex.Destinatio
 			return destination, nil
 		}
 	}
-	return nil, fmt.Errorf("not found")
+	return nil, kodex.NotFound
 }
 
 func (c *InMemoryController) StreamsByUrgency(n int) ([]kodex.Stream, error) {
