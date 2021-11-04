@@ -17,8 +17,6 @@
 package api
 
 import (
-	"encoding/hex"
-	"encoding/json"
 	"github.com/kiprotect/kodex"
 )
 
@@ -38,138 +36,51 @@ type UserProvider interface {
 	Stop()
 }
 
+type CreateUserProvider interface {
+	Create(user *User) error
+}
+
 type AccessToken struct {
-	scopes []string `json:"scopes"`
-	token  []byte
-}
-
-func (i *AccessToken) Scopes() []string {
-	return i.scopes
-}
-
-func (i *AccessToken) Token() []byte {
-	return i.token
+	Scopes []string `json:"scopes"`
+	Token  []byte
 }
 
 type OrganizationRoles struct {
-	roles        []string          `json:"roles"`
-	organization *UserOrganization `json:"organization"`
-}
-
-func (i *OrganizationRoles) Roles() []string {
-	return i.roles
-}
-
-func (i *OrganizationRoles) Organization() *UserOrganization {
-	return i.organization
+	Roles        []string          `json:"roles"`
+	Organization *UserOrganization `json:"organization"`
 }
 
 type UserOrganization struct {
-	source      string       `json:"source"`
-	name        string       `json:"name"`
-	isDefault   bool         `json:"default"`
-	description string       `json:"description"`
-	id          []byte       `json:"id"`
+	Source      string       `json:"source"`
+	Name        string       `json:"name"`
+	Default     bool         `json:"default"`
+	Description string       `json:"description"`
+	ID          []byte       `json:"id"`
 	apiOrg      Organization `json:"-"`
 }
 
-func (i *UserOrganization) Name() string {
-	return i.name
-}
-
-func (i *UserOrganization) Source() string {
-	return i.source
-}
-
-func (i *UserOrganization) Default() bool {
-	return i.isDefault
-}
-
-func (i *UserOrganization) Description() string {
-	return i.description
-}
-
-func (i *UserOrganization) ID() []byte {
-	return i.id
-}
-
 type User struct {
-	source      string                 `json:"source"`
-	sourceID    []byte                 `json:"sourceID"`
-	email       string                 `json:"email"`
-	displayName string                 `json:"displayName"`
-	superuser   bool                   `json:"superuser"`
-	accessToken *AccessToken           `json:"accessToken"`
-	roles       []*OrganizationRoles   `json:"roles"`
-	limits      map[string]interface{} `json:"limits"`
-}
-
-func (i *User) Source() string {
-	return i.source
-}
-
-func (i *User) SourceID() []byte {
-	return i.sourceID
-}
-
-func (i *User) EMail() string {
-	return i.email
-}
-
-func (i *User) SuperUser() bool {
-	return i.superuser
-}
-
-func (i *User) DisplayName() string {
-	return i.displayName
-}
-
-func (i *User) AccessToken() *AccessToken {
-	return i.accessToken
-}
-
-func (i *User) Roles() []*OrganizationRoles {
-	return i.roles
-}
-
-func (i *User) Limits() map[string]interface{} {
-	return i.limits
-}
-
-func (i *AccessToken) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"scopes": i.scopes,
-	})
-}
-
-func (i *OrganizationRoles) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"roles":        i.roles,
-		"organization": i.organization,
-	})
-}
-
-func (i *UserOrganization) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"name":        i.name,
-		"source":      i.source,
-		"default":     i.isDefault,
-		"description": i.description,
-		"source_id":   hex.EncodeToString(i.id),
-	})
+	Source      string                 `json:"source"`
+	SourceID    []byte                 `json:"sourceID"`
+	EMail       string                 `json:"email"`
+	DisplayName string                 `json:"displayName"`
+	Superuser   bool                   `json:"superuser"`
+	AccessToken *AccessToken           `json:"accessToken"`
+	Roles       []*OrganizationRoles   `json:"roles"`
+	Limits      map[string]interface{} `json:"limits"`
 }
 
 func (i *UserOrganization) ApiOrganization(controller Controller) (Organization, error) {
 	if i.apiOrg == nil {
-		org, err := controller.Organization(i.source, i.id)
+		org, err := controller.Organization(i.Source, i.ID)
 		if err == nil {
 			i.apiOrg = org
 		} else {
 			org := controller.MakeOrganization()
-			org.SetName(i.name)
-			org.SetDescription(i.description)
-			org.SetSourceID(i.id)
-			org.SetSource(i.source)
+			org.SetName(i.Name)
+			org.SetDescription(i.Description)
+			org.SetSourceID(i.ID)
+			org.SetSource(i.Source)
 			if err := org.Save(); err != nil {
 				return nil, err
 			}
@@ -179,48 +90,37 @@ func (i *UserOrganization) ApiOrganization(controller Controller) (Organization,
 	return i.apiOrg, nil
 }
 
-func (i *User) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"source":       i.source,
-		"source_id":    hex.EncodeToString(i.sourceID),
-		"email":        i.email,
-		"display_name": i.displayName,
-		"access_token": i.accessToken,
-		"roles":        i.roles,
-	})
-}
-
 func MakeUserOrganization(source, name, description string, id []byte) *UserOrganization {
 	return &UserOrganization{
-		source:      source,
-		name:        name,
-		description: description,
-		id:          id,
+		Source:      source,
+		Name:        name,
+		Description: description,
+		ID:          id,
 	}
 }
 
 func MakeAccessToken(scopes []string) *AccessToken {
 	return &AccessToken{
-		scopes: scopes,
+		Scopes: scopes,
 	}
 }
 
 func MakeOrganizationRoles(org *UserOrganization, roles []string) *OrganizationRoles {
 	return &OrganizationRoles{
-		organization: org,
-		roles:        roles,
+		Organization: org,
+		Roles:        roles,
 	}
 }
 
 func MakeUser(source, email string, superuser bool, roles []*OrganizationRoles, limits map[string]interface{}, token *AccessToken) *User {
 
 	return &User{
-		source:      source,
-		limits:      limits,
-		email:       email,
-		superuser:   superuser,
-		roles:       roles,
-		accessToken: token,
+		Source:      source,
+		Limits:      limits,
+		EMail:       email,
+		Superuser:   superuser,
+		Roles:       roles,
+		AccessToken: token,
 	}
 
 }

@@ -1,6 +1,8 @@
 package providers
 
 import (
+	"bytes"
+	"encoding/hex"
 	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
@@ -35,20 +37,34 @@ func ValidateInMemoryUserProviderSettings(settings map[string]interface{}) (inte
 }
 
 type InMemoryUserProvider struct {
-	users map[string]*api.User
+	users []*api.User
 }
 
 func MakeInMemoryUserProvider(settings kodex.Settings) (api.UserProvider, error) {
-	kodex.Log.Info("Making in-memory user provider")
-	return &InMemoryUserProvider{}, nil
+	return &InMemoryUserProvider{
+		users: make([]*api.User, 0),
+	}, nil
+}
+
+func (i *InMemoryUserProvider) Create(user *api.User) error {
+	i.users = append(i.users, user)
+	return nil
 }
 
 // Return a user with the given access token
-func (i *InMemoryUserProvider) Get(string) (*api.User, error) {
-	return nil, fmt.Errorf("access token missing")
+func (i *InMemoryUserProvider) Get(stringToken string) (*api.User, error) {
+	if token, err := hex.DecodeString(stringToken); err != nil {
+		return nil, fmt.Errorf("malformed access token")
+	} else {
+		for _, user := range i.users {
+			if bytes.Equal(user.AccessToken.Token, token) {
+				return user, nil
+			}
+		}
+	}
+	return nil, fmt.Errorf("invalid access token")
 }
 func (i *InMemoryUserProvider) Start() {
-	kodex.Log.Info("Starting in-memory user provider...")
 }
 
 func (i *InMemoryUserProvider) Stop() {

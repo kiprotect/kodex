@@ -92,5 +92,5 @@ func (a ProjectAdaptor) MakeObject(c *gin.Context) kodex.Model {
 		return nil
 	}
 
-	return controller.MakeProject()
+	return controller.MakeProject(nil)
 }

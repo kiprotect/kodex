@@ -111,19 +111,19 @@ func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.Han
 			return
 		}
 
-		if superUser && !user.SuperUser() {
+		if superUser && !user.Superuser {
 			api.HandleError(c, 403, fmt.Errorf("access denied"))
 			return
 		}
 
-		if !CheckScopes(scopes, user.AccessToken().Scopes()) {
-			api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": user.AccessToken().Scopes(), "required_scopes": scopes}, nil))
+		if !CheckScopes(scopes, user.AccessToken.Scopes) {
+			api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": user.AccessToken.Scopes, "required_scopes": scopes}, nil))
 			return
 		}
 
 		//if successful, we set the userId to the given value
-		c.Set("userId", user.SourceID())
-		c.Set("userSource", user.Source())
+		c.Set("userId", user.SourceID)
+		c.Set("userSource", user.Source)
 		c.Set("user", user)
 	}
 

@@ -22,21 +22,20 @@ import (
 )
 
 type Blueprint struct {
-	Config  map[string]interface{}
-	Project string
+	Config map[string]interface{}
 }
 
 func (c Blueprint) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
-	project, ok := fixtures[c.Project].(kodex.Project)
+	controller, ok := fixtures["controller"].(kodex.Controller)
 
 	if !ok {
-		return nil, fmt.Errorf("project is missing")
+		return nil, fmt.Errorf("controller is missing")
 	}
 
 	blueprint := kodex.MakeBlueprint(c.Config)
 
-	if err := blueprint.Create(project); err != nil {
+	if err := blueprint.Create(controller); err != nil {
 		return nil, err
 	}
 

@@ -23,6 +23,8 @@ import (
 type ControllerMaker func(map[string]interface{}, Settings, *Definitions) (Controller, error)
 type ControllerDefinitions map[string]ControllerMaker
 
+var NotFound = fmt.Errorf("object not found")
+
 type Controller interface {
 	SetVar(key string, value interface{}) error
 	GetVar(key string) (interface{}, bool)
@@ -76,7 +78,7 @@ type Controller interface {
 	Ping(Processable, ProcessingStats) error
 
 	// Projects
-	MakeProject() Project
+	MakeProject(id []byte) Project
 	Project(projectID []byte) (Project, error)
 	Projects(filters map[string]interface{}) ([]Project, error)
 

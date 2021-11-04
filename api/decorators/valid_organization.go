@@ -78,23 +78,23 @@ func ValidOrganization(orgRoles []string) gin.HandlerFunc {
 		var err error
 
 		// to do: take into account the given organization
-		for _, organizationRoles := range user.Roles() {
-			org = organizationRoles.Organization()
+		for _, organizationRoles := range user.Roles {
+			org = organizationRoles.Organization
 			if err != nil {
 				api.HandleError(c, 500, err)
 				return
 			}
 			if useDefault {
-				if !org.Default() {
+				if !org.Default {
 					continue
 				}
-			} else if !bytes.Equal(org.ID(), orgID) {
+			} else if !bytes.Equal(org.ID, orgID) {
 				continue
 			}
 			if len(orgRoles) == 0 {
 				found = true
 			} else {
-				for _, userRole := range organizationRoles.Roles() {
+				for _, userRole := range organizationRoles.Roles {
 					for _, orgRole := range orgRoles {
 						if orgRole == userRole || orgRole == "*" {
 							found = true

@@ -31,7 +31,7 @@ func (c Project) Setup(fixtures map[string]interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	project := controller.MakeProject()
+	project := controller.MakeProject(nil)
 
 	values := map[string]interface{}{
 		"name": c.Name,

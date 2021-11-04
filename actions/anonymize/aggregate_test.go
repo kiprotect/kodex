@@ -784,8 +784,7 @@ func testAggregate(t *testing.T, parallel bool) {
 		var fixtureConfig = []pt.FC{
 			pt.FC{pf.Settings{}, "settings"},
 			pt.FC{pf.Controller{}, "controller"},
-			pt.FC{pf.Project{Name: "test"}, "project"},
-			pt.FC{pf.Blueprint{Config: test.Config, Project: "project"}, "blueprint"},
+			pt.FC{pf.Blueprint{Config: test.Config}, "blueprint"},
 		}
 
 		fixtures, err := pt.SetupFixtures(fixtureConfig)

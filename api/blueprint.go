@@ -17,7 +17,9 @@
 package api
 
 import (
+	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
+	"github.com/kiprotect/kodex"
 )
 
 var BPObjectRoleForm = forms.Form{
@@ -31,18 +33,25 @@ var BPObjectRoleForm = forms.Form{
 		{
 			Name: "organizationID",
 			Validators: []forms.Validator{
-				forms.IsString{},
+				forms.IsBytes{Encoding: "hex"},
 			},
 		},
 		{
 			Name: "objectID",
 			Validators: []forms.Validator{
-				forms.IsString{},
+				forms.IsBytes{Encoding: "hex"},
 			},
 		},
 		{
 			Name: "organizationRole",
 			Validators: []forms.Validator{
+				forms.IsString{},
+			},
+		},
+		{
+			Name: "organizationSource",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: "inMemory"},
 				forms.IsString{},
 			},
 		},
@@ -58,6 +67,13 @@ var BPObjectRoleForm = forms.Form{
 var BPOrganizationForm = forms.Form{
 	Fields: []forms.Field{
 		{
+			Name: "source",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: "inMemory"},
+				forms.IsIn{Choices: []interface{}{"inMemory"}},
+			},
+		},
+		{
 			Name: "name",
 			Validators: []forms.Validator{
 				forms.IsString{},
@@ -66,7 +82,7 @@ var BPOrganizationForm = forms.Form{
 		{
 			Name: "id",
 			Validators: []forms.Validator{
-				forms.IsString{},
+				forms.IsBytes{Encoding: "hex"},
 			},
 		},
 	},
@@ -77,7 +93,7 @@ var AccessTokenForm = forms.Form{
 		{
 			Name: "token",
 			Validators: []forms.Validator{
-				forms.IsString{},
+				forms.IsBytes{Encoding: "hex"},
 			},
 		},
 		{
@@ -93,7 +109,7 @@ var AccessTokenForm = forms.Form{
 	},
 }
 
-var RoleForm = forms.Form{
+var RolesForm = forms.Form{
 	Fields: []forms.Field{
 		{
 			Name: "roles",
@@ -102,9 +118,11 @@ var RoleForm = forms.Form{
 			},
 		},
 		{
-			Name: "organizationID",
+			Name: "organization",
 			Validators: []forms.Validator{
-				forms.IsString{},
+				forms.IsStringMap{
+					Form: &BPOrganizationForm,
+				},
 			},
 		},
 	},
@@ -112,6 +130,13 @@ var RoleForm = forms.Form{
 
 var UserForm = forms.Form{
 	Fields: []forms.Field{
+		{
+			Name: "source",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: "inMemory"},
+				forms.IsIn{Choices: []interface{}{"inMemory"}},
+			},
+		},
 		{
 			Name: "email",
 			Validators: []forms.Validator{
@@ -147,7 +172,7 @@ var UserForm = forms.Form{
 				forms.IsList{
 					Validators: []forms.Validator{
 						forms.IsStringMap{
-							Form: &RoleForm,
+							Form: &RolesForm,
 						},
 					},
 				},
@@ -182,18 +207,6 @@ var BlueprintConfigForm = forms.Form{
 				},
 			},
 		},
-		{
-			Name: "organizations",
-			Validators: []forms.Validator{
-				forms.IsList{
-					Validators: []forms.Validator{
-						forms.IsStringMap{
-							Form: &BPOrganizationForm,
-						},
-					},
-				},
-			},
-		},
 	},
 }
 
@@ -201,11 +214,68 @@ type Blueprint struct {
 	config map[string]interface{}
 }
 
-func initRoles(controller Controller, config map[string]interface{}) error {
+type ObjectRoleSpec struct {
+	ObjectRole         string `json:"objectRole"`
+	OrganizationRole   string `json:"organizationRole"`
+	OrganizationID     []byte `json:"organizationID"`
+	OrganizationSource string `json:"organizationSource"`
+	ObjectID           []byte `json:"objectID"`
+	ObjectType         string `json:"objectType"`
+}
+
+type UsersAndRoles struct {
+	Users []*User           `json:"users"`
+	Roles []*ObjectRoleSpec `json:"roles"`
+}
+
+func initRoles(controller Controller, roles []*ObjectRoleSpec) error {
+	for _, role := range roles {
+		var obj kodex.Model
+		var err error
+		switch role.ObjectType {
+		case "project":
+			obj, err = controller.Project(role.ObjectID)
+			if err != nil {
+				kodex.Log.Error("project not found")
+				return err
+			}
+		default:
+			return fmt.Errorf("invalid object type: %s", role.ObjectType)
+		}
+		if org, err := controller.Organization(role.OrganizationSource, role.OrganizationID); err != nil {
+			return err
+		} else {
+			objRole := controller.MakeObjectRole(obj, org)
+			if err := objRole.SetObjectRole(role.ObjectRole); err != nil {
+				return err
+			} else if err := objRole.SetOrganizationRole(role.OrganizationRole); err != nil {
+				return err
+			} else if err := objRole.Save(); err != nil {
+				return err
+			}
+		}
+
+	}
 	return nil
 }
 
-func initUsers(controller Controller, config map[string]interface{}) error {
+func initUsers(controller Controller, users []*User) error {
+	userProvider := controller.UserProvider()
+	createUserProvider, ok := userProvider.(CreateUserProvider)
+	if !ok {
+		return fmt.Errorf("cannot create users")
+	}
+	for _, user := range users {
+		for _, roles := range user.Roles {
+			// we ensure all organizations are created in the controller
+			if _, err := roles.Organization.ApiOrganization(controller); err != nil {
+				return err
+			}
+		}
+		if err := createUserProvider.Create(user); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -216,11 +286,21 @@ func MakeBlueprint(config map[string]interface{}) *Blueprint {
 }
 
 func (b *Blueprint) Create(controller Controller) error {
-	if err := initUsers(controller, b.config); err != nil {
+
+	if params, err := BlueprintConfigForm.Validate(b.config); err != nil {
 		return err
+	} else {
+		usersAndRoles := &UsersAndRoles{}
+		if err := BlueprintConfigForm.Coerce(usersAndRoles, params); err != nil {
+			return err
+		}
+		// users need to be initialized first
+		if err := initUsers(controller, usersAndRoles.Users); err != nil {
+			return err
+		}
+		if err := initRoles(controller, usersAndRoles.Roles); err != nil {
+			return err
+		}
+		return nil
 	}
-	if err := initRoles(controller, b.config); err != nil {
-		return err
-	}
-	return nil
 }

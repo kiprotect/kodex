@@ -141,8 +141,8 @@ func DeleteObjectRole(c *gin.Context) {
 	userRoleCount := 0
 	roleAffected := false
 	for _, role := range roles {
-		for _, organizationRoles := range user.Roles() {
-			apiOrg, err := organizationRoles.Organization().ApiOrganization(controller)
+		for _, organizationRoles := range user.Roles {
+			apiOrg, err := organizationRoles.Organization.ApiOrganization(controller)
 			if err != nil {
 				api.HandleError(c, 500, err)
 				return
@@ -150,7 +150,7 @@ func DeleteObjectRole(c *gin.Context) {
 			if !bytes.Equal(apiOrg.ID(), role.OrganizationID()) {
 				continue
 			}
-			for _, userRole := range organizationRoles.Roles() {
+			for _, userRole := range organizationRoles.Roles {
 				if role.OrganizationRole() == userRole && role.ObjectRole() == "superuser" {
 					userRoleCount++
 					if bytes.Equal(role.ID(), roleID) {

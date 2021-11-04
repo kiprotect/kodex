@@ -54,8 +54,6 @@ func (o ObjectRole) Setup(fixtures map[string]interface{}) (interface{}, error) 
 		"role":              o.ObjectRole,
 	}
 
-	kodex.Log.Info("Creating object role...")
-
 	if err := objectRole.Create(values); err != nil {
 		return nil, err
 	}
@@ -63,8 +61,6 @@ func (o ObjectRole) Setup(fixtures map[string]interface{}) (interface{}, error) 
 	if err := objectRole.Save(); err != nil {
 		return nil, err
 	}
-
-	kodex.Log.Info("Saved object role...")
 
 	return objectRole, nil
 

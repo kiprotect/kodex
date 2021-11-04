@@ -42,7 +42,7 @@ func MakeInMemoryProject(id []byte, controller kodex.Controller) *InMemoryProjec
 }
 
 func (i *InMemoryProject) ID() []byte {
-	return []byte(i.name)
+	return i.id
 }
 
 func (i *InMemoryProject) InternalID() []byte {

@@ -105,12 +105,12 @@ func OrganizationMeterId(settings kodex.Settings) gin.HandlerFunc {
 
 		var id string
 
-		if len(user.Roles()) == 0 {
+		if len(user.Roles) == 0 {
 			api.HandleError(c, 400, fmt.Errorf("you need to be associated with an organization to use this endpoint"))
 			return
 		}
 
-		orgId := hex.EncodeToString(user.Roles()[0].Organization().ID())
+		orgId := hex.EncodeToString(user.Roles[0].Organization.ID)
 
 		// to do: select a given organization based on the access token
 		id = "org:" + orgId
@@ -129,7 +129,6 @@ func Metered(settings kodex.Settings, meter kodex.Meter) gin.HandlerFunc {
 	decorator := func(c *gin.Context) {
 
 		if disabled, ok := settings.Bool("meter.disable"); ok && disabled {
-			kodex.Log.Info("Metering is disabled...")
 			return
 		}
 
