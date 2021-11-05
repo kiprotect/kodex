@@ -4,3 +4,6 @@ user-provider:
   type: inMemory
 meter:
   disable: true
+parameter-store:
+  type: file
+  filename: ~/.kiprotect/parameters.kip
