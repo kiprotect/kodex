@@ -28,6 +28,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -272,6 +273,7 @@ func NormalizePath(path string) (string, error) {
 }
 
 func LoadBlueprintConfig(settingsObj Settings, filename, version string) (map[string]interface{}, error) {
+	filename = filepath.ToSlash(filename)
 	if filename == "" {
 		filename = ".yml"
 	} else {
@@ -282,9 +284,11 @@ func LoadBlueprintConfig(settingsObj Settings, filename, version string) (map[st
 		if filename, err = NormalizePath(filename); err != nil {
 			return nil, err
 		}
+		Log.Info(filename)
 		// we check if we can directly locate the blueprint. If not, we try to
 		// find it using the blueprints directories.
 		if _, err := os.Stat(filename); err != nil {
+			Log.Error(err)
 			var err error
 			if filename, err = findBlueprint(settingsObj, filename, version); err != nil {
 				return nil, err
@@ -298,9 +302,14 @@ func LoadBlueprintConfig(settingsObj Settings, filename, version string) (map[st
 		return nil, err
 	} else {
 		// we remove the leading '/' as that's illegal for the FS interface
-		filename = absFilename[1:]
+		// filename = absFilename[1:]
+		if runtime.GOOS == "windows" {
+			filename = filepath.ToSlash(absFilename)[3:] // we remove the drive letter and first slash
+		} else {
+			filename = filepath.ToSlash(absFilename)[1:] // we remove the first slash
+		}
 	}
-	if config, err := settings.LoadYaml(filename, os.DirFS("/")); err != nil {
+	if config, err := settings.LoadYaml(filename, os.DirFS("")); err != nil {
 		return nil, err
 	} else if configMap, ok := config.(map[string]interface{}); !ok {
 		return nil, fmt.Errorf("expected a map")
