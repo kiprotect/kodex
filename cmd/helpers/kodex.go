@@ -224,6 +224,41 @@ func Kodex(definitions *kodex.Definitions) {
 			},
 		},
 		cli.Command{
+			Name: "export",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "version",
+					Value: "",
+					Usage: "optional: the version of the blueprint to load",
+				},
+			},
+			Action: func(c *cli.Context) error {
+
+				blueprintName := ""
+
+				if c.NArg() > 0 {
+					blueprintName = c.Args().Get(0)
+				}
+
+				blueprintConfig, err := kodex.LoadBlueprintConfig(controller.Settings(), blueprintName, c.String("version"))
+
+				if err != nil {
+					return err
+				}
+
+				bytes, err := json.MarshalIndent(blueprintConfig, "", "  ")
+
+				if err != nil {
+					return err
+				}
+
+				fmt.Println(string(bytes))
+
+				return nil
+
+			},
+		},
+		cli.Command{
 			Name: "run",
 			Flags: []cli.Flag{
 				cli.StringFlag{
