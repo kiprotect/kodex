@@ -34,10 +34,8 @@ func (c Controller) Setup(fixtures map[string]interface{}) (interface{}, error) 
 
 	if !ok {
 		defs = apiDefinitions.DefaultDefinitions
+		defs.Definitions = definitions.DefaultDefinitions
 	}
-
-	allDefinitions := api.MergeDefinitions(api.Definitions{}, defs)
-	allDefinitions.Definitions = kodex.MergeDefinitions(kodex.Definitions{}, definitions.DefaultDefinitions)
 
 	settings, ok := fixtures["settings"].(kodex.Settings)
 
@@ -45,13 +43,13 @@ func (c Controller) Setup(fixtures map[string]interface{}) (interface{}, error) 
 		return nil, fmt.Errorf("No settings present")
 	}
 
-	if ctrl, err := helpers.Controller(settings, &allDefinitions.Definitions); err != nil {
+	if ctrl, err := helpers.Controller(settings, &defs.Definitions); err != nil {
 		return nil, err
 	} else {
 		if err := ctrl.ResetDB(); err != nil {
 			return nil, err
 		}
-		return controllerHelpers.ApiController(ctrl, &allDefinitions)
+		return controllerHelpers.ApiController(ctrl, &defs)
 	}
 
 }
