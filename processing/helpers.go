@@ -96,6 +96,8 @@ func ProcessStream(stream kodex.Stream, timeout time.Duration) error {
 		time.Sleep(time.Millisecond)
 	}
 
+	kodex.Log.Infof("Stream executors stopped...")
+
 	// we wait for all destination writers to finish their work
 	for {
 		allStopped := true
@@ -110,6 +112,8 @@ func ProcessStream(stream kodex.Stream, timeout time.Duration) error {
 		}
 		time.Sleep(time.Millisecond)
 	}
+
+	kodex.Log.Infof("Destination writers stopped...")
 
 	return nil
 
