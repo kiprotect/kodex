@@ -163,17 +163,26 @@ func (w *LocalStreamWorker) ProcessPayload(payload kodex.Payload) error {
 
 			for _, destinationMap := range destinationMaps {
 
-				// we only write items to active destinations
-				if destinationMap.Status() != kodex.ActiveDestination {
-					continue
-				}
-
 				// we do not perform any writer setup as we already did this before
 				writer, err := destinationMap.InternalWriter()
 
 				if err != nil {
 					kodex.Log.Error("error writing destination items...")
 					return handleError(err)
+				}
+
+				// we only write items to active destinations
+				if destinationMap.Status() != kodex.ActiveDestination {
+
+					// we always announce the end of the stream to the destination writer...
+					if payload.EndOfStream() {
+						if err := writer.Write(kodex.MakeBasicPayload([]*kodex.Item{}, payload.Headers(), payload.EndOfStream())); err != nil {
+							kodex.Log.Error("error writing end of stream message...")
+							return handleError(err)
+						}
+					}
+
+					continue
 				}
 
 				if err := writer.Write(kodex.MakeBasicPayload(newItems, payload.Headers(), payload.EndOfStream())); err != nil {
