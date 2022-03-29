@@ -26,5 +26,5 @@ type CommandsDefinition struct {
 	Maker       CommandsMaker `json:"-"`
 }
 
-type CommandsMaker func(controller Controller) ([]cli.Command, error)
+type CommandsMaker func(controller Controller, definitions interface{}) ([]cli.Command, error)
 type CommandsDefinitions []CommandsDefinition

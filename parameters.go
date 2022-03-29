@@ -40,11 +40,6 @@ type ParameterStoreMaker func(map[string]interface{}, *Definitions) (ParameterSt
 
 // An interface that manages action parameters
 type ParameterStore interface {
-
-	// Returns parameters for a given action config (or nil if none exist). If
-	// there is an error (e.g. parameters exist for the same action config
-	// as identified by their ID but they are incompatible) and error will
-	// be returned.
 	Definitions() *Definitions
 	ParametersById(id []byte) (*Parameters, error)
 	Parameters(action Action, parameterGroup *ParameterGroup) (*Parameters, error)

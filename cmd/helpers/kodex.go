@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/api"
 	kipHelpers "github.com/kiprotect/kodex/helpers"
 	"github.com/kiprotect/kodex/processing"
 	"github.com/urfave/cli"
@@ -119,7 +120,7 @@ func Settings() (kodex.Settings, error) {
 	}
 }
 
-func Kodex(definitions *kodex.Definitions) {
+func Kodex(definitions *api.Definitions) {
 
 	var controller kodex.Controller
 	var settings kodex.Settings
@@ -129,7 +130,7 @@ func Kodex(definitions *kodex.Definitions) {
 		kodex.Log.Fatal(err)
 	}
 
-	if controller, err = kipHelpers.Controller(settings, definitions); err != nil {
+	if controller, err = kipHelpers.Controller(settings, &definitions.Definitions); err != nil {
 		kodex.Log.Fatal(err)
 	}
 
@@ -306,7 +307,7 @@ func Kodex(definitions *kodex.Definitions) {
 
 	// we add commands from the definitions
 	for _, commandsDefinition := range controller.Definitions().CommandsDefinitions {
-		if commands, err := commandsDefinition.Maker(controller); err != nil {
+		if commands, err := commandsDefinition.Maker(controller, definitions); err != nil {
 			kodex.Log.Fatal(err)
 		} else {
 			bareCommands = append(bareCommands, commands...)

@@ -24,8 +24,8 @@ import (
 
 type Definitions struct {
 	kodex.Definitions
-	APIControllerDefinitions APIControllerDefinitions
 	Routes                   []Routes
+	APIControllerDefinitions APIControllerDefinitions
 	ObjectAdaptors           map[string]ObjectAdaptor
 	AssociateAdaptors        map[string]AssociateAdaptor
 	UserProviders            map[string]UserProviderDefinition

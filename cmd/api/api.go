@@ -19,13 +19,13 @@ package api
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
-	apiDefinitions "github.com/kiprotect/kodex/api/definitions"
 	controllerHelpers "github.com/kiprotect/kodex/api/helpers/controller"
 	ginHelpers "github.com/kiprotect/kodex/api/helpers/gin"
 	"github.com/urfave/cli"
@@ -33,7 +33,9 @@ import (
 	"sync"
 )
 
-func API(controller kodex.Controller) ([]cli.Command, error) {
+func API(controller kodex.Controller, definitions interface{}) ([]cli.Command, error) {
+
+	apiDefinitions := definitions.(*api.Definitions)
 
 	return []cli.Command{
 		{
@@ -58,7 +60,7 @@ func API(controller kodex.Controller) ([]cli.Command, error) {
 							blueprintName = c.Args().Get(0)
 						}
 
-						return runAPI(controller, blueprintName)
+						return RunAPI(controller, apiDefinitions, "", nil, blueprintName)
 					},
 				},
 			},
@@ -67,7 +69,7 @@ func API(controller kodex.Controller) ([]cli.Command, error) {
 
 }
 
-func runAPI(controller kodex.Controller, blueprintName string) error {
+func RunAPI(controller kodex.Controller, definitions *api.Definitions, prefix string, handlerMaker func(http.Handler) http.Handler, blueprintName string) error {
 	kodex.Log.Info("KIProtect - API", ginHelpers.ApiVersion)
 
 	var wg sync.WaitGroup
@@ -81,11 +83,7 @@ func runAPI(controller kodex.Controller, blueprintName string) error {
 		host = "0.0.0.0"
 	}
 
-	// we load the default definitions and merge them with the given definitions
-	definitions := api.MergeDefinitions(api.Definitions{}, apiDefinitions.DefaultDefinitions)
-	definitions.Definitions = kodex.MergeDefinitions(kodex.Definitions{}, *controller.Definitions())
-
-	apiController, err := controllerHelpers.ApiController(controller, &definitions)
+	apiController, err := controllerHelpers.ApiController(controller, definitions)
 
 	if err != nil {
 		return err
@@ -120,7 +118,7 @@ func runAPI(controller kodex.Controller, blueprintName string) error {
 	}
 
 	var addr = host + ":" + strconv.Itoa(port)
-	srv, _, err := ginHelpers.RunApi(apiController, addr, &wg)
+	srv, _, err := ginHelpers.RunApi(apiController, addr, prefix, handlerMaker, &wg)
 
 	if err != nil {
 		return err

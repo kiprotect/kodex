@@ -7,3 +7,5 @@ meter:
 parameter-store:
   type: file
   filename: ~/.kiprotect/parameters.kip
+api:
+  prefix: /api
