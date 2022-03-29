@@ -21,9 +21,11 @@ import (
 	"github.com/kiprotect/kodex/api/controllers"
 	"github.com/kiprotect/kodex/api/user_providers"
 	"github.com/kiprotect/kodex/api/v1"
+	"github.com/kiprotect/kodex/definitions"
 )
 
 var DefaultDefinitions = api.Definitions{
+	Definitions: definitions.DefaultDefinitions,
 	APIControllerDefinitions: map[string]api.APIControllerMaker{
 		"inMemory": controllers.MakeInMemoryController,
 	},

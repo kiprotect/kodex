@@ -47,7 +47,7 @@ func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
 	return tc, nil
 }
 
-func Router(controller api.Controller, decorator gin.HandlerFunc) (*gin.Engine, error) {
+func Router(controller api.Controller, prefix string, decorator gin.HandlerFunc) (*gin.Engine, error) {
 
 	debug, _ := controller.Settings().Bool("debug")
 
@@ -75,6 +75,12 @@ func Router(controller api.Controller, decorator gin.HandlerFunc) (*gin.Engine, 
 		return nil, err
 	}
 
+	// we serve the API under an API prefix
+	if prefix != "" {
+		kodex.Log.Infof("Serving the API with prefix '%s'...", prefix)
+		group = group.Group(prefix)
+	}
+
 	for _, routesProvider := range controller.APIDefinitions().Routes {
 		if err := routesProvider(group, controller, meter); err != nil {
 			return nil, err
@@ -86,7 +92,7 @@ func Router(controller api.Controller, decorator gin.HandlerFunc) (*gin.Engine, 
 }
 
 func RegisterPlugins(controller api.Controller) error {
-	pluginSettings, err := controller.Settings().Get("plugins")
+	pluginSettings, err := controller.Settings().Get("api.plugins")
 
 	if err == nil {
 		pluginsList, ok := pluginSettings.([]interface{})
@@ -118,21 +124,29 @@ func RegisterPlugins(controller api.Controller) error {
 	return nil
 }
 
-func RunApi(controller api.Controller, addr string, wg *sync.WaitGroup) (*http.Server, *gin.Engine, error) {
+func RunApi(controller api.Controller, addr string, prefix string, handlerMaker func(http.Handler) http.Handler, wg *sync.WaitGroup) (*http.Server, *gin.Engine, error) {
 
 	if err := RegisterPlugins(controller); err != nil {
 		return nil, nil, err
 	}
 
-	g, err := Router(controller, nil)
+	g, err := Router(controller, prefix, nil)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
+	var handler http.Handler
+
 	kodex.Log.Info("Started API - listening on http://" + addr)
 
-	srv := &http.Server{Addr: addr, Handler: g}
+	if handlerMaker != nil {
+		handler = handlerMaker(g)
+	} else {
+		handler = g
+	}
+
+	srv := &http.Server{Addr: addr, Handler: handler}
 
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {

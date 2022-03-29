@@ -17,8 +17,8 @@
 package main
 
 import (
+	"github.com/kiprotect/kodex/api/definitions"
 	cmdHelpers "github.com/kiprotect/kodex/cmd/helpers"
-	"github.com/kiprotect/kodex/definitions"
 )
 
 func main() {
