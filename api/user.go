@@ -42,7 +42,7 @@ type CreateUserProvider interface {
 
 type AccessToken struct {
 	Scopes []string `json:"scopes"`
-	Token  []byte `json:"-"`
+	Token  []byte `json:"-" coerce:"name:token"`
 }
 
 type OrganizationRoles struct {
