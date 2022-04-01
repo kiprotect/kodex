@@ -84,6 +84,15 @@ func Initialize(group *gin.RouterGroup,
 		"action", []string{"admin", "superuser", "writer"}, []string{"kiprotect:api:action:transform"}))
 	transformActionEndpoints.POST("/actions/:actionID/transform", resources.TransformActionConfigEndpoint(meter))
 
+	// blueprint
+	getBlueprintEndpoint := endpoints.Group("")
+	getBlueprintEndpoint.Use(decorators.ValidObject(settings,
+		"project", []string{"admin", "superuser", "writer"}, []string{"kiprotect:api:project:blueprint"}))
+	getBlueprintEndpoint.GET("/blueprints/:projectID", resources.GetBlueprint)
+
+	uploadBlueprintEndpoint := endpoints.Group("")
+	uploadBlueprintEndpoint.POST("/blueprints", resources.UploadBlueprint)
+
 	for _, objectAdaptor := range controller.APIDefinitions().ObjectAdaptors {
 
 		objectType := objectAdaptor.Type()
