@@ -35,7 +35,7 @@ func (c Blueprint) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
 	blueprint := kodex.MakeBlueprint(c.Config)
 
-	if err := blueprint.Create(controller); err != nil {
+	if _, err := blueprint.Create(controller); err != nil {
 		return nil, err
 	}
 

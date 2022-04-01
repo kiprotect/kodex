@@ -420,16 +420,23 @@ func initDestinations(project Project, config map[string]interface{}) error {
 
 func initStreams(project Project, config map[string]interface{}) error {
 	streamsConfig, ok := maps.ToStringMapList(config["streams"])
+
 	if !ok {
 		return nil
 	}
+
 	Log.Debug("Initializing streams...")
+
 	for _, streamConfig := range streamsConfig {
+
 		name, ok := streamConfig["name"].(string)
+
 		if !ok {
 			return fmt.Errorf("name is missing")
 		}
+
 		streamConfigMap, ok := maps.ToStringMap(streamConfig)
+
 		if !ok {
 			return fmt.Errorf("stream config missing")
 		}
@@ -437,11 +444,27 @@ func initStreams(project Project, config map[string]interface{}) error {
 		if params, err := BlueprintStreamForm.Validate(streamConfigMap); err != nil {
 			return err
 		} else {
-			Log.Debugf("Creating stream: %s", name)
-			streamID, _ := streamConfigMap["id"].([]byte)
-			stream := project.MakeStream(streamID)
 
-			if err := stream.Create(params); err != nil {
+			var stream Stream
+			var err error
+
+			Log.Debugf("Creating stream: %s", name)
+
+			streamID, _ := params["id"].([]byte)
+
+			if stream, err = project.Controller().Stream(streamID); err != nil {
+
+				if err != NotFound {
+					return err
+				}
+
+				stream = project.MakeStream(streamID)
+
+				if err := stream.Create(params); err != nil {
+					return err
+				}
+
+			} else if err := stream.Update(params); err != nil {
 				return err
 			}
 
@@ -524,11 +547,22 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 			return err
 		} else {
 
-			id, _ := params["id"].([]byte)
+			var config Config
+			var err error
 
-			config := stream.MakeConfig(id)
+			if config, err = stream.Config(name); err != nil {
 
-			if err := config.Create(params); err != nil {
+				if err != NotFound {
+					return err
+				}
+
+				config = stream.MakeConfig(nil)
+
+				if err := config.Create(params); err != nil {
+					return err
+				}
+
+			} else if err := config.Update(params); err != nil {
 				return err
 			}
 
@@ -609,22 +643,38 @@ func initConfigDestinations(config Config, configData map[string]interface{}) er
 
 func initProject(controller Controller, configData map[string]interface{}) (Project, error) {
 	projectConfigData, ok := configData["project"]
+
+	var projectConfig map[string]interface{}
+	var project Project
+
 	if !ok {
-		project := controller.MakeProject(nil)
-		project.SetName("default")
-		return project, project.Save()
+		projectConfig = map[string]interface{}{
+			"id":   []byte("default"),
+			"name": "default",
+		}
+
+	} else if projectConfig, ok = maps.ToStringMap(projectConfigData); !ok {
+		return nil, fmt.Errorf("expected a map")
 	}
-	projectConfig, ok := maps.ToStringMap(projectConfigData)
 
 	if params, err := BlueprintProjectForm.Validate(projectConfig); err != nil {
 		return nil, err
 	} else {
-		project := controller.MakeProject(params["id"].([]byte))
-		if err := project.Create(params); err != nil {
+		id := params["id"].([]byte)
+		if project, err = controller.Project(id); err != nil {
+			if err != NotFound {
+				return nil, err
+			}
+			project = controller.MakeProject(params["id"].([]byte))
+			if err := project.Create(params); err != nil {
+				return nil, err
+			}
+		} else if err := project.Update(params); err != nil {
 			return nil, err
 		}
 		return project, project.Save()
 	}
+
 }
 
 func initConfigActions(config Config, configData map[string]interface{}) error {
@@ -696,28 +746,28 @@ func MakeBlueprint(config map[string]interface{}) *Blueprint {
 	}
 }
 
-func (b *Blueprint) Create(controller Controller) error {
+func (b *Blueprint) Create(controller Controller) (Project, error) {
 
 	project, err := initProject(controller, b.config)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := initSources(project, b.config); err != nil {
-		return err
+		return nil, err
 	}
 	if err := initDestinations(project, b.config); err != nil {
-		return err
+		return nil, err
 	}
 	if err := initActionConfigs(project, b.config); err != nil {
-		return err
+		return nil, err
 	}
 	if err := initStreams(project, b.config); err != nil {
-		return err
+		return nil, err
 	}
 	if err := initKeys(project, b.config); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return project, nil
 }

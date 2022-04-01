@@ -99,7 +99,7 @@ func RunAPI(controller kodex.Controller, definitions *api.Definitions, prefix st
 
 		blueprint := kodex.MakeBlueprint(blueprintConfig)
 
-		if err := blueprint.Create(apiController); err != nil {
+		if _, err := blueprint.Create(apiController); err != nil {
 			return err
 		}
 

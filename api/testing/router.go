@@ -23,5 +23,5 @@ import (
 )
 
 func Router(controller api.Controller, decorator gin.HandlerFunc) (*gin.Engine, error) {
-	return ginHelpers.Router(controller, decorator)
+	return ginHelpers.Router(controller, "", decorator)
 }
