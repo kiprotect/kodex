@@ -661,17 +661,22 @@ func initProject(controller Controller, configData map[string]interface{}) (Proj
 		return nil, err
 	} else {
 		id := params["id"].([]byte)
+
+		// if the project already exists we delete it
 		if project, err = controller.Project(id); err != nil {
 			if err != NotFound {
 				return nil, err
 			}
-			project = controller.MakeProject(params["id"].([]byte))
-			if err := project.Create(params); err != nil {
-				return nil, err
-			}
-		} else if err := project.Update(params); err != nil {
+		} else if err := project.Delete(); err != nil {
 			return nil, err
 		}
+
+		project = controller.MakeProject(params["id"].([]byte))
+
+		if err := project.Create(params); err != nil {
+			return nil, err
+		}
+
 		return project, project.Save()
 	}
 
