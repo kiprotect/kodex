@@ -284,11 +284,13 @@ func Kodex(definitions *api.Definitions) {
 
 				blueprint := kodex.MakeBlueprint(blueprintConfig)
 
-				if err := blueprint.Create(controller); err != nil {
+				project, err := blueprint.Create(controller)
+
+				if err != nil {
 					return err
 				}
 
-				streams, err := controller.Streams(map[string]interface{}{"name": "default"})
+				streams, err := controller.Streams(map[string]interface{}{"name": "default", "stream_project_id_project.ext_id": project.ID()})
 
 				if err != nil {
 					return err

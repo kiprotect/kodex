@@ -188,7 +188,7 @@ func (p *ParameterSet) UpdateParameters(action Action, params interface{}, param
 	}
 	// we haven't found the action config (this should never happen)
 	if !found {
-		return fmt.Errorf("action config not found")
+		return NotFound
 	}
 
 	// we try to generate new parameters for the given parameter group

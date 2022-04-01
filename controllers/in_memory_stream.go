@@ -52,13 +52,13 @@ func MakeInMemoryStream(id []byte, config map[string]interface{}, project *InMem
 	return stream, nil
 }
 
-func (c *InMemoryStream) Config(configID []byte) (kodex.Config, error) {
+func (c *InMemoryStream) Config(name string) (kodex.Config, error) {
 	for _, config := range c.configs {
-		if bytes.Equal(config.ID(), configID) {
+		if config.Name() == name {
 			return config, nil
 		}
 	}
-	return nil, fmt.Errorf("config not found")
+	return nil, kodex.NotFound
 }
 
 func (c *InMemoryStream) Data() interface{} {
