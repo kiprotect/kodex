@@ -94,12 +94,36 @@ func (b *BaseStream) Create(values map[string]interface{}) error {
 
 func (b *BaseStream) MarshalJSON() ([]byte, error) {
 
+	configs, err := b.Self.Configs()
+
+	if err != nil {
+		return nil, err
+	}
+
+	sources, err := b.Self.Sources()
+
+	if err != nil {
+		return nil, err
+	}
+
+	sourcesList := make([]interface{}, 0)
+
+	for _, sourceMap := range sources {
+		sourceData := map[string]interface{}{
+			"source": sourceMap.Source().Name(),
+		}
+
+		sourcesList = append(sourcesList, sourceData)
+	}
+
 	data := map[string]interface{}{
 		"name":        b.Self.Name(),
 		"status":      b.Self.Status(),
 		"description": b.Self.Description(),
 		"project":     b.Self.Project(),
 		"data":        b.Self.Data(),
+		"configs":     configs,
+		"sources":     sourcesList,
 	}
 
 	for k, v := range JSONData(b.Self) {

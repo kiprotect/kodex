@@ -263,14 +263,40 @@ func (b *BaseConfig) Create(values map[string]interface{}) error {
 
 func (b *BaseConfig) MarshalJSON() ([]byte, error) {
 
+	actionConfigs, err := b.Self.ActionConfigs()
+
+	if err != nil {
+		return nil, err
+	}
+
+	destinations, err := b.Self.Destinations()
+
+	if err != nil {
+		return nil, err
+	}
+
+	destinationsList := make([]interface{}, 0)
+
+	for name, destinationMaps := range destinations {
+		for _, destinationMap := range destinationMaps {
+			destinationData := map[string]interface{}{
+				"name":        name,
+				"destination": destinationMap.Destination().Name(),
+				"status":      destinationMap.Status(),
+			}
+			destinationsList = append(destinationsList, destinationData)
+		}
+	}
+
 	data := map[string]interface{}{
-		"name":        b.Self.Name(),
-		"description": b.Self.Description(),
-		"source":      b.Self.Source(),
-		"status":      b.Self.Status(),
-		"version":     b.Self.Version(),
-		"stream":      b.Self.Stream(),
-		"data":        b.Self.Data(),
+		"name":         b.Self.Name(),
+		"description":  b.Self.Description(),
+		"source":       b.Self.Source(),
+		"status":       b.Self.Status(),
+		"actions":      actionConfigs,
+		"destinations": destinationsList,
+		"version":      b.Self.Version(),
+		"data":         b.Self.Data(),
 	}
 
 	for k, v := range JSONData(b.Self) {

@@ -290,7 +290,7 @@ func Kodex(definitions *api.Definitions) {
 					return err
 				}
 
-				streams, err := controller.Streams(map[string]interface{}{"name": "default", "stream_project_id_project.ext_id": project.ID()})
+				streams, err := controller.Streams(map[string]interface{}{"name": "default", "project.id": project.ID()})
 
 				if err != nil {
 					return err
