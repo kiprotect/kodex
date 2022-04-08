@@ -168,7 +168,7 @@ outer:
 	for _, stream := range c.streams {
 		for key, value := range filters {
 			switch key {
-			case "ProjectID":
+			case "project.id":
 				bytesValue, ok := value.([]byte)
 				if !ok {
 					return nil, fmt.Errorf("expected at name")
@@ -238,7 +238,7 @@ outer:
 	for _, actionConfig := range c.actionConfigs {
 		for key, value := range filters {
 			switch key {
-			case "ProjectID":
+			case "project.id":
 				bytesValue, ok := value.([]byte)
 				if !ok {
 					return nil, fmt.Errorf("expected at name")
@@ -273,7 +273,7 @@ outer:
 	for _, source := range c.sources {
 		for key, value := range filters {
 			switch key {
-			case "ProjectID":
+			case "project.id":
 				bytesValue, ok := value.([]byte)
 				if !ok {
 					return nil, fmt.Errorf("expected at name")
@@ -317,7 +317,7 @@ outer:
 	for _, destination := range c.destinations {
 		for key, value := range filters {
 			switch key {
-			case "ProjectID":
+			case "project.id":
 				bytesValue, ok := value.([]byte)
 				if !ok {
 					return nil, fmt.Errorf("expected at name")

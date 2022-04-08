@@ -745,6 +745,39 @@ func initKeys(project Project, config map[string]interface{}) error {
 	return nil
 }
 
+func ExportBlueprint(project Project) (map[string]interface{}, error) {
+	blueprint := make(map[string]interface{})
+
+	blueprint["project"] = project
+
+	if actions, err := project.Controller().ActionConfigs(map[string]interface{}{"project.id": project.ID()}); err != nil {
+		return nil, err
+	} else {
+		blueprint["actions"] = actions
+	}
+
+	if sources, err := project.Controller().Sources(map[string]interface{}{"project.id": project.ID()}); err != nil {
+		return nil, err
+	} else {
+		blueprint["sources"] = sources
+	}
+
+	if destinations, err := project.Controller().Destinations(map[string]interface{}{"project.id": project.ID()}); err != nil {
+		return nil, err
+	} else {
+		blueprint["destinations"] = destinations
+	}
+
+	if streams, err := project.Controller().Streams(map[string]interface{}{"project.id": project.ID()}); err != nil {
+		return nil, err
+	} else {
+		blueprint["streams"] = streams
+	}
+
+	return blueprint, nil
+
+}
+
 func MakeBlueprint(config map[string]interface{}) *Blueprint {
 	return &Blueprint{
 		config: config,

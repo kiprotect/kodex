@@ -39,9 +39,16 @@ func GetBlueprint(c *gin.Context) {
 		return
 	}
 
+	blueprint, err := kodex.ExportBlueprint(project)
+
+	if err != nil {
+		api.HandleError(c, 500, err)
+		return
+	}
+
 	// to do: convert the project to a blueprint....
 
-	c.JSON(200, map[string]interface{}{"message": "success", "project": project})
+	c.JSON(200, map[string]interface{}{"message": "success", "data": blueprint})
 
 }
 
@@ -75,6 +82,6 @@ func UploadBlueprint(c *gin.Context) {
 		api.HandleError(c, 500, err)
 	}
 
-	c.JSON(200, map[string]interface{}{"message": "success", "project": project})
+	c.JSON(200, map[string]interface{}{"message": "success", "data": project})
 
 }
