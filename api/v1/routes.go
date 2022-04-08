@@ -91,7 +91,9 @@ func Initialize(group *gin.RouterGroup,
 	getBlueprintEndpoint.GET("/blueprints/:projectID", resources.GetBlueprint)
 
 	uploadBlueprintEndpoint := endpoints.Group("")
-	uploadBlueprintEndpoint.POST("/blueprints", resources.UploadBlueprint)
+	uploadBlueprintEndpoint.Use(decorators.ValidOrganization([]string{"admin",
+		"superuser"}))
+	uploadBlueprintEndpoint.POST("/orgs/:organizationID/blueprints", resources.UploadBlueprint)
 
 	for _, objectAdaptor := range controller.APIDefinitions().ObjectAdaptors {
 

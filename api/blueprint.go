@@ -80,6 +80,13 @@ var BPOrganizationForm = forms.Form{
 			},
 		},
 		{
+			Name: "default",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: false},
+				forms.IsBoolean{},
+			},
+		},
+		{
 			Name: "id",
 			Validators: []forms.Validator{
 				forms.IsBytes{Encoding: "hex"},
