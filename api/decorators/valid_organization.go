@@ -84,6 +84,7 @@ func ValidOrganization(orgRoles []string) gin.HandlerFunc {
 				api.HandleError(c, 500, err)
 				return
 			}
+
 			if useDefault {
 				if !org.Default {
 					continue

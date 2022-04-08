@@ -68,18 +68,43 @@ func UploadBlueprint(c *gin.Context) {
 
 	if !ok {
 		api.HandleError(c, 500, fmt.Errorf("invalid controller"))
+		return
 	}
 
 	ctrl, ok := controllerObj.(api.Controller)
 
 	if !ok {
 		api.HandleError(c, 500, fmt.Errorf("invalid controller"))
+		return
+	}
+
+	organization := helpers.Organization(c)
+
+	if organization == nil {
+		return
 	}
 
 	project, err := blueprint.Create(ctrl)
 
 	if err != nil {
 		api.HandleError(c, 500, err)
+		return
+	}
+
+	for _, orgRole := range []string{"admin", "superuser"} {
+		role := ctrl.MakeObjectRole(project, organization)
+		values := map[string]interface{}{
+			"organization_role": orgRole,
+			"role":              "superuser",
+		}
+		if err := role.Create(values); err != nil {
+			api.HandleError(c, 500, err)
+			return
+		}
+		if err := role.Save(); err != nil {
+			api.HandleError(c, 500, err)
+			return
+		}
 	}
 
 	c.JSON(200, map[string]interface{}{"message": "success", "data": project})
