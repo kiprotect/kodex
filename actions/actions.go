@@ -37,6 +37,7 @@ var Actions = kodex.ActionDefinitions{
 	"form": kodex.ActionDefinition{
 		Name:  "Form Validation",
 		Maker: MakeFormAction,
+		Form:  FormForm,
 	},
 	"anonymize": kodex.ActionDefinition{
 		Name:  "Anonymize",

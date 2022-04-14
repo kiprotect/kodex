@@ -42,7 +42,7 @@ var PseudonymizeForm = forms.Form{
 				forms.IsRequired{},
 				forms.IsString{},
 				forms.MatchesRegex{
-					Regex: regexp.MustCompile(`^.{8,32}$`),
+					Regexp: regexp.MustCompile(`^.{8,32}$`),
 				},
 			},
 		},

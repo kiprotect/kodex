@@ -8,7 +8,7 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/btree v1.0.0
 	github.com/google/gopacket v1.1.19
-	github.com/kiprotect/go-helpers v0.0.0-20211126144132-63cf08b7160f
+	github.com/kiprotect/go-helpers v0.0.0-20211210144244-79ce90e73e79
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/streadway/amqp v1.0.0
