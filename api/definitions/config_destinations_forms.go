@@ -35,7 +35,7 @@ var AddConfigDestinationForm = forms.Form{
 			Name: "name",
 			Validators: []forms.Validator{
 				forms.IsRequired{},
-				forms.MatchesRegex{Regex: regexp.MustCompile("^[a-z0-9-]{3,40}$")},
+				forms.MatchesRegex{Regexp: regexp.MustCompile("^[a-z0-9-]{3,40}$")},
 			},
 		},
 	},

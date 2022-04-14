@@ -51,6 +51,8 @@ func (i IsAction) Validate(input interface{}, values map[string]interface{}) (in
 	}
 }
 
+var FormForm = forms.FormForm
+
 var IsActionForm = forms.Form{
 	Fields: []forms.Field{
 		{

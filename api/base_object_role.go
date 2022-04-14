@@ -97,7 +97,7 @@ var ObjectRoleForm = forms.Form{
 			Validators: []forms.Validator{
 				forms.IsRequired{},
 				forms.IsString{MinLength: 2, MaxLength: 100},
-				forms.MatchesRegex{Regex: regexp.MustCompile(`^[\w\d\-\:\.]{2,100}$`)},
+				forms.MatchesRegex{Regexp: regexp.MustCompile(`^[\w\d\-\:\.]{2,100}$`)},
 			},
 		},
 		{

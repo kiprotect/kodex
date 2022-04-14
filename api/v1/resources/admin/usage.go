@@ -63,7 +63,7 @@ var UsageForm = forms.Form{
 			Name: "name",
 			Validators: []forms.Validator{
 				forms.IsOptional{Default: ""},
-				forms.MatchesRegex{Regex: regexp.MustCompile(`^[\w\d\-]{0,50}$`)},
+				forms.MatchesRegex{Regexp: regexp.MustCompile(`^[\w\d\-]{0,50}$`)},
 			},
 		},
 		{
