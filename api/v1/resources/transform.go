@@ -77,6 +77,7 @@ func TransformEndpoint(meter kodex.Meter) func(c *gin.Context) {
 		actions, err := kodex.MakeActions(actionSpecs, definitions)
 
 		if err != nil {
+			kodex.Log.Error("Error creating actions...")
 			api.HandleError(c, 500, err)
 			return
 		}
@@ -84,6 +85,7 @@ func TransformEndpoint(meter kodex.Meter) func(c *gin.Context) {
 		parameterSet, err := kodex.MakeParameterSet(actions, nil)
 
 		if err != nil {
+			kodex.Log.Error("Error making parameter set...")
 			api.HandleError(c, 500, err)
 			return
 		}
@@ -93,6 +95,7 @@ func TransformEndpoint(meter kodex.Meter) func(c *gin.Context) {
 		processor, err := kodex.MakeProcessor(parameterSet, writer, nil)
 
 		if err != nil {
+			kodex.Log.Error("Error making processor...")
 			api.HandleError(c, 500, err)
 			return
 		}
@@ -109,6 +112,7 @@ func TransformEndpoint(meter kodex.Meter) func(c *gin.Context) {
 		}
 
 		if newItems, err := process(); err != nil {
+			kodex.Log.Error("Error processing items...")
 			api.HandleError(c, 500, err)
 			return
 		} else {
