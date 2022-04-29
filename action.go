@@ -134,7 +134,9 @@ var ActionSpecificationForm = forms.Form{
 				forms.IsOptional{
 					DefaultGenerator: func() interface{} { return RandomID() },
 				},
-				forms.IsBytes{},
+				forms.IsBytes{
+					Encoding: "hex",
+				},
 			},
 		},
 		forms.Field{

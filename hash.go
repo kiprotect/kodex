@@ -249,6 +249,12 @@ func addHash(source interface{}, h hash.Hash) error {
 
 	sourceValue := reflect.ValueOf(source)
 
-	return addValue(sourceValue, h)
+	if err := addValue(sourceValue, h); err != nil {
+		if err == NullValue {
+			return nil
+		}
+		return err
+	}
+	return nil
 
 }
