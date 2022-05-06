@@ -238,7 +238,7 @@ func (p *Processor) processItem(item *Item, paramsMap map[string]interface{}, un
 				// not all actions that have an Undo function are always
 				// undoable (e.g. some pseudonymization methods are one-way)
 				if undoableAction.Undoable(newItem) {
-					newItem, err = undoableAction.Undo(item, p.channelWriter)
+					newItem, err = undoableAction.Undo(newItem, p.channelWriter)
 				}
 			}
 		} else {
