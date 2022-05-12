@@ -101,7 +101,6 @@ func UploadBlueprint(c *gin.Context) {
 		return
 	}*/
 
-
 	for _, orgRole := range []string{"admin", "superuser"} {
 		role := ctrl.MakeObjectRole(project, organization)
 		values := map[string]interface{}{

@@ -671,7 +671,7 @@ func initProject(controller Controller, configData map[string]interface{}) (Proj
 			return nil, err
 		}
 
-		project = controller.MakeProject(params["id"].([]byte))
+		project = controller.MakeProject(id)
 
 		if err := project.Create(params); err != nil {
 			return nil, err
