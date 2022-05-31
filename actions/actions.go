@@ -34,6 +34,10 @@ var Actions = kodex.ActionDefinitions{
 		Name:  "Quantize",
 		Maker: MakeQuantizeAction,
 	},
+	"generalize": kodex.ActionDefinition{
+		Name:  "Generalize",
+		Maker: MakeGeneralizeAction,
+	},
 	"form": kodex.ActionDefinition{
 		Name:  "Form Validation",
 		Maker: MakeFormAction,
