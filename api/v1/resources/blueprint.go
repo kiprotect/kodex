@@ -21,6 +21,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
+	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex/api/helpers"
 )
 
@@ -84,22 +85,17 @@ func UploadBlueprint(c *gin.Context) {
 		return
 	}
 
-	/*if err := ctrl.Begin(); err != nil {
-		api.HandleError(c, 500, fmt.Errorf("cannot begin transaction"))
-	}*/
-
 	project, err := blueprint.Create(ctrl)
 
+
 	if err != nil {
-		// ctrl.Rollback()
-		api.HandleError(c, 500, err)
+		if _, ok := err.(*forms.FormError); ok {
+			api.HandleError(c, 400, err)
+		} else {
+			api.HandleError(c, 500, err)
+		}
 		return
 	}
-
-	/* if err := ctrl.Commit(); err != nil {
-		api.HandleError(c, 500, fmt.Errorf("cannot commit transaction"))
-		return
-	}*/
 
 	for _, orgRole := range []string{"admin", "superuser"} {
 		role := ctrl.MakeObjectRole(project, organization)
