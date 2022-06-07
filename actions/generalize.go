@@ -1,5 +1,5 @@
 // Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - Germany
+// Copyright (C) 2019-2022  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -34,6 +34,7 @@ var GeneralizeForm = forms.Form{
 		{
 			Name: "key",
 			Validators: []forms.Validator{
+				forms.IsOptional{Default: "_"},
 				forms.IsString{},
 			},
 		},
@@ -71,7 +72,7 @@ func MakeGeneralizeAction(spec kodex.ActionSpecification) (kodex.Action, error) 
 
 	if params, err := GeneralizeForm.Validate(spec.Config); err != nil {
 		return nil, err
-	} else if err := GeneralizeForm.Coerce(params, generalizeConfig); err != nil {
+	} else if err := GeneralizeForm.Coerce(generalizeConfig, params); err != nil {
 		return nil, err
 	} else {
 		return &GeneralizeAction{
