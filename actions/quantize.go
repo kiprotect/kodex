@@ -1,5 +1,5 @@
 // Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - Germany
+// Copyright (C) 2019-2022  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -57,7 +57,7 @@ func MakeQuantizeAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 
 	if params, err := QuantizeForm.Validate(spec.Config); err != nil {
 		return nil, err
-	} else if err := QuantizeForm.Coerce(params, quantizeConfig); err != nil {
+	} else if err := QuantizeForm.Coerce(quantizeConfig, params); err != nil {
 		return nil, err
 	} else {
 		return &QuantizeAction{
