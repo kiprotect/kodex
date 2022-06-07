@@ -72,6 +72,31 @@ func (b *BaseStream) Type() string {
 	return "stream"
 }
 
+func (b *BaseStream) DeleteRelated() error {
+
+	if configs, err := b.Self.Configs(); err != nil {
+		return err
+	} else {
+		for _, config := range configs {
+			if err := config.Delete(); err != nil {
+				return err
+			}
+		}
+	}
+
+	if sources, err := b.Self.Sources(); err != nil {
+		return err
+	} else {
+		for _, sourceMap := range sources {
+			if err := sourceMap.Delete(); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (b *BaseStream) Update(values map[string]interface{}) error {
 
 	if params, err := StreamForm.ValidateUpdate(values); err != nil {

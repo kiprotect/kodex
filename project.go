@@ -34,6 +34,7 @@ type Project interface {
 	MakeDestination(id []byte) Destination
 	MakeSource(id []byte) Source
 	MakeStream(id []byte) Stream
+	DeleteRelated() error
 
 	Controller() Controller
 }
@@ -56,6 +57,56 @@ func (b *BaseProject) Update(values map[string]interface{}) error {
 	} else {
 		return b.update(params)
 	}
+}
+
+func (b *BaseProject) DeleteRelated() error {
+
+	// we delete related streams
+	if streams, err := b.Controller().Streams(map[string]interface{}{"project.id": b.Self.ID()}); err != nil {
+		return err
+	} else {
+		for _, stream := range streams {
+			if err := stream.Delete(); err != nil {
+				return err
+			}
+		}
+	}
+
+	// we delete related actions
+	if actions, err := b.Controller().ActionConfigs(map[string]interface{}{"project.id": b.Self.ID()}); err != nil {
+		return err
+	} else {
+		for _, action := range actions {
+			if err := action.Delete(); err != nil {
+				return err
+			}
+		}
+	}
+
+	// we delete related sources
+	if sources, err := b.Controller().Sources(map[string]interface{}{"project.id": b.Self.ID()}); err != nil {
+		return err
+	} else {
+		for _, source := range sources {
+			if err := source.Delete(); err != nil {
+				return err
+			}
+		}
+	}
+
+	// we delete related destinations
+	if destinations, err := b.Controller().Destinations(map[string]interface{}{"project.id": b.Self.ID()}); err != nil {
+		return err
+	} else {
+		for _, destination := range destinations {
+			if err := destination.Delete(); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
 }
 
 func (b *BaseProject) Create(values map[string]interface{}) error {

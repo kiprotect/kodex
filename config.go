@@ -243,6 +243,21 @@ func (b *BaseConfig) Stream() Stream {
 	return b.Stream_
 }
 
+func (b *BaseConfig) DeleteRelated() error {
+	if destinations, err := b.Self.Destinations(); err != nil {
+		return err
+	} else {
+		for _, destinationMaps := range destinations {
+			for _, destinationMap := range destinationMaps {
+				if err := destinationMap.Delete(); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (b *BaseConfig) Update(values map[string]interface{}) error {
 
 	if params, err := ConfigForm.ValidateUpdate(values); err != nil {
