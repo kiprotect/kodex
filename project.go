@@ -1,5 +1,5 @@
 // Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - Germany
+// Copyright (C) 2019-2022  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -30,9 +30,9 @@ type Project interface {
 	Data() interface{}
 	SetData(interface{}) error
 
-	MakeActionConfig() ActionConfig
-	MakeDestination() Destination
-	MakeSource() Source
+	MakeActionConfig(id []byte) ActionConfig
+	MakeDestination(id []byte) Destination
+	MakeSource(id []byte) Source
 	MakeStream(id []byte) Stream
 
 	Controller() Controller

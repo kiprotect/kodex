@@ -1,5 +1,5 @@
 // Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - Germany
+// Copyright (C) 2019-2022  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,7 @@ import (
 	"github.com/kiprotect/go-helpers/settings"
 	kipStrings "github.com/kiprotect/go-helpers/strings"
 	"github.com/kiprotect/go-helpers/yaml"
+	"encoding/hex"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -340,8 +341,15 @@ func initSources(project Project, config map[string]interface{}) error {
 		if !ok {
 			return fmt.Errorf("invalid config for source %s", name)
 		}
+
+		var id []byte
+
+		if strId, ok := sourceMapConfig["id"].(string); ok {
+			id, _ = hex.DecodeString(strId)
+		}
+
 		Log.Debugf("Creating source: %s", name)
-		source := project.MakeSource()
+		source := project.MakeSource(id)
 
 		if err := source.Create(sourceMapConfig); err != nil {
 			return err
@@ -371,8 +379,15 @@ func initActionConfigs(project Project, config map[string]interface{}) error {
 		if !ok {
 			return fmt.Errorf("invalid config for action %s", name)
 		}
+
+		var id []byte
+
+		if strId, ok := actionMapConfig["id"].(string); ok {
+			id, _ = hex.DecodeString(strId)
+		}
+
 		Log.Debugf("Creating action: %s", name)
-		action := project.MakeActionConfig()
+		action := project.MakeActionConfig(id)
 
 		if err := action.Create(actionMapConfig); err != nil {
 			return err
@@ -402,8 +417,15 @@ func initDestinations(project Project, config map[string]interface{}) error {
 		if !ok {
 			return fmt.Errorf("invalid config for destination %s", name)
 		}
+
+		var id []byte
+
+		if strId, ok := destinationMapConfig["id"].(string); ok {
+			id, _ = hex.DecodeString(strId)
+		}
+
 		Log.Debugf("Creating destination: %s", name)
-		destination := project.MakeDestination()
+		destination := project.MakeDestination(id)
 
 		if err := destination.Create(destinationMapConfig); err != nil {
 			return err
@@ -550,13 +572,15 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 			var config Config
 			var err error
 
+			configID, _ := params["id"].([]byte)
+
 			if config, err = stream.Config(name); err != nil {
 
 				if err != NotFound {
 					return err
 				}
 
-				config = stream.MakeConfig(nil)
+				config = stream.MakeConfig(configID)
 
 				if err := config.Create(params); err != nil {
 					return err
@@ -786,6 +810,21 @@ func MakeBlueprint(config map[string]interface{}) *Blueprint {
 
 func (b *Blueprint) Create(controller Controller) (Project, error) {
 
+	success := false
+
+	if err := controller.Begin(); err != nil {
+		return nil, err
+	}
+
+	defer func(){
+		// we roll back the transaction, but only if it hasn't been successful
+		if !success {
+			if err := controller.Rollback(); err != nil {
+				Log.Error(err)
+			}
+		}
+	}()
+
 	project, err := initProject(controller, b.config)
 
 	if err != nil {
@@ -807,5 +846,13 @@ func (b *Blueprint) Create(controller Controller) (Project, error) {
 	if err := initKeys(project, b.config); err != nil {
 		return nil, err
 	}
+
+	if err := controller.Commit(); err != nil {
+		return nil, err
+	}
+
+	// everything worked out nicely
+	success = true
+
 	return project, nil
 }

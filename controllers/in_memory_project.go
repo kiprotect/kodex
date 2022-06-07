@@ -1,5 +1,5 @@
 // Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - Germany
+// Copyright (C) 2019-2022  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -119,14 +119,23 @@ func (c *InMemoryProject) MakeStream(id []byte) kodex.Stream {
 	return stream
 }
 
-func (c *InMemoryProject) MakeActionConfig() kodex.ActionConfig {
-	return MakeInMemoryActionConfig(kodex.RandomID(), c)
+func (c *InMemoryProject) MakeActionConfig(id []byte) kodex.ActionConfig {
+	if id == nil {
+		id = kodex.RandomID()
+	}
+	return MakeInMemoryActionConfig(id, c)
 }
 
-func (c *InMemoryProject) MakeSource() kodex.Source {
-	return MakeInMemorySource(kodex.RandomID(), c)
+func (c *InMemoryProject) MakeSource(id []byte) kodex.Source {
+	if id == nil {
+		id = kodex.RandomID()
+	}
+	return MakeInMemorySource(id, c)
 }
 
-func (c *InMemoryProject) MakeDestination() kodex.Destination {
-	return MakeInMemoryDestination(kodex.RandomID(), c)
+func (c *InMemoryProject) MakeDestination(id []byte) kodex.Destination {
+	if id == nil {
+		id = kodex.RandomID()
+	}
+	return MakeInMemoryDestination(id, c)
 }
