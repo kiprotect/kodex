@@ -72,7 +72,7 @@ func (a ProjectAdaptor) Objects(c *gin.Context) []kodex.Model {
 	})
 
 	if err != nil {
-		api.HandleError(c, 400, err)
+		api.HandleError(c, 500, err)
 		return nil
 	}
 
