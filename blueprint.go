@@ -17,13 +17,13 @@
 package kodex
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/go-helpers/maps"
 	"github.com/kiprotect/go-helpers/settings"
 	kipStrings "github.com/kiprotect/go-helpers/strings"
 	"github.com/kiprotect/go-helpers/yaml"
-	"encoding/hex"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -345,7 +345,10 @@ func initSources(project Project, config map[string]interface{}) error {
 		var id []byte
 
 		if strId, ok := sourceMapConfig["id"].(string); ok {
-			id, _ = hex.DecodeString(strId)
+			var err error
+			if id, err = hex.DecodeString(strId); err != nil {
+				id = nil
+			}
 		}
 
 		Log.Debugf("Creating source: %s", name)
@@ -383,7 +386,10 @@ func initActionConfigs(project Project, config map[string]interface{}) error {
 		var id []byte
 
 		if strId, ok := actionMapConfig["id"].(string); ok {
-			id, _ = hex.DecodeString(strId)
+			var err error
+			if id, err = hex.DecodeString(strId); err != nil {
+				id = nil
+			}
 		}
 
 		Log.Debugf("Creating action: %s", name)
@@ -421,7 +427,10 @@ func initDestinations(project Project, config map[string]interface{}) error {
 		var id []byte
 
 		if strId, ok := destinationMapConfig["id"].(string); ok {
-			id, _ = hex.DecodeString(strId)
+			var err error
+			if id, err = hex.DecodeString(strId); err != nil {
+				id = nil
+			}
 		}
 
 		Log.Debugf("Creating destination: %s", name)
@@ -816,7 +825,7 @@ func (b *Blueprint) Create(controller Controller) (Project, error) {
 		return nil, err
 	}
 
-	defer func(){
+	defer func() {
 		// we roll back the transaction, but only if it hasn't been successful
 		if !success {
 			if err := controller.Rollback(); err != nil {
