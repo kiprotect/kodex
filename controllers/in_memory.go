@@ -1,5 +1,5 @@
 // Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - Germany
+// Copyright (C) 2019-2022  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/kiprotect/kodex"
-	"github.com/kiprotect/kodex/api"
 	"sync"
 )
 
@@ -503,7 +502,7 @@ outer:
 					if !bytes.Equal(project.ID(), tv) {
 						continue outer
 					}
-				case api.In:
+				case kodex.In:
 					found := false
 					for _, id := range tv.Values {
 						if bytesID, ok := id.([]byte); !ok {

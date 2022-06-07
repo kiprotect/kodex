@@ -1,5 +1,5 @@
 // Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - Germany
+// Copyright (C) 2019-2022  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -67,7 +67,7 @@ func (a SourceAdaptor) Objects(c *gin.Context) []kodex.Model {
 	}
 
 	sources, err := controller.Sources(map[string]interface{}{
-		"ProjectID": project.ID(),
+		"project.id": project.ID(),
 	})
 
 	if err != nil {
@@ -91,5 +91,5 @@ func (a SourceAdaptor) MakeObject(c *gin.Context) kodex.Model {
 		return nil
 	}
 
-	return project.MakeSource()
+	return project.MakeSource(nil)
 }

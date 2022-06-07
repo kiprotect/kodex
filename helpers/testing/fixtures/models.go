@@ -1,5 +1,5 @@
 // Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2021  KIProtect GmbH (HRB 208395B) - Germany
+// Copyright (C) 2019-2022  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -131,7 +131,7 @@ func (i Source) Setup(fixtures map[string]interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("project missing")
 	}
 
-	source := project.MakeSource()
+	source := project.MakeSource(nil)
 
 	values := map[string]interface{}{
 		"type":        i.SourceType,
@@ -166,7 +166,7 @@ func (o Destination) Setup(fixtures map[string]interface{}) (interface{}, error)
 		return nil, fmt.Errorf("project missing")
 	}
 
-	destination := project.MakeDestination()
+	destination := project.MakeDestination(nil)
 
 	values := map[string]interface{}{
 		"type":        o.DestinationType,
@@ -289,7 +289,7 @@ func (a ActionConfig) Setup(fixtures map[string]interface{}) (interface{}, error
 		return nil, fmt.Errorf("project missing")
 	}
 
-	actionConfig := project.MakeActionConfig()
+	actionConfig := project.MakeActionConfig(nil)
 
 	values := map[string]interface{}{
 		"name":   a.Name,
