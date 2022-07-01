@@ -186,7 +186,7 @@ var NameValidators = []forms.Validator{
 }
 
 var DescriptionValidators = []forms.Validator{
-	forms.IsString{MaxLength: 256},
+	forms.IsString{MaxLength: 10000},
 }
 
 var IsValidStreamStatus = forms.IsIn{

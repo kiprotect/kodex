@@ -32,19 +32,19 @@ type ChannelWriter interface {
 }
 
 type Message struct {
-	Type MessageType
-	Item *Item
-	Data map[string]interface{}
+	Type MessageType            `json:"type"`
+	Item *Item                  `json:"item"`
+	Data map[string]interface{} `json:"data"`
 }
 
 type Error struct {
-	Error error
-	Item  *Item
+	Error error `json:"error"`
+	Item  *Item `json:"item"`
 }
 
 type Warning struct {
-	Warning error
-	Item    *Item
+	Warning error `json:"warning"`
+	Item    *Item `json:"item"`
 }
 
 type InMemoryChannelWriter struct {

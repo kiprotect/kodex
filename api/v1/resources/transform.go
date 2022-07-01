@@ -122,7 +122,8 @@ func TransformEndpoint(meter kodex.Meter) func(c *gin.Context) {
 				channels[k] = v
 			}
 			data := map[string]interface{}{
-				"data": channels,
+				"data":   channels,
+				"errors": writer.Errors,
 			}
 			if returnKey {
 				data["key"] = key

@@ -19,9 +19,9 @@ package resources
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
-	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex/api/helpers"
 )
 
@@ -86,7 +86,6 @@ func UploadBlueprint(c *gin.Context) {
 	}
 
 	project, err := blueprint.Create(ctrl)
-
 
 	if err != nil {
 		if _, ok := err.(*forms.FormError); ok {

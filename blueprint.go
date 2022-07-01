@@ -819,7 +819,7 @@ func MakeBlueprint(config map[string]interface{}) *Blueprint {
 
 func (b *Blueprint) Create(controller Controller) (Project, error) {
 
-	success := false
+	succeeded := false
 
 	if err := controller.Begin(); err != nil {
 		return nil, err
@@ -827,7 +827,7 @@ func (b *Blueprint) Create(controller Controller) (Project, error) {
 
 	defer func() {
 		// we roll back the transaction, but only if it hasn't been successful
-		if !success {
+		if !succeeded {
 			if err := controller.Rollback(); err != nil {
 				Log.Error(err)
 			}
@@ -861,7 +861,7 @@ func (b *Blueprint) Create(controller Controller) (Project, error) {
 	}
 
 	// everything worked out nicely
-	success = true
+	succeeded = true
 
 	return project, nil
 }
