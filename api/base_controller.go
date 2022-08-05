@@ -18,6 +18,7 @@ package api
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/kiprotect/kodex"
 )
 
@@ -27,12 +28,32 @@ type BaseController struct {
 	Self          Controller
 }
 
+func getUserProvider(controller Controller) (UserProvider, error) {
+	userProviderType, ok := controller.Settings().String("user-provider.type")
+	if !ok {
+		return nil, fmt.Errorf("user provider type missing")
+	}
+	definition, ok := controller.APIDefinitions().UserProviders[userProviderType]
+	if !ok {
+		return nil, fmt.Errorf("invalid user provider type '%s'", userProviderType)
+	}
+	return definition.Maker(controller.Settings())
+}
+
 func (b *BaseController) APIDefinitions() *Definitions {
 	return b.Definitions_
 }
 
-func (b *BaseController) UserProvider() UserProvider {
-	return b.UserProvider_
+func (b *BaseController) UserProvider() (UserProvider, error) {
+
+	if b.UserProvider_ == nil {
+		if userProvider, err := getUserProvider(b.Self); err != nil {
+			return nil, err
+		} else {
+			b.UserProvider_ = userProvider
+		}
+	}
+	return b.UserProvider_, nil
 }
 
 func (b *BaseController) ObjectRolesForUser(objectType string, user *User) ([]ObjectRole, error) {
@@ -100,6 +121,11 @@ func (b *BaseController) RegisterAPIPlugin(plugin APIPlugin) error {
 	b.Definitions_.Routes = append(b.Definitions_.Routes, plugin.InitializeAPI)
 	if err := plugin.InitializeAdaptors(b.Definitions_.ObjectAdaptors); err != nil {
 		return err
+	}
+	if userProviderPlugin, ok := plugin.(UserProviderPlugin); ok {
+		if err := userProviderPlugin.InitializeUserProviders(b.Definitions_.UserProviders); err != nil {
+			return err
+		}
 	}
 	return nil
 }

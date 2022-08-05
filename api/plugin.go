@@ -25,3 +25,7 @@ type APIPlugin interface {
 	InitializeAPI(*gin.RouterGroup, Controller, kodex.Meter) error
 	InitializeAdaptors(map[string]ObjectAdaptor) error
 }
+
+type UserProviderPlugin interface {
+	InitializeUserProviders(map[string]UserProviderDefinition) error
+}

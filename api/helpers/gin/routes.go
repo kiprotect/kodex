@@ -18,23 +18,39 @@ package gin
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/api/decorators"
 )
 
-func InitializeRouterGroup(engine *gin.Engine,
+func InitializeRouterGroup(engine *gin.Engine, prefix string,
 	controller api.Controller) (*gin.RouterGroup, error) {
 	/*
 	   Here we define the routes for the V1 of the API
 	*/
 
-	endpoints := engine.Group("")
+	// we serve the API under an API prefix
+	if prefix != "" {
+		kodex.Log.Infof("Serving the API with prefix '%s'...", prefix)
+	}
+
+	endpoints := engine.Group(prefix)
 
 	//attach settings to all handlers
 	endpoints.Use(decorators.WithSettings(controller.Settings()))
 
+	userProvider, err := controller.UserProvider()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := userProvider.Initialize(endpoints); err != nil {
+		return nil, err
+	}
+
 	// we add the user provider so the WithUser decorator can use it
-	endpoints.Use(decorators.WithValue("userProvider", controller.UserProvider()))
+	endpoints.Use(decorators.WithValue("userProvider", userProvider))
 
 	// we add the CORS handler
 	engine.NoRoute(decorators.Cors(controller.Settings(), true))

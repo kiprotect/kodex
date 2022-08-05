@@ -17,7 +17,6 @@
 package gin
 
 import (
-	"fmt"
 	"net"
 	"net/http"
 	"sync"
@@ -69,16 +68,10 @@ func Router(controller api.Controller, prefix string, decorator gin.HandlerFunc)
 		return nil, err
 	}
 
-	group, err := InitializeRouterGroup(g, controller)
+	group, err := InitializeRouterGroup(g, prefix, controller)
 
 	if err != nil {
 		return nil, err
-	}
-
-	// we serve the API under an API prefix
-	if prefix != "" {
-		kodex.Log.Infof("Serving the API with prefix '%s'...", prefix)
-		group = group.Group(prefix)
 	}
 
 	for _, routesProvider := range controller.APIDefinitions().Routes {
@@ -91,44 +84,7 @@ func Router(controller api.Controller, prefix string, decorator gin.HandlerFunc)
 
 }
 
-func RegisterPlugins(controller api.Controller) error {
-	pluginSettings, err := controller.Settings().Get("api.plugins")
-
-	if err == nil {
-		pluginsList, ok := pluginSettings.([]interface{})
-		if ok {
-			for _, pluginName := range pluginsList {
-				pluginNameStr, ok := pluginName.(string)
-				if !ok {
-					return fmt.Errorf("expected a string")
-				}
-				if definition, ok := controller.Definitions().PluginDefinitions[pluginNameStr]; ok {
-					plugin, err := definition.Maker(nil)
-					if err != nil {
-						return err
-					}
-					apiPlugin, ok := plugin.(api.APIPlugin)
-					if ok {
-						if err := controller.RegisterAPIPlugin(apiPlugin); err != nil {
-							return err
-						} else {
-							kodex.Log.Infof("Successfully registered plugin '%s'", pluginName)
-						}
-					}
-				} else {
-					kodex.Log.Errorf("plugin '%s' not found", pluginName)
-				}
-			}
-		}
-	}
-	return nil
-}
-
 func RunApi(controller api.Controller, addr string, prefix string, handlerMaker func(http.Handler) http.Handler, wg *sync.WaitGroup) (*http.Server, *gin.Engine, error) {
-
-	if err := RegisterPlugins(controller); err != nil {
-		return nil, nil, err
-	}
 
 	g, err := Router(controller, prefix, nil)
 

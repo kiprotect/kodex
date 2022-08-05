@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
-	"github.com/kiprotect/kodex/api/helpers"
 	kodexControllers "github.com/kiprotect/kodex/controllers"
 )
 
@@ -45,12 +44,6 @@ func MakeInMemoryController(config map[string]interface{}, controller kodex.Cont
 		BaseController: api.BaseController{
 			Definitions_: definitions,
 		},
-	}
-
-	if userProvider, err := helpers.UserProvider(apiController); err != nil {
-		return nil, err
-	} else {
-		apiController.UserProvider_ = userProvider
 	}
 
 	apiController.Self = apiController

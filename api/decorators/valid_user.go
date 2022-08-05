@@ -22,24 +22,8 @@ import (
 	"github.com/kiprotect/go-helpers/errors"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
-	"regexp"
 	"strings"
 )
-
-func extractAccessToken(c *gin.Context) (string, bool) {
-	authorizationHeader := c.Request.Header.Get("Authorization")
-
-	if authorizationHeader == "" {
-		return "", false
-	}
-
-	regex, _ := regexp.Compile("(?i)\\s*Bearer\\s+([\\w\\d-]+)")
-	result := regex.FindStringSubmatch(authorizationHeader)
-	if result == nil {
-		return "", false
-	}
-	return result[1], true
-}
 
 func CheckScopes(requiredScopes, userScopes []string) bool {
 	for _, scope := range requiredScopes {
@@ -97,17 +81,9 @@ func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.Han
 			return
 		}
 
-		accessToken, ok := extractAccessToken(c)
-
-		if !ok {
-			api.HandleError(c, 401, fmt.Errorf("malformed/missing authorization header"))
-			return
-		}
-
-		user, err := userProvider.Get(accessToken)
+		user, err := userProvider.Get(c)
 
 		if err != nil {
-			api.HandleError(c, 401, fmt.Errorf("invalid access token"))
 			return
 		}
 

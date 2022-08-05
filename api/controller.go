@@ -37,7 +37,7 @@ type Controller interface {
 	APIDefinitions() *Definitions
 
 	// User provider
-	UserProvider() UserProvider
+	UserProvider() (UserProvider, error)
 
 	// Object roles
 	CanAccess(user *User, object kodex.Model, objectRoles []string) (bool, error)

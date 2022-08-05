@@ -17,6 +17,7 @@
 package api
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/kiprotect/kodex"
 )
 
@@ -31,9 +32,8 @@ type UserProviderDefinitions map[string]UserProviderDefinition
 type UserProviderMaker func(settings kodex.Settings) (UserProvider, error)
 
 type UserProvider interface {
-	Get(string) (*User, error)
-	Start()
-	Stop()
+	Initialize(group *gin.RouterGroup) error
+	Get(context *gin.Context) (*User, error)
 }
 
 type CreateUserProvider interface {

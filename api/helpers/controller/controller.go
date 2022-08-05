@@ -32,6 +32,39 @@ func InMemoryController(settings kodex.Settings, config map[string]interface{}, 
 	return ControllerType("inMemory", config, kodexController, definitions)
 }
 
+func RegisterPlugins(controller api.Controller) error {
+	pluginSettings, err := controller.Settings().Get("api.plugins")
+
+	if err == nil {
+		pluginsList, ok := pluginSettings.([]interface{})
+		if ok {
+			for _, pluginName := range pluginsList {
+				pluginNameStr, ok := pluginName.(string)
+				if !ok {
+					return fmt.Errorf("expected a string")
+				}
+				if definition, ok := controller.Definitions().PluginDefinitions[pluginNameStr]; ok {
+					plugin, err := definition.Maker(nil)
+					if err != nil {
+						return err
+					}
+					apiPlugin, ok := plugin.(api.APIPlugin)
+					if ok {
+						if err := controller.RegisterAPIPlugin(apiPlugin); err != nil {
+							return err
+						} else {
+							kodex.Log.Infof("Successfully registered plugin '%s'", pluginName)
+						}
+					}
+				} else {
+					kodex.Log.Errorf("plugin '%s' not found", pluginName)
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func ApiController(kodexController kodex.Controller, definitions *api.Definitions) (api.Controller, error) {
 
 	apiControllerType, ok := kodexController.Settings().String("controller.type")
@@ -52,7 +85,13 @@ func ApiController(kodexController kodex.Controller, definitions *api.Definition
 		return nil, fmt.Errorf("Invalid config")
 	}
 
-	return ControllerType(apiControllerType, strMapConfig, kodexController, definitions)
+	if apiController, err := ControllerType(apiControllerType, strMapConfig, kodexController, definitions); err != nil {
+		return nil, err
+	} else if err := RegisterPlugins(apiController); err != nil {
+		return nil, err
+	} else {
+		return apiController, nil
+	}
 
 }
 

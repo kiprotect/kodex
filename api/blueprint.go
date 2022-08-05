@@ -193,6 +193,7 @@ var BlueprintConfigForm = forms.Form{
 		{
 			Name: "users",
 			Validators: []forms.Validator{
+				forms.IsOptional{},
 				forms.IsList{
 					Validators: []forms.Validator{
 						forms.IsStringMap{
@@ -267,11 +268,23 @@ func initRoles(controller Controller, roles []*ObjectRoleSpec) error {
 }
 
 func initUsers(controller Controller, users []*User) error {
-	userProvider := controller.UserProvider()
+
+	if users == nil {
+		return nil
+	}
+
+	userProvider, err := controller.UserProvider()
+
+	if err != nil {
+		return err
+	}
+
 	createUserProvider, ok := userProvider.(CreateUserProvider)
+
 	if !ok {
 		return fmt.Errorf("cannot create users")
 	}
+
 	for _, user := range users {
 		for _, roles := range user.Roles {
 			// we ensure all organizations are created in the controller
