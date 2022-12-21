@@ -26,14 +26,14 @@ func User(c *gin.Context) *api.User {
 	userObj, ok := c.Get("user")
 
 	if !ok {
-		api.HandleError(c, 500, fmt.Errorf("no user defined in context"))
+		api.HandleError(c, 401, fmt.Errorf("unauthorized"))
 		return nil
 	}
 
 	user, ok := userObj.(*api.User)
 
 	if !ok {
-		api.HandleError(c, 500, fmt.Errorf("no user defined in context"))
+		api.HandleError(c, 401, fmt.Errorf("user object is invalid"))
 		return nil
 	}
 

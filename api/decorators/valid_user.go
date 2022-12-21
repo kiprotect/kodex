@@ -84,6 +84,13 @@ func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.Han
 		user, err := userProvider.Get(c)
 
 		if err != nil {
+			api.HandleError(c, 401, fmt.Errorf("authorization error: %v", err))
+			return
+		}
+
+		// the provider should always return a user, but we still catch this error...
+		if user == nil {
+			api.HandleError(c, 403, fmt.Errorf("access denied"))
 			return
 		}
 
@@ -92,7 +99,8 @@ func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.Han
 			return
 		}
 
-		if !CheckScopes(scopes, user.AccessToken.Scopes) {
+		// the user should always have an access token, we still always check for it...
+		if user.AccessToken == nil || !CheckScopes(scopes, user.AccessToken.Scopes) {
 			api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": user.AccessToken.Scopes, "required_scopes": scopes}, nil))
 			return
 		}
