@@ -27,6 +27,7 @@ import (
 type InMemoryController struct {
 	api.BaseController
 	objectRoles        map[string]api.ObjectRole
+	changeRequests     map[string]api.ChangeRequest
 	defaultObjectRoles map[string]api.DefaultObjectRole
 	organizations      map[string]api.Organization
 	*kodexControllers.InMemoryController
@@ -41,6 +42,7 @@ func MakeInMemoryController(config map[string]interface{}, controller kodex.Cont
 	apiController := &InMemoryController{
 		organizations:      make(map[string]api.Organization),
 		defaultObjectRoles: make(map[string]api.DefaultObjectRole),
+		changeRequests:     make(map[string]api.ChangeRequest),
 		objectRoles:        make(map[string]api.ObjectRole),
 		InMemoryController: inMemoryController,
 		BaseController: api.BaseController{
@@ -66,6 +68,16 @@ func (m *InMemoryController) ObjectRole(id []byte) (api.ObjectRole, error) {
 		}
 	}
 	return nil, fmt.Errorf("not found")
+}
+
+func (m *InMemoryController) DeleteChangeRequest(changeRequest *InMemoryChangeRequest) error {
+	delete(m.changeRequests, string(changeRequest.ID()))
+	return nil
+}
+
+func (m *InMemoryController) SaveChangeRequest(changeRequest *InMemoryChangeRequest) error {
+	m.changeRequests[string(changeRequest.ID())] = changeRequest
+	return nil
 }
 
 func (m *InMemoryController) DeleteObjectRole(objectRole *InMemoryObjectRole) error {
@@ -205,4 +217,16 @@ func (c *InMemoryController) SaveOrganization(organization *InMemoryOrganization
 
 func (c *InMemoryController) MakeOrganization() api.Organization {
 	return MakeInMemoryOrganization(kodex.RandomID(), c)
+}
+
+func (c *InMemoryController) ChangeRequests(object kodex.Model) ([]api.ChangeRequest, error) {
+	return nil, nil
+}
+
+func (c *InMemoryController) ChangeRequest(id []byte) (api.ChangeRequest, error) {
+	return nil, nil
+}
+
+func (c *InMemoryController) MakeChangeRequest(object kodex.Model) api.ChangeRequest {
+	return nil
 }

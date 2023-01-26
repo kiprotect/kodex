@@ -176,6 +176,18 @@ func Initialize(group *gin.RouterGroup,
 		objectDetailsEndpoints.GET(fmt.Sprintf("/%ss/:%sID",
 			objectType, objectType), resources.ObjectDetails)
 
+		// list all change requests for the object
+		objectDetailsEndpoints.GET(fmt.Sprintf("/%ss/:%sID/change-requests",
+			objectType, objectType), resources.ChangeRequests)
+
+		// create a change request for the object
+		objectDetailsEndpoints.POST(fmt.Sprintf("/%ss/:%sID/change-requests",
+			objectType, objectType), resources.CreateChangeRequest)
+
+		// delete a change request for the object
+		objectDetailsEndpoints.DELETE(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
+			objectType, objectType), resources.DeleteChangeRequest)
+
 		// only object superusers can perform advanced object operations
 		objectSuperusers := objectEndpoints.Group("")
 		objectSuperusers.Use(decorators.ValidObject(settings,

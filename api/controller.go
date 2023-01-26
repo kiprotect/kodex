@@ -52,6 +52,11 @@ type Controller interface {
 	DefaultObjectRole(id []byte) (DefaultObjectRole, error)
 	MakeDefaultObjectRole(objectType string, organization Organization) DefaultObjectRole
 
+	// Change request
+	ChangeRequests(object kodex.Model) ([]ChangeRequest, error)
+	ChangeRequest(id []byte) (ChangeRequest, error)
+	MakeChangeRequest(object kodex.Model) ChangeRequest
+
 	// Organizations
 	MakeOrganization() Organization
 	Organization(source string, sourceID []byte) (Organization, error)
