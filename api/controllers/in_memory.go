@@ -26,8 +26,9 @@ import (
 
 type InMemoryController struct {
 	api.BaseController
-	objectRoles   map[string]api.ObjectRole
-	organizations map[string]api.Organization
+	objectRoles        map[string]api.ObjectRole
+	defaultObjectRoles map[string]api.DefaultObjectRole
+	organizations      map[string]api.Organization
 	*kodexControllers.InMemoryController
 }
 
@@ -39,6 +40,7 @@ func MakeInMemoryController(config map[string]interface{}, controller kodex.Cont
 
 	apiController := &InMemoryController{
 		organizations:      make(map[string]api.Organization),
+		defaultObjectRoles: make(map[string]api.DefaultObjectRole),
 		objectRoles:        make(map[string]api.ObjectRole),
 		InMemoryController: inMemoryController,
 		BaseController: api.BaseController{
@@ -76,6 +78,16 @@ func (m *InMemoryController) SaveObjectRole(objectRole *InMemoryObjectRole) erro
 	return nil
 }
 
+func (m *InMemoryController) DeleteDefaultObjectRole(objectRole *InMemoryDefaultObjectRole) error {
+	delete(m.objectRoles, string(objectRole.ID()))
+	return nil
+}
+
+func (m *InMemoryController) SaveDefaultObjectRole(objectRole *InMemoryDefaultObjectRole) error {
+	m.defaultObjectRoles[string(objectRole.ID())] = objectRole
+	return nil
+}
+
 func (m *InMemoryController) MakeObjectRole(object kodex.Model, organization api.Organization) api.ObjectRole {
 	return MakeInMemoryObjectRole(kodex.RandomID(), organization.ID(), object.ID(), object.Type(), m)
 }
@@ -90,6 +102,37 @@ func (m *InMemoryController) RolesForObject(object kodex.Model) ([]api.ObjectRol
 	}
 
 	return osrs, nil
+}
+
+func (m *InMemoryController) DefaultObjectRoles(organizationID []byte) ([]api.DefaultObjectRole, error) {
+
+	osrs := make([]api.DefaultObjectRole, 0)
+
+	for _, objectRole := range m.defaultObjectRoles {
+
+		if !bytes.Equal(objectRole.OrganizationID(), organizationID) {
+			continue
+		}
+
+		osrs = append(osrs, objectRole)
+	}
+
+	return osrs, nil
+
+}
+
+func (m *InMemoryController) DefaultObjectRole(id []byte) (api.DefaultObjectRole, error) {
+	for _, objectRole := range m.defaultObjectRoles {
+		if bytes.Equal(objectRole.ID(), id) {
+			return objectRole, nil
+		}
+	}
+	return nil, fmt.Errorf("not found")
+
+}
+
+func (m *InMemoryController) MakeDefaultObjectRole(objectType string, organization api.Organization) api.DefaultObjectRole {
+	return MakeInMemoryDefaultObjectRole(kodex.RandomID(), organization.ID(), objectType, m)
 }
 
 func (m *InMemoryController) ObjectRolesForOrganizationRoles(objectType string, organizationRoles []string, organizationID []byte) ([]api.ObjectRole, error) {

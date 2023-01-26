@@ -95,6 +95,17 @@ func Initialize(group *gin.RouterGroup,
 		"superuser"}))
 	uploadBlueprintEndpoint.POST("/orgs/:organizationID/blueprints", resources.UploadBlueprint)
 
+	orgSuperusers := endpoints.Group("")
+
+	// manage default object roles
+	orgSuperusers.Use(decorators.ValidOrganization([]string{"superuser"}))
+	// create a new default object role
+	orgSuperusers.POST("/orgs/:organizationID/default-roles/:objectType", resources.CreateDefaultObjectRole)
+	// delete a default object role
+	orgSuperusers.DELETE("/orgs/:organizationID/default-roles/:roleID", resources.DeleteDefaultObjectRole)
+	// list default object roles
+	orgSuperusers.GET("/orgs/:organizationID/default-roles", resources.DefaultObjectRoles)
+
 	for _, objectAdaptor := range controller.APIDefinitions().ObjectAdaptors {
 
 		objectType := objectAdaptor.Type()

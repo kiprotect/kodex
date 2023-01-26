@@ -47,6 +47,11 @@ type Controller interface {
 	ObjectRolesForOrganizationRoles(objectType string, organizationRoles []string, organizationID []byte) ([]ObjectRole, error)
 	MakeObjectRole(object kodex.Model, organization Organization) ObjectRole
 
+	// Default object roles
+	DefaultObjectRoles(organizationID []byte) ([]DefaultObjectRole, error)
+	DefaultObjectRole(id []byte) (DefaultObjectRole, error)
+	MakeDefaultObjectRole(objectType string, organization Organization) DefaultObjectRole
+
 	// Organizations
 	MakeOrganization() Organization
 	Organization(source string, sourceID []byte) (Organization, error)
