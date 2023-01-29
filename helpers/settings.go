@@ -25,20 +25,7 @@ import (
 	"strings"
 )
 
-var EnvConfigName = "KODEX_CONFIG"
 var EnvSettingsName = "KODEX_SETTINGS"
-
-func ConfigPaths() []string {
-	envValue := os.Getenv(EnvConfigName)
-	if envValue == "" {
-		wd, err := os.Getwd()
-		if err != nil {
-			return []string{}
-		}
-		return []string{filepath.Join(wd, "config")}
-	}
-	return strings.Split(envValue, ":")
-}
 
 func SettingsPaths() ([]string, fs.FS, error) {
 	envValue := os.Getenv(EnvSettingsName)
