@@ -104,7 +104,7 @@ var DefaultObjectRoleForm = forms.Form{
 			Validators: []forms.Validator{
 				forms.IsRequired{},
 				forms.IsString{},
-				forms.IsIn{Choices: []interface{}{"superuser", "admin", "viewer", "reviewer"}},
+				forms.IsIn{Choices: []interface{}{"superuser", "admin", "viewer", "reviewer", "editor"}},
 			},
 		},
 	},
