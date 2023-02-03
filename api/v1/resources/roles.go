@@ -176,6 +176,8 @@ func DeleteObjectRole(c *gin.Context) {
 		}
 	}
 
+	c.JSON(200, map[string]interface{}{"message": "ok"})
+
 }
 
 // Get a list of object roles
