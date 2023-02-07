@@ -205,3 +205,64 @@ func ObjectRoles(c *gin.Context) {
 	c.JSON(200, map[string]interface{}{"data": roles})
 
 }
+
+// Get a list of object roles
+func UserObjectRoles(c *gin.Context) {
+
+	controller := helpers.Controller(c)
+	user := helpers.User(c)
+
+	if controller == nil || user == nil {
+		return
+	}
+
+	obj := GetObject(c)
+
+	if obj == nil {
+		return
+	}
+
+	roles, err := controller.RolesForObject(obj)
+
+	if err != nil {
+		api.HandleError(c, 500, err)
+		return
+	}
+
+	// we ensure that the user does not cut off his/her own access to the object
+
+	userRoles := make([]string, 0, 10)
+
+roles:
+	for _, role := range roles {
+
+		for _, existingRole := range userRoles {
+			if existingRole == role.ObjectRole() {
+				continue
+			}
+		}
+
+		for _, organizationRoles := range user.Roles {
+
+			apiOrg, err := organizationRoles.Organization.ApiOrganization(controller)
+
+			if err != nil {
+				api.HandleError(c, 500, err)
+				return
+			}
+
+			if !bytes.Equal(apiOrg.ID(), role.OrganizationID()) {
+				continue
+			}
+
+			// this role applies to the user
+			userRoles = append(userRoles, role.ObjectRole())
+
+			continue roles
+
+		}
+	}
+
+	c.JSON(200, map[string]interface{}{"data": userRoles})
+
+}

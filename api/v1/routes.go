@@ -227,6 +227,13 @@ func Initialize(group *gin.RouterGroup,
 			}
 		}
 
+		userRolesEndpoints := objectEndpoints.Group("")
+
+		userRolesEndpoints.Use(decorators.ValidObject(settings,
+			objectType, []string{}, []string{fmt.Sprintf("kiprotect:api:%s:user-roles", objectType)}))
+
+		userRolesEndpoints.GET(fmt.Sprintf("/%ss/:%sID/user-roles", objectType, objectType), resources.UserObjectRoles)
+
 		if dependsOn == "" {
 			objectRoleEndpoints := objectEndpoints.Group("")
 			objectRoleEndpoints.Use(decorators.ValidObject(settings,
