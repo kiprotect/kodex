@@ -49,13 +49,6 @@ var BPObjectRoleForm = forms.Form{
 			},
 		},
 		{
-			Name: "organizationSource",
-			Validators: []forms.Validator{
-				forms.IsOptional{Default: "inMemory"},
-				forms.IsString{},
-			},
-		},
-		{
 			Name: "objectRole",
 			Validators: []forms.Validator{
 				forms.IsString{},
@@ -236,7 +229,7 @@ type UsersAndRoles struct {
 	Roles []*ObjectRoleSpec `json:"roles"`
 }
 
-func initRoles(controller Controller, roles []*ObjectRoleSpec) error {
+func InitRoles(controller Controller, roles []*ObjectRoleSpec) error {
 	for _, role := range roles {
 		var obj kodex.Model
 		var err error
@@ -267,7 +260,7 @@ func initRoles(controller Controller, roles []*ObjectRoleSpec) error {
 	return nil
 }
 
-func initUsers(controller Controller, users []*User) error {
+func InitUsers(controller Controller, users []*User) error {
 
 	if users == nil {
 		return nil
@@ -315,10 +308,10 @@ func (b *Blueprint) Create(controller Controller) error {
 			return err
 		}
 		// users need to be initialized first
-		if err := initUsers(controller, usersAndRoles.Users); err != nil {
+		if err := InitUsers(controller, usersAndRoles.Users); err != nil {
 			return err
 		}
-		if err := initRoles(controller, usersAndRoles.Roles); err != nil {
+		if err := InitRoles(controller, usersAndRoles.Roles); err != nil {
 			return err
 		}
 		return nil

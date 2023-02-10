@@ -2,6 +2,29 @@ controller:
   type: inMemory
 user-provider:
   type: inMemory
+  settings:
+    organizations: # just a helper data structure that is referenced below
+      muster-org: &muster-org
+        name: Muster Org
+        default: true
+        description: An example organization
+        id: &muster-org-id
+          aa
+    users:
+      - email: max@mustermann.de
+        id: max-mustermann
+        accessToken:
+          token: aabbccdd # the token use to authenticate against the API
+          scopes: [kiprotect:api] # grants access to everything
+        roles: # the roles the user has in different organizations
+          - roles: [superuser]
+            organization: *muster-org
+    roles: # the roles the given organization has in the default project
+      - organizationID: *muster-org-id
+        objectID: aabbccdd
+        objectType: project
+        objectRole: admin
+        organizationRole: superuser
 meter:
   disable: true
 parameter-store:

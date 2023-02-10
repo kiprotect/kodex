@@ -21,33 +21,24 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/kiprotect/go-helpers/forms"
+	"github.com/kiprotect/go-helpers/maps"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
 	"regexp"
 )
 
-var InMemoryUserForm = forms.Form{
-	Fields: []forms.Field{
-		{
-			Name: "displayName",
-			Validators: []forms.Validator{
-				forms.IsOptional{Default: ""},
-				forms.IsString{},
-			},
-		},
-	},
-}
+var InMemoryUserProviderForm = api.BlueprintConfigForm
 
 type InMemoryUserProviderSettings struct {
+	api.UsersAndRoles
 }
 
 func ValidateInMemoryUserProviderSettings(settings map[string]interface{}) (interface{}, error) {
-	if params, err := InMemoryUserForm.Validate(settings); err != nil {
+	if params, err := InMemoryUserProviderForm.Validate(settings); err != nil {
 		return nil, err
 	} else {
 		providerSettings := &InMemoryUserProviderSettings{}
-		if err := InMemoryUserForm.Coerce(providerSettings, params); err != nil {
+		if err := InMemoryUserProviderForm.Coerce(providerSettings, params); err != nil {
 			return nil, err
 		}
 		return providerSettings, nil
@@ -55,13 +46,38 @@ func ValidateInMemoryUserProviderSettings(settings map[string]interface{}) (inte
 }
 
 type InMemoryUserProvider struct {
-	users []*api.User
+	settings *InMemoryUserProviderSettings
 }
 
 func MakeInMemoryUserProvider(settings kodex.Settings) (api.UserProvider, error) {
-	return &InMemoryUserProvider{
-		users: make([]*api.User, 0),
-	}, nil
+
+	providerSettings, err := settings.Get("user-provider.settings")
+
+	if err != nil {
+		return nil, err
+	}
+
+	providerSettingsMap, ok := maps.ToStringMap(providerSettings)
+
+	if !ok {
+		return nil, fmt.Errorf("invalid config")
+	}
+
+	if params, err := InMemoryUserProviderForm.Validate(providerSettingsMap); err != nil {
+		return nil, err
+	} else {
+
+		settingsStruct := &InMemoryUserProviderSettings{}
+
+		if err := InMemoryUserProviderForm.Coerce(settingsStruct, params); err != nil {
+			return nil, err
+		}
+
+		return &InMemoryUserProvider{
+			settings: settingsStruct,
+		}, nil
+
+	}
 }
 
 func (i *InMemoryUserProvider) Initialize(group *gin.RouterGroup) error {
@@ -69,7 +85,7 @@ func (i *InMemoryUserProvider) Initialize(group *gin.RouterGroup) error {
 }
 
 func (i *InMemoryUserProvider) Create(user *api.User) error {
-	i.users = append(i.users, user)
+	i.settings.Users = append(i.settings.Users, user)
 	return nil
 }
 
@@ -94,27 +110,19 @@ func (i *InMemoryUserProvider) Get(c *gin.Context) (*api.User, error) {
 	accessToken, ok := extractAccessToken(c)
 
 	if !ok {
-
-		err := fmt.Errorf("malformed/missing authorization header")
-		api.HandleError(c, 401, err)
-
-		return nil, err
+		return nil, fmt.Errorf("malformed/missing authorization header")
 	}
 
 	if token, err := hex.DecodeString(accessToken); err != nil {
-		err := fmt.Errorf("malformed access token")
-		api.HandleError(c, 401, err)
-		return nil, err
+		return nil, fmt.Errorf("malformed access token")
 	} else {
-		for _, user := range i.users {
+		for _, user := range i.settings.Users {
 			if bytes.Equal(user.AccessToken.Token, token) {
 				return user, nil
 			}
 		}
 	}
 
-	err := fmt.Errorf("invalid access token")
-	api.HandleError(c, 401, err)
-	return nil, err
+	return nil, fmt.Errorf("invalid access token")
 
 }
