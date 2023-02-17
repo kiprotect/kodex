@@ -27,7 +27,7 @@ func objectType(c *gin.Context, key string) string {
 	objectType, ok := c.Get(key)
 
 	if !ok {
-		return ""
+		return key
 	}
 
 	objectTypeStr, _ := objectType.(string)

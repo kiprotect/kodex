@@ -231,7 +231,7 @@ func (c *InMemoryController) ChangeRequest(id []byte) (api.ChangeRequest, error)
 	return nil, nil
 }
 
-func (c *InMemoryController) MakeChangeRequest(object kodex.Model) api.ChangeRequest {
+func (c *InMemoryController) MakeChangeRequest(object kodex.Model, user api.User) api.ChangeRequest {
 	return nil
 }
 

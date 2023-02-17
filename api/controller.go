@@ -55,7 +55,7 @@ type Controller interface {
 	// Change request
 	ChangeRequests(object kodex.Model) ([]ChangeRequest, error)
 	ChangeRequest(id []byte) (ChangeRequest, error)
-	MakeChangeRequest(object kodex.Model) ChangeRequest
+	MakeChangeRequest(object kodex.Model, user User) ChangeRequest
 
 	// Users
 	MakeUser() User

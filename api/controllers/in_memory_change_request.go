@@ -27,6 +27,7 @@ type InMemoryChangeRequest struct {
 	updatedAt  time.Time
 	deletedAt  *time.Time
 	objectType string
+	status     api.ChangeRequestStatus
 	objectID   []byte
 	id         []byte
 	data       interface{}
@@ -56,6 +57,20 @@ func (c *InMemoryChangeRequest) Refresh() error {
 
 func (c *InMemoryChangeRequest) CreatedAt() time.Time {
 	return c.createdAt
+}
+
+func (c *InMemoryChangeRequest) SetReviewer(user api.User) error {
+	c.Reviewer_ = user
+	return nil
+}
+
+func (c *InMemoryChangeRequest) SetStatus(status api.ChangeRequestStatus) error {
+	c.status = status
+	return nil
+}
+
+func (c *InMemoryChangeRequest) Status() api.ChangeRequestStatus {
+	return c.status
 }
 
 func (c *InMemoryChangeRequest) DeletedAt() *time.Time {

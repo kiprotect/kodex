@@ -68,6 +68,35 @@ type ExternalUser struct {
 	AccessToken *AccessToken           `json:"accessToken"`
 	Roles       []*OrganizationRoles   `json:"roles"`
 	Limits      map[string]interface{} `json:"limits"`
+	apiUser     User                   `json:"-"`
+}
+
+func (i *ExternalUser) ApiUser(controller Controller) (User, error) {
+	if i.apiUser == nil {
+		user, err := controller.User(i.Source, i.SourceID)
+		if err == nil {
+			i.apiUser = user
+		} else {
+			user := controller.MakeUser()
+
+			if err := user.Create(map[string]interface{}{
+				"displayName": i.DisplayName,
+				"email":       i.EMail,
+				"superuser":   i.Superuser,
+			}); err != nil {
+				return nil, err
+			}
+
+			user.SetSource(i.Source)
+			user.SetSourceID(i.SourceID)
+
+			if err := user.Save(); err != nil {
+				return nil, err
+			}
+			i.apiUser = user
+		}
+	}
+	return i.apiUser, nil
 }
 
 func (i *UserOrganization) ApiOrganization(controller Controller) (Organization, error) {

@@ -131,7 +131,7 @@ func Initialize(group *gin.RouterGroup,
 				dependsOn, dependsOn)
 			// we require the object this resources depend on
 			objectListEndpoints.Use(decorators.ValidObject(settings,
-				dependsOn, []string{"admin", "superuser", "viewer"}, []string{}))
+				dependsOn, []string{"admin", "superuser", "editor", "reviewer"}, []string{}))
 
 		}
 
@@ -148,14 +148,14 @@ func Initialize(group *gin.RouterGroup,
 
 		objectDetailsEndpoints := objectEndpoints.Group("")
 		objectDetailsEndpoints.Use(decorators.ValidObject(settings,
-			objectType, []string{"superuser", "admin", "viewer"}, []string{fmt.Sprintf("kiprotect:api:%s:read", objectType)}))
+			objectType, []string{"superuser", "admin", "editor", "reviewer"}, []string{fmt.Sprintf("kiprotect:api:%s:read", objectType)}))
 
 		// we expose object statistics via the usage endpoint
 		if modelMeter, ok := meter.(kodex.ModelMeter); ok {
 			usageEndpoint := admin.UsageEndpoint(meter, "objMeterId")
 			objectStatsEndpoints := objectEndpoints.Group("")
 			objectStatsEndpoints.Use(decorators.ValidObject(settings,
-				objectType, []string{"superuser", "admin", "viewer"}, []string{fmt.Sprintf("kiprotect:api:%s:stats", objectType), fmt.Sprintf("kiprotect:api:%s:read", objectType)}))
+				objectType, []string{"superuser", "admin", "editor", "reviewer"}, []string{fmt.Sprintf("kiprotect:api:%s:stats", objectType), fmt.Sprintf("kiprotect:api:%s:read", objectType)}))
 			objectStatsEndpoints.GET(fmt.Sprintf("/%ss/:%sID/stats", objectType,
 				objectType), func(c *gin.Context) {
 
@@ -184,8 +184,20 @@ func Initialize(group *gin.RouterGroup,
 		objectDetailsEndpoints.POST(fmt.Sprintf("/%ss/:%sID/change-requests",
 			objectType, objectType), resources.CreateChangeRequest)
 
+		editChangeRequestEndpoints := objectDetailsEndpoints.Group("")
+
+		editChangeRequestEndpoints.Use(decorators.ValidObject(settings,
+			"changeRequest", []string{"superuser", "admin", "editor", "reviewer"}, []string{fmt.Sprintf("kiprotect:api:%s:change-requests:edit", objectType)}))
+
+		// update a change request for the object
+		editChangeRequestEndpoints.PATCH(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
+			objectType, objectType), resources.CreateChangeRequest)
+
+		editChangeRequestEndpoints.POST(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID/status",
+			objectType, objectType), resources.UpdateChangeRequestStatus)
+
 		// delete a change request for the object
-		objectDetailsEndpoints.DELETE(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
+		editChangeRequestEndpoints.DELETE(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
 			objectType, objectType), resources.DeleteChangeRequest)
 
 		// only object superusers can perform advanced object operations
@@ -278,7 +290,7 @@ func Initialize(group *gin.RouterGroup,
 			right, []string{"admin", "superuser"}, []string{fmt.Sprintf("kiprotect:api:%s:write", right)}))
 
 		getEndpoints.Use(decorators.ValidObject(settings,
-			left, []string{"admin", "superuser", "viewer"}, []string{fmt.Sprintf("kiprotect:api:%s:read", left)}))
+			left, []string{"admin", "superuser", "editor", "viewer"}, []string{fmt.Sprintf("kiprotect:api:%s:read", left)}))
 
 		getEndpoints.GET(getUrl, resources.AssociatedObjects)
 

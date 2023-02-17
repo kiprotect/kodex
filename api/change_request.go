@@ -22,10 +22,25 @@ import (
 	"github.com/kiprotect/kodex"
 )
 
+type ChangeRequestStatus string
+
+const (
+	Draft     ChangeRequestStatus = "draft"
+	Ready     ChangeRequestStatus = "ready"
+	Withdrawn ChangeRequestStatus = "withdrawn"
+	Approved  ChangeRequestStatus = "approved"
+	Rejected  ChangeRequestStatus = "rejected"
+)
+
 type ChangeRequest interface {
 	kodex.Model
 	SetData(interface{}) error
 	Data() interface{}
+	SetStatus(ChangeRequestStatus) error
+	Status() ChangeRequestStatus
+	Creator() User
+	Reviewer() User
+	SetReviewer(User) error
 	ObjectID() []byte
 	ObjectType() string
 }
@@ -46,8 +61,10 @@ var ChangeRequestForm = forms.Form{
 /* Base Functionality */
 
 type BaseChangeRequest struct {
-	Self     ChangeRequest
-	Project_ kodex.Project
+	Self      ChangeRequest
+	Project_  kodex.Project
+	Creator_  User
+	Reviewer_ User
 }
 
 func (b *BaseChangeRequest) Type() string {
@@ -56,6 +73,14 @@ func (b *BaseChangeRequest) Type() string {
 
 func (b *BaseChangeRequest) Project() kodex.Project {
 	return b.Project_
+}
+
+func (b *BaseChangeRequest) Creator() User {
+	return b.Creator_
+}
+
+func (b *BaseChangeRequest) Reviewer() User {
+	return b.Reviewer_
 }
 
 func (b *BaseChangeRequest) Update(values map[string]interface{}) error {
@@ -83,6 +108,8 @@ func (b *BaseChangeRequest) update(params map[string]interface{}) error {
 	for key, value := range params {
 		var err error
 		switch key {
+		case "status":
+			err = b.Self.SetStatus(value.(ChangeRequestStatus))
 		case "data":
 			err = b.Self.SetData(value)
 		}
@@ -99,6 +126,7 @@ func (b *BaseChangeRequest) MarshalJSON() ([]byte, error) {
 
 	data := map[string]interface{}{
 		"data":        b.Self.Data(),
+		"status":      b.Self.Status(),
 		"object_id":   b.Self.ObjectID(),
 		"object_type": b.Self.ObjectType(),
 	}
