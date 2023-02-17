@@ -80,7 +80,7 @@ func TestTransformConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(*api.User)
+	user := fixtures["user"].(*api.ExternalUser)
 	config := fixtures["config"].(kodex.Config)
 	controller := fixtures["controller"].(api.Controller)
 
@@ -135,7 +135,7 @@ func TestTransformConfigError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(*api.User)
+	user := fixtures["user"].(*api.ExternalUser)
 	config := fixtures["config"].(kodex.Config)
 	controller := fixtures["controller"].(api.Controller)
 

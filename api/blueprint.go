@@ -128,7 +128,7 @@ var RolesForm = forms.Form{
 	},
 }
 
-var UserForm = forms.Form{
+var BlueprintUserForm = forms.Form{
 	Fields: []forms.Field{
 		{
 			Name: "source",
@@ -190,7 +190,7 @@ var BlueprintConfigForm = forms.Form{
 				forms.IsList{
 					Validators: []forms.Validator{
 						forms.IsStringMap{
-							Form: &UserForm,
+							Form: &BlueprintUserForm,
 						},
 					},
 				},
@@ -225,7 +225,7 @@ type ObjectRoleSpec struct {
 }
 
 type UsersAndRoles struct {
-	Users []*User           `json:"users"`
+	Users []*ExternalUser   `json:"users"`
 	Roles []*ObjectRoleSpec `json:"roles"`
 }
 
@@ -260,7 +260,7 @@ func InitRoles(controller Controller, roles []*ObjectRoleSpec) error {
 	return nil
 }
 
-func InitUsers(controller Controller, users []*User) error {
+func InitUsers(controller Controller, users []*ExternalUser) error {
 
 	if users == nil {
 		return nil

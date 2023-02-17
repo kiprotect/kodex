@@ -22,7 +22,7 @@ import (
 	"github.com/kiprotect/kodex/api"
 )
 
-func User(c *gin.Context) *api.User {
+func User(c *gin.Context) *api.ExternalUser {
 	userObj, ok := c.Get("user")
 
 	if !ok {
@@ -30,7 +30,7 @@ func User(c *gin.Context) *api.User {
 		return nil
 	}
 
-	user, ok := userObj.(*api.User)
+	user, ok := userObj.(*api.ExternalUser)
 
 	if !ok {
 		api.HandleError(c, 401, fmt.Errorf("user object is invalid"))

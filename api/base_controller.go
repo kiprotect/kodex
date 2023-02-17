@@ -56,7 +56,7 @@ func (b *BaseController) UserProvider() (UserProvider, error) {
 	return b.UserProvider_, nil
 }
 
-func (b *BaseController) ObjectRolesForUser(objectType string, user *User) ([]ObjectRole, error) {
+func (b *BaseController) ObjectRolesForUser(objectType string, user *ExternalUser) ([]ObjectRole, error) {
 	objectRoles := make([]ObjectRole, 0)
 	for _, organizationRoles := range user.Roles {
 		// we retrieve the organization of the user
@@ -73,7 +73,7 @@ func (b *BaseController) ObjectRolesForUser(objectType string, user *User) ([]Ob
 	return objectRoles, nil
 }
 
-func (b *BaseController) CanAccess(user *User, object kodex.Model, objectRoles []string) (bool, error) {
+func (b *BaseController) CanAccess(user *ExternalUser, object kodex.Model, objectRoles []string) (bool, error) {
 
 	// we retrive all organization roles for this object
 	roles, err := b.Self.RolesForObject(object)

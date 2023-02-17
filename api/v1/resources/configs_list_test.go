@@ -69,7 +69,7 @@ func TestConfigs(t *testing.T) {
 	}
 
 	controller := fixtures["controller"].(api.Controller)
-	user := fixtures["userA"].(*api.User)
+	user := fixtures["userA"].(*api.ExternalUser)
 	streamA := fixtures["streamA"].(kodex.Stream)
 
 	resp, err := at.Get(controller, user, "/v1/streams/"+hex.EncodeToString(streamA.ID())+"/configs", nil)

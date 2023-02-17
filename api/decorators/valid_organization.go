@@ -46,7 +46,7 @@ func ValidOrganization(orgRoles []string) gin.HandlerFunc {
 			return
 		}
 
-		user, ok := up.(*api.User)
+		user, ok := up.(*api.ExternalUser)
 
 		if !ok {
 			api.HandleError(c, 500, fmt.Errorf("corrupt user"))

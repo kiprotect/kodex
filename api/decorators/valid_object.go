@@ -42,7 +42,7 @@ func ValidObject(settings kodex.Settings, objectType string, objectRoles []strin
 
 	return func(c *gin.Context) {
 
-		var user *api.User
+		var user *api.ExternalUser
 
 		if len(objectRoles) > 0 || len(scopes) > 0 {
 			up, ok := c.Get("user")
@@ -52,7 +52,7 @@ func ValidObject(settings kodex.Settings, objectType string, objectRoles []strin
 				return
 			}
 
-			user, ok = up.(*api.User)
+			user, ok = up.(*api.ExternalUser)
 
 			if !ok {
 				api.HandleError(c, 500, fmt.Errorf("corrupt user"))

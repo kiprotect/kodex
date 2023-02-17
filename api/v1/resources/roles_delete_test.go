@@ -61,7 +61,7 @@ func TestDeleteRole(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(*api.User)
+	user := fixtures["user"].(*api.ExternalUser)
 	project := fixtures["project"].(kodex.Project)
 	controller := fixtures["controller"].(api.Controller)
 
@@ -163,7 +163,7 @@ func TestRoleDeleteAuthorization(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(*api.User)
+	user := fixtures["user"].(*api.ExternalUser)
 	project := fixtures["project"].(kodex.Project)
 	controller := fixtures["controller"].(api.Controller)
 

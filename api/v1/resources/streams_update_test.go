@@ -62,7 +62,7 @@ func TestUpdateStream(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(*api.User)
+	user := fixtures["user"].(*api.ExternalUser)
 	stream := fixtures["stream"].(kodex.Stream)
 	controller := fixtures["controller"].(api.Controller)
 
@@ -198,7 +198,7 @@ func TestUpdateStreamAuthorization(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(*api.User)
+	user := fixtures["user"].(*api.ExternalUser)
 	stream := fixtures["stream"].(kodex.Stream)
 	controller := fixtures["controller"].(api.Controller)
 

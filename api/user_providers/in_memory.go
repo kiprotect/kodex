@@ -84,7 +84,7 @@ func (i *InMemoryUserProvider) Initialize(group *gin.RouterGroup) error {
 	return nil
 }
 
-func (i *InMemoryUserProvider) Create(user *api.User) error {
+func (i *InMemoryUserProvider) Create(user *api.ExternalUser) error {
 	i.settings.Users = append(i.settings.Users, user)
 	return nil
 }
@@ -105,7 +105,7 @@ func extractAccessToken(c *gin.Context) (string, bool) {
 }
 
 // Return a user with the given access token
-func (i *InMemoryUserProvider) Get(c *gin.Context) (*api.User, error) {
+func (i *InMemoryUserProvider) Get(c *gin.Context) (*api.ExternalUser, error) {
 
 	accessToken, ok := extractAccessToken(c)
 

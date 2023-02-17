@@ -64,7 +64,7 @@ func TestListRoles(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(*api.User)
+	user := fixtures["user"].(*api.ExternalUser)
 	project := fixtures["project"].(kodex.Project)
 	controller := fixtures["controller"].(api.Controller)
 
@@ -161,7 +161,7 @@ func TestRoleListAuthorization(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(*api.User)
+	user := fixtures["user"].(*api.ExternalUser)
 	project := fixtures["project"].(kodex.Project)
 	controller := fixtures["controller"].(api.Controller)
 

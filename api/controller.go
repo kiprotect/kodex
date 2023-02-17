@@ -40,10 +40,10 @@ type Controller interface {
 	UserProvider() (UserProvider, error)
 
 	// Object roles
-	CanAccess(user *User, object kodex.Model, objectRoles []string) (bool, error)
+	CanAccess(user *ExternalUser, object kodex.Model, objectRoles []string) (bool, error)
 	ObjectRole(id []byte) (ObjectRole, error)
 	RolesForObject(object kodex.Model) ([]ObjectRole, error)
-	ObjectRolesForUser(objectType string, user *User) ([]ObjectRole, error)
+	ObjectRolesForUser(objectType string, user *ExternalUser) ([]ObjectRole, error)
 	ObjectRolesForOrganizationRoles(objectType string, organizationRoles []string, organizationID []byte) ([]ObjectRole, error)
 	MakeObjectRole(object kodex.Model, organization Organization) ObjectRole
 
@@ -56,6 +56,11 @@ type Controller interface {
 	ChangeRequests(object kodex.Model) ([]ChangeRequest, error)
 	ChangeRequest(id []byte) (ChangeRequest, error)
 	MakeChangeRequest(object kodex.Model) ChangeRequest
+
+	// Users
+	MakeUser() User
+	User(source string, sourceID []byte) (User, error)
+	Users(filters map[string]interface{}) ([]User, error)
 
 	// Organizations
 	MakeOrganization() Organization

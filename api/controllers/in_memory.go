@@ -30,6 +30,7 @@ type InMemoryController struct {
 	changeRequests     map[string]api.ChangeRequest
 	defaultObjectRoles map[string]api.DefaultObjectRole
 	organizations      map[string]api.Organization
+	users              map[string]api.User
 	*kodexControllers.InMemoryController
 }
 
@@ -41,6 +42,7 @@ func MakeInMemoryController(config map[string]interface{}, controller kodex.Cont
 
 	apiController := &InMemoryController{
 		organizations:      make(map[string]api.Organization),
+		users:              make(map[string]api.User),
 		defaultObjectRoles: make(map[string]api.DefaultObjectRole),
 		changeRequests:     make(map[string]api.ChangeRequest),
 		objectRoles:        make(map[string]api.ObjectRole),
@@ -219,6 +221,8 @@ func (c *InMemoryController) MakeOrganization() api.Organization {
 	return MakeInMemoryOrganization(kodex.RandomID(), c)
 }
 
+/* Change Requests */
+
 func (c *InMemoryController) ChangeRequests(object kodex.Model) ([]api.ChangeRequest, error) {
 	return nil, nil
 }
@@ -229,4 +233,47 @@ func (c *InMemoryController) ChangeRequest(id []byte) (api.ChangeRequest, error)
 
 func (c *InMemoryController) MakeChangeRequest(object kodex.Model) api.ChangeRequest {
 	return nil
+}
+
+/* Users */
+
+func (c *InMemoryController) Users(filters map[string]interface{}) ([]api.User, error) {
+	users := make([]api.User, 0)
+outer:
+	for _, user := range c.users {
+		for key, value := range filters {
+			switch key {
+			case "email":
+				strValue, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("expected a name")
+				}
+				if user.EMail() != strValue {
+					continue outer
+				}
+			default:
+				return nil, fmt.Errorf("unknown filter key: %s", key)
+			}
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}
+
+func (c *InMemoryController) User(source string, sourceID []byte) (api.User, error) {
+	for _, user := range c.users {
+		if user.Source() == source && bytes.Equal(user.SourceID(), sourceID) {
+			return user, nil
+		}
+	}
+	return nil, kodex.NotFound
+}
+
+func (c *InMemoryController) SaveUser(user *InMemoryUser) error {
+	c.users[string(user.ID())] = user
+	return nil
+}
+
+func (c *InMemoryController) MakeUser() api.User {
+	return MakeInMemoryUser(kodex.RandomID(), c)
 }

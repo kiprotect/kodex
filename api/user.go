@@ -17,110 +17,21 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/kiprotect/kodex"
 )
 
-type UserProviderDefinition struct {
-	Name              string            `json:"name"`
-	Description       string            `json:"description"`
-	Maker             UserProviderMaker `json:"-"`
-	SettingsValidator SettingsValidator `json:"-"`
-}
-
-type UserProviderDefinitions map[string]UserProviderDefinition
-type UserProviderMaker func(settings kodex.Settings) (UserProvider, error)
-
-type UserProvider interface {
-	Initialize(group *gin.RouterGroup) error
-	Get(context *gin.Context) (*User, error)
-}
-
-type CreateUserProvider interface {
-	Create(user *User) error
-}
-
-type AccessToken struct {
-	Scopes []string `json:"scopes"`
-	Token  []byte   `json:"-" coerce:"name:token"`
-}
-
-type OrganizationRoles struct {
-	Roles        []string          `json:"roles"`
-	Organization *UserOrganization `json:"organization"`
-}
-
-type UserOrganization struct {
-	Source      string       `json:"source"`
-	Name        string       `json:"name"`
-	Default     bool         `json:"default"`
-	Description string       `json:"description"`
-	ID          []byte       `json:"id"`
-	apiOrg      Organization `json:"-"`
-}
-
-type User struct {
-	Source      string                 `json:"source"`
-	SourceID    []byte                 `json:"sourceID"`
-	EMail       string                 `json:"email"`
-	DisplayName string                 `json:"displayName"`
-	Superuser   bool                   `json:"superuser"`
-	AccessToken *AccessToken           `json:"accessToken"`
-	Roles       []*OrganizationRoles   `json:"roles"`
-	Limits      map[string]interface{} `json:"limits"`
-}
-
-func (i *UserOrganization) ApiOrganization(controller Controller) (Organization, error) {
-	if i.apiOrg == nil {
-		org, err := controller.Organization(i.Source, i.ID)
-		if err == nil {
-			i.apiOrg = org
-		} else {
-			org := controller.MakeOrganization()
-			org.SetName(i.Name)
-			org.SetDescription(i.Description)
-			org.SetSourceID(i.ID)
-			org.SetSource(i.Source)
-			if err := org.Save(); err != nil {
-				return nil, err
-			}
-			i.apiOrg = org
-		}
-	}
-	return i.apiOrg, nil
-}
-
-func MakeUserOrganization(source, name, description string, id []byte) *UserOrganization {
-	return &UserOrganization{
-		Source:      source,
-		Name:        name,
-		Description: description,
-		ID:          id,
-	}
-}
-
-func MakeAccessToken(scopes []string) *AccessToken {
-	return &AccessToken{
-		Scopes: scopes,
-	}
-}
-
-func MakeOrganizationRoles(org *UserOrganization, roles []string) *OrganizationRoles {
-	return &OrganizationRoles{
-		Organization: org,
-		Roles:        roles,
-	}
-}
-
-func MakeUser(source, email string, superuser bool, roles []*OrganizationRoles, limits map[string]interface{}, token *AccessToken) *User {
-
-	return &User{
-		Source:      source,
-		Limits:      limits,
-		EMail:       email,
-		Superuser:   superuser,
-		Roles:       roles,
-		AccessToken: token,
-	}
-
+type User interface {
+	kodex.Model
+	Source() string
+	SourceID() []byte
+	EMail() string
+	DisplayName() string
+	Superuser() bool
+	SetDisplayName(string) error
+	SetEMail(string) error
+	SetSuperuser(bool) error
+	SetSource(string) error
+	SetSourceID([]byte) error
+	Data() interface{}
+	SetData(interface{}) error
 }

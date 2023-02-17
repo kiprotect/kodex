@@ -47,7 +47,7 @@ func TestDefinitions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	user := fixtures["user"].(*api.User)
+	user := fixtures["user"].(*api.ExternalUser)
 	controller := fixtures["controller"].(api.Controller)
 
 	resp, err := at.Get(controller, user, "/v1/definitions", nil)
