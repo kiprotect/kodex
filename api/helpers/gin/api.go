@@ -28,10 +28,6 @@ import (
 	"github.com/kiprotect/kodex/helpers"
 )
 
-const (
-	ApiVersion = "v0.1.0"
-)
-
 type tcpKeepAliveListener struct {
 	*net.TCPListener
 }

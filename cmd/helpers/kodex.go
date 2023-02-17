@@ -284,7 +284,7 @@ func Kodex(definitions *api.Definitions) {
 
 				blueprint := kodex.MakeBlueprint(blueprintConfig)
 
-				project, err := blueprint.Create(controller)
+				project, err := blueprint.Create(controller, true)
 
 				if err != nil {
 					return err

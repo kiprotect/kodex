@@ -238,7 +238,7 @@ roles:
 
 		for _, existingRole := range userRoles {
 			if existingRole == role.ObjectRole() {
-				continue
+				continue roles
 			}
 		}
 

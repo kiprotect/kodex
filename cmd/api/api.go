@@ -39,7 +39,8 @@ func API(controller kodex.Controller, definitions interface{}) ([]cli.Command, e
 
 	return []cli.Command{
 		{
-			Name: "api",
+			Name:  "api",
+			Usage: "API related commands.",
 			Subcommands: []cli.Command{
 				{
 					Name:    "run",
@@ -70,7 +71,7 @@ func API(controller kodex.Controller, definitions interface{}) ([]cli.Command, e
 }
 
 func RunAPI(controller kodex.Controller, definitions *api.Definitions, prefix string, handlerMaker func(http.Handler) http.Handler, blueprintName string) error {
-	kodex.Log.Info("KIProtect - API", ginHelpers.ApiVersion)
+	kodex.Log.Infof("Running Kodex - API %s", kodex.Version)
 
 	var wg sync.WaitGroup
 
@@ -100,7 +101,7 @@ func RunAPI(controller kodex.Controller, definitions *api.Definitions, prefix st
 		blueprint := kodex.MakeBlueprint(blueprintConfig)
 		apiBlueprint := api.MakeBlueprint(blueprintConfig)
 
-		if _, err := blueprint.Create(apiController); err != nil {
+		if _, err := blueprint.Create(apiController, true); err != nil {
 			return err
 		}
 

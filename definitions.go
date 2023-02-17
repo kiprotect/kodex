@@ -61,7 +61,13 @@ func MergeDefinitions(a, b Definitions) Definitions {
 		HookDefinitions:           make(HookDefinitions, 0),
 	}
 	for _, obj := range []Definitions{a, b} {
+	addCommand:
 		for _, v := range obj.CommandsDefinitions {
+			for _, ev := range c.CommandsDefinitions {
+				if ev.Name == v.Name {
+					continue addCommand
+				}
+			}
 			c.CommandsDefinitions = append(c.CommandsDefinitions, v)
 		}
 		for k, v := range obj.PluginDefinitions {

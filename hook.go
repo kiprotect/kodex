@@ -18,6 +18,7 @@ package kodex
 
 type HookDefinition struct {
 	Description string `json:"description"`
+	Name        string `json:"name"`
 	Hook        Hook   `json:"-"`
 }
 

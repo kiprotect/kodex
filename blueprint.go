@@ -674,7 +674,7 @@ func initConfigDestinations(config Config, configData map[string]interface{}) er
 	return nil
 }
 
-func initProject(controller Controller, configData map[string]interface{}) (Project, error) {
+func initProject(controller Controller, configData map[string]interface{}, createProject bool) (Project, error) {
 	projectConfigData, ok := configData["project"]
 
 	var projectConfig map[string]interface{}
@@ -700,8 +700,14 @@ func initProject(controller Controller, configData map[string]interface{}) (Proj
 			if err != NotFound {
 				return nil, err
 			}
-		} else if err := project.Delete(); err != nil {
-			return nil, err
+		} else {
+			if !createProject {
+				return nil, fmt.Errorf("project does not exist")
+			}
+			// we delete the project
+			if err := project.Delete(); err != nil {
+				return nil, err
+			}
 		}
 
 		project = controller.MakeProject(id)
@@ -817,7 +823,7 @@ func MakeBlueprint(config map[string]interface{}) *Blueprint {
 	}
 }
 
-func (b *Blueprint) Create(controller Controller) (Project, error) {
+func (b *Blueprint) Create(controller Controller, createProject bool) (Project, error) {
 
 	succeeded := false
 
@@ -834,7 +840,7 @@ func (b *Blueprint) Create(controller Controller) (Project, error) {
 		}
 	}()
 
-	project, err := initProject(controller, b.config)
+	project, err := initProject(controller, b.config, createProject)
 
 	if err != nil {
 		return nil, err

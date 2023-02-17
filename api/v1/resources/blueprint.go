@@ -57,6 +57,8 @@ func UploadBlueprint(c *gin.Context) {
 
 	// generate payload from POST Body
 
+	// to do: require a valid project
+
 	data := helpers.JSONData(c)
 
 	if data == nil {
@@ -85,7 +87,8 @@ func UploadBlueprint(c *gin.Context) {
 		return
 	}
 
-	project, err := blueprint.Create(ctrl)
+	// we only create a blueprint for an existing project
+	project, err := blueprint.Create(ctrl, false)
 
 	if err != nil {
 		if _, ok := err.(*forms.FormError); ok {
@@ -94,22 +97,6 @@ func UploadBlueprint(c *gin.Context) {
 			api.HandleError(c, 500, err)
 		}
 		return
-	}
-
-	for _, orgRole := range []string{"admin", "superuser"} {
-		role := ctrl.MakeObjectRole(project, organization)
-		values := map[string]interface{}{
-			"organization_role": orgRole,
-			"role":              "superuser",
-		}
-		if err := role.Create(values); err != nil {
-			api.HandleError(c, 500, err)
-			return
-		}
-		if err := role.Save(); err != nil {
-			api.HandleError(c, 500, err)
-			return
-		}
 	}
 
 	c.JSON(200, map[string]interface{}{"message": "success", "data": project})
