@@ -1,0 +1,9 @@
+meter!:
+  ip-key: super-secret-random-key-used-for-ip-hashing #change me
+  disable: false
+  type: redis
+  config:
+    database: 1
+    addresses:
+      - redis:6379
+    password: ""
