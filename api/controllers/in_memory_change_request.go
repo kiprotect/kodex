@@ -31,6 +31,7 @@ type InMemoryChangeRequest struct {
 	objectID   []byte
 	id         []byte
 	data       interface{}
+	metadata       interface{}
 	controller *InMemoryController
 }
 
@@ -99,5 +100,14 @@ func (c *InMemoryChangeRequest) Data() interface{} {
 
 func (c *InMemoryChangeRequest) SetData(data interface{}) error {
 	c.data = data
+	return nil
+}
+
+func (c *InMemoryChangeRequest) Metadata() interface{} {
+	return c.metadata
+}
+
+func (c *InMemoryChangeRequest) SetMetadata(data interface{}) error {
+	c.metadata = data
 	return nil
 }
