@@ -1,6 +1,6 @@
 image: golang:1.16
 
-services: {}
+services: []
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
