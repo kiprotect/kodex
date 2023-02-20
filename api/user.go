@@ -24,11 +24,11 @@ type User interface {
 	kodex.Model
 	Source() string
 	SourceID() []byte
-	EMail() string
+	Email() string
 	DisplayName() string
 	Superuser() bool
 	SetDisplayName(string) error
-	SetEMail(string) error
+	SetEmail(string) error
 	SetSuperuser(bool) error
 	SetSource(string) error
 	SetSourceID([]byte) error

@@ -102,7 +102,7 @@ func TestDeleteStream(t *testing.T) {
 			"projectRoleB",
 		},
 
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"project:a:superuser", "project:b:admin"}, Scopes: []string{"kiprotect:api:stream:write"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"project:a:superuser", "project:b:admin"}, Scopes: []string{"kiprotect:api:stream:write"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

@@ -73,8 +73,8 @@ func TestSources(t *testing.T) {
 		pt.FC{af.ObjectRole{ObjectName: "projectA", OrganizationRole: "project:a:admin", ObjectRole: "admin", Organization: "orgA"}, "projectRoleA"},
 		pt.FC{af.ObjectRole{ObjectName: "projectB", OrganizationRole: "project:b:admin", ObjectRole: "admin", Organization: "orgB"}, "projectRoleB"},
 
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "orgA", Roles: []string{"project:a:admin"}, Scopes: []string{"kiprotect:api:source:read"}}, "userA"},
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "orgB", Roles: []string{"project:b:admin"}, Scopes: []string{"kiprotect:api:source:read"}}, "userB"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "orgA", Roles: []string{"project:a:admin"}, Scopes: []string{"kiprotect:api:source:read"}}, "userA"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "orgB", Roles: []string{"project:b:admin"}, Scopes: []string{"kiprotect:api:source:read"}}, "userB"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

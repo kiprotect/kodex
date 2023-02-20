@@ -59,7 +59,7 @@ var transformActionConfigFixtures = []pt.FC{
 	},
 
 	// we create a user
-	pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:action:transform"}}, "user"},
+	pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:action:transform"}}, "user"},
 }
 
 func TestTransformActionConfig(t *testing.T) {

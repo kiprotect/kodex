@@ -62,7 +62,7 @@ type UserOrganization struct {
 type ExternalUser struct {
 	Source      string                 `json:"source"`
 	SourceID    []byte                 `json:"sourceID"`
-	EMail       string                 `json:"email"`
+	Email       string                 `json:"email"`
 	DisplayName string                 `json:"displayName"`
 	Superuser   bool                   `json:"superuser"`
 	AccessToken *AccessToken           `json:"accessToken"`
@@ -81,7 +81,7 @@ func (i *ExternalUser) ApiUser(controller Controller) (User, error) {
 
 			if err := user.Create(map[string]interface{}{
 				"displayName": i.DisplayName,
-				"email":       i.EMail,
+				"email":       i.Email,
 				"superuser":   i.Superuser,
 			}); err != nil {
 				return nil, err
@@ -146,7 +146,7 @@ func MakeUser(source, email string, superuser bool, roles []*OrganizationRoles, 
 	return &ExternalUser{
 		Source:      source,
 		Limits:      limits,
-		EMail:       email,
+		Email:       email,
 		Superuser:   superuser,
 		Roles:       roles,
 		AccessToken: token,

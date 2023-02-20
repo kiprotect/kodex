@@ -51,9 +51,9 @@ var createStreamFixtures = []pt.FC{
 
 	pt.FC{af.ObjectRole{ObjectName: "project", OrganizationRole: "project:admin", ObjectRole: "admin", Organization: "org"}, "projectRole"},
 
-	pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:stream:create"}}, "user"},
+	pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:stream:create"}}, "user"},
 
-	pt.FC{af.User{EMail: "mux@mustermann.de", Organization: "org", Roles: []string{"admins"}, Scopes: []string{"kiprotect:api:stream:create"}}, "userB"},
+	pt.FC{af.User{Email: "mux@mustermann.de", Organization: "org", Roles: []string{"admins"}, Scopes: []string{"kiprotect:api:stream:create"}}, "userB"},
 }
 
 func TestCreateStream(t *testing.T) {

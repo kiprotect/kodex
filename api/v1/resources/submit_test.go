@@ -42,7 +42,7 @@ func TestSubmit(t *testing.T) {
 			ObjectRole:       "superuser",
 			Organization:     "org"}, "projectRole"},
 		pt.FC{af.User{
-			EMail:        "max@mustermann.de",
+			Email:        "max@mustermann.de",
 			Scopes:       []string{"kiprotect:api:stream:submit"},
 			Organization: "org",
 			Roles:        []string{"project:admin"}}, "user"},

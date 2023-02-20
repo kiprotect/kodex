@@ -77,8 +77,8 @@ func TestActionConfigs(t *testing.T) {
 		},
 
 		// we create two users and controllers
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "orgA", Roles: []string{"project:a:admin"}, Scopes: []string{"kiprotect:api:project:read"}}, "userA"},
-		pt.FC{af.User{EMail: "mux@mastermann.de", Organization: "orgB", Roles: []string{"project:b:admin"}, Scopes: []string{"kiprotect:api:projec:read"}}, "userB"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "orgA", Roles: []string{"project:a:admin"}, Scopes: []string{"kiprotect:api:project:read"}}, "userA"},
+		pt.FC{af.User{Email: "mux@mastermann.de", Organization: "orgB", Roles: []string{"project:b:admin"}, Scopes: []string{"kiprotect:api:projec:read"}}, "userB"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

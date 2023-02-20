@@ -48,7 +48,7 @@ func TestUpdateConfig(t *testing.T) {
 
 		// we create a stream role
 		pt.FC{af.ObjectRole{ObjectName: "project", OrganizationRole: "project:admin", Organization: "org", ObjectRole: "superuser"}, "projectRole"},
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:config:write"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:config:write"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

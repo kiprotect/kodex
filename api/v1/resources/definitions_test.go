@@ -37,7 +37,7 @@ func TestDefinitions(t *testing.T) {
 		// we create an SQL controller
 		pt.FC{af.Controller{}, "controller"},
 		pt.FC{af.Organization{Name: "org"}, "org"},
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{}, Scopes: []string{"kiprotect:api:definitions"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{}, Scopes: []string{"kiprotect:api:definitions"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

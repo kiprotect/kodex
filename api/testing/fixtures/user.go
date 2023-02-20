@@ -48,7 +48,7 @@ func (o Organization) Teardown(fixture interface{}) error {
 
 type User struct {
 	Limits       map[string]interface{}
-	EMail        string
+	Email        string
 	SuperUser    bool
 	Organization string
 	Roles        []string
@@ -67,7 +67,7 @@ func (u User) Setup(fixtures map[string]interface{}) (interface{}, error) {
 
 	roles := api.MakeOrganizationRoles(org, u.Roles)
 
-	user := api.MakeUser("test", u.EMail, u.SuperUser, []*api.OrganizationRoles{roles}, u.Limits, token)
+	user := api.MakeUser("test", u.Email, u.SuperUser, []*api.OrganizationRoles{roles}, u.Limits, token)
 
 	return user, nil
 }

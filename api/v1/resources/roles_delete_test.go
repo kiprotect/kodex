@@ -51,7 +51,7 @@ func TestDeleteRole(t *testing.T) {
 		// and another one that we will delete
 		pt.FC{af.ObjectRole{ObjectName: "project", OrganizationRole: "project:master", ObjectRole: "superuser", Organization: "orgA"}, "projectRoleB"},
 
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "orgA", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:project:roles"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "orgA", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:project:roles"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)
@@ -153,7 +153,7 @@ func TestRoleDeleteAuthorization(t *testing.T) {
 		// we create a project role
 		pt.FC{af.ObjectRole{ObjectName: "project", OrganizationRole: "project:master", ObjectRole: "superuser", Organization: "orgA"}, "projectRole"},
 
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "orgA", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:project:roles"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "orgA", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:project:roles"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

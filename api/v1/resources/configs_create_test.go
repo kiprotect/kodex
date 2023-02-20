@@ -41,10 +41,10 @@ func TestCreateConfig(t *testing.T) {
 
 		pt.FC{af.Organization{Name: "org"}, "org"},
 		// we create two users and controllers
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"admin", "superuser", "project:admin"}, Scopes: []string{"kiprotect:api:config:create"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"admin", "superuser", "project:admin"}, Scopes: []string{"kiprotect:api:config:create"}}, "user"},
 		// we create two users and controllers
 		pt.FC{
-			af.User{EMail: "mux@mastermann.de", Organization: "org", Roles: []string{"admins"}, Scopes: []string{"kiprotect:api"}}, "userB"},
+			af.User{Email: "mux@mastermann.de", Organization: "org", Roles: []string{"admins"}, Scopes: []string{"kiprotect:api"}}, "userB"},
 
 		pt.FC{pf.Project{Name: "test"}, "project"},
 

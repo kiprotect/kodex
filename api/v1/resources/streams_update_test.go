@@ -52,7 +52,7 @@ func TestUpdateStream(t *testing.T) {
 		// we create a stream role
 		pt.FC{af.ObjectRole{ObjectName: "project", OrganizationRole: "project:admin", ObjectRole: "superuser", Organization: "org"}, "projectRole"},
 
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:stream:write"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:stream:write"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)
@@ -189,7 +189,7 @@ func TestUpdateStreamAuthorization(t *testing.T) {
 		// we create a project role
 		pt.FC{af.ObjectRole{ObjectName: "project", OrganizationRole: "project:master", ObjectRole: "superuser", Organization: "org"}, "projectRole"},
 
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:stream:write"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:stream:write"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

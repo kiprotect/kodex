@@ -248,7 +248,7 @@ outer:
 				if !ok {
 					return nil, fmt.Errorf("expected a name")
 				}
-				if user.EMail() != strValue {
+				if user.Email() != strValue {
 					continue outer
 				}
 			default:

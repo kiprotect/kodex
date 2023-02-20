@@ -56,9 +56,9 @@ func TestConfigs(t *testing.T) {
 		pt.FC{pf.Config{Stream: "streamA", Name: "test 1", Version: "1", Source: "api", Status: "active"}, "configA"},
 		pt.FC{pf.Config{Stream: "streamB", Name: "test 2", Version: "1", Source: "api", Status: "active"}, "configB"},
 
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "orgA", Roles: []string{"project:a:admin"}, Scopes: []string{"kiprotect:api:config:read"}}, "userA"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "orgA", Roles: []string{"project:a:admin"}, Scopes: []string{"kiprotect:api:config:read"}}, "userA"},
 
-		pt.FC{af.User{EMail: "mux@mustermann.de", Organization: "orgB", Roles: []string{"project:b:admin"}, Scopes: []string{"kiprotect:api:config:read"}}, "userB"},
+		pt.FC{af.User{Email: "mux@mustermann.de", Organization: "orgB", Roles: []string{"project:b:admin"}, Scopes: []string{"kiprotect:api:config:read"}}, "userB"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

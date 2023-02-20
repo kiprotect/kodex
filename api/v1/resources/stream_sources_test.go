@@ -52,7 +52,7 @@ func TestAddStreamSource(t *testing.T) {
 		}, "source"},
 		pt.FC{af.Organization{Name: "test"}, "org"},
 		pt.FC{af.ObjectRole{ObjectName: "project", OrganizationRole: "project:admin", ObjectRole: "superuser", Organization: "org"}, "projectRole"},
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:stream:write", "kiprotect:api:source:write"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:stream:write", "kiprotect:api:source:write"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)
@@ -143,7 +143,7 @@ func TestRemoveStreamSource(t *testing.T) {
 		pt.FC{pf.SourceAdder{Source: "source", Stream: "stream", Status: "active"}, "sourceMap"},
 		pt.FC{af.Organization{Name: "test"}, "org"},
 		pt.FC{af.ObjectRole{ObjectName: "project", OrganizationRole: "project:admin", ObjectRole: "superuser", Organization: "org"}, "projectRole"},
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:stream:write", "kiprotect:api:source:write"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:stream:write", "kiprotect:api:source:write"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

@@ -110,7 +110,7 @@ func TestTransform(t *testing.T) {
 		pt.FC{af.Controller{}, "controller"},
 		pt.FC{af.Organization{Name: "test"}, "org"},
 
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"admin"}, Scopes: []string{"kiprotect:api:transform"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"admin"}, Scopes: []string{"kiprotect:api:transform"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

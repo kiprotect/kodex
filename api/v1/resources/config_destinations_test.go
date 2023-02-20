@@ -44,7 +44,7 @@ func TestAddConfigDestination(t *testing.T) {
 		pt.FC{af.ObjectRole{ObjectName: "project", OrganizationRole: "project:admin", ObjectRole: "superuser", Organization: "org"}, "projectRole"},
 		pt.FC{pf.Config{Stream: "stream", Name: "test 1", Version: "1", Source: "api", Status: "active"}, "config"},
 		pt.FC{pf.Destination{Name: "stream", Project: "project", DestinationType: "in-memory", Config: map[string]interface{}{}}, "destination"},
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:destination:write", "kiprotect:api:config:write"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:destination:write", "kiprotect:api:config:write"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)
@@ -135,7 +135,7 @@ func TestRemoveConfigDestination(t *testing.T) {
 		pt.FC{pf.DestinationAdder{Destination: "destination", Name: "stream", Config: "config", Status: "active"}, "destinationMap"},
 		pt.FC{af.Organization{Name: "test"}, "org"},
 		pt.FC{af.ObjectRole{ObjectName: "project", OrganizationRole: "project:admin", ObjectRole: "superuser", Organization: "org"}, "projectRole"},
-		pt.FC{af.User{EMail: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:destination:write", "kiprotect:api:config:write"}}, "user"},
+		pt.FC{af.User{Email: "max@mustermann.de", Organization: "org", Roles: []string{"project:admin"}, Scopes: []string{"kiprotect:api:destination:write", "kiprotect:api:config:write"}}, "user"},
 	}
 
 	fixtures, err := pt.SetupFixtures(fixturesConfig)

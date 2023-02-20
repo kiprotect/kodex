@@ -75,11 +75,11 @@ func (i *InMemoryUser) SetData(data interface{}) error {
 	return nil
 }
 
-func (i *InMemoryUser) EMail() string {
+func (i *InMemoryUser) Email() string {
 	return i.email
 }
 
-func (i *InMemoryUser) SetEMail(email string) error {
+func (i *InMemoryUser) SetEmail(email string) error {
 	i.email = email
 	return nil
 }

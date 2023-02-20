@@ -59,7 +59,7 @@ func (b *BaseUser) MarshalJSON() ([]byte, error) {
 
 	data := map[string]interface{}{
 		"displayName": b.Self.DisplayName(),
-		"email":       b.Self.EMail(),
+		"email":       b.Self.Email(),
 		"data":        b.Self.Data(),
 	}
 
@@ -78,7 +78,7 @@ func (b *BaseUser) update(params map[string]interface{}) error {
 		case "displayName":
 			err = b.Self.SetDisplayName(value.(string))
 		case "email":
-			err = b.Self.SetEMail(value.(string))
+			err = b.Self.SetEmail(value.(string))
 		case "data":
 			err = b.Self.SetData(value)
 		}
