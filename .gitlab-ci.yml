@@ -18,9 +18,7 @@ unit_tests:
   stage: test
   before_script:
     # Install project dependencies
-    - make dep
- 
+    - make dep 
   script:
     - make test
     - make test-api
-
