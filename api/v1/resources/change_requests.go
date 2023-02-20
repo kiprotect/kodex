@@ -24,19 +24,6 @@ import (
 	"github.com/kiprotect/kodex/api/helpers"
 )
 
-var createChangeRequestForm = forms.Form{
-	ErrorMsg: "invalid data encountered in the default role creation form",
-	Fields: []forms.Field{
-		{
-			Name: "object_type",
-			Validators: []forms.Validator{
-				forms.IsRequired{},
-				forms.IsIn{Choices: []interface{}{"project"}},
-			},
-		},
-	},
-}
-
 var updateChangeRequestStatusForn = forms.Form{
 	ErrorMsg: "invalid data encountered in the change request update status form",
 	Fields: []forms.Field{
@@ -154,12 +141,6 @@ func CreateChangeRequest(c *gin.Context) {
 		return
 	}
 
-	data := helpers.JSONData(c)
-
-	if data == nil {
-		return
-	}
-
 	apiUser, err := user.ApiUser(controller)
 
 	if err != nil {
@@ -167,7 +148,18 @@ func CreateChangeRequest(c *gin.Context) {
 		return
 	}
 
-	request := controller.MakeChangeRequest(object, apiUser)
+	request, err := controller.MakeChangeRequest(object, apiUser)
+
+	if err != nil {
+		api.HandleError(c, 500, err)
+		return
+	}
+
+	data := helpers.JSONData(c)
+
+	if data == nil {
+		return
+	}
 
 	if err := request.Create(data); err != nil {
 		api.HandleError(c, 400, err)

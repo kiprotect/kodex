@@ -55,6 +55,13 @@ var ChangeRequestForm = forms.Form{
 				forms.IsStringMap{},
 			},
 		},
+		{
+			Name: "status",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: Draft},
+				forms.IsIn{Choices: []interface{}{Draft}},
+			},
+		},
 	},
 }
 

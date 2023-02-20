@@ -79,6 +79,8 @@ func (i *ExternalUser) ApiUser(controller Controller) (User, error) {
 		} else {
 			user := controller.MakeUser()
 
+			kodex.Log.Infof("Email: %s", i.Email)
+
 			if err := user.Create(map[string]interface{}{
 				"displayName": i.DisplayName,
 				"email":       i.Email,

@@ -697,14 +697,17 @@ func initProject(controller Controller, configData map[string]interface{}, creat
 
 		// if the project already exists we delete it
 		if project, err = controller.Project(id); err != nil {
+
 			if err != NotFound {
 				return nil, err
 			}
-		} else {
+
 			if !createProject {
-				return nil, fmt.Errorf("project does not exist")
+				return nil, fmt.Errorf("project does not exist, will not create it...")
 			}
-			// we delete the project
+
+		} else {
+			// the project exists, we delete it and recreate it
 			if err := project.Delete(); err != nil {
 				return nil, err
 			}

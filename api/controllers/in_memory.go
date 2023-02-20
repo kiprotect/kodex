@@ -224,15 +224,15 @@ func (c *InMemoryController) MakeOrganization() api.Organization {
 /* Change Requests */
 
 func (c *InMemoryController) ChangeRequests(object kodex.Model) ([]api.ChangeRequest, error) {
-	return nil, nil
+	return nil, fmt.Errorf("not implemented")
 }
 
 func (c *InMemoryController) ChangeRequest(id []byte) (api.ChangeRequest, error) {
-	return nil, nil
+	return nil, fmt.Errorf("not implemented")
 }
 
-func (c *InMemoryController) MakeChangeRequest(object kodex.Model, user api.User) api.ChangeRequest {
-	return nil
+func (c *InMemoryController) MakeChangeRequest(object kodex.Model, user api.User) (api.ChangeRequest, error) {
+	return nil, fmt.Errorf("not implemented")
 }
 
 /* Users */
