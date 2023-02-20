@@ -24,4 +24,4 @@ require (
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
 )
 
-replace github.com/kiprotect/go-helpers => ../go-helpers
+// replace github.com/kiprotect/go-helpers => ../go-helpers
