@@ -1,0 +1,26 @@
+image: golang:1.16
+
+services: {}
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  DEBIAN_FRONTEND: noninteractive
+
+cache:
+  paths:
+    - /apt-cache
+    - /go/pkg/mod
+
+stages:
+  - test
+
+unit_tests:
+  stage: test
+  before_script:
+    # Install project dependencies
+    - make dep
+ 
+  script:
+    - make test
+    - make test-api
+
