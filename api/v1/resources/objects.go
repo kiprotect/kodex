@@ -136,7 +136,7 @@ func CreateObject(c *gin.Context) {
 
 		// we try to add default roles as well
 		if defaultRoles, err := controller.DefaultObjectRoles(organization.ID()); err != nil {
-			kodex.Log.Error("Cannot load default roles: %v", err)
+			kodex.Log.Errorf("Cannot load default roles: %v", err)
 		} else {
 			for _, defaultRole := range defaultRoles {
 				if defaultRole.ObjectType() != object.Type() {
