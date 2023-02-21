@@ -18,6 +18,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
 )
@@ -47,6 +48,26 @@ type ChangeRequest interface {
 	ObjectType() string
 }
 
+type IsChangeRequestStatus struct{}
+
+func (i IsChangeRequestStatus) Validate(value interface{}, values map[string]interface{}) (interface{}, error) {
+
+	if enumValue, ok := value.(ChangeRequestStatus); ok {
+		// this already is an enum
+		return enumValue, nil
+	}
+
+	// we expect a string
+	strValue, ok := value.(string)
+
+	if !ok {
+		return nil, fmt.Errorf("expected a string")
+	}
+
+	// we convert the string...
+	return ChangeRequestStatus(strValue), nil
+}
+
 var ChangeRequestForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the change request config",
 	Fields: []forms.Field{
@@ -68,7 +89,8 @@ var ChangeRequestForm = forms.Form{
 			Name: "status",
 			Validators: []forms.Validator{
 				forms.IsOptional{Default: Draft},
-				forms.IsIn{Choices: []interface{}{Draft}},
+				IsChangeRequestStatus{},
+				forms.IsIn{Choices: []interface{}{Draft, Ready}},
 			},
 		},
 	},
@@ -126,6 +148,8 @@ func (b *BaseChangeRequest) update(params map[string]interface{}) error {
 		switch key {
 		case "status":
 			err = b.Self.SetStatus(value.(ChangeRequestStatus))
+		case "metadata":
+			err = b.Self.SetMetadata(value)
 		case "data":
 			err = b.Self.SetData(value)
 		}

@@ -17,6 +17,7 @@
 package resources
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/kiprotect/go-helpers/forms"
@@ -31,6 +32,7 @@ var updateChangeRequestStatusForn = forms.Form{
 			Name: "status",
 			Validators: []forms.Validator{
 				forms.IsRequired{},
+				api.IsChangeRequestStatus{},
 				forms.IsIn{Choices: []interface{}{api.Draft, api.Ready, api.Withdrawn, api.Rejected, api.Approved}},
 			},
 		},
@@ -57,16 +59,9 @@ func UpdateChangeRequestStatus(c *gin.Context) {
 		return
 	}
 
-	changeRequestObj := GetObj(c, "changeRequest")
+	request := changeRequest(c, controller)
 
-	if changeRequestObj == nil {
-		return
-	}
-
-	changeRequest, ok := changeRequestObj.(api.ChangeRequest)
-
-	if !ok {
-		api.HandleError(c, 500, fmt.Errorf("invalid change request"))
+	if request == nil {
 		return
 	}
 
@@ -94,21 +89,35 @@ func UpdateChangeRequestStatus(c *gin.Context) {
 
 	if !isReviewer {
 		// requests can only go from "draft" to "ready" or "withdrawn"
-		if changeRequest.Status() == api.Draft && (status != api.Ready && status != api.Withdrawn) {
-			api.HandleError(c, 400, fmt.Errorf("cannot set status from %s to %s", changeRequest.Status(), status))
+		if request.Status() == api.Draft && (status != api.Ready && status != api.Withdrawn) {
+			api.HandleError(c, 400, fmt.Errorf("cannot set status from %s to %s", request.Status(), status))
 			return
-		} else if changeRequest.Status() == api.Ready && (status != api.Withdrawn && status != api.Draft) {
-			api.HandleError(c, 400, fmt.Errorf("cannot set status from %s to %s", changeRequest.Status(), status))
+		} else if request.Status() == api.Ready && (status != api.Withdrawn && status != api.Draft) {
+			api.HandleError(c, 400, fmt.Errorf("cannot set status from %s to %s", request.Status(), status))
+			return
+		}
+	} else {
+
+		apiUser, err := user.ApiUser(controller)
+
+		if err != nil {
+			api.HandleError(c, 500, err)
+			return
+		}
+
+		// we update the reviewer of the request
+		if err := request.SetReviewer(apiUser); err != nil {
+			api.HandleError(c, 500, err)
 			return
 		}
 	}
 
-	if err := changeRequest.SetStatus(status); err != nil {
+	if err := request.SetStatus(status); err != nil {
 		api.HandleError(c, 500, fmt.Errorf("cannot update change request status: %v", err))
 		return
 	}
 
-	c.JSON(200, map[string]interface{}{"data": changeRequest})
+	c.JSON(200, map[string]interface{}{"data": request})
 
 }
 
@@ -132,7 +141,7 @@ func CreateChangeRequest(c *gin.Context) {
 		return
 	}
 
-	// we check that the user can actually access the change request
+	// we check that the user can actually edit the object
 	if ok, err := controller.CanAccess(user, object, []string{"editor", "admin", "superuser"}); err != nil {
 		api.HandleError(c, 500, err)
 		return
@@ -175,8 +184,8 @@ func CreateChangeRequest(c *gin.Context) {
 
 }
 
-var deleteChangeRequestForm = forms.Form{
-	ErrorMsg: "invalid data encountered in the change request deletion form",
+var changeRequestIDForm = forms.Form{
+	ErrorMsg: "invalid data encountered in the change request ID form",
 	Fields: []forms.Field{
 		{
 			Name: "request_id",
@@ -188,24 +197,17 @@ var deleteChangeRequestForm = forms.Form{
 	},
 }
 
-// Delete a change request
-func UpdateChangeRequest(c *gin.Context) {
-
-	controller := helpers.Controller(c)
-
-	if controller == nil {
-		return
-	}
+func changeRequest(c *gin.Context, controller api.Controller) api.ChangeRequest {
 
 	data := map[string]interface{}{
 		"request_id": c.Param("requestID"),
 	}
 
-	params, err := deleteChangeRequestForm.Validate(data)
+	params, err := changeRequestIDForm.Validate(data)
 
 	if err != nil {
 		api.HandleError(c, 400, err)
-		return
+		return nil
 	}
 
 	requestID := params["request_id"].([]byte)
@@ -214,15 +216,57 @@ func UpdateChangeRequest(c *gin.Context) {
 
 	if err != nil {
 		api.HandleError(c, 404, err)
+		return nil
+	}
+
+	return request
+
+}
+
+// Update a change request
+func UpdateChangeRequest(c *gin.Context) {
+
+	controller := helpers.Controller(c)
+
+	if controller == nil {
 		return
 	}
 
-	if err := request.Delete(); err != nil {
+	request := changeRequest(c, controller)
+
+	if request == nil {
+		return
+	}
+
+	user := helpers.User(c)
+
+	if user == nil {
+		return
+	}
+
+	// we ensure the user is the creator of the change request
+	if !bytes.Equal(request.Creator().SourceID(), user.SourceID) || request.Creator().Source() != request.Creator().Source() {
+		api.HandleError(c, 401, fmt.Errorf("you cannot edit this change request"))
+		return
+	}
+
+	data := helpers.JSONData(c)
+
+	if data == nil {
+		return
+	}
+
+	if err := request.Update(data); err != nil {
+		api.HandleError(c, 400, err)
+		return
+	}
+
+	if err := request.Save(); err != nil {
 		api.HandleError(c, 500, err)
 		return
 	}
 
-	c.JSON(200, map[string]interface{}{"message": "ok"})
+	c.JSON(200, map[string]interface{}{"data": request})
 
 }
 
@@ -235,23 +279,33 @@ func DeleteChangeRequest(c *gin.Context) {
 		return
 	}
 
-	data := map[string]interface{}{
-		"request_id": c.Param("requestID"),
-	}
+	request := changeRequest(c, controller)
 
-	params, err := deleteChangeRequestForm.Validate(data)
-
-	if err != nil {
-		api.HandleError(c, 400, err)
+	if request == nil {
 		return
 	}
 
-	requestID := params["request_id"].([]byte)
+	user := helpers.User(c)
 
-	request, err := controller.ChangeRequest(requestID)
+	if user == nil {
+		return
+	}
 
-	if err != nil {
-		api.HandleError(c, 404, err)
+	canDelete := false
+
+	if ok, err := controller.CanAccess(user, request, []string{"editor", "admin", "superuser"}); err != nil {
+		api.HandleError(c, 500, err)
+		return
+	} else if ok {
+		canDelete = true
+	}
+
+	if bytes.Equal(request.Creator().SourceID(), user.SourceID) && request.Creator().Source() == request.Creator().Source() {
+		canDelete = true
+	}
+
+	if !canDelete {
+		api.HandleError(c, 401, fmt.Errorf("you cannot delete this change request"))
 		return
 	}
 

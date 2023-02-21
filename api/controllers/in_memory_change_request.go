@@ -31,7 +31,7 @@ type InMemoryChangeRequest struct {
 	objectID   []byte
 	id         []byte
 	data       interface{}
-	metadata       interface{}
+	metadata   interface{}
 	controller *InMemoryController
 }
 

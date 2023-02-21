@@ -176,28 +176,26 @@ func Initialize(group *gin.RouterGroup,
 		objectDetailsEndpoints.GET(fmt.Sprintf("/%ss/:%sID",
 			objectType, objectType), resources.ObjectDetails)
 
-		// list all change requests for the object
-		objectDetailsEndpoints.GET(fmt.Sprintf("/%ss/:%sID/change-requests",
-			objectType, objectType), resources.ChangeRequests)
+		changeRequestEndpoints := objectDetailsEndpoints.Group("")
 
 		// create a change request for the object
-		objectDetailsEndpoints.POST(fmt.Sprintf("/%ss/:%sID/change-requests",
+		changeRequestEndpoints.POST(fmt.Sprintf("/%ss/:%sID/change-requests",
 			objectType, objectType), resources.CreateChangeRequest)
 
-		editChangeRequestEndpoints := objectDetailsEndpoints.Group("")
+		// list all change requests for the object
+		changeRequestEndpoints.GET(fmt.Sprintf("/%ss/:%sID/change-requests",
+			objectType, objectType), resources.ChangeRequests)
 
-		editChangeRequestEndpoints.Use(decorators.ValidObject(settings,
-			"changeRequest", []string{"superuser", "admin", "editor", "reviewer"}, []string{fmt.Sprintf("kiprotect:api:%s:change-requests:edit", objectType)}))
+		// update a change request
+		changeRequestEndpoints.PATCH(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
+			objectType, objectType), resources.UpdateChangeRequest)
 
-		// update a change request for the object
-		editChangeRequestEndpoints.PATCH(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
-			objectType, objectType), resources.CreateChangeRequest)
-
-		editChangeRequestEndpoints.POST(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID/status",
+		// update a change request status
+		changeRequestEndpoints.POST(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID/status",
 			objectType, objectType), resources.UpdateChangeRequestStatus)
 
 		// delete a change request for the object
-		editChangeRequestEndpoints.DELETE(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
+		changeRequestEndpoints.DELETE(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
 			objectType, objectType), resources.DeleteChangeRequest)
 
 		// only object superusers can perform advanced object operations
