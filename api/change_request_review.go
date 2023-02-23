@@ -33,8 +33,6 @@ const (
 
 type ChangeRequestReview interface {
 	kodex.Model
-	SetMetadata(interface{}) error
-	Metadata() interface{}
 	SetData(interface{}) error
 	Data() interface{}
 	SetStatus(ChangeRequestReviewStatus) error
@@ -138,8 +136,6 @@ func (b *BaseChangeRequestReview) update(params map[string]interface{}) error {
 		switch key {
 		case "status":
 			err = b.Self.SetStatus(value.(ChangeRequestReviewStatus))
-		case "metadata":
-			err = b.Self.SetMetadata(value)
 		case "data":
 			err = b.Self.SetData(value)
 		}
@@ -155,10 +151,9 @@ func (b *BaseChangeRequestReview) update(params map[string]interface{}) error {
 func (b *BaseChangeRequestReview) MarshalJSON() ([]byte, error) {
 
 	data := map[string]interface{}{
-		"data":     b.Self.Data(),
-		"status":   b.Self.Status(),
-		"creator":  b.Self.Creator(),
-		"metadata": b.Self.Metadata(),
+		"data":    b.Self.Data(),
+		"status":  b.Self.Status(),
+		"creator": b.Self.Creator(),
 	}
 
 	for k, v := range kodex.JSONData(b.Self) {
