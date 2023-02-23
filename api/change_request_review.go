@@ -33,6 +33,8 @@ const (
 
 type ChangeRequestReview interface {
 	kodex.Model
+	Description() string
+	SetDescription(string) error
 	SetData(interface{}) error
 	Data() interface{}
 	SetStatus(ChangeRequestReviewStatus) error
@@ -72,10 +74,9 @@ var ChangeRequestReviewForm = forms.Form{
 			},
 		},
 		{
-			Name: "metadata",
+			Name: "description",
 			Validators: []forms.Validator{
-				forms.IsOptional{},
-				forms.IsStringMap{},
+				forms.IsString{MinLength: 10},
 			},
 		},
 		{
@@ -136,6 +137,8 @@ func (b *BaseChangeRequestReview) update(params map[string]interface{}) error {
 		switch key {
 		case "status":
 			err = b.Self.SetStatus(value.(ChangeRequestReviewStatus))
+		case "description":
+			err = b.Self.SetDescription(value.(string))
 		case "data":
 			err = b.Self.SetData(value)
 		}
@@ -151,9 +154,11 @@ func (b *BaseChangeRequestReview) update(params map[string]interface{}) error {
 func (b *BaseChangeRequestReview) MarshalJSON() ([]byte, error) {
 
 	data := map[string]interface{}{
-		"data":    b.Self.Data(),
-		"status":  b.Self.Status(),
-		"creator": b.Self.Creator(),
+		"data":           b.Self.Data(),
+		"description":    b.Self.Description(),
+		"change_request": b.Self.ChangeRequest(),
+		"status":         b.Self.Status(),
+		"creator":        b.Self.Creator(),
 	}
 
 	for k, v := range kodex.JSONData(b.Self) {

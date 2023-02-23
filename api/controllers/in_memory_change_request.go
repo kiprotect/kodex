@@ -23,17 +23,19 @@ import (
 
 type InMemoryChangeRequest struct {
 	api.BaseChangeRequest
-	createdAt  time.Time
-	updatedAt  time.Time
-	deletedAt  *time.Time
-	objectType string
-	status     api.ChangeRequestStatus
-	objectID   []byte
-	id         []byte
-	reviews    map[string]api.ChangeRequestReview
-	data       interface{}
-	metadata   interface{}
-	controller *InMemoryController
+	createdAt   time.Time
+	updatedAt   time.Time
+	deletedAt   *time.Time
+	objectType  string
+	title       string
+	description string
+	status      api.ChangeRequestStatus
+	objectID    []byte
+	id          []byte
+	reviews     map[string]api.ChangeRequestReview
+	data        interface{}
+	metadata    interface{}
+	controller  *InMemoryController
 }
 
 func MakeInMemoryChangeRequest(objectType string, objectID []byte, controller *InMemoryController) api.ChangeRequest {
@@ -125,11 +127,20 @@ func (c *InMemoryChangeRequest) SetData(data interface{}) error {
 	return nil
 }
 
-func (c *InMemoryChangeRequest) Metadata() interface{} {
-	return c.metadata
+func (c *InMemoryChangeRequest) Title() string {
+	return c.title
 }
 
-func (c *InMemoryChangeRequest) SetMetadata(data interface{}) error {
-	c.metadata = data
+func (c *InMemoryChangeRequest) SetTitle(title string) error {
+	c.title = title
+	return nil
+}
+
+func (c *InMemoryChangeRequest) Description() string {
+	return c.description
+}
+
+func (c *InMemoryChangeRequest) SetDescription(description string) error {
+	c.description = description
 	return nil
 }

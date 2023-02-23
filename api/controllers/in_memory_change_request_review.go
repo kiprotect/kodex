@@ -26,6 +26,7 @@ type InMemoryChangeRequestReview struct {
 	createdAt     time.Time
 	updatedAt     time.Time
 	deletedAt     *time.Time
+	description   string
 	status        api.ChangeRequestReviewStatus
 	id            []byte
 	data          interface{}
@@ -92,11 +93,11 @@ func (c *InMemoryChangeRequestReview) SetData(data interface{}) error {
 	return nil
 }
 
-func (c *InMemoryChangeRequestReview) Metadata() interface{} {
-	return c.metadata
+func (c *InMemoryChangeRequestReview) Description() string {
+	return c.description
 }
 
-func (c *InMemoryChangeRequestReview) SetMetadata(data interface{}) error {
-	c.metadata = data
+func (c *InMemoryChangeRequestReview) SetDescription(description string) error {
+	c.description = description
 	return nil
 }

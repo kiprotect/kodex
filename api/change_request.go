@@ -35,6 +35,10 @@ const (
 
 type ChangeRequest interface {
 	kodex.Model
+	Title() string
+	SetTitle(string) error
+	Description() string
+	SetDescription(string) error
 	SetData(interface{}) error
 	Data() interface{}
 	SetStatus(ChangeRequestStatus) error
@@ -76,10 +80,15 @@ var ChangeRequestForm = forms.Form{
 			},
 		},
 		{
-			Name: "metadata",
+			Name: "description",
 			Validators: []forms.Validator{
-				forms.IsOptional{},
-				forms.IsStringMap{},
+				forms.IsString{MinLength: 5},
+			},
+		},
+		{
+			Name: "title",
+			Validators: []forms.Validator{
+				forms.IsString{MinLength: 2},
 			},
 		},
 		{
@@ -138,6 +147,10 @@ func (b *BaseChangeRequest) update(params map[string]interface{}) error {
 	for key, value := range params {
 		var err error
 		switch key {
+		case "title":
+			err = b.Self.SetTitle(value.(string))
+		case "description":
+			err = b.Self.SetDescription(value.(string))
 		case "status":
 			err = b.Self.SetStatus(value.(ChangeRequestStatus))
 		case "data":
@@ -156,6 +169,8 @@ func (b *BaseChangeRequest) MarshalJSON() ([]byte, error) {
 
 	data := map[string]interface{}{
 		"data":        b.Self.Data(),
+		"title":       b.Self.Title(),
+		"description": b.Self.Description(),
 		"status":      b.Self.Status(),
 		"creator":     b.Self.Creator(),
 		"object_id":   b.Self.ObjectID(),
