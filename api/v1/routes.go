@@ -176,6 +176,7 @@ func Initialize(group *gin.RouterGroup,
 		objectDetailsEndpoints.GET(fmt.Sprintf("/%ss/:%sID",
 			objectType, objectType), resources.ObjectDetails)
 
+		// change requests endpoints
 		changeRequestEndpoints := objectDetailsEndpoints.Group("")
 
 		// create a change request for the object
@@ -197,6 +198,22 @@ func Initialize(group *gin.RouterGroup,
 		// delete a change request for the object
 		changeRequestEndpoints.DELETE(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
 			objectType, objectType), resources.DeleteChangeRequest)
+
+		// create a change request review
+		changeRequestEndpoints.POST(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID/reviews",
+			objectType, objectType), resources.CreateChangeRequestReview)
+
+		// update a change request review
+		changeRequestEndpoints.PATCH(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID/reviews/:reviewID",
+			objectType, objectType), resources.UpdateChangeRequestReview)
+
+		// delete a change request review
+		changeRequestEndpoints.DELETE(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID/reviews/:reviewID",
+			objectType, objectType), resources.DeleteChangeRequestReview)
+
+		// update a change request review status
+		changeRequestEndpoints.POST(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID/reviews/:reviewID/status",
+			objectType, objectType), resources.UpdateChangeRequestReviewStatus)
 
 		// only object superusers can perform advanced object operations
 		objectSuperusers := objectEndpoints.Group("")

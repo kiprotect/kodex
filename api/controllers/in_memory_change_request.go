@@ -17,6 +17,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/kiprotect/kodex/api"
 	"time"
 )
@@ -64,8 +65,15 @@ func (c *InMemoryChangeRequest) CreatedAt() time.Time {
 	return c.createdAt
 }
 
-func (c *InMemoryChangeRequest) MakeReview() api.ChangeRequestReview {
-	return MakeInMemoryChangeRequestReview(c)
+func (c *InMemoryChangeRequest) MakeReview(user api.User) (api.ChangeRequestReview, error) {
+
+	inMemoryUser, ok := user.(*InMemoryUser)
+
+	if !ok {
+		return nil, fmt.Errorf("expected an inMemory user")
+	}
+
+	return MakeInMemoryChangeRequestReview(c, inMemoryUser), nil
 }
 
 func (c *InMemoryChangeRequest) SaveChangeRequestReview(review api.ChangeRequestReview) error {
@@ -143,4 +151,8 @@ func (c *InMemoryChangeRequest) Description() string {
 func (c *InMemoryChangeRequest) SetDescription(description string) error {
 	c.description = description
 	return nil
+}
+
+func (c *InMemoryChangeRequest) Review([]byte) (api.ChangeRequestReview, error) {
+	return nil, nil
 }

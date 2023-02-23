@@ -31,13 +31,15 @@ type InMemoryChangeRequestReview struct {
 	id            []byte
 	data          interface{}
 	metadata      interface{}
+	creator       *InMemoryUser
 	changeRequest *InMemoryChangeRequest
 	controller    *InMemoryController
 }
 
-func MakeInMemoryChangeRequestReview(changeRequest *InMemoryChangeRequest) api.ChangeRequestReview {
+func MakeInMemoryChangeRequestReview(changeRequest *InMemoryChangeRequest, creator *InMemoryUser) api.ChangeRequestReview {
 	inMemoryChangeRequestReview := &InMemoryChangeRequestReview{
 		changeRequest: changeRequest,
+		creator:       creator,
 	}
 	inMemoryChangeRequestReview.Self = inMemoryChangeRequestReview
 	return inMemoryChangeRequestReview

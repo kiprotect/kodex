@@ -44,6 +44,8 @@ type ChangeRequest interface {
 	SetStatus(ChangeRequestStatus) error
 	Status() ChangeRequestStatus
 	Reviews() ([]ChangeRequestReview, error)
+	MakeReview(User) (ChangeRequestReview, error)
+	Review([]byte) (ChangeRequestReview, error)
 	Creator() User
 	ObjectID() []byte
 	ObjectType() string
@@ -106,16 +108,11 @@ var ChangeRequestForm = forms.Form{
 
 type BaseChangeRequest struct {
 	Self     ChangeRequest
-	Project_ kodex.Project
 	Creator_ User
 }
 
 func (b *BaseChangeRequest) Type() string {
 	return "change-request"
-}
-
-func (b *BaseChangeRequest) Project() kodex.Project {
-	return b.Project_
 }
 
 func (b *BaseChangeRequest) Creator() User {
