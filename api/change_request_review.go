@@ -23,35 +23,31 @@ import (
 	"github.com/kiprotect/kodex"
 )
 
-type ChangeRequestStatus string
+type ChangeRequestReviewStatus string
 
 const (
-	Draft     ChangeRequestStatus = "draft"
-	Ready     ChangeRequestStatus = "ready"
-	Withdrawn ChangeRequestStatus = "withdrawn"
-	Approved  ChangeRequestStatus = "approved"
-	Rejected  ChangeRequestStatus = "rejected"
+	ReviewRequested ChangeRequestReviewStatus = "requested"
+	RequestRejected ChangeRequestReviewStatus = "rejected"
+	RequestApproved ChangeRequestReviewStatus = "approved"
 )
 
-type ChangeRequest interface {
+type ChangeRequestReview interface {
 	kodex.Model
 	SetMetadata(interface{}) error
 	Metadata() interface{}
 	SetData(interface{}) error
 	Data() interface{}
-	SetStatus(ChangeRequestStatus) error
-	Status() ChangeRequestStatus
-	Reviews() ([]ChangeRequestReview, error)
+	SetStatus(ChangeRequestReviewStatus) error
+	Status() ChangeRequestReviewStatus
+	ChangeRequest() ChangeRequest
 	Creator() User
-	ObjectID() []byte
-	ObjectType() string
 }
 
-type IsChangeRequestStatus struct{}
+type IsChangeRequestReviewStatus struct{}
 
-func (i IsChangeRequestStatus) Validate(value interface{}, values map[string]interface{}) (interface{}, error) {
+func (i IsChangeRequestReviewStatus) Validate(value interface{}, values map[string]interface{}) (interface{}, error) {
 
-	if enumValue, ok := value.(ChangeRequestStatus); ok {
+	if enumValue, ok := value.(ChangeRequestReviewStatus); ok {
 		// this already is an enum
 		return enumValue, nil
 	}
@@ -64,10 +60,10 @@ func (i IsChangeRequestStatus) Validate(value interface{}, values map[string]int
 	}
 
 	// we convert the string...
-	return ChangeRequestStatus(strValue), nil
+	return ChangeRequestReviewStatus(strValue), nil
 }
 
-var ChangeRequestForm = forms.Form{
+var ChangeRequestReviewForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the change request config",
 	Fields: []forms.Field{
 		{
@@ -87,9 +83,9 @@ var ChangeRequestForm = forms.Form{
 		{
 			Name: "status",
 			Validators: []forms.Validator{
-				forms.IsOptional{Default: Draft},
-				IsChangeRequestStatus{},
-				forms.IsIn{Choices: []interface{}{Draft, Ready}},
+				forms.IsOptional{Default: ReviewRequested},
+				IsChangeRequestReviewStatus{},
+				forms.IsIn{Choices: []interface{}{ReviewRequested}},
 			},
 		},
 	},
@@ -97,27 +93,27 @@ var ChangeRequestForm = forms.Form{
 
 /* Base Functionality */
 
-type BaseChangeRequest struct {
-	Self     ChangeRequest
+type BaseChangeRequestReview struct {
+	Self     ChangeRequestReview
 	Project_ kodex.Project
 	Creator_ User
 }
 
-func (b *BaseChangeRequest) Type() string {
+func (b *BaseChangeRequestReview) Type() string {
 	return "change-request"
 }
 
-func (b *BaseChangeRequest) Project() kodex.Project {
+func (b *BaseChangeRequestReview) Project() kodex.Project {
 	return b.Project_
 }
 
-func (b *BaseChangeRequest) Creator() User {
+func (b *BaseChangeRequestReview) Creator() User {
 	return b.Creator_
 }
 
-func (b *BaseChangeRequest) Update(values map[string]interface{}) error {
+func (b *BaseChangeRequestReview) Update(values map[string]interface{}) error {
 
-	if params, err := ChangeRequestForm.ValidateUpdate(values); err != nil {
+	if params, err := ChangeRequestReviewForm.ValidateUpdate(values); err != nil {
 		return err
 	} else {
 		return b.update(params)
@@ -125,9 +121,9 @@ func (b *BaseChangeRequest) Update(values map[string]interface{}) error {
 
 }
 
-func (b *BaseChangeRequest) Create(values map[string]interface{}) error {
+func (b *BaseChangeRequestReview) Create(values map[string]interface{}) error {
 
-	if params, err := ChangeRequestForm.Validate(values); err != nil {
+	if params, err := ChangeRequestReviewForm.Validate(values); err != nil {
 		return err
 	} else {
 		return b.update(params)
@@ -135,13 +131,13 @@ func (b *BaseChangeRequest) Create(values map[string]interface{}) error {
 
 }
 
-func (b *BaseChangeRequest) update(params map[string]interface{}) error {
+func (b *BaseChangeRequestReview) update(params map[string]interface{}) error {
 
 	for key, value := range params {
 		var err error
 		switch key {
 		case "status":
-			err = b.Self.SetStatus(value.(ChangeRequestStatus))
+			err = b.Self.SetStatus(value.(ChangeRequestReviewStatus))
 		case "metadata":
 			err = b.Self.SetMetadata(value)
 		case "data":
@@ -156,15 +152,13 @@ func (b *BaseChangeRequest) update(params map[string]interface{}) error {
 
 }
 
-func (b *BaseChangeRequest) MarshalJSON() ([]byte, error) {
+func (b *BaseChangeRequestReview) MarshalJSON() ([]byte, error) {
 
 	data := map[string]interface{}{
-		"data":        b.Self.Data(),
-		"status":      b.Self.Status(),
-		"creator":     b.Self.Creator(),
-		"metadata":    b.Self.Metadata(),
-		"object_id":   b.Self.ObjectID(),
-		"object_type": b.Self.ObjectType(),
+		"data":     b.Self.Data(),
+		"status":   b.Self.Status(),
+		"creator":  b.Self.Creator(),
+		"metadata": b.Self.Metadata(),
 	}
 
 	for k, v := range kodex.JSONData(b.Self) {

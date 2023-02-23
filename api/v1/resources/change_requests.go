@@ -96,20 +96,6 @@ func UpdateChangeRequestStatus(c *gin.Context) {
 			api.HandleError(c, 400, fmt.Errorf("cannot set status from %s to %s", request.Status(), status))
 			return
 		}
-	} else {
-
-		apiUser, err := user.ApiUser(controller)
-
-		if err != nil {
-			api.HandleError(c, 500, err)
-			return
-		}
-
-		// we update the reviewer of the request
-		if err := request.SetReviewer(apiUser); err != nil {
-			api.HandleError(c, 500, err)
-			return
-		}
 	}
 
 	if err := request.SetStatus(status); err != nil {

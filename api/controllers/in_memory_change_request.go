@@ -30,6 +30,7 @@ type InMemoryChangeRequest struct {
 	status     api.ChangeRequestStatus
 	objectID   []byte
 	id         []byte
+	reviews    map[string]api.ChangeRequestReview
 	data       interface{}
 	metadata   interface{}
 	controller *InMemoryController
@@ -39,6 +40,7 @@ func MakeInMemoryChangeRequest(objectType string, objectID []byte, controller *I
 	inMemoryChangeRequest := &InMemoryChangeRequest{
 		objectID:   objectID,
 		objectType: objectType,
+		reviews:    make(map[string]api.ChangeRequestReview),
 	}
 	inMemoryChangeRequest.Self = inMemoryChangeRequest
 	return inMemoryChangeRequest
@@ -60,9 +62,29 @@ func (c *InMemoryChangeRequest) CreatedAt() time.Time {
 	return c.createdAt
 }
 
-func (c *InMemoryChangeRequest) SetReviewer(user api.User) error {
-	c.Reviewer_ = user
+func (c *InMemoryChangeRequest) MakeReview() api.ChangeRequestReview {
+	return MakeInMemoryChangeRequestReview(c)
+}
+
+func (c *InMemoryChangeRequest) SaveChangeRequestReview(review api.ChangeRequestReview) error {
+	c.reviews[string(review.ID())] = review
 	return nil
+}
+
+func (c *InMemoryChangeRequest) DeleteChangeRequestReview(review api.ChangeRequestReview) error {
+	delete(c.reviews, string(review.ID()))
+	return nil
+}
+
+func (c *InMemoryChangeRequest) Reviews() ([]api.ChangeRequestReview, error) {
+
+	reviews := make([]api.ChangeRequestReview, 0, len(c.reviews))
+
+	for _, review := range c.reviews {
+		reviews = append(reviews, review)
+	}
+
+	return reviews, nil
 }
 
 func (c *InMemoryChangeRequest) SetStatus(status api.ChangeRequestStatus) error {
