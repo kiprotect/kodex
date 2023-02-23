@@ -180,7 +180,7 @@ var changeRequestReviewIDForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the change request review ID form",
 	Fields: []forms.Field{
 		{
-			Name: "request_id",
+			Name: "review_id",
 			Validators: []forms.Validator{
 				forms.IsRequired{},
 				forms.IsHex{ConvertToBinary: true, Strict: false},
@@ -192,7 +192,7 @@ var changeRequestReviewIDForm = forms.Form{
 func changeRequestReview(c *gin.Context, changeRequest api.ChangeRequest) api.ChangeRequestReview {
 
 	data := map[string]interface{}{
-		"request_id": c.Param("requestID"),
+		"review_id": c.Param("reviewID"),
 	}
 
 	params, err := changeRequestReviewIDForm.Validate(data)
@@ -202,7 +202,7 @@ func changeRequestReview(c *gin.Context, changeRequest api.ChangeRequest) api.Ch
 		return nil
 	}
 
-	reviewID := params["request_id"].([]byte)
+	reviewID := params["review_id"].([]byte)
 
 	review, err := changeRequest.Review(reviewID)
 
