@@ -199,6 +199,11 @@ func Initialize(group *gin.RouterGroup,
 		changeRequestEndpoints.DELETE(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
 			objectType, objectType), resources.DeleteChangeRequest)
 
+		// change request reviews
+
+		changeRequestEndpoints.GET(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID/reviews",
+			objectType, objectType), resources.ChangeRequestReviews)
+
 		// create a change request review
 		changeRequestEndpoints.POST(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID/reviews",
 			objectType, objectType), resources.CreateChangeRequestReview)
