@@ -187,6 +187,10 @@ func Initialize(group *gin.RouterGroup,
 		changeRequestEndpoints.GET(fmt.Sprintf("/%ss/:%sID/change-requests",
 			objectType, objectType), resources.ChangeRequests)
 
+		// list all change requests for the object
+		changeRequestEndpoints.GET(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
+			objectType, objectType), resources.ChangeRequestDetails)
+
 		// update a change request
 		changeRequestEndpoints.PATCH(fmt.Sprintf("/%ss/:%sID/change-requests/:requestID",
 			objectType, objectType), resources.UpdateChangeRequest)

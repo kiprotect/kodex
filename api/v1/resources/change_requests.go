@@ -307,6 +307,25 @@ func DeleteChangeRequest(c *gin.Context) {
 }
 
 // Get a list of change requestse
+func ChangeRequestDetails(c *gin.Context) {
+
+	controller := helpers.Controller(c)
+
+	if controller == nil {
+		return
+	}
+
+	request := changeRequest(c, controller)
+
+	if request == nil {
+		return
+	}
+
+	c.JSON(200, map[string]interface{}{"data": request})
+
+}
+
+// Get a list of change requestse
 func ChangeRequests(c *gin.Context) {
 
 	controller := helpers.Controller(c)
