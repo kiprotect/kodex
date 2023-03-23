@@ -1,0 +1,27 @@
+@import "../variables.scss";
+
+.kip-with-sidebar {
+    display: flex;
+    margin-top: $kip-navbar-height;
+
+    &__sidebar {
+        @media (min-width: $kip-desktop) {
+            width: 64px;
+        }
+    }
+
+    &__content {
+        width: 100%;
+        margin: map-get($kip-space, lg) map-get($kip-space, lg)
+            map-get($kip-space, lg);
+        max-width: calc(100% - 64px);
+
+        .bulma-container {
+            margin: 0 auto;
+        }
+
+        @media (min-width: $kip-desktop) {
+            max-width: calc(100% - 128px);
+        }
+    }
+}

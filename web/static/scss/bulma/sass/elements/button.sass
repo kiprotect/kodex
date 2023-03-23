@@ -1,0 +1,305 @@
+$bulma-button-color: $bulma-grey-darker !default
+$bulma-button-background-color: $bulma-white !default
+$bulma-button-family: false !default
+
+$bulma-button-border-color: $bulma-grey-lighter !default
+$bulma-button-border-width: $bulma-control-border-width !default
+
+$bulma-button-padding-vertical: calc(0.375em - #{$bulma-button-border-width}) !default
+$bulma-button-padding-horizontal: 0.75em !default
+
+$bulma-button-hover-color: $bulma-link-hover !default
+$bulma-button-hover-border-color: $bulma-link-hover-border !default
+
+$bulma-button-focus-color: $bulma-link-focus !default
+$bulma-button-focus-border-color: $bulma-link-focus-border !default
+$bulma-button-focus-box-shadow-size: 0 0 0 0.125em !default
+$bulma-button-focus-box-shadow-color: rgba($bulma-link, 0.25) !default
+
+$bulma-button-active-color: $bulma-link-active !default
+$bulma-button-active-border-color: $bulma-link-active-border !default
+
+$bulma-button-text-color: $bulma-text !default
+$bulma-button-text-hover-background-color: $bulma-background !default
+$bulma-button-text-hover-color: $bulma-text-strong !default
+
+$bulma-button-disabled-background-color: $bulma-white !default
+$bulma-button-disabled-border-color: $bulma-grey-lighter !default
+$bulma-button-disabled-shadow: none !default
+$bulma-button-disabled-opacity: 0.5 !default
+
+$bulma-button-static-color: $bulma-grey !default
+$bulma-button-static-background-color: $bulma-white-ter !default
+$bulma-button-static-border-color: $bulma-grey-lighter !default
+
+// The button sizes use mixins so they can be used at different breakpoints
+=bulma-button-small
+  border-radius: $bulma-radius-small
+  font-size: $bulma-size-small
+=bulma-button-normal
+  font-size: $bulma-size-normal
+=bulma-button-medium
+  font-size: $bulma-size-medium
+=bulma-button-large
+  font-size: $bulma-size-large
+
+.bulma-button
+  @extend %control
+  @extend %unselectable
+  background-color: $bulma-button-background-color
+  border-color: $bulma-button-border-color
+  border-width: $bulma-button-border-width
+  color: $bulma-button-color
+  cursor: pointer
+  @if $bulma-button-family
+    font-family: $bulma-button-family
+  justify-content: center
+  padding-bottom: $bulma-button-padding-vertical
+  padding-left: $bulma-button-padding-horizontal
+  padding-right: $bulma-button-padding-horizontal
+  padding-top: $bulma-button-padding-vertical
+  text-align: center
+  white-space: nowrap
+  strong
+    color: inherit
+  .bulma-icon
+    &,
+    &.bulma-is-small,
+    &.bulma-is-medium,
+    &.bulma-is-large
+      height: 1.5em
+      width: 1.5em
+    &:first-child:not(:last-child)
+      margin-left: calc(-0.375em - #{$bulma-button-border-width})
+      margin-right: 0.1875em
+    &:last-child:not(:first-child)
+      margin-left: 0.1875em
+      margin-right: calc(-0.375em - #{$bulma-button-border-width})
+    &:first-child:last-child
+      margin-left: calc(-0.375em - #{$bulma-button-border-width})
+      margin-right: calc(-0.375em - #{$bulma-button-border-width})
+  // States
+  &:hover,
+  &.bulma-is-hovered
+    border-color: $bulma-button-hover-border-color
+    color: $bulma-button-hover-color
+  &:focus,
+  &.bulma-is-focused
+    border-color: $bulma-button-focus-border-color
+    color: $bulma-button-focus-color
+    &:not(:active)
+      box-shadow: $bulma-button-focus-box-shadow-size $bulma-button-focus-box-shadow-color
+  &:active,
+  &.bulma-is-active
+    border-color: $bulma-button-active-border-color
+    color: $bulma-button-active-color
+  // Colors
+  &.bulma-is-text
+    background-color: transparent
+    border-color: transparent
+    color: $bulma-button-text-color
+    text-decoration: underline
+    &:hover,
+    &.bulma-is-hovered,
+    &:focus,
+    &.bulma-is-focused
+      background-color: $bulma-button-text-hover-background-color
+      color: $bulma-button-text-hover-color
+    &:active,
+    &.bulma-is-active
+      background-color: darken($bulma-button-text-hover-background-color, 5%)
+      color: $bulma-button-text-hover-color
+    &[disabled],
+    fieldset[disabled] &
+      background-color: transparent
+      border-color: transparent
+      box-shadow: none
+  @each $bulma-name, $bulma-pair in $bulma-colors
+    $bulma-color: nth($bulma-pair, 1)
+    $bulma-color-invert: nth($bulma-pair, 2)
+    &.bulma-is-#{$bulma-name}
+      background-color: $bulma-color
+      border-color: transparent
+      color: $bulma-color-invert
+      &:hover,
+      &.bulma-is-hovered
+        background-color: darken($bulma-color, 2.5%)
+        border-color: transparent
+        color: $bulma-color-invert
+      &:focus,
+      &.bulma-is-focused
+        border-color: transparent
+        color: $bulma-color-invert
+        &:not(:active)
+          box-shadow: $bulma-button-focus-box-shadow-size rgba($bulma-color, 0.25)
+      &:active,
+      &.bulma-is-active
+        background-color: darken($bulma-color, 5%)
+        border-color: transparent
+        color: $bulma-color-invert
+      &[disabled],
+      fieldset[disabled] &
+        background-color: $bulma-color
+        border-color: transparent
+        box-shadow: none
+      &.bulma-is-inverted
+        background-color: $bulma-color-invert
+        color: $bulma-color
+        &:hover,
+        &.bulma-is-hovered
+          background-color: darken($bulma-color-invert, 5%)
+        &[disabled],
+        fieldset[disabled] &
+          background-color: $bulma-color-invert
+          border-color: transparent
+          box-shadow: none
+          color: $bulma-color
+      &.bulma-is-loading
+        &::after
+          border-color: transparent transparent $bulma-color-invert $bulma-color-invert !important
+      &.bulma-is-outlined
+        background-color: transparent
+        border-color: $bulma-color
+        color: $bulma-color
+        &:hover,
+        &.bulma-is-hovered,
+        &:focus,
+        &.bulma-is-focused
+          background-color: $bulma-color
+          border-color: $bulma-color
+          color: $bulma-color-invert
+        &.bulma-is-loading
+          &::after
+            border-color: transparent transparent $bulma-color $bulma-color !important
+          &:hover,
+          &.bulma-is-hovered,
+          &:focus,
+          &.bulma-is-focused
+            &::after
+              border-color: transparent transparent $bulma-color-invert $bulma-color-invert !important
+        &[disabled],
+        fieldset[disabled] &
+          background-color: transparent
+          border-color: $bulma-color
+          box-shadow: none
+          color: $bulma-color
+      &.bulma-is-inverted.bulma-is-outlined
+        background-color: transparent
+        border-color: $bulma-color-invert
+        color: $bulma-color-invert
+        &:hover,
+        &.bulma-is-hovered,
+        &:focus,
+        &.bulma-is-focused
+          background-color: $bulma-color-invert
+          color: $bulma-color
+        &.bulma-is-loading
+          &:hover,
+          &.bulma-is-hovered,
+          &:focus,
+          &.bulma-is-focused
+            &::after
+              border-color: transparent transparent $bulma-color $bulma-color !important
+        &[disabled],
+        fieldset[disabled] &
+          background-color: transparent
+          border-color: $bulma-color-invert
+          box-shadow: none
+          color: $bulma-color-invert
+  // Sizes
+  &.bulma-is-small
+    +bulma-button-small
+  &.bulma-is-normal
+    +bulma-button-normal
+  &.bulma-is-medium
+    +bulma-button-medium
+  &.bulma-is-large
+    +bulma-button-large
+  // Modifiers
+  &[disabled],
+  fieldset[disabled] &
+    background-color: $bulma-button-disabled-background-color
+    border-color: $bulma-button-disabled-border-color
+    box-shadow: $bulma-button-disabled-shadow
+    opacity: $bulma-button-disabled-opacity
+  &.bulma-is-fullwidth
+    display: flex
+    width: 100%
+  &.bulma-is-loading
+    color: transparent !important
+    pointer-events: none
+    &::after
+      @extend %loader
+      +bulma-center(1em)
+      position: absolute !important
+  &.bulma-is-static
+    background-color: $bulma-button-static-background-color
+    border-color: $bulma-button-static-border-color
+    color: $bulma-button-static-color
+    box-shadow: none
+    pointer-events: none
+  &.bulma-is-rounded
+    border-radius: $bulma-radius-rounded
+    padding-left: 1em
+    padding-right: 1em
+
+.bulma-buttons
+  align-items: center
+  display: flex
+  flex-wrap: wrap
+  justify-content: flex-start
+  .bulma-button
+    margin-bottom: 0.5rem
+    &:not(:last-child):not(.bulma-is-fullwidth)
+      margin-right: 0.5rem
+  &:last-child
+    margin-bottom: -0.5rem
+  &:not(:last-child)
+    margin-bottom: 1rem
+  // Sizes
+  &.bulma-are-small
+    .bulma-button:not(.bulma-is-normal):not(.bulma-is-medium):not(.bulma-is-large)
+      +bulma-button-small
+  &.bulma-are-medium
+    .bulma-button:not(.bulma-is-small):not(.bulma-is-normal):not(.bulma-is-large)
+      +bulma-button-medium
+  &.bulma-are-large
+    .bulma-button:not(.bulma-is-small):not(.bulma-is-normal):not(.bulma-is-medium)
+      +bulma-button-large
+  &.bulma-has-addons
+    .bulma-button
+      &:not(:first-child)
+        border-bottom-left-radius: 0
+        border-top-left-radius: 0
+      &:not(:last-child)
+        border-bottom-right-radius: 0
+        border-top-right-radius: 0
+        margin-right: -1px
+      &:last-child
+        margin-right: 0
+      &:hover,
+      &.bulma-is-hovered
+        z-index: 2
+      &:focus,
+      &.bulma-is-focused,
+      &:active,
+      &.bulma-is-active,
+      &.bulma-is-selected
+        z-index: 3
+        &:hover
+          z-index: 4
+      &.bulma-is-expanded
+        flex-grow: 1
+        flex-shrink: 1
+  &.bulma-is-centered
+    justify-content: center
+    &:not(.bulma-has-addons)
+      .bulma-button:not(.bulma-is-fullwidth)
+        margin-left: 0.25rem
+        margin-right: 0.25rem
+  &.bulma-is-right
+    justify-content: flex-end
+    &:not(.bulma-has-addons)
+      .bulma-button:not(.bulma-is-fullwidth)
+        margin-left: 0.25rem
+        margin-right: 0.25rem

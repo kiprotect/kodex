@@ -1,0 +1,44 @@
+@import "../variables";
+
+.kip-with-app-selector {
+    .kip-logo-wrapper {
+        display: block;
+        margin: 0 auto;
+        text-align: center;
+        vertical-align: center;
+
+        & + .kip-card-title {
+            h2 {
+                text-align: right;
+            }
+        }
+
+        img.kip-logo {
+            height: 1.5rem;
+        }
+
+        a {
+            color: inherit;
+            display: inline-block;
+            margin-top: 0.75rem;
+        }
+    }
+
+    a.kip-with-app-selector-link {
+        display: block;
+        width: 100%;
+        background: inherit;
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: #fff;
+        padding: map-get($kip-space, lg);
+
+        &:hover {
+            color: #fff;
+        }
+        & + * {
+            padding-top: 70px;
+        }
+    }
+}

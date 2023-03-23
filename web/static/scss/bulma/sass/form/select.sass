@@ -1,0 +1,85 @@
+.bulma-select
+  display: inline-block
+  max-width: 100%
+  position: relative
+  vertical-align: top
+  &:not(.bulma-is-multiple)
+    height: $bulma-input-height
+  &:not(.bulma-is-multiple):not(.bulma-is-loading)
+    &::after
+      @extend %arrow
+      border-color: $bulma-input-arrow
+      right: 1.125em
+      z-index: 4
+  &.bulma-is-rounded
+    select
+      border-radius: $bulma-radius-rounded
+      padding-left: 1em
+  select
+    @extend %input
+    cursor: pointer
+    display: block
+    font-size: 1em
+    max-width: 100%
+    outline: none
+    &::-ms-expand
+      display: none
+    &[disabled]:hover,
+    fieldset[disabled] &:hover
+      border-color: $bulma-input-disabled-border-color
+    &:not([multiple])
+      padding-right: 2.5em
+    &[multiple]
+      height: auto
+      padding: 0
+      option
+        padding: 0.5em 1em
+  // States
+  &:not(.bulma-is-multiple):not(.bulma-is-loading):hover
+    &::after
+      border-color: $bulma-input-hover-color
+  // Colors
+  @each $bulma-name, $bulma-pair in $bulma-colors
+    $bulma-color: nth($bulma-pair, 1)
+    &.bulma-is-#{$bulma-name}
+      &:not(:hover)::after
+        border-color: $bulma-color
+      select
+        border-color: $bulma-color
+        &:hover,
+        &.bulma-is-hovered
+          border-color: darken($bulma-color, 5%)
+        &:focus,
+        &.bulma-is-focused,
+        &:active,
+        &.bulma-is-active
+          box-shadow: $bulma-input-focus-box-shadow-size rgba($bulma-color, 0.25)
+  // Sizes
+  &.bulma-is-small
+    +bulma-control-small
+  &.bulma-is-medium
+    +bulma-control-medium
+  &.bulma-is-large
+    +bulma-control-large
+  // Modifiers
+  &.bulma-is-disabled
+    &::after
+      border-color: $bulma-input-disabled-color
+  &.bulma-is-fullwidth
+    width: 100%
+    select
+      width: 100%
+  &.bulma-is-loading
+    &::after
+      @extend %loader
+      margin-top: 0
+      position: absolute
+      right: 0.625em
+      top: 0.625em
+      transform: none
+    &.bulma-is-small:after
+      font-size: $bulma-size-small
+    &.bulma-is-medium:after
+      font-size: $bulma-size-medium
+    &.bulma-is-large:after
+      font-size: $bulma-size-large

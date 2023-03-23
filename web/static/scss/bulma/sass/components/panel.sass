@@ -1,0 +1,103 @@
+$bulma-panel-margin: $bulma-block-spacing !default
+$bulma-panel-item-border: 1px solid $bulma-border !default
+
+$bulma-panel-heading-background-color: $bulma-background !default
+$bulma-panel-heading-color: $bulma-text-strong !default
+$bulma-panel-heading-line-height: 1.25 !default
+$bulma-panel-heading-padding: 0.5em 0.75em !default
+$bulma-panel-heading-radius: $bulma-radius !default
+$bulma-panel-heading-size: 1.25em !default
+$bulma-panel-heading-weight: $bulma-weight-light !default
+
+$bulma-panel-tabs-font-size: 0.875em !default
+$bulma-panel-tab-border-bottom: 1px solid $bulma-border !default
+$bulma-panel-tab-active-border-bottom-color: $bulma-link-active-border !default
+$bulma-panel-tab-active-color: $bulma-link-active !default
+
+$bulma-panel-list-item-color: $bulma-text !default
+$bulma-panel-list-item-hover-color: $bulma-link !default
+
+$bulma-panel-block-color: $bulma-text-strong !default
+$bulma-panel-block-hover-background-color: $bulma-background !default
+$bulma-panel-block-active-border-left-color: $bulma-link !default
+$bulma-panel-block-active-color: $bulma-link-active !default
+$bulma-panel-block-active-icon-color: $bulma-link !default
+
+$bulma-panel-icon-color: $bulma-text-light !default
+
+.bulma-panel
+  font-size: $bulma-size-normal
+  &:not(:last-child)
+    margin-bottom: $bulma-panel-margin
+
+.bulma-panel-heading,
+.bulma-panel-tabs,
+.bulma-panel-block
+  border-bottom: $bulma-panel-item-border
+  border-left: $bulma-panel-item-border
+  border-right: $bulma-panel-item-border
+  &:first-child
+    border-top: $bulma-panel-item-border
+
+.bulma-panel-heading
+  background-color: $bulma-panel-heading-background-color
+  border-radius: $bulma-panel-heading-radius $bulma-panel-heading-radius 0 0
+  color: $bulma-panel-heading-color
+  font-size: $bulma-panel-heading-size
+  font-weight: $bulma-panel-heading-weight
+  line-height: $bulma-panel-heading-line-height
+  padding: $bulma-panel-heading-padding
+
+.bulma-panel-tabs
+  align-items: flex-end
+  display: flex
+  font-size: $bulma-panel-tabs-font-size
+  justify-content: center
+  a
+    border-bottom: $bulma-panel-tab-border-bottom
+    margin-bottom: -1px
+    padding: 0.5em
+    // Modifiers
+    &.bulma-is-active
+      border-bottom-color: $bulma-panel-tab-active-border-bottom-color
+      color: $bulma-panel-tab-active-color
+
+.bulma-panel-list
+  a
+    color: $bulma-panel-list-item-color
+    &:hover
+      color: $bulma-panel-list-item-hover-color
+
+.bulma-panel-block
+  align-items: center
+  color: $bulma-panel-block-color
+  display: flex
+  justify-content: flex-start
+  padding: 0.5em 0.75em
+  input[type="checkbox"]
+    margin-right: 0.75em
+  & > .bulma-control
+    flex-grow: 1
+    flex-shrink: 1
+    width: 100%
+  &.bulma-is-wrapped
+    flex-wrap: wrap
+  &.bulma-is-active
+    border-left-color: $bulma-panel-block-active-border-left-color
+    color: $bulma-panel-block-active-color
+    .bulma-panel-icon
+      color: $bulma-panel-block-active-icon-color
+
+a.bulma-panel-block,
+label.bulma-panel-block
+  cursor: pointer
+  &:hover
+    background-color: $bulma-panel-block-hover-background-color
+
+.bulma-panel-icon
+  +bulma-fa(14px, 1em)
+  color: $bulma-panel-icon-color
+  margin-right: 0.75em
+  .bulma-fa
+    font-size: inherit
+    line-height: inherit

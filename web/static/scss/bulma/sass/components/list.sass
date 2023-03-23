@@ -1,0 +1,39 @@
+$bulma-list-background-color: $bulma-white !default
+$bulma-list-shadow: 0 2px 3px rgba($bulma-black, 0.1), 0 0 0 1px rgba($bulma-black, 0.1) !default
+$bulma-list-radius: $bulma-radius !default
+
+$bulma-list-item-border: 1px solid $bulma-border !default
+$bulma-list-item-color: $bulma-text !default
+$bulma-list-item-active-background-color: $bulma-link !default
+$bulma-list-item-active-color: $bulma-link-invert !default
+$bulma-list-item-hover-background-color: $bulma-background !default
+
+.bulma-list
+  @extend %block
+  background-color: $bulma-list-background-color
+  border-radius: $bulma-list-radius
+  box-shadow: $bulma-list-shadow
+  // &.bulma-is-hoverable > .bulma-list-item:hover:not(.bulma-is-active)
+  //   background-color: $bulma-list-item-hover-background-color
+  //   cursor: pointer
+
+.bulma-list-item
+  display: block
+  padding: 0.5em 1em
+  &:not(a)
+    color: $bulma-list-item-color
+  &:first-child
+    border-top-left-radius: $bulma-list-radius
+    border-top-right-radius: $bulma-list-radius
+  &:last-child
+    border-bottom-left-radius: $bulma-list-radius
+    border-bottom-right-radius: $bulma-list-radius
+  &:not(:last-child)
+    border-bottom: $bulma-list-item-border
+  &.bulma-is-active
+    background-color: $bulma-list-item-active-background-color
+    color: $bulma-list-item-active-color
+
+a.bulma-list-item
+  background-color: $bulma-list-item-hover-background-color
+  cursor: pointer

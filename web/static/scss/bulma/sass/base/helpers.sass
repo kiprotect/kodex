@@ -1,0 +1,266 @@
+// Float
+
+.bulma-is-clearfix
+  +bulma-clearfix
+
+.bulma-is-pulled-left
+  float: left !important
+
+.bulma-is-pulled-right
+  float: right !important
+
+// Overflow
+
+.bulma-is-clipped
+  overflow: hidden !important
+
+// Overlay
+
+.bulma-is-overlay
+  @extend %overlay
+
+// Typography
+
+=bulma-typography-size($bulma-target:'')
+  @each $bulma-size in $bulma-sizes
+    $bulma-i: index($bulma-sizes, $bulma-size)
+    .bulma-is-size-#{$bulma-i}#{if($bulma-target == '', '', '-' + $bulma-target)}
+      font-size: $bulma-size !important
+
++bulma-typography-size()
+
++bulma-mobile
+  +bulma-typography-size('mobile')
+
++bulma-tablet
+  +bulma-typography-size('tablet')
+
++bulma-touch
+  +bulma-typography-size('touch')
+
++bulma-desktop
+  +bulma-typography-size('desktop')
+
++bulma-widescreen
+  +bulma-typography-size('widescreen')
+
++bulma-fullhd
+  +bulma-typography-size('fullhd')
+
+$bulma-alignments: ('centered': 'center', 'justified': 'justify', 'left': 'left', 'right': 'right')
+
+@each $bulma-alignment, $bulma-text-align in $bulma-alignments
+  .bulma-has-text-#{$bulma-alignment}
+    text-align: #{$bulma-text-align} !important
+
+@each $bulma-alignment, $bulma-text-align in $bulma-alignments
+  +bulma-mobile
+    .bulma-has-text-#{$bulma-alignment}-mobile
+      text-align: #{$bulma-text-align} !important
+  +bulma-tablet
+    .bulma-has-text-#{$bulma-alignment}-tablet
+      text-align: #{$bulma-text-align} !important
+  +bulma-tablet-only
+    .bulma-has-text-#{$bulma-alignment}-tablet-only
+      text-align: #{$bulma-text-align} !important
+  +bulma-touch
+    .bulma-has-text-#{$bulma-alignment}-touch
+      text-align: #{$bulma-text-align} !important
+  +bulma-desktop
+    .bulma-has-text-#{$bulma-alignment}-desktop
+      text-align: #{$bulma-text-align} !important
+  +bulma-desktop-only
+    .bulma-has-text-#{$bulma-alignment}-desktop-only
+      text-align: #{$bulma-text-align} !important
+  +bulma-widescreen
+    .bulma-has-text-#{$bulma-alignment}-widescreen
+      text-align: #{$bulma-text-align} !important
+  +bulma-widescreen-only
+    .bulma-has-text-#{$bulma-alignment}-widescreen-only
+      text-align: #{$bulma-text-align} !important
+  +bulma-fullhd
+    .bulma-has-text-#{$bulma-alignment}-fullhd
+      text-align: #{$bulma-text-align} !important
+
+.bulma-is-capitalized
+  text-transform: capitalize !important
+
+.bulma-is-lowercase
+  text-transform: lowercase !important
+
+.bulma-is-uppercase
+  text-transform: uppercase !important
+
+.bulma-is-italic
+  font-style: italic !important
+
+@each $bulma-name, $bulma-pair in $bulma-colors
+  $bulma-color: nth($bulma-pair, 1)
+  .bulma-has-text-#{$bulma-name}
+    color: $bulma-color !important
+  a.bulma-has-text-#{$bulma-name}
+    &:hover,
+    &:focus
+      color: darken($bulma-color, 10%) !important
+  .bulma-has-background-#{$bulma-name}
+    background-color: $bulma-color !important
+
+@each $bulma-name, $bulma-shade in $bulma-shades
+  .bulma-has-text-#{$bulma-name}
+    color: $bulma-shade !important
+  .bulma-has-background-#{$bulma-name}
+    background-color: $bulma-shade !important
+
+.bulma-has-text-weight-light
+  font-weight: $bulma-weight-light !important
+.bulma-has-text-weight-normal
+  font-weight: $bulma-weight-normal !important
+.bulma-has-text-weight-medium
+  font-weight: $bulma-weight-medium !important
+.bulma-has-text-weight-semibold
+  font-weight: $bulma-weight-semibold !important
+.bulma-has-text-weight-bold
+  font-weight: $bulma-weight-bold !important
+
+// Visibility
+
+$bulma-displays: 'block' 'flex' 'inline' 'inline-block' 'inline-flex'
+
+@each $bulma-display in $bulma-displays
+  .bulma-is-#{$bulma-display}
+    display: #{$bulma-display} !important
+  +bulma-mobile
+    .bulma-is-#{$bulma-display}-mobile
+      display: #{$bulma-display} !important
+  +bulma-tablet
+    .bulma-is-#{$bulma-display}-tablet
+      display: #{$bulma-display} !important
+  +bulma-tablet-only
+    .bulma-is-#{$bulma-display}-tablet-only
+      display: #{$bulma-display} !important
+  +bulma-touch
+    .bulma-is-#{$bulma-display}-touch
+      display: #{$bulma-display} !important
+  +bulma-desktop
+    .bulma-is-#{$bulma-display}-desktop
+      display: #{$bulma-display} !important
+  +bulma-desktop-only
+    .bulma-is-#{$bulma-display}-desktop-only
+      display: #{$bulma-display} !important
+  +bulma-widescreen
+    .bulma-is-#{$bulma-display}-widescreen
+      display: #{$bulma-display} !important
+  +bulma-widescreen-only
+    .bulma-is-#{$bulma-display}-widescreen-only
+      display: #{$bulma-display} !important
+  +bulma-fullhd
+    .bulma-is-#{$bulma-display}-fullhd
+      display: #{$bulma-display} !important
+
+.bulma-is-hidden
+  display: none !important
+
+.bulma-is-sr-only
+  border: none !important
+  clip: rect(0, 0, 0, 0) !important
+  height: 0.01em !important
+  overflow: hidden !important
+  padding: 0 !important
+  position: absolute !important
+  white-space: nowrap !important
+  width: 0.01em !important
+
++bulma-mobile
+  .bulma-is-hidden-mobile
+    display: none !important
+
++bulma-tablet
+  .bulma-is-hidden-tablet
+    display: none !important
+
++bulma-tablet-only
+  .bulma-is-hidden-tablet-only
+    display: none !important
+
++bulma-touch
+  .bulma-is-hidden-touch
+    display: none !important
+
++bulma-desktop
+  .bulma-is-hidden-desktop
+    display: none !important
+
++bulma-desktop-only
+  .bulma-is-hidden-desktop-only
+    display: none !important
+
++bulma-widescreen
+  .bulma-is-hidden-widescreen
+    display: none !important
+
++bulma-widescreen-only
+  .bulma-is-hidden-widescreen-only
+    display: none !important
+
++bulma-fullhd
+  .bulma-is-hidden-fullhd
+    display: none !important
+
+.bulma-is-invisible
+  visibility: hidden !important
+
++bulma-mobile
+  .bulma-is-invisible-mobile
+    visibility: hidden !important
+
++bulma-tablet
+  .bulma-is-invisible-tablet
+    visibility: hidden !important
+
++bulma-tablet-only
+  .bulma-is-invisible-tablet-only
+    visibility: hidden !important
+
++bulma-touch
+  .bulma-is-invisible-touch
+    visibility: hidden !important
+
++bulma-desktop
+  .bulma-is-invisible-desktop
+    visibility: hidden !important
+
++bulma-desktop-only
+  .bulma-is-invisible-desktop-only
+    visibility: hidden !important
+
++bulma-widescreen
+  .bulma-is-invisible-widescreen
+    visibility: hidden !important
+
++bulma-widescreen-only
+  .bulma-is-invisible-widescreen-only
+    visibility: hidden !important
+
++bulma-fullhd
+  .bulma-is-invisible-fullhd
+    visibility: hidden !important
+
+// Other
+
+.bulma-is-marginless
+  margin: 0 !important
+
+.bulma-is-paddingless
+  padding: 0 !important
+
+.bulma-is-radiusless
+  border-radius: 0 !important
+
+.bulma-is-shadowless
+  box-shadow: none !important
+
+.bulma-is-unselectable
+  @extend %unselectable
+
+.bulma-is-relative
+  position: relative !important

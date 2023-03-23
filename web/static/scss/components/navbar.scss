@@ -1,0 +1,152 @@
+@import "../variables.scss";
+
+.kip-navbar-dropdown {
+    max-width: 300px;
+
+    &__item {
+        display: block;
+        overflow: hidden;
+        font-weight: bold;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+}
+
+.kip-navbar {
+    @media screen and (min-width: $kip-desktop) {
+        .bulma-navbar-item.bulma-has-dropdown:hover .bulma-navbar-link,
+        .bulma-navbar-item.bulma-has-dropdown.bulma-is-active
+        .bulma-navbar-link {
+            background-color: $kip-darkblue;
+        }
+    }
+
+    .centered {
+        width: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    span.kip-version {
+        display: inline-block;
+        font-size: 10px;
+        padding-left: 10px;
+        color: #aaa;
+        text-transform: uppercase;
+    }
+
+    .bulma-navbar-brand {
+        .kip-logo-wrapper {
+            margin: 0 0.5rem;
+            text-align: center;
+            vertical-align: center;
+
+            img.kip-logo {
+                height: 1.5rem;
+                @media (max-width: $kip-desktop) {
+                    display: none;
+                }
+            }
+
+            img.kip-small-logo {
+                height: 1.5rem;
+                @media (min-width: $kip-desktop) {
+                    display: none;
+                }
+            }
+
+            a {
+                color: inherit;
+                display: inline-block;
+                margin-top: 0.75rem;
+            }
+        }
+    }
+
+    span.bulma-is-hidden-navbar {
+        display: none;
+    }
+
+    box-shadow: $kip-box-shadow;
+    background-color: $kip-white;
+    z-index: 30;
+    position: relative;
+    font-size: 1.1rem;
+
+    .bulma-navbar-item {
+        align-items: center;
+        flex-shrink: 1;
+        line-height: 1.5;
+        padding: 0.5rem 0.75rem;
+        position: relative;
+    }
+
+    .bulma-navbar-title {
+        @include font-muli;
+        display: inline-block;
+        flex-grow: 1;
+        text-align: center;
+        margin: 0 auto;
+        font-weight: 400;
+        margin-right: 64px;
+
+        @media (max-width: $kip-tablet) {
+            text-align: left;
+            font-size: 14px;
+        }
+
+        @media (max-width: $kip-desktop) {
+            margin-left: 10px;
+        }
+    }
+    .bulma-navbar-item,
+    .bulma-navbar-link {
+        &::after {
+            border-color: $kip-darkblue;
+        }
+    }
+
+    .bulma-navbar-link:hover,
+    .bulma-navbar-item.bulma-is-active .bulma-navbar-link {
+        color: $kip-white-transparent;
+
+        &::after {
+            border-color: $kip-white-transparent;
+        }
+
+        i.fas {
+            text-decoration: none;
+        }
+    }
+
+    .bulma-navbar-link span > .bulma-panel-icon {
+        color: $kip-white;
+    }
+}
+
+@media (max-width: $kip-desktop) {
+    .kip-navbar {
+        .bulma-navbar-menu {
+            width: 0px;
+            transition: width 0.5s;
+        }
+
+        .bulma-navbar-menu.bulma-is-active {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            padding-top: 40px;
+            width: auto;
+            a {
+                padding-right: 60px;
+            }
+        }
+
+        .bulma-navbar-burger {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+    }
+}

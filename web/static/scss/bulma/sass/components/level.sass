@@ -1,0 +1,77 @@
+$bulma-level-item-spacing: ($bulma-block-spacing * 0.5) !default
+
+.bulma-level
+  @extend %block
+  align-items: center
+  justify-content: space-between
+  code
+    border-radius: $bulma-radius
+  img
+    display: inline-block
+    vertical-align: top
+  // Modifiers
+  &.bulma-is-mobile
+    display: flex
+    .bulma-level-left,
+    .bulma-level-right
+      display: flex
+    .bulma-level-left + .bulma-level-right
+      margin-top: 0
+    .bulma-level-item
+      &:not(:last-child)
+        margin-bottom: 0
+        margin-right: $bulma-level-item-spacing
+      &:not(.bulma-is-narrow)
+        flex-grow: 1
+  // Responsiveness
+  +bulma-tablet
+    display: flex
+    & > .bulma-level-item
+      &:not(.bulma-is-narrow)
+        flex-grow: 1
+
+.bulma-level-item
+  align-items: center
+  display: flex
+  flex-basis: auto
+  flex-grow: 0
+  flex-shrink: 0
+  justify-content: center
+  .bulma-title,
+  .bulma-subtitle
+    margin-bottom: 0
+  // Responsiveness
+  +bulma-mobile
+    &:not(:last-child)
+      margin-bottom: $bulma-level-item-spacing
+
+.bulma-level-left,
+.bulma-level-right
+  flex-basis: auto
+  flex-grow: 0
+  flex-shrink: 0
+  .bulma-level-item
+    // Modifiers
+    &.bulma-is-flexible
+      flex-grow: 1
+    // Responsiveness
+    +bulma-tablet
+      &:not(:last-child)
+        margin-right: $bulma-level-item-spacing
+
+.bulma-level-left
+  align-items: center
+  justify-content: flex-start
+  // Responsiveness
+  +bulma-mobile
+    & + .bulma-level-right
+      margin-top: 1.5rem
+  +bulma-tablet
+    display: flex
+
+.bulma-level-right
+  align-items: center
+  justify-content: flex-end
+  // Responsiveness
+  +bulma-tablet
+    display: flex

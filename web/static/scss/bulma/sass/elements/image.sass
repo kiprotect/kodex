@@ -1,0 +1,69 @@
+$bulma-dimensions: 16 24 32 48 64 96 128 !default
+
+.bulma-image
+  display: block
+  position: relative
+  img
+    display: block
+    height: auto
+    width: 100%
+    &.bulma-is-rounded
+      border-radius: $bulma-radius-rounded
+  // Ratio
+  &.bulma-is-square,
+  &.bulma-is-1by1,
+  &.bulma-is-5by4,
+  &.bulma-is-4by3,
+  &.bulma-is-3by2,
+  &.bulma-is-5by3,
+  &.bulma-is-16by9,
+  &.bulma-is-2by1,
+  &.bulma-is-3by1,
+  &.bulma-is-4by5,
+  &.bulma-is-3by4,
+  &.bulma-is-2by3,
+  &.bulma-is-3by5,
+  &.bulma-is-9by16,
+  &.bulma-is-1by2,
+  &.bulma-is-1by3
+    img,
+    .bulma-has-ratio
+      @extend %overlay
+      height: 100%
+      width: 100%
+  &.bulma-is-square,
+  &.bulma-is-1by1
+    padding-top: 100%
+  &.bulma-is-5by4
+    padding-top: 80%
+  &.bulma-is-4by3
+    padding-top: 75%
+  &.bulma-is-3by2
+    padding-top: 66.6666%
+  &.bulma-is-5by3
+    padding-top: 60%
+  &.bulma-is-16by9
+    padding-top: 56.25%
+  &.bulma-is-2by1
+    padding-top: 50%
+  &.bulma-is-3by1
+    padding-top: 33.3333%
+  &.bulma-is-4by5
+    padding-top: 125%
+  &.bulma-is-3by4
+    padding-top: 133.3333%
+  &.bulma-is-2by3
+    padding-top: 150%
+  &.bulma-is-3by5
+    padding-top: 166.6666%
+  &.bulma-is-9by16
+    padding-top: 177.7777%
+  &.bulma-is-1by2
+    padding-top: 200%
+  &.bulma-is-1by3
+    padding-top: 300%
+  // Sizes
+  @each $bulma-dimension in $bulma-dimensions
+    &.bulma-is-#{$bulma-dimension}x#{$bulma-dimension}
+      height: $bulma-dimension * 1px
+      width: $bulma-dimension * 1px

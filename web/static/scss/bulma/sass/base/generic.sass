@@ -1,0 +1,127 @@
+$bulma-body-background-color: $bulma-white !default
+$bulma-body-size: 16px !default
+$bulma-body-min-width: 300px !default
+$bulma-body-rendering: optimizeLegibility !default
+$bulma-body-overflow-x: hidden !default
+$bulma-body-overflow-y: scroll !default
+
+$bulma-body-color: $bulma-text !default
+$bulma-body-font-size: 1em !default
+$bulma-body-weight: $bulma-weight-normal !default
+$bulma-body-line-height: 1.5 !default
+
+$bulma-code-padding: 0.25em 0.5em 0.25em !default
+$bulma-code-weight: normal !default
+$bulma-code-size: 0.875em !default
+
+$bulma-small-font-size: 0.875em !default
+
+$bulma-hr-background-color: $bulma-background !default
+$bulma-hr-height: 2px !default
+$bulma-hr-margin: 1.5rem 0 !default
+
+$bulma-strong-color: $bulma-text-strong !default
+$bulma-strong-weight: $bulma-weight-bold !default
+
+$bulma-pre-font-size: 0.875em !default
+$bulma-pre-padding: 1.25rem 1.5rem !default
+$bulma-pre-code-font-size: 1em !default
+
+html
+  background-color: $bulma-body-background-color
+  font-size: $bulma-body-size
+  -moz-osx-font-smoothing: grayscale
+  -webkit-font-smoothing: antialiased
+  min-width: $bulma-body-min-width
+  overflow-x: $bulma-body-overflow-x
+  overflow-y: $bulma-body-overflow-y
+  text-rendering: $bulma-body-rendering
+  text-size-adjust: 100%
+
+article,
+aside,
+figure,
+footer,
+header,
+hgroup,
+section
+  display: block
+
+.bulma, .kip
+  color: $bulma-body-color
+  font-size: $bulma-body-font-size
+  font-weight: $bulma-body-weight
+  line-height: $bulma-body-line-height
+
+  // Inline
+
+  a
+    color: $bulma-link
+    cursor: pointer
+    text-decoration: none
+    strong
+      color: currentColor
+    &:hover
+      color: $bulma-link-hover
+
+  code
+    background-color: $bulma-code-background
+    color: $bulma-code
+    font-size: $bulma-code-size
+    font-weight: $bulma-code-weight
+    padding: $bulma-code-padding
+
+  hr
+    background-color: $bulma-hr-background-color
+    border: none
+    display: block
+    height: $bulma-hr-height
+    margin: $bulma-hr-margin
+
+  img
+    height: auto
+    max-width: 100%
+
+  input[type="checkbox"],
+  input[type="radio"]
+    vertical-align: baseline
+
+  small
+    font-size: $bulma-small-font-size
+
+  span
+    font-style: inherit
+    font-weight: inherit
+
+  strong
+    color: $bulma-strong-color
+    font-weight: $bulma-strong-weight
+
+  // Block
+
+  fieldset
+    border: none
+
+  pre
+    +bulma-overflow-touch
+    background-color: $bulma-pre-background
+    color: $bulma-pre
+    font-size: $bulma-pre-font-size
+    overflow-x: auto
+    padding: $bulma-pre-padding
+    white-space: pre
+    word-wrap: normal
+    code
+      background-color: transparent
+      color: currentColor
+      font-size: $bulma-pre-code-font-size
+      padding: 0
+
+  table
+    td,
+    th
+      vertical-align: top
+      &:not([align])
+        text-align: left
+    th
+      color: $bulma-text-strong

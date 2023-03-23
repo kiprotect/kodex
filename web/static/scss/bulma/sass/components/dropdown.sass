@@ -1,0 +1,81 @@
+$bulma-dropdown-menu-min-width: 12rem !default
+
+$bulma-dropdown-content-background-color: $bulma-white !default
+$bulma-dropdown-content-arrow: $bulma-link !default
+$bulma-dropdown-content-offset: 4px !default
+$bulma-dropdown-content-padding-bottom: 0.5rem !default
+$bulma-dropdown-content-padding-top: 0.5rem !default
+$bulma-dropdown-content-radius: $bulma-radius !default
+$bulma-dropdown-content-shadow: 0 2px 3px rgba($bulma-black, 0.1), 0 0 0 1px rgba($bulma-black, 0.1) !default
+$bulma-dropdown-content-z: 20 !default
+
+$bulma-dropdown-item-color: $bulma-grey-dark !default
+$bulma-dropdown-item-hover-color: $bulma-black !default
+$bulma-dropdown-item-hover-background-color: $bulma-background !default
+$bulma-dropdown-item-active-color: $bulma-link-invert !default
+$bulma-dropdown-item-active-background-color: $bulma-link !default
+
+$bulma-dropdown-divider-background-color: $bulma-border !default
+
+.bulma-dropdown
+  display: inline-flex
+  position: relative
+  vertical-align: top
+  &.bulma-is-active,
+  &.bulma-is-hoverable:hover
+    .bulma-dropdown-menu
+      display: block
+  &.bulma-is-right
+    .bulma-dropdown-menu
+      left: auto
+      right: 0
+  &.bulma-is-up
+    .bulma-dropdown-menu
+      bottom: 100%
+      padding-bottom: $bulma-dropdown-content-offset
+      padding-top: initial
+      top: auto
+
+.bulma-dropdown-menu
+  display: none
+  left: 0
+  min-width: $bulma-dropdown-menu-min-width
+  padding-top: $bulma-dropdown-content-offset
+  position: absolute
+  top: 100%
+  z-index: $bulma-dropdown-content-z
+
+.bulma-dropdown-content
+  background-color: $bulma-dropdown-content-background-color
+  border-radius: $bulma-dropdown-content-radius
+  box-shadow: $bulma-dropdown-content-shadow
+  padding-bottom: $bulma-dropdown-content-padding-bottom
+  padding-top: $bulma-dropdown-content-padding-top
+
+.bulma-dropdown-item
+  color: $bulma-dropdown-item-color
+  display: block
+  font-size: 0.875rem
+  line-height: 1.5
+  padding: 0.375rem 1rem
+  position: relative
+
+a.bulma-dropdown-item,
+button.bulma-dropdown-item
+  padding-right: 3rem
+  text-align: left
+  white-space: nowrap
+  width: 100%
+  &:hover
+    background-color: $bulma-dropdown-item-hover-background-color
+    color: $bulma-dropdown-item-hover-color
+  &.bulma-is-active
+    background-color: $bulma-dropdown-item-active-background-color
+    color: $bulma-dropdown-item-active-color
+
+.bulma-dropdown-divider
+  background-color: $bulma-dropdown-divider-background-color
+  border: none
+  display: block
+  height: 1px
+  margin: 0.5rem 0

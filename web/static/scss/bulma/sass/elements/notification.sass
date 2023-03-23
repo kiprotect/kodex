@@ -1,0 +1,35 @@
+$bulma-notification-background-color: $bulma-background !default
+$bulma-notification-radius: $bulma-radius !default
+$bulma-notification-padding: 1.25rem 2.5rem 1.25rem 1.5rem !default
+
+.bulma-notification
+  @extend %block
+  background-color: $bulma-notification-background-color
+  border-radius: $bulma-notification-radius
+  padding: $bulma-notification-padding
+  position: relative
+  a:not(.bulma-button):not(.bulma-dropdown-item)
+    color: currentColor
+    text-decoration: underline
+  strong
+    color: currentColor
+  code,
+  pre
+    background: $bulma-white
+  pre code
+    background: transparent
+  & > .bulma-delete
+    position: absolute
+    right: 0.5rem
+    top: 0.5rem
+  .bulma-title,
+  .bulma-subtitle,
+  .bulma-content
+    color: currentColor
+  // Colors
+  @each $bulma-name, $bulma-pair in $bulma-colors
+    $bulma-color: nth($bulma-pair, 1)
+    $bulma-color-invert: nth($bulma-pair, 2)
+    &.bulma-is-#{$bulma-name}
+      background-color: $bulma-color
+      color: $bulma-color-invert

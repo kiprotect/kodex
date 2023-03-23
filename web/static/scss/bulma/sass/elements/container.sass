@@ -1,0 +1,23 @@
+$bulma-container-offset: (2 * $bulma-gap) !default
+
+.bulma-container
+  flex-grow: 1
+  margin: 0 auto
+  position: relative
+  width: auto
+  +bulma-desktop
+    max-width: $bulma-desktop - $bulma-container-offset
+    &.bulma-is-fluid
+      margin-left: $bulma-gap
+      margin-right: $bulma-gap
+      max-width: none
+  +bulma-until-widescreen
+    &.bulma-is-widescreen
+      max-width: $bulma-widescreen - $bulma-container-offset
+  +bulma-until-fullhd
+    &.bulma-is-fullhd
+      max-width: $bulma-fullhd - $bulma-container-offset
+  +bulma-widescreen
+    max-width: $bulma-widescreen - $bulma-container-offset
+  +bulma-fullhd
+    max-width: $bulma-fullhd - $bulma-container-offset

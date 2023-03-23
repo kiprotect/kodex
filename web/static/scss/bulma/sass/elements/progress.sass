@@ -1,0 +1,67 @@
+$bulma-progress-bar-background-color: $bulma-border !default
+$bulma-progress-value-background-color: $bulma-text !default
+$bulma-progress-border-radius: $bulma-radius-rounded !default
+
+$bulma-progress-indeterminate-duration: 1.5s !default
+
+.bulma-progress
+  @extend %block
+  -moz-appearance: none
+  -webkit-appearance: none
+  border: none
+  border-radius: $bulma-progress-border-radius
+  display: block
+  height: $bulma-size-normal
+  overflow: hidden
+  padding: 0
+  width: 100%
+  &::-webkit-progress-bar
+    background-color: $bulma-progress-bar-background-color
+  &::-webkit-progress-value
+    background-color: $bulma-progress-value-background-color
+  &::-moz-progress-bar
+    background-color: $bulma-progress-value-background-color
+  &::-ms-fill
+    background-color: $bulma-progress-value-background-color
+    border: none
+  // Colors
+  @each $bulma-name, $bulma-pair in $bulma-colors
+    $bulma-color: nth($bulma-pair, 1)
+    &.bulma-is-#{$bulma-name}
+      &::-webkit-progress-value
+        background-color: $bulma-color
+      &::-moz-progress-bar
+        background-color: $bulma-color
+      &::-ms-fill
+        background-color: $bulma-color
+      &:indeterminate
+        background-image: linear-gradient(to right, $bulma-color 30%, $bulma-progress-bar-background-color 30%)
+
+  &:indeterminate
+    animation-duration: $bulma-progress-indeterminate-duration
+    animation-iteration-count: infinite
+    animation-name: moveIndeterminate
+    animation-timing-function: linear
+    background-color: $bulma-progress-bar-background-color
+    background-image: linear-gradient(to right, $bulma-text 30%, $bulma-progress-bar-background-color 30%)
+    background-position: top left
+    background-repeat: no-repeat
+    background-size: 150% 150%
+    &::-webkit-progress-bar
+      background-color: transparent
+    &::-moz-progress-bar
+      background-color: transparent
+
+  // Sizes
+  &.bulma-is-small
+    height: $bulma-size-small
+  &.bulma-is-medium
+    height: $bulma-size-medium
+  &.bulma-is-large
+    height: $bulma-size-large
+
+@keyframes moveIndeterminate
+  from
+    background-position: 200% 0
+  to
+    background-position: -200% 0

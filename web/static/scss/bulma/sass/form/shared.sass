@@ -1,0 +1,55 @@
+$bulma-input-color: $bulma-grey-darker !default
+$bulma-input-background-color: $bulma-white !default
+$bulma-input-border-color: $bulma-grey-lighter !default
+$bulma-input-height: $bulma-control-height !default
+$bulma-input-shadow: inset 0 1px 2px rgba($bulma-black, 0.1) !default
+$bulma-input-placeholder-color: rgba($bulma-input-color, 0.3) !default
+
+$bulma-input-hover-color: $bulma-grey-darker !default
+$bulma-input-hover-border-color: $bulma-grey-light !default
+
+$bulma-input-focus-color: $bulma-grey-darker !default
+$bulma-input-focus-border-color: $bulma-link !default
+$bulma-input-focus-box-shadow-size: 0 0 0 0.125em !default
+$bulma-input-focus-box-shadow-color: rgba($bulma-link, 0.25) !default
+
+$bulma-input-disabled-color: $bulma-text-light !default
+$bulma-input-disabled-background-color: $bulma-background !default
+$bulma-input-disabled-border-color: $bulma-background !default
+$bulma-input-disabled-placeholder-color: rgba($bulma-input-disabled-color, 0.3) !default
+
+$bulma-input-arrow: $bulma-link !default
+
+$bulma-input-icon-color: $bulma-grey-lighter !default
+$bulma-input-icon-active-color: $bulma-grey !default
+
+$bulma-input-radius: $bulma-radius !default
+
+=bulma-input
+  @extend %control
+  background-color: $bulma-input-background-color
+  border-color: $bulma-input-border-color
+  border-radius: $bulma-input-radius
+  color: $bulma-input-color
+  +bulma-placeholder
+    color: $bulma-input-placeholder-color
+  &:hover,
+  &.bulma-is-hovered
+    border-color: $bulma-input-hover-border-color
+  &:focus,
+  &.bulma-is-focused,
+  &:active,
+  &.bulma-is-active
+    border-color: $bulma-input-focus-border-color
+    box-shadow: $bulma-input-focus-box-shadow-size $bulma-input-focus-box-shadow-color
+  &[disabled],
+  fieldset[disabled] &
+    background-color: $bulma-input-disabled-background-color
+    border-color: $bulma-input-disabled-border-color
+    box-shadow: none
+    color: $bulma-input-disabled-color
+    +bulma-placeholder
+      color: $bulma-input-disabled-placeholder-color
+
+%input
+  +bulma-input

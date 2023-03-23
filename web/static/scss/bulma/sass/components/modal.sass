@@ -1,0 +1,116 @@
+$bulma-modal-z: 40 !default
+
+$bulma-modal-background-background-color: rgba($bulma-black, 0.86) !default
+
+$bulma-modal-content-width: 640px !default
+$bulma-modal-content-margin-mobile: 20px !default
+$bulma-modal-content-spacing-mobile: 160px !default
+$bulma-modal-content-spacing-tablet: 40px !default
+
+$bulma-modal-close-dimensions: 40px !default
+$bulma-modal-close-right: 20px !default
+$bulma-modal-close-top: 20px !default
+
+$bulma-modal-card-spacing: 40px !default
+
+$bulma-modal-card-head-background-color: $bulma-background !default
+$bulma-modal-card-head-border-bottom: 1px solid $bulma-border !default
+$bulma-modal-card-head-padding: 20px !default
+$bulma-modal-card-head-radius: $bulma-radius-large !default
+
+$bulma-modal-card-title-color: $bulma-text-strong !default
+$bulma-modal-card-title-line-height: 1 !default
+$bulma-modal-card-title-size: $bulma-size-4 !default
+
+$bulma-modal-card-foot-radius: $bulma-radius-large !default
+$bulma-modal-card-foot-border-top: 1px solid $bulma-border !default
+
+$bulma-modal-card-body-background-color: $bulma-white !default
+$bulma-modal-card-body-padding: 20px !default
+
+.bulma-modal
+  @extend %overlay
+  align-items: center
+  display: none
+  flex-direction: column
+  justify-content: center
+  overflow: hidden
+  position: fixed
+  z-index: $bulma-modal-z
+  // Modifiers
+  &.bulma-is-active
+    display: flex
+
+.bulma-modal-background
+  @extend %overlay
+  background-color: $bulma-modal-background-background-color
+
+.bulma-modal-content,
+.bulma-modal-card
+  margin: 0 $bulma-modal-content-margin-mobile
+  max-height: calc(100vh - #{$bulma-modal-content-spacing-mobile})
+  overflow: auto
+  position: relative
+  width: 100%
+  // Responsiveness
+  +bulma-tablet
+    margin: 0 auto
+    max-height: calc(100vh - #{$bulma-modal-content-spacing-tablet})
+    width: $bulma-modal-content-width
+
+.bulma-modal-close
+  @extend %delete
+  background: none
+  height: $bulma-modal-close-dimensions
+  position: fixed
+  right: $bulma-modal-close-right
+  top: $bulma-modal-close-top
+  width: $bulma-modal-close-dimensions
+
+.bulma-modal-card
+  display: flex
+  flex-direction: column
+  max-height: calc(100vh)
+  overflow: hidden
+  -ms-overflow-y: visible
+  // Responsiveness
+  +bulma-tablet
+    max-height: calc(100vh - #{$bulma-modal-card-spacing})
+
+.bulma-modal-card-head,
+.bulma-modal-card-foot
+  align-items: center
+  background-color: $bulma-modal-card-head-background-color
+  display: flex
+  flex-shrink: 0
+  justify-content: flex-start
+  padding: $bulma-modal-card-head-padding
+  position: relative
+
+.bulma-modal-card-head
+  border-bottom: $bulma-modal-card-head-border-bottom
+  border-top-left-radius: $bulma-modal-card-head-radius
+  border-top-right-radius: $bulma-modal-card-head-radius
+
+.bulma-modal-card-title
+  color: $bulma-modal-card-title-color
+  flex-grow: 1
+  flex-shrink: 0
+  font-size: $bulma-modal-card-title-size
+  line-height: $bulma-modal-card-title-line-height
+
+.bulma-modal-card-foot
+  border-bottom-left-radius: $bulma-modal-card-foot-radius
+  border-bottom-right-radius: $bulma-modal-card-foot-radius
+  border-top: $bulma-modal-card-foot-border-top
+  .bulma-button
+    &:not(:last-child)
+      margin-right: 0.5em
+
+.bulma-modal-card-body
+  +bulma-overflow-touch
+  background-color: $bulma-modal-card-body-background-color
+  flex-grow: 1
+  flex-shrink: 1
+  overflow: auto
+  padding: $bulma-modal-card-body-padding

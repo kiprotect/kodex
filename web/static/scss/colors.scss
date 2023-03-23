@@ -1,0 +1,46 @@
+$kip-lightblue: #4b9bbd;
+$kip-darkblue: #193e70;
+
+$kip-blue: #2581c4;
+$kip-blue-background: scale-color($kip-blue, $lightness: 20%);
+$kip-darkblue: #0a65a7;
+$kip-lightgreen: #88d498;
+$kip-green: #1a936f;
+
+$kip-background-color: #f5f6fa;
+
+$kip-white-transparent: #ffffffcc;
+
+$kip-gray-light: #eee;
+$kip-gray: #aaa;
+$kip-gray-dark: #777;
+$kip-black: #222;
+$kip-white: #fff;
+
+$cm-blue1: #2581c4 !default;
+$cm-blue2: scale-color($cm-blue1, $lightness: 20%) !default;
+$cm-blue3: scale-color($cm-blue2, $lightness: 20%) !default;
+$cm-blue4: scale-color($cm-blue3, $lightness: 20%) !default;
+$cm-green1: #1a936f !default;
+$cm-green2: scale-color($cm-green1, $lightness: 20%) !default;
+$cm-green3: scale-color($cm-green2, $lightness: 20%) !default;
+$cm-green4: scale-color($cm-green3, $lightness: 20%) !default;
+$cm-red1: #da2c43 !default;
+$cm-red2: scale-color($cm-red1, $lightness: 20%) !default;
+$cm-red3: scale-color($cm-red2, $lightness: 20%) !default;
+$cm-red4: scale-color($cm-red3, $lightness: 20%) !default;
+$cm-yellow1: #f2d600 !default;
+$cm-yellow2: scale-color($cm-yellow1, $lightness: 20%) !default;
+$cm-yellow3: scale-color($cm-yellow2, $lightness: 20%) !default;
+$cm-yellow4: scale-color($cm-yellow3, $lightness: 20%) !default;
+
+$kip-link: $kip-blue;
+
+// special
+$kip-purple: #a95ecf;
+
+// gradients
+
+@mixin kip-gradient($kip-direction) {
+    background: linear-gradient(unquote($kip-direction), $kip-blue, $kip-green);
+}

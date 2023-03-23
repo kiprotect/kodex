@@ -1,0 +1,57 @@
+@import 'colors.scss';
+@import 'variables.scss';
+@import 'breakpoints.scss';
+@import 'fonts.scss';
+@import "assets.scss";
+@import 'bulma.scss';
+
+@import 'components/index.scss';
+
+html {
+    background: $kip-background-color;
+}
+
+body.kip-fonts {
+    margin: 0;
+    padding: 0;
+    @include font-nunito;
+}
+
+div.kip {
+
+    fieldset {
+        border: none;
+    }
+
+    a {
+        cursor: pointer;
+    }
+
+    // Styles the background on the login page
+    .kip-is-fullheight.kip-simple {
+        @include kip-gradient("to top");
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        li {
+            padding: 0;
+            margin: 0;
+        }
+    }
+
+    select, input {
+        @include font-nunito;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @include font-muli;
+    }
+}

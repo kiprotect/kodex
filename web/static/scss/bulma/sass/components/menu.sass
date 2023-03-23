@@ -1,0 +1,57 @@
+$bulma-menu-item-color: $bulma-text !default
+$bulma-menu-item-radius: $bulma-radius-small !default
+$bulma-menu-item-hover-color: $bulma-text-strong !default
+$bulma-menu-item-hover-background-color: $bulma-background !default
+$bulma-menu-item-active-color: $bulma-link-invert !default
+$bulma-menu-item-active-background-color: $bulma-link !default
+
+$bulma-menu-list-border-left: 1px solid $bulma-border !default
+$bulma-menu-list-line-height: 1.25 !default
+$bulma-menu-list-link-padding: 0.5em 0.75em !default
+$bulma-menu-nested-list-margin: 0.75em !default
+$bulma-menu-nested-list-padding-left: 0.75em !default
+
+$bulma-menu-label-color: $bulma-text-light !default
+$bulma-menu-label-font-size: 0.75em !default
+$bulma-menu-label-letter-spacing: 0.1em !default
+$bulma-menu-label-spacing: 1em !default
+
+.bulma-menu
+  font-size: $bulma-size-normal
+  // Sizes
+  &.bulma-is-small
+    font-size: $bulma-size-small
+  &.bulma-is-medium
+    font-size: $bulma-size-medium
+  &.bulma-is-large
+    font-size: $bulma-size-large
+
+.bulma-menu-list
+  line-height: $bulma-menu-list-line-height
+  a
+    border-radius: $bulma-menu-item-radius
+    color: $bulma-menu-item-color
+    display: block
+    padding: $bulma-menu-list-link-padding
+    &:hover
+      background-color: $bulma-menu-item-hover-background-color
+      color: $bulma-menu-item-hover-color
+    // Modifiers
+    &.bulma-is-active
+      background-color: $bulma-menu-item-active-background-color
+      color: $bulma-menu-item-active-color
+  li
+    ul
+      border-left: $bulma-menu-list-border-left
+      margin: $bulma-menu-nested-list-margin
+      padding-left: $bulma-menu-nested-list-padding-left
+
+.bulma-menu-label
+  color: $bulma-menu-label-color
+  font-size: $bulma-menu-label-font-size
+  letter-spacing: $bulma-menu-label-letter-spacing
+  text-transform: uppercase
+  &:not(:first-child)
+    margin-top: $bulma-menu-label-spacing
+  &:not(:last-child)
+    margin-bottom: $bulma-menu-label-spacing

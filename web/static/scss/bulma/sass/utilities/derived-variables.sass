@@ -1,0 +1,79 @@
+$bulma-primary: $bulma-turquoise !default
+
+$bulma-info: $bulma-cyan !default
+$bulma-success: $bulma-green !default
+$bulma-warning: $bulma-yellow !default
+$bulma-danger: $bulma-red !default
+
+$bulma-light: $bulma-white-ter !default
+$bulma-dark: $bulma-grey-darker !default
+
+// Invert colors
+
+$bulma-orange-invert: findColorInvert($bulma-orange) !default
+$bulma-yellow-invert: findColorInvert($bulma-yellow) !default
+$bulma-green-invert: findColorInvert($bulma-green) !default
+$bulma-turquoise-invert: findColorInvert($bulma-turquoise) !default
+$bulma-cyan-invert: findColorInvert($bulma-cyan) !default
+$bulma-blue-invert: findColorInvert($bulma-blue) !default
+$bulma-purple-invert: findColorInvert($bulma-purple) !default
+$bulma-red-invert: findColorInvert($bulma-red) !default
+
+$bulma-primary-invert: $bulma-turquoise-invert !default
+$bulma-info-invert: $bulma-cyan-invert !default
+$bulma-success-invert: $bulma-green-invert !default
+$bulma-warning-invert: $bulma-yellow-invert !default
+$bulma-danger-invert: $bulma-red-invert !default
+$bulma-light-invert: $bulma-dark !default
+$bulma-dark-invert: $bulma-light !default
+
+// General colors
+
+$bulma-background: $bulma-white-ter !default
+
+$bulma-border: $bulma-grey-lighter !default
+$bulma-border-hover: $bulma-grey-light !default
+
+// Text colors
+
+$bulma-text: $bulma-grey-dark !default
+$bulma-text-invert: findColorInvert($bulma-text) !default
+$bulma-text-light: $bulma-grey !default
+$bulma-text-strong: $bulma-grey-darker !default
+
+// Code colors
+
+$bulma-code: $bulma-red !default
+$bulma-code-background: $bulma-background !default
+
+$bulma-pre: $bulma-text !default
+$bulma-pre-background: $bulma-background !default
+
+// Link colors
+
+$bulma-link: $bulma-blue !default
+$bulma-link-invert: $bulma-blue-invert !default
+$bulma-link-visited: $bulma-purple !default
+
+$bulma-link-hover: $bulma-grey-darker !default
+$bulma-link-hover-border: $bulma-grey-light !default
+
+$bulma-link-focus: $bulma-grey-darker !default
+$bulma-link-focus-border: $bulma-blue !default
+
+$bulma-link-active: $bulma-grey-darker !default
+$bulma-link-active-border: $bulma-grey-dark !default
+
+$bulma-size-small: $bulma-size-7 !default
+$bulma-size-normal: $bulma-size-6 !default
+$bulma-size-medium: $bulma-size-5 !default
+$bulma-size-large: $bulma-size-4 !default
+
+// Lists and maps
+$bulma-custom-colors: null !default
+$bulma-custom-shades: null !default
+
+$bulma-colors: mergeColorMaps(("white": ($bulma-white, $bulma-black), "black": ($bulma-black, $bulma-white), "light": ($bulma-light, $bulma-light-invert), "dark": ($bulma-dark, $bulma-dark-invert), "primary": ($bulma-primary, $bulma-primary-invert), "link": ($bulma-link, $bulma-link-invert), "info": ($bulma-info, $bulma-info-invert), "success": ($bulma-success, $bulma-success-invert), "warning": ($bulma-warning, $bulma-warning-invert), "danger": ($bulma-danger, $bulma-danger-invert)), $bulma-custom-colors) !default
+$bulma-shades: mergeColorMaps(("black-bis": $bulma-black-bis, "black-ter": $bulma-black-ter, "grey-darker": $bulma-grey-darker, "grey-dark": $bulma-grey-dark, "grey": $bulma-grey, "grey-light": $bulma-grey-light, "grey-lighter": $bulma-grey-lighter, "white-ter": $bulma-white-ter, "white-bis": $bulma-white-bis), $bulma-custom-shades) !default
+
+$bulma-sizes: $bulma-size-1 $bulma-size-2 $bulma-size-3 $bulma-size-4 $bulma-size-5 $bulma-size-6 $bulma-size-7 !default

@@ -1,0 +1,180 @@
+$bulma-file-border-color: $bulma-border !default
+$bulma-file-radius: $bulma-radius !default
+
+$bulma-file-cta-background-color: $bulma-white-ter !default
+$bulma-file-cta-color: $bulma-grey-dark !default
+$bulma-file-cta-hover-color: $bulma-grey-darker !default
+$bulma-file-cta-active-color: $bulma-grey-darker !default
+
+$bulma-file-name-border-color: $bulma-border !default
+$bulma-file-name-border-style: solid !default
+$bulma-file-name-border-width: 1px 1px 1px 0 !default
+$bulma-file-name-max-width: 16em !default
+
+.bulma-file
+  @extend %unselectable
+  align-items: stretch
+  display: flex
+  justify-content: flex-start
+  position: relative
+  // Colors
+  @each $bulma-name, $bulma-pair in $bulma-colors
+    $bulma-color: nth($bulma-pair, 1)
+    $bulma-color-invert: nth($bulma-pair, 2)
+    &.bulma-is-#{$bulma-name}
+      .bulma-file-cta
+        background-color: $bulma-color
+        border-color: transparent
+        color: $bulma-color-invert
+      &:hover,
+      &.bulma-is-hovered
+        .bulma-file-cta
+          background-color: darken($bulma-color, 2.5%)
+          border-color: transparent
+          color: $bulma-color-invert
+      &:focus,
+      &.bulma-is-focused
+        .bulma-file-cta
+          border-color: transparent
+          box-shadow: 0 0 0.5em rgba($bulma-color, 0.25)
+          color: $bulma-color-invert
+      &:active,
+      &.bulma-is-active
+        .bulma-file-cta
+          background-color: darken($bulma-color, 5%)
+          border-color: transparent
+          color: $bulma-color-invert
+  // Sizes
+  &.bulma-is-small
+    font-size: $bulma-size-small
+  &.bulma-is-medium
+    font-size: $bulma-size-medium
+    .bulma-file-icon
+      .bulma-fa
+        font-size: 21px
+  &.bulma-is-large
+    font-size: $bulma-size-large
+    .bulma-file-icon
+      .bulma-fa
+        font-size: 28px
+  // Modifiers
+  &.bulma-has-name
+    .bulma-file-cta
+      border-bottom-right-radius: 0
+      border-top-right-radius: 0
+    .bulma-file-name
+      border-bottom-left-radius: 0
+      border-top-left-radius: 0
+    &.bulma-is-empty
+      .bulma-file-cta
+        border-radius: $bulma-file-radius
+      .bulma-file-name
+        display: none
+  &.bulma-is-boxed
+    .bulma-file-label
+      flex-direction: column
+    .bulma-file-cta
+      flex-direction: column
+      height: auto
+      padding: 1em 3em
+    .bulma-file-name
+      border-width: 0 1px 1px
+    .bulma-file-icon
+      height: 1.5em
+      width: 1.5em
+      .bulma-fa
+        font-size: 21px
+    &.bulma-is-small
+      .bulma-file-icon .bulma-fa
+        font-size: 14px
+    &.bulma-is-medium
+      .bulma-file-icon .bulma-fa
+        font-size: 28px
+    &.bulma-is-large
+      .bulma-file-icon .bulma-fa
+        font-size: 35px
+    &.bulma-has-name
+      .bulma-file-cta
+        border-radius: $bulma-file-radius $bulma-file-radius 0 0
+      .bulma-file-name
+        border-radius: 0 0 $bulma-file-radius $bulma-file-radius
+        border-width: 0 1px 1px
+  &.bulma-is-centered
+    justify-content: center
+  &.bulma-is-fullwidth
+    .bulma-file-label
+      width: 100%
+    .bulma-file-name
+      flex-grow: 1
+      max-width: none
+  &.bulma-is-right
+    justify-content: flex-end
+    .bulma-file-cta
+      border-radius: 0 $bulma-file-radius $bulma-file-radius 0
+    .bulma-file-name
+      border-radius: $bulma-file-radius 0 0 $bulma-file-radius
+      border-width: 1px 0 1px 1px
+      order: -1
+
+.bulma-file-label
+  align-items: stretch
+  display: flex
+  cursor: pointer
+  justify-content: flex-start
+  overflow: hidden
+  position: relative
+  &:hover
+    .bulma-file-cta
+      background-color: darken($bulma-file-cta-background-color, 2.5%)
+      color: $bulma-file-cta-hover-color
+    .bulma-file-name
+      border-color: darken($bulma-file-name-border-color, 2.5%)
+  &:active
+    .bulma-file-cta
+      background-color: darken($bulma-file-cta-background-color, 5%)
+      color: $bulma-file-cta-active-color
+    .bulma-file-name
+      border-color: darken($bulma-file-name-border-color, 5%)
+
+.bulma-file-input
+  height: 100%
+  left: 0
+  opacity: 0
+  outline: none
+  position: absolute
+  top: 0
+  width: 100%
+
+.bulma-file-cta,
+.bulma-file-name
+  @extend %control
+  border-color: $bulma-file-border-color
+  border-radius: $bulma-file-radius
+  font-size: 1em
+  padding-left: 1em
+  padding-right: 1em
+  white-space: nowrap
+
+.bulma-file-cta
+  background-color: $bulma-file-cta-background-color
+  color: $bulma-file-cta-color
+
+.bulma-file-name
+  border-color: $bulma-file-name-border-color
+  border-style: $bulma-file-name-border-style
+  border-width: $bulma-file-name-border-width
+  display: block
+  max-width: $bulma-file-name-max-width
+  overflow: hidden
+  text-align: left
+  text-overflow: ellipsis
+
+.bulma-file-icon
+  align-items: center
+  display: flex
+  height: 1em
+  justify-content: center
+  margin-right: 0.5em
+  width: 1em
+  .bulma-fa
+    font-size: 14px

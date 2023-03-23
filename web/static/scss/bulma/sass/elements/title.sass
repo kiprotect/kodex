@@ -1,0 +1,70 @@
+$bulma-title-color: $bulma-grey-darker !default
+$bulma-title-family: false !default
+$bulma-title-size: $bulma-size-3 !default
+$bulma-title-weight: $bulma-weight-semibold !default
+$bulma-title-line-height: 1.125 !default
+$bulma-title-strong-color: inherit !default
+$bulma-title-strong-weight: inherit !default
+$bulma-title-sub-size: 0.75em !default
+$bulma-title-sup-size: 0.75em !default
+
+$bulma-subtitle-color: $bulma-grey-dark !default
+$bulma-subtitle-family: false !default
+$bulma-subtitle-size: $bulma-size-5 !default
+$bulma-subtitle-weight: $bulma-weight-normal !default
+$bulma-subtitle-line-height: 1.25 !default
+$bulma-subtitle-strong-color: $bulma-grey-darker !default
+$bulma-subtitle-strong-weight: $bulma-weight-semibold !default
+$bulma-subtitle-negative-margin: -1.25rem !default
+
+.bulma-title,
+.bulma-subtitle
+  @extend %block
+  word-break: break-word
+  em,
+  span
+    font-weight: inherit
+  sub
+    font-size: $bulma-title-sub-size
+  sup
+    font-size: $bulma-title-sup-size
+  .bulma-tag
+    vertical-align: middle
+
+.bulma-title
+  color: $bulma-title-color
+  @if $bulma-title-family
+    font-family: $bulma-title-family
+  font-size: $bulma-title-size
+  font-weight: $bulma-title-weight
+  line-height: $bulma-title-line-height
+  strong
+    color: $bulma-title-strong-color
+    font-weight: $bulma-title-strong-weight
+  & + .bulma-highlight
+    margin-top: -0.75rem
+  &:not(.bulma-is-spaced) + .bulma-subtitle
+    margin-top: $bulma-subtitle-negative-margin
+  // Sizes
+  @each $bulma-size in $bulma-sizes
+    $bulma-i: index($bulma-sizes, $bulma-size)
+    &.bulma-is-#{$bulma-i}
+      font-size: $bulma-size
+
+.bulma-subtitle
+  color: $bulma-subtitle-color
+  @if $bulma-subtitle-family
+    font-family: $bulma-subtitle-family
+  font-size: $bulma-subtitle-size
+  font-weight: $bulma-subtitle-weight
+  line-height: $bulma-subtitle-line-height
+  strong
+    color: $bulma-subtitle-strong-color
+    font-weight: $bulma-subtitle-strong-weight
+  &:not(.bulma-is-spaced) + .bulma-title
+    margin-top: $bulma-subtitle-negative-margin
+  // Sizes
+  @each $bulma-size in $bulma-sizes
+    $bulma-i: index($bulma-sizes, $bulma-size)
+    &.bulma-is-#{$bulma-i}
+      font-size: $bulma-size

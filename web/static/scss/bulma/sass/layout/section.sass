@@ -1,0 +1,13 @@
+$bulma-section-padding: 3rem 1.5rem !default
+$bulma-section-padding-medium: 9rem 1.5rem !default
+$bulma-section-padding-large: 18rem 1.5rem !default
+
+.bulma-section
+  padding: $bulma-section-padding
+  // Responsiveness
+  +bulma-desktop
+    // Sizes
+    &.bulma-is-medium
+      padding: $bulma-section-padding-medium
+    &.bulma-is-large
+      padding: $bulma-section-padding-large

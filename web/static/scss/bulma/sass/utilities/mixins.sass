@@ -1,0 +1,261 @@
+@import "initial-variables"
+
+=bulma-clearfix
+  &::after
+    clear: both
+    content: " "
+    display: table
+
+=bulma-center($bulma-width, $bulma-height: 0)
+  position: absolute
+  @if $bulma-height != 0
+    left: calc(50% - (#{$bulma-width} / 2))
+    top: calc(50% - (#{$bulma-height} / 2))
+  @else
+    left: calc(50% - (#{$bulma-width} / 2))
+    top: calc(50% - (#{$bulma-width} / 2))
+
+=bulma-fa($bulma-size, $bulma-dimensions)
+  display: inline-block
+  font-size: $bulma-size
+  height: $bulma-dimensions
+  line-height: $bulma-dimensions
+  text-align: center
+  vertical-align: top
+  width: $bulma-dimensions
+
+=bulma-hamburger($bulma-dimensions)
+  cursor: pointer
+  display: block
+  height: $bulma-dimensions
+  position: relative
+  width: $bulma-dimensions
+  span
+    background-color: currentColor
+    display: block
+    height: 1px
+    left: calc(50% - 8px)
+    position: absolute
+    transform-origin: center
+    transition-duration: $bulma-speed
+    transition-property: background-color, opacity, transform
+    transition-timing-function: $bulma-easing
+    width: 16px
+    &:nth-child(1)
+      top: calc(50% - 6px)
+    &:nth-child(2)
+      top: calc(50% - 1px)
+    &:nth-child(3)
+      top: calc(50% + 4px)
+  &:hover
+    background-color: rgba(black, 0.05)
+  // Modifers
+  &.bulma-is-active
+    span
+      &:nth-child(1)
+        transform: translateY(5px) rotate(45deg)
+      &:nth-child(2)
+        opacity: 0
+      &:nth-child(3)
+        transform: translateY(-5px) rotate(-45deg)
+
+=bulma-overflow-touch
+  -webkit-overflow-scrolling: touch
+
+=bulma-placeholder
+  $bulma-placeholders: ':-moz' ':-webkit-input' '-moz' '-ms-input'
+  @each $bulma-placeholder in $bulma-placeholders
+    &:#{$bulma-placeholder}-placeholder
+      @content
+
+// Responsiveness
+
+=bulma-from($bulma-device)
+  @media screen and (min-width: $bulma-device)
+    @content
+
+=bulma-until($bulma-device)
+  @media screen and (max-width: $bulma-device - 1px)
+    @content
+
+=bulma-mobile
+  @media screen and (max-width: $bulma-tablet - 1px)
+    @content
+
+=bulma-tablet
+  @media screen and (min-width: $bulma-tablet), print
+    @content
+
+=bulma-tablet-only
+  @media screen and (min-width: $bulma-tablet) and (max-width: $bulma-desktop - 1px)
+    @content
+
+=bulma-touch
+  @media screen and (max-width: $bulma-desktop - 1px)
+    @content
+
+=bulma-desktop
+  @media screen and (min-width: $bulma-desktop)
+    @content
+
+=bulma-desktop-only
+  @if $bulma-widescreen-enabled
+    @media screen and (min-width: $bulma-desktop) and (max-width: $bulma-widescreen - 1px)
+      @content
+
+=bulma-until-widescreen
+  @if $bulma-widescreen-enabled
+    @media screen and (max-width: $bulma-widescreen - 1px)
+      @content
+
+=bulma-widescreen
+  @if $bulma-widescreen-enabled
+    @media screen and (min-width: $bulma-widescreen)
+      @content
+
+=bulma-widescreen-only
+  @if $bulma-widescreen-enabled and $bulma-fullhd-enabled
+    @media screen and (min-width: $bulma-widescreen) and (max-width: $bulma-fullhd - 1px)
+      @content
+
+=bulma-until-fullhd
+  @if $bulma-fullhd-enabled
+    @media screen and (max-width: $bulma-fullhd - 1px)
+      @content
+
+=bulma-fullhd
+  @if $bulma-fullhd-enabled
+    @media screen and (min-width: $bulma-fullhd)
+      @content
+
+// Placeholders
+
+=bulma-unselectable
+  -webkit-touch-callout: none
+  -webkit-user-select: none
+  -moz-user-select: none
+  -ms-user-select: none
+  user-select: none
+
+%unselectable
+  +bulma-unselectable
+
+=bulma-arrow($bulma-color: transparent)
+  border: 3px solid $bulma-color
+  border-radius: 2px
+  border-right: 0
+  border-top: 0
+  content: " "
+  display: block
+  height: 0.625em
+  margin-top: -0.4375em
+  pointer-events: none
+  position: absolute
+  top: 50%
+  transform: rotate(-45deg)
+  transform-origin: center
+  width: 0.625em
+
+%arrow
+  +bulma-arrow
+
+=bulma-block($bulma-spacing: $bulma-block-spacing)
+  &:not(:last-child)
+    margin-bottom: $bulma-spacing
+
+%block
+  +bulma-block
+
+=bulma-delete
+  @extend %unselectable
+  -moz-appearance: none
+  -webkit-appearance: none
+  background-color: rgba($bulma-black, 0.2)
+  border: none
+  border-radius: $bulma-radius-rounded
+  cursor: pointer
+  pointer-events: auto
+  display: inline-block
+  flex-grow: 0
+  flex-shrink: 0
+  font-size: 0
+  height: 20px
+  max-height: 20px
+  max-width: 20px
+  min-height: 20px
+  min-width: 20px
+  outline: none
+  position: relative
+  vertical-align: top
+  width: 20px
+  &::before,
+  &::after
+    background-color: $bulma-white
+    content: ""
+    display: block
+    left: 50%
+    position: absolute
+    top: 50%
+    transform: translateX(-50%) translateY(-50%) rotate(45deg)
+    transform-origin: center center
+  &::before
+    height: 2px
+    width: 50%
+  &::after
+    height: 50%
+    width: 2px
+  &:hover,
+  &:focus
+    background-color: rgba($bulma-black, 0.3)
+  &:active
+    background-color: rgba($bulma-black, 0.4)
+  // Sizes
+  &.bulma-is-small
+    height: 16px
+    max-height: 16px
+    max-width: 16px
+    min-height: 16px
+    min-width: 16px
+    width: 16px
+  &.bulma-is-medium
+    height: 24px
+    max-height: 24px
+    max-width: 24px
+    min-height: 24px
+    min-width: 24px
+    width: 24px
+  &.bulma-is-large
+    height: 32px
+    max-height: 32px
+    max-width: 32px
+    min-height: 32px
+    min-width: 32px
+    width: 32px
+
+%delete
+  +bulma-delete
+
+=bulma-loader
+  animation: spinAround 500ms infinite linear
+  border: 2px solid $bulma-grey-lighter
+  border-radius: $bulma-radius-rounded
+  border-right-color: transparent
+  border-top-color: transparent
+  content: ""
+  display: block
+  height: 1em
+  position: relative
+  width: 1em
+
+%loader
+  +bulma-loader
+
+=bulma-overlay($bulma-offset: 0)
+  bottom: $bulma-offset
+  left: $bulma-offset
+  position: absolute
+  right: $bulma-offset
+  top: $bulma-offset
+
+%overlay
+  +bulma-overlay

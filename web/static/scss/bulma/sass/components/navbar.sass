@@ -1,0 +1,443 @@
+$bulma-navbar-background-color: $bulma-white !default
+$bulma-navbar-box-shadow-size: 0 2px 0 0 !default
+$bulma-navbar-box-shadow-color: $bulma-background !default
+$bulma-navbar-height: 3.25rem !default
+$bulma-navbar-padding-vertical: 1rem !default
+$bulma-navbar-padding-horizontal: 2rem !default
+$bulma-navbar-z: 30 !default
+$bulma-navbar-fixed-z: 30 !default
+
+$bulma-navbar-item-color: $bulma-grey-dark !default
+$bulma-navbar-item-hover-color: $bulma-link !default
+$bulma-navbar-item-hover-background-color: $bulma-white-bis !default
+$bulma-navbar-item-active-color: $bulma-black !default
+$bulma-navbar-item-active-background-color: transparent !default
+$bulma-navbar-item-img-max-height: 1.75rem !default
+
+$bulma-navbar-burger-color: $bulma-navbar-item-color !default
+
+$bulma-navbar-tab-hover-background-color: transparent !default
+$bulma-navbar-tab-hover-border-bottom-color: $bulma-link !default
+$bulma-navbar-tab-active-color: $bulma-link !default
+$bulma-navbar-tab-active-background-color: transparent !default
+$bulma-navbar-tab-active-border-bottom-color: $bulma-link !default
+$bulma-navbar-tab-active-border-bottom-style: solid !default
+$bulma-navbar-tab-active-border-bottom-width: 3px !default
+
+$bulma-navbar-dropdown-background-color: $bulma-white !default
+$bulma-navbar-dropdown-border-top: 2px solid $bulma-border !default
+$bulma-navbar-dropdown-offset: -4px !default
+$bulma-navbar-dropdown-arrow: $bulma-link !default
+$bulma-navbar-dropdown-radius: $bulma-radius-large !default
+$bulma-navbar-dropdown-z: 20 !default
+
+$bulma-navbar-dropdown-boxed-radius: $bulma-radius-large !default
+$bulma-navbar-dropdown-boxed-shadow: 0 8px 8px rgba($bulma-black, 0.1), 0 0 0 1px rgba($bulma-black, 0.1) !default
+
+$bulma-navbar-dropdown-item-hover-color: $bulma-black !default
+$bulma-navbar-dropdown-item-hover-background-color: $bulma-background !default
+$bulma-navbar-dropdown-item-active-color: $bulma-link !default
+$bulma-navbar-dropdown-item-active-background-color: $bulma-background !default
+
+$bulma-navbar-divider-background-color: $bulma-background !default
+$bulma-navbar-divider-height: 2px !default
+
+$bulma-navbar-bottom-box-shadow-size: 0 -2px 0 0 !default
+
+$bulma-navbar-breakpoint: $bulma-desktop !default
+
+=bulma-navbar-fixed
+  left: 0
+  position: fixed
+  right: 0
+  z-index: $bulma-navbar-fixed-z
+
+.bulma-navbar
+  background-color: $bulma-navbar-background-color
+  min-height: $bulma-navbar-height
+  position: relative
+  z-index: $bulma-navbar-z
+  @each $bulma-name, $bulma-pair in $bulma-colors
+    $bulma-color: nth($bulma-pair, 1)
+    $bulma-color-invert: nth($bulma-pair, 2)
+    &.bulma-is-#{$bulma-name}
+      background-color: $bulma-color
+      color: $bulma-color-invert
+      .bulma-navbar-brand
+        & > .bulma-navbar-item,
+        .bulma-navbar-link
+          color: $bulma-color-invert
+        & > a.bulma-navbar-item,
+        .bulma-navbar-link
+          &:focus,
+          &:hover,
+          &.bulma-is-active
+            background-color: darken($bulma-color, 5%)
+            color: $bulma-color-invert
+        .bulma-navbar-link
+          &::after
+            border-color: $bulma-color-invert
+      .bulma-navbar-burger
+        color: $bulma-color-invert
+      +bulma-from($bulma-navbar-breakpoint)
+        .bulma-navbar-start,
+        .bulma-navbar-end
+          & > .bulma-navbar-item,
+          .bulma-navbar-link
+            color: $bulma-color-invert
+          & > a.bulma-navbar-item,
+          .bulma-navbar-link
+            &:focus,
+            &:hover,
+            &.bulma-is-active
+              background-color: darken($bulma-color, 5%)
+              color: $bulma-color-invert
+          .bulma-navbar-link
+            &::after
+              border-color: $bulma-color-invert
+        .bulma-navbar-item.bulma-has-dropdown:focus .bulma-navbar-link,
+        .bulma-navbar-item.bulma-has-dropdown:hover .bulma-navbar-link,
+        .bulma-navbar-item.bulma-has-dropdown.bulma-is-active .bulma-navbar-link
+          background-color: darken($bulma-color, 5%)
+          color: $bulma-color-invert
+        .bulma-navbar-dropdown
+          a.bulma-navbar-item
+            &.bulma-is-active
+              background-color: $bulma-color
+              color: $bulma-color-invert
+  & > .bulma-container
+    align-items: stretch
+    display: flex
+    min-height: $bulma-navbar-height
+    width: 100%
+  &.bulma-has-shadow
+    box-shadow: $bulma-navbar-box-shadow-size $bulma-navbar-box-shadow-color
+  &.bulma-is-fixed-bottom,
+  &.bulma-is-fixed-top
+    +bulma-navbar-fixed
+  &.bulma-is-fixed-bottom
+    bottom: 0
+    &.bulma-has-shadow
+      box-shadow: $bulma-navbar-bottom-box-shadow-size $bulma-navbar-box-shadow-color
+  &.bulma-is-fixed-top
+    top: 0
+
+html,
+body
+  &.bulma-has-navbar-fixed-top
+    padding-top: $bulma-navbar-height
+  &.bulma-has-navbar-fixed-bottom
+    padding-bottom: $bulma-navbar-height
+
+.bulma-navbar-brand,
+.bulma-navbar-tabs
+  align-items: stretch
+  display: flex
+  flex-shrink: 0
+  min-height: $bulma-navbar-height
+
+.bulma-navbar-brand
+  a.bulma-navbar-item
+    &:focus,
+    &:hover
+      background-color: transparent
+
+.bulma-navbar-tabs
+  +bulma-overflow-touch
+  max-width: 100vw
+  overflow-x: auto
+  overflow-y: hidden
+
+.bulma-navbar-burger
+  color: $bulma-navbar-burger-color
+  +bulma-hamburger($bulma-navbar-height)
+  margin-left: auto
+
+.bulma-navbar-menu
+  display: none
+
+.bulma-navbar-item,
+.bulma-navbar-link
+  color: $bulma-navbar-item-color
+  display: block
+  line-height: 1.5
+  padding: 0.5rem 0.75rem
+  position: relative
+  .bulma-icon
+    &:only-child
+      margin-left: -0.25rem
+      margin-right: -0.25rem
+
+a.bulma-navbar-item,
+.bulma-navbar-link
+  cursor: pointer
+  &:focus,
+  &:focus-within,
+  &:hover,
+  &.bulma-is-active
+    background-color: $bulma-navbar-item-hover-background-color
+    color: $bulma-navbar-item-hover-color
+
+.bulma-navbar-item
+  display: block
+  flex-grow: 0
+  flex-shrink: 0
+  img
+    max-height: $bulma-navbar-item-img-max-height
+  &.bulma-has-dropdown
+    padding: 0
+  &.bulma-is-expanded
+    flex-grow: 1
+    flex-shrink: 1
+  &.bulma-is-tab
+    border-bottom: 1px solid transparent
+    min-height: $bulma-navbar-height
+    padding-bottom: calc(0.5rem - 1px)
+    &:focus,
+    &:hover
+      background-color: $bulma-navbar-tab-hover-background-color
+      border-bottom-color: $bulma-navbar-tab-hover-border-bottom-color
+    &.bulma-is-active
+      background-color: $bulma-navbar-tab-active-background-color
+      border-bottom-color: $bulma-navbar-tab-active-border-bottom-color
+      border-bottom-style: $bulma-navbar-tab-active-border-bottom-style
+      border-bottom-width: $bulma-navbar-tab-active-border-bottom-width
+      color: $bulma-navbar-tab-active-color
+      padding-bottom: calc(0.5rem - #{$bulma-navbar-tab-active-border-bottom-width})
+
+.bulma-navbar-content
+  flex-grow: 1
+  flex-shrink: 1
+
+.bulma-navbar-link:not(.bulma-is-arrowless)
+  padding-right: 2.5em
+  &::after
+    @extend %arrow
+    border-color: $bulma-navbar-dropdown-arrow
+    margin-top: -0.375em
+    right: 1.125em
+
+.bulma-navbar-dropdown
+  font-size: 0.875rem
+  padding-bottom: 0.5rem
+  padding-top: 0.5rem
+  .bulma-navbar-item
+    padding-left: 1.5rem
+    padding-right: 1.5rem
+
+.bulma-navbar-divider
+  background-color: $bulma-navbar-divider-background-color
+  border: none
+  display: none
+  height: $bulma-navbar-divider-height
+  margin: 0.5rem 0
+
++bulma-until($bulma-navbar-breakpoint)
+  .bulma-navbar > .bulma-container
+    display: block
+  .bulma-navbar-brand,
+  .bulma-navbar-tabs
+    .bulma-navbar-item
+      align-items: center
+      display: flex
+  .bulma-navbar-link
+    &::after
+      display: none
+  .bulma-navbar-menu
+    background-color: $bulma-navbar-background-color
+    box-shadow: 0 8px 16px rgba($bulma-black, 0.1)
+    padding: 0.5rem 0
+    &.bulma-is-active
+      display: block
+  // Fixed navbar
+  .bulma-navbar
+    &.bulma-is-fixed-bottom-touch,
+    &.bulma-is-fixed-top-touch
+      +bulma-navbar-fixed
+    &.bulma-is-fixed-bottom-touch
+      bottom: 0
+      &.bulma-has-shadow
+        box-shadow: 0 -2px 3px rgba($bulma-black, 0.1)
+    &.bulma-is-fixed-top-touch
+      top: 0
+    &.bulma-is-fixed-top,
+    &.bulma-is-fixed-top-touch
+      .bulma-navbar-menu
+        +bulma-overflow-touch
+        max-height: calc(100vh - #{$bulma-navbar-height})
+        overflow: auto
+  html,
+  body
+    &.bulma-has-navbar-fixed-top-touch
+      padding-top: $bulma-navbar-height
+    &.bulma-has-navbar-fixed-bottom-touch
+      padding-bottom: $bulma-navbar-height
+
++bulma-from($bulma-navbar-breakpoint)
+  .bulma-navbar,
+  .bulma-navbar-menu,
+  .bulma-navbar-start,
+  .bulma-navbar-end
+    align-items: stretch
+    display: flex
+  .bulma-navbar
+    min-height: $bulma-navbar-height
+    &.bulma-is-spaced
+      padding: $bulma-navbar-padding-vertical $bulma-navbar-padding-horizontal
+      .bulma-navbar-start,
+      .bulma-navbar-end
+        align-items: center
+      a.bulma-navbar-item,
+      .bulma-navbar-link
+        border-radius: $bulma-radius
+    &.bulma-is-transparent
+      a.bulma-navbar-item,
+      .bulma-navbar-link
+        &:focus,
+        &:hover,
+        &.bulma-is-active
+          background-color: transparent !important
+      .bulma-navbar-item.bulma-has-dropdown
+        &.bulma-is-active,
+        &.bulma-is-hoverable:focus,
+        &.bulma-is-hoverable:focus-within,
+        &.bulma-is-hoverable:hover
+          .bulma-navbar-link
+            background-color: transparent !important
+      .bulma-navbar-dropdown
+        a.bulma-navbar-item
+          &:focus,
+          &:hover
+            background-color: $bulma-navbar-dropdown-item-hover-background-color
+            color: $bulma-navbar-dropdown-item-hover-color
+          &.bulma-is-active
+            background-color: $bulma-navbar-dropdown-item-active-background-color
+            color: $bulma-navbar-dropdown-item-active-color
+  .bulma-navbar-burger
+    display: none
+  .bulma-navbar-item,
+  .bulma-navbar-link
+    align-items: center
+    display: flex
+  .bulma-navbar-item
+    display: flex
+    &.bulma-has-dropdown
+      align-items: stretch
+    &.bulma-has-dropdown-up
+      .bulma-navbar-link::after
+        transform: rotate(135deg) translate(0.25em, -0.25em)
+      .bulma-navbar-dropdown
+        border-bottom: $bulma-navbar-dropdown-border-top
+        border-radius: $bulma-navbar-dropdown-radius $bulma-navbar-dropdown-radius 0 0
+        border-top: none
+        bottom: 100%
+        box-shadow: 0 -8px 8px rgba($bulma-black, 0.1)
+        top: auto
+    &.bulma-is-active,
+    &.bulma-is-hoverable:focus,
+    &.bulma-is-hoverable:focus-within,
+    &.bulma-is-hoverable:hover
+      .bulma-navbar-dropdown
+        display: block
+        .bulma-navbar.bulma-is-spaced &,
+        &.bulma-is-boxed
+          opacity: 1
+          pointer-events: auto
+          transform: translateY(0)
+  .bulma-navbar-menu
+    flex-grow: 1
+    flex-shrink: 0
+  .bulma-navbar-start
+    justify-content: flex-start
+    margin-right: auto
+  .bulma-navbar-end
+    justify-content: flex-end
+    margin-left: auto
+  .bulma-navbar-dropdown
+    background-color: $bulma-navbar-dropdown-background-color
+    border-bottom-left-radius: $bulma-navbar-dropdown-radius
+    border-bottom-right-radius: $bulma-navbar-dropdown-radius
+    border-top: $bulma-navbar-dropdown-border-top
+    box-shadow: 0 8px 8px rgba($bulma-black, 0.1)
+    display: none
+    font-size: 0.875rem
+    left: 0
+    min-width: 100%
+    position: absolute
+    top: 100%
+    z-index: $bulma-navbar-dropdown-z
+    .bulma-navbar-item
+      padding: 0.375rem 1rem
+      white-space: nowrap
+    a.bulma-navbar-item
+      padding-right: 3rem
+      &:focus,
+      &:hover
+        background-color: $bulma-navbar-dropdown-item-hover-background-color
+        color: $bulma-navbar-dropdown-item-hover-color
+      &.bulma-is-active
+        background-color: $bulma-navbar-dropdown-item-active-background-color
+        color: $bulma-navbar-dropdown-item-active-color
+    .bulma-navbar.bulma-is-spaced &,
+    &.bulma-is-boxed
+      border-radius: $bulma-navbar-dropdown-boxed-radius
+      border-top: none
+      box-shadow: $bulma-navbar-dropdown-boxed-shadow
+      display: block
+      opacity: 0
+      pointer-events: none
+      top: calc(100% + (#{$bulma-navbar-dropdown-offset}))
+      transform: translateY(-5px)
+      transition-duration: $bulma-speed
+      transition-property: opacity, transform
+    &.bulma-is-right
+      left: auto
+      right: 0
+  .bulma-navbar-divider
+    display: block
+  .bulma-navbar > .bulma-container,
+  .bulma-container > .bulma-navbar
+    .bulma-navbar-brand
+      margin-left: -.75rem
+    .bulma-navbar-menu
+      margin-right: -.75rem
+  // Fixed navbar
+  .bulma-navbar
+    &.bulma-is-fixed-bottom-desktop,
+    &.bulma-is-fixed-top-desktop
+      +bulma-navbar-fixed
+    &.bulma-is-fixed-bottom-desktop
+      bottom: 0
+      &.bulma-has-shadow
+        box-shadow: 0 -2px 3px rgba($bulma-black, 0.1)
+    &.bulma-is-fixed-top-desktop
+      top: 0
+  html,
+  body
+    &.bulma-has-navbar-fixed-top-desktop
+      padding-top: $bulma-navbar-height
+    &.bulma-has-navbar-fixed-bottom-desktop
+      padding-bottom: $bulma-navbar-height
+    &.bulma-has-spaced-navbar-fixed-top
+      padding-top: $bulma-navbar-height + ($bulma-navbar-padding-vertical * 2)
+    &.bulma-has-spaced-navbar-fixed-bottom
+      padding-bottom: $bulma-navbar-height + ($bulma-navbar-padding-vertical * 2)
+  // Hover/Active states
+  a.bulma-navbar-item,
+  .bulma-navbar-link
+    &.bulma-is-active
+      color: $bulma-navbar-item-active-color
+    &.bulma-is-active:not(:focus):not(:hover)
+      background-color: $bulma-navbar-item-active-background-color
+  .bulma-navbar-item.bulma-has-dropdown
+    &:focus,
+    &:hover,
+    &.bulma-is-active
+      .bulma-navbar-link
+        background-color: $bulma-navbar-item-hover-background-color
+
+// Combination
+
+.bulma-hero
+  &.bulma-is-fullheight-with-navbar
+    min-height: calc(100vh - #{$bulma-navbar-height})

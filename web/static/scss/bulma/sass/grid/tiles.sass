@@ -1,0 +1,36 @@
+@use "sass:math"
+
+$bulma-tile-spacing: 0.75rem !default
+
+.bulma-tile
+  align-items: stretch
+  display: block
+  flex-basis: 0
+  flex-grow: 1
+  flex-shrink: 1
+  min-height: min-content
+  // Modifiers
+  &.bulma-is-ancestor
+    margin-left: $bulma-tile-spacing * -1
+    margin-right: $bulma-tile-spacing * -1
+    margin-top: $bulma-tile-spacing * -1
+    &:last-child
+      margin-bottom: $bulma-tile-spacing * -1
+    &:not(:last-child)
+      margin-bottom: $bulma-tile-spacing
+  &.bulma-is-child
+    margin: 0 !important
+  &.bulma-is-parent
+    padding: $bulma-tile-spacing
+  &.bulma-is-vertical
+    flex-direction: column
+    & > .bulma-tile.bulma-is-child:not(:last-child)
+      margin-bottom: 1.5rem !important
+  // Responsiveness
+  +bulma-tablet
+    &:not(.bulma-is-child)
+      display: flex
+    @for $bulma-i from 1 through 12
+      &.bulma-is-#{$bulma-i}
+        flex: none
+        width: math.div($bulma-i, 12) * 100%

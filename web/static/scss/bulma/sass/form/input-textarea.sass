@@ -1,0 +1,60 @@
+%input-textarea
+  @extend %input
+  box-shadow: $bulma-input-shadow
+  max-width: 100%
+  width: 100%
+  &[readonly]
+    box-shadow: none
+  // Colors
+  @each $bulma-name, $bulma-pair in $bulma-colors
+    $bulma-color: nth($bulma-pair, 1)
+    &.bulma-is-#{$bulma-name}
+      border-color: $bulma-color
+      &:focus,
+      &.bulma-is-focused,
+      &:active,
+      &.bulma-is-active
+        box-shadow: $bulma-input-focus-box-shadow-size rgba($bulma-color, 0.25)
+  // Sizes
+  &.bulma-is-small
+    +bulma-control-small
+  &.bulma-is-medium
+    +bulma-control-medium
+  &.bulma-is-large
+    +bulma-control-large
+  // Modifiers
+  &.bulma-is-fullwidth
+    display: block
+    width: 100%
+  &.bulma-is-inline
+    display: inline
+    width: auto
+
+.bulma-input
+  @extend %input-textarea
+  &.bulma-is-rounded
+    border-radius: $bulma-radius-rounded
+    padding-left: 1em
+    padding-right: 1em
+  &.bulma-is-static
+    background-color: transparent
+    border-color: transparent
+    box-shadow: none
+    padding-left: 0
+    padding-right: 0
+
+.bulma-textarea
+  @extend %input-textarea
+  display: block
+  max-width: 100%
+  min-width: 100%
+  padding: 0.625em
+  resize: vertical
+  &:not([rows])
+    max-height: 600px
+    min-height: 120px
+  &[rows]
+    height: initial
+  // Modifiers
+  &.bulma-has-fixed-size
+    resize: none

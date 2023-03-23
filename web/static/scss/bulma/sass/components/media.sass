@@ -1,0 +1,48 @@
+.bulma-media
+  align-items: flex-start
+  display: flex
+  text-align: left
+  .bulma-content:not(:last-child)
+    margin-bottom: 0.75rem
+  .bulma-media
+    border-top: 1px solid rgba($bulma-border, 0.5)
+    display: flex
+    padding-top: 0.75rem
+    .bulma-content:not(:last-child),
+    .bulma-control:not(:last-child)
+      margin-bottom: 0.5rem
+    .bulma-media
+      padding-top: 0.5rem
+      & + .bulma-media
+        margin-top: 0.5rem
+  & + .bulma-media
+    border-top: 1px solid rgba($bulma-border, 0.5)
+    margin-top: 1rem
+    padding-top: 1rem
+  // Sizes
+  &.bulma-is-large
+    & + .bulma-media
+      margin-top: 1.5rem
+      padding-top: 1.5rem
+
+.bulma-media-left,
+.bulma-media-right
+  flex-basis: auto
+  flex-grow: 0
+  flex-shrink: 0
+
+.bulma-media-left
+  margin-right: 1rem
+
+.bulma-media-right
+  margin-left: 1rem
+
+.bulma-media-content
+  flex-basis: auto
+  flex-grow: 1
+  flex-shrink: 1
+  text-align: left
+
++bulma-mobile
+  .bulma-media-content
+    overflow-x: auto

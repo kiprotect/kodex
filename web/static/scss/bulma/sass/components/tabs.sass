@@ -1,0 +1,151 @@
+$bulma-tabs-border-bottom-color: $bulma-border !default
+$bulma-tabs-border-bottom-style: solid !default
+$bulma-tabs-border-bottom-width: 1px !default
+$bulma-tabs-link-color: $bulma-text !default
+$bulma-tabs-link-hover-border-bottom-color: $bulma-text-strong !default
+$bulma-tabs-link-hover-color: $bulma-text-strong !default
+$bulma-tabs-link-active-border-bottom-color: $bulma-link !default
+$bulma-tabs-link-active-color: $bulma-link !default
+$bulma-tabs-link-padding: 0.5em 1em !default
+
+$bulma-tabs-boxed-link-radius: $bulma-radius !default
+$bulma-tabs-boxed-link-hover-background-color: $bulma-background !default
+$bulma-tabs-boxed-link-hover-border-bottom-color: $bulma-border !default
+
+$bulma-tabs-boxed-link-active-background-color: $bulma-white !default
+$bulma-tabs-boxed-link-active-border-color: $bulma-border !default
+$bulma-tabs-boxed-link-active-border-bottom-color: transparent !default
+
+$bulma-tabs-toggle-link-border-color: $bulma-border !default
+$bulma-tabs-toggle-link-border-style: solid !default
+$bulma-tabs-toggle-link-border-width: 1px !default
+$bulma-tabs-toggle-link-hover-background-color: $bulma-background !default
+$bulma-tabs-toggle-link-hover-border-color: $bulma-border-hover !default
+$bulma-tabs-toggle-link-radius: $bulma-radius !default
+$bulma-tabs-toggle-link-active-background-color: $bulma-link !default
+$bulma-tabs-toggle-link-active-border-color: $bulma-link !default
+$bulma-tabs-toggle-link-active-color: $bulma-link-invert !default
+
+.bulma-tabs
+  @extend %block
+  +bulma-overflow-touch
+  @extend %unselectable
+  align-items: stretch
+  display: flex
+  font-size: $bulma-size-normal
+  justify-content: space-between
+  overflow: hidden
+  overflow-x: auto
+  white-space: nowrap
+  a
+    align-items: center
+    border-bottom-color: $bulma-tabs-border-bottom-color
+    border-bottom-style: $bulma-tabs-border-bottom-style
+    border-bottom-width: $bulma-tabs-border-bottom-width
+    color: $bulma-tabs-link-color
+    display: flex
+    justify-content: center
+    margin-bottom: -#{$bulma-tabs-border-bottom-width}
+    padding: $bulma-tabs-link-padding
+    vertical-align: top
+    &:hover
+      border-bottom-color: $bulma-tabs-link-hover-border-bottom-color
+      color: $bulma-tabs-link-hover-color
+  li
+    display: block
+    &.bulma-is-active
+      a
+        border-bottom-color: $bulma-tabs-link-active-border-bottom-color
+        color: $bulma-tabs-link-active-color
+  ul
+    align-items: center
+    border-bottom-color: $bulma-tabs-border-bottom-color
+    border-bottom-style: $bulma-tabs-border-bottom-style
+    border-bottom-width: $bulma-tabs-border-bottom-width
+    display: flex
+    flex-grow: 1
+    flex-shrink: 0
+    justify-content: flex-start
+    &.bulma-is-left
+      padding-right: 0.75em
+    &.bulma-is-center
+      flex: none
+      justify-content: center
+      padding-left: 0.75em
+      padding-right: 0.75em
+    &.bulma-is-right
+      justify-content: flex-end
+      padding-left: 0.75em
+  .bulma-icon
+    &:first-child
+      margin-right: 0.5em
+    &:last-child
+      margin-left: 0.5em
+  // Alignment
+  &.bulma-is-centered
+    ul
+      justify-content: center
+  &.bulma-is-right
+    ul
+      justify-content: flex-end
+  // Styles
+  &.bulma-is-boxed
+    a
+      border: 1px solid transparent
+      border-radius: $bulma-tabs-boxed-link-radius $bulma-tabs-boxed-link-radius 0 0
+      &:hover
+        background-color: $bulma-tabs-boxed-link-hover-background-color
+        border-bottom-color: $bulma-tabs-boxed-link-hover-border-bottom-color
+    li
+      &.bulma-is-active
+        a
+          background-color: $bulma-tabs-boxed-link-active-background-color
+          border-color: $bulma-tabs-boxed-link-active-border-color
+          border-bottom-color: $bulma-tabs-boxed-link-active-border-bottom-color !important
+  &.bulma-is-fullwidth
+    li
+      flex-grow: 1
+      flex-shrink: 0
+  &.bulma-is-toggle
+    a
+      border-color: $bulma-tabs-toggle-link-border-color
+      border-style: $bulma-tabs-toggle-link-border-style
+      border-width: $bulma-tabs-toggle-link-border-width
+      margin-bottom: 0
+      position: relative
+      &:hover
+        background-color: $bulma-tabs-toggle-link-hover-background-color
+        border-color: $bulma-tabs-toggle-link-hover-border-color
+        z-index: 2
+    li
+      & + li
+        margin-left: -#{$bulma-tabs-toggle-link-border-width}
+      &:first-child a
+        border-radius: $bulma-tabs-toggle-link-radius 0 0 $bulma-tabs-toggle-link-radius
+      &:last-child a
+        border-radius: 0 $bulma-tabs-toggle-link-radius $bulma-tabs-toggle-link-radius 0
+      &.bulma-is-active
+        a
+          background-color: $bulma-tabs-toggle-link-active-background-color
+          border-color: $bulma-tabs-toggle-link-active-border-color
+          color: $bulma-tabs-toggle-link-active-color
+          z-index: 1
+    ul
+      border-bottom: none
+    &.bulma-is-toggle-rounded
+      li
+        &:first-child a
+          border-bottom-left-radius: $bulma-radius-rounded
+          border-top-left-radius: $bulma-radius-rounded
+          padding-left: 1.25em
+        &:last-child a
+          border-bottom-right-radius: $bulma-radius-rounded
+          border-top-right-radius: $bulma-radius-rounded
+          padding-right: 1.25em
+  // Sizes
+  &.bulma-is-small
+    font-size: $bulma-size-small
+  &.bulma-is-medium
+    font-size: $bulma-size-medium
+  &.bulma-is-large
+    font-size: $bulma-size-large

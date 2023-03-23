@@ -1,0 +1,24 @@
+$bulma-box-color: $bulma-text !default
+$bulma-box-background-color: $bulma-white !default
+$bulma-box-radius: $bulma-radius-large !default
+$bulma-box-shadow: 0 2px 3px rgba($bulma-black, 0.1), 0 0 0 1px rgba($bulma-black, 0.1) !default
+$bulma-box-padding: 1.25rem !default
+
+$bulma-box-link-hover-shadow: 0 2px 3px rgba($bulma-black, 0.1), 0 0 0 1px $bulma-link !default
+$bulma-box-link-active-shadow: inset 0 1px 2px rgba($bulma-black, 0.2), 0 0 0 1px $bulma-link !default
+
+.bulma-box
+  @extend %block
+  background-color: $bulma-box-background-color
+  border-radius: $bulma-box-radius
+  box-shadow: $bulma-box-shadow
+  color: $bulma-box-color
+  display: block
+  padding: $bulma-box-padding
+
+a.bulma-box
+  &:hover,
+  &:focus
+    box-shadow: $bulma-box-link-hover-shadow
+  &:active
+    box-shadow: $bulma-box-link-active-shadow

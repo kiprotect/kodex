@@ -1,0 +1,72 @@
+@import "./colors.scss";
+
+$kip-border-radius: 5px;
+$kip-box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1),
+    0 0 0 1px rgba(10, 10, 10, 0.1);
+
+$kip-shadow-light-sm: 0 2px 5px 0 rgba(0, 0, 0, 0.11);
+$kip-shadow-dark-sm: 0 2px 5px 0 rgba(0, 0, 0, 0.33);
+
+$kip-radius: 4px;
+
+$kip-gap: 64px;
+$kip-mobile: 421px;
+$kip-tablet: 769px;
+$kip-desktop: 960px + (2 * $kip-gap);
+
+$kip-border-radius: $kip-radius;
+
+$bulma-navbar-height: 3.25rem;
+$kip-navbar-height: 3.25rem;
+
+$kip-space: (
+    xs: 4px,
+    sm: 8px,
+    md: 16px,
+    lg: 24px,
+    xl: 48px,
+    xxl: 96px
+);
+
+// Shadows
+
+$kip-shadow-sm: 0 4px 4px 0 rgba(0, 0, 0, 0.05),
+    3px 3px 3px 0 rgba(0, 0, 0, 0.05);
+$kip-shadow-dropdown: 0 3px 6px -2px rgba(0, 0, 0, 0.5);
+
+$kip-weight-normal: 300;
+$kip-weight-bold: 600;
+$kip-weight-thin: 150;
+
+@mixin fs($kip-size) {
+    @media (min-width: $kip-tablet) {
+        font-size: map-get($kip-fs-tablet, $kip-size);
+    }
+    font-size: map-get($kip-fs, $kip-size);
+}
+
+$kip-fs-tablet: (
+    huge: 60px,
+    large: 34px,
+    normal: 20px
+);
+
+$kip-fs: (
+    huge: map-get($kip-fs-tablet, huge) * 0.5,
+    large: map-get($kip-fs-tablet, large) * 0.5,
+    normal: map-get($kip-fs-tablet, normal) * 0.5
+);
+
+@mixin vertical-space($kip-size) {
+    margin-bottom: map-get();
+}
+
+// Fonts
+
+@mixin font-nunito {
+    font-family: Nunito, sans-serif;
+}
+
+@mixin font-muli {
+    font-family: Muli, sans-serif;
+}

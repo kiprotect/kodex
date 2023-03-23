@@ -1,0 +1,64 @@
+@use "sass:math"
+
+@function mergeColorMaps($bulma-bulma-colors, $bulma-custom-colors)
+  // we return at least bulma hardcoded colors
+  $bulma-merged-colors: $bulma-bulma-colors
+
+  // we want a map as input
+  @if type-of($bulma-custom-colors) == 'map'
+    @each $bulma-name, $bulma-components in $bulma-custom-colors
+      // color name should be a string and colors pair a list with at least one element
+      @if type-of($bulma-name) == 'string' and (type-of($bulma-components) == 'list' or type-of($bulma-components) == 'color') and length($bulma-components) >= 1
+        $bulma-color-base: null
+
+        // the param can either be a single color
+        // or a list of 2 colors
+        @if type-of($bulma-components) == 'color'
+          $bulma-color-base: $bulma-components
+        @else if type-of($bulma-components) == 'list'
+          $bulma-color-base: nth($bulma-components, 1)
+
+        $bulma-color-invert: null
+        // is an inverted color provided in the list
+        @if length($bulma-components) > 1
+          $bulma-color-invert: nth($bulma-components, 2)
+
+        // we only want a color as base color
+        @if type-of($bulma-color-base) == 'color'
+          // if inverted color is not provided or is not a color we compute it
+          @if type-of($bulma-color-invert) != 'color'
+            $bulma-color-invert: findColorInvert($bulma-color-base)
+
+          // we merge this colors elements as map with bulma colors (we can override them this way, no multiple definition for the same name)
+          $bulma-merged-colors: map_merge($bulma-merged-colors, ($bulma-name: ($bulma-color-base, $bulma-color-invert)))
+
+  @return $bulma-merged-colors
+
+@function powerNumber($bulma-number, $bulma-exp)
+  $bulma-value: 1
+  @if $bulma-exp > 0
+    @for $bulma-i from 1 through $bulma-exp
+      $bulma-value: $bulma-value * $bulma-number
+  @else if $bulma-exp < 0
+    @for $bulma-i from 1 through -$bulma-exp
+      $bulma-value: math.div($bulma-value, $bulma-number)
+  @return $bulma-value
+
+@function colorLuminance($bulma-color)
+  $bulma-color-rgb: ('red': red($bulma-color),'green': green($bulma-color),'blue': blue($bulma-color))
+  @each $bulma-name, $bulma-value in $bulma-color-rgb
+    $bulma-adjusted: 0
+    $bulma-value: math.div($bulma-value, 255)
+    @if $bulma-value < 0.03928
+      $bulma-value: math.div($bulma-value, 12.92)
+    @else
+      $bulma-value: math.div($bulma-value + .055, 1.055)
+      $bulma-value: powerNumber($bulma-value, 2)
+    $bulma-color-rgb: map-merge($bulma-color-rgb, ($bulma-name: $bulma-value))
+  @return (map-get($bulma-color-rgb, 'red') * .2126) + (map-get($bulma-color-rgb, 'green') * .7152) + (map-get($bulma-color-rgb, 'blue') * .0722)
+
+@function findColorInvert($bulma-color)
+  @if (colorLuminance($bulma-color) > 0.55)
+    @return rgba(#000, 0.7)
+  @else
+    @return #fff

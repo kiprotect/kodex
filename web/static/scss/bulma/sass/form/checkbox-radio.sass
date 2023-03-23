@@ -1,0 +1,21 @@
+%checkbox-radio
+  cursor: pointer
+  display: inline-block
+  line-height: 1.25
+  position: relative
+  input
+    cursor: pointer
+  &:hover
+    color: $bulma-input-hover-color
+  &[disabled],
+  fieldset[disabled] &
+    color: $bulma-input-disabled-color
+    cursor: not-allowed
+
+.bulma-checkbox
+  @extend %checkbox-radio
+
+.bulma-radio
+  @extend %checkbox-radio
+  & + .bulma-radio
+    margin-left: 0.5em

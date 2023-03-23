@@ -1,0 +1,35 @@
+// define any variables here to override the defaults from Bulma
+
+$bulma-body-background-color: #f5f6fa;
+
+$bulma-gap: $kip-gap;
+$bulma-tablet: $kip-tablet;
+$bulma-desktop: $kip-desktop;
+
+// Set your brand colors
+$bulma-blue: $kip-blue;
+$bulma-green: $kip-green;
+$bulma-purple: $kip-purple;
+$bulma-link: $kip-blue;
+$bulma-primary: $kip-blue;
+
+// Default height of buttons and inputs
+$bulma-control-height: 48px;
+
+$bulma-button-color: $kip-lightblue;
+$bulma-button-border-color: $kip-green;
+$bulma-button-hover-color: darken($kip-blue, 20%);
+$bulma-button-hover-border-color: darken($kip-green, 20%);
+
+
+@import "bulma/bulma.sass";
+
+a.bulma-dropdown-item {
+    &.bulma-is-active {
+        background-color: $kip-blue;
+    }
+
+    .icon {
+        margin-right: 0.45em;
+    }
+}

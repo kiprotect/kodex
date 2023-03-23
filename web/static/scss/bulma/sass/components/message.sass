@@ -1,0 +1,87 @@
+$bulma-message-background-color: $bulma-background !default
+$bulma-message-radius: $bulma-radius !default
+
+$bulma-message-header-background-color: $bulma-text !default
+$bulma-message-header-color: $bulma-text-invert !default
+$bulma-message-header-weight: $bulma-weight-bold !default
+$bulma-message-header-padding: 0.75em 1em !default
+$bulma-message-header-radius: $bulma-radius !default
+
+$bulma-message-body-border-color: $bulma-border !default
+$bulma-message-body-border-width: 0 0 0 4px !default
+$bulma-message-body-color: $bulma-text !default
+$bulma-message-body-padding: 1.25em 1.5em !default
+$bulma-message-body-radius: $bulma-radius !default
+
+$bulma-message-body-pre-background-color: $bulma-white !default
+$bulma-message-body-pre-code-background-color: transparent !default
+
+$bulma-message-header-body-border-width: 0 !default
+$bulma-message-colors: $bulma-colors !default
+
+.bulma-message
+  @extend %block
+  background-color: $bulma-message-background-color
+  border-radius: $bulma-message-radius
+  font-size: $bulma-size-normal
+  strong
+    color: currentColor
+  a:not(.bulma-button):not(.bulma-tag):not(.bulma-dropdown-item)
+    color: currentColor
+    text-decoration: underline
+  // Sizes
+  &.bulma-is-small
+    font-size: $bulma-size-small
+  &.bulma-is-medium
+    font-size: $bulma-size-medium
+  &.bulma-is-large
+    font-size: $bulma-size-large
+  // Colors
+  @each $bulma-name, $bulma-pair in $bulma-message-colors
+    $bulma-color: nth($bulma-pair, 1)
+    $bulma-color-invert: nth($bulma-pair, 2)
+    $bulma-color-lightning: max((100% - lightness($bulma-color)) - 2%, 0%)
+    $bulma-color-luminance: colorLuminance($bulma-color)
+    $bulma-darken-percentage: $bulma-color-luminance * 70%
+    $bulma-desaturate-percentage: $bulma-color-luminance * 30%
+    &.bulma-is-#{$bulma-name}
+      background-color: lighten($bulma-color, $bulma-color-lightning)
+      .bulma-message-header
+        background-color: $bulma-color
+        color: $bulma-color-invert
+      .bulma-message-body
+        border-color: $bulma-color
+        color: desaturate(darken($bulma-color, $bulma-darken-percentage), $bulma-desaturate-percentage)
+
+.bulma-message-header
+  align-items: center
+  background-color: $bulma-message-header-background-color
+  border-radius: $bulma-message-header-radius $bulma-message-header-radius 0 0
+  color: $bulma-message-header-color
+  display: flex
+  font-weight: $bulma-message-header-weight
+  justify-content: space-between
+  line-height: 1.25
+  padding: $bulma-message-header-padding
+  position: relative
+  .bulma-delete
+    flex-grow: 0
+    flex-shrink: 0
+    margin-left: 0.75em
+  & + .bulma-message-body
+    border-width: $bulma-message-header-body-border-width
+    border-top-left-radius: 0
+    border-top-right-radius: 0
+
+.bulma-message-body
+  border-color: $bulma-message-body-border-color
+  border-radius: $bulma-message-body-radius
+  border-style: solid
+  border-width: $bulma-message-body-border-width
+  color: $bulma-message-body-color
+  padding: $bulma-message-body-padding
+  code,
+  pre
+    background-color: $bulma-message-body-pre-background-color
+  pre code
+    background-color: $bulma-message-body-pre-code-background-color

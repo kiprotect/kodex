@@ -1,0 +1,127 @@
+$bulma-table-color: $bulma-grey-darker !default
+$bulma-table-background-color: $bulma-white !default
+
+$bulma-table-cell-border: 1px solid $bulma-grey-lighter !default
+$bulma-table-cell-border-width: 0 0 1px !default
+$bulma-table-cell-padding: 0.5em 0.75em !default
+$bulma-table-cell-heading-color: $bulma-text-strong !default
+
+$bulma-table-head-cell-border-width: 0 0 2px !default
+$bulma-table-head-cell-color: $bulma-text-strong !default
+$bulma-table-foot-cell-border-width: 2px 0 0 !default
+$bulma-table-foot-cell-color: $bulma-text-strong !default
+
+$bulma-table-head-background-color: transparent !default
+$bulma-table-body-background-color: transparent !default
+$bulma-table-foot-background-color: transparent !default
+
+$bulma-table-row-hover-background-color: $bulma-white-bis !default
+
+$bulma-table-row-active-background-color: $bulma-primary !default
+$bulma-table-row-active-color: $bulma-primary-invert !default
+
+$bulma-table-striped-row-even-background-color: $bulma-white-bis !default
+$bulma-table-striped-row-even-hover-background-color: $bulma-white-ter !default
+
+.bulma-table
+  @extend %block
+  background-color: $bulma-table-background-color
+  color: $bulma-table-color
+  td,
+  th
+    border: $bulma-table-cell-border
+    border-width: $bulma-table-cell-border-width
+    padding: $bulma-table-cell-padding
+    vertical-align: top
+    // Colors
+    @each $bulma-name, $bulma-pair in $bulma-colors
+      $bulma-color: nth($bulma-pair, 1)
+      $bulma-color-invert: nth($bulma-pair, 2)
+      &.bulma-is-#{$bulma-name}
+        background-color: $bulma-color
+        border-color: $bulma-color
+        color: $bulma-color-invert
+    // Modifiers
+    &.bulma-is-narrow
+      white-space: nowrap
+      width: 1%
+    &.bulma-is-selected
+      background-color: $bulma-table-row-active-background-color
+      color: $bulma-table-row-active-color
+      a,
+      strong
+        color: currentColor
+  th
+    color: $bulma-table-cell-heading-color
+    &:not([align])
+      text-align: left
+  tr
+    &.bulma-is-selected
+      background-color: $bulma-table-row-active-background-color
+      color: $bulma-table-row-active-color
+      a,
+      strong
+        color: currentColor
+      td,
+      th
+        border-color: $bulma-table-row-active-color
+        color: currentColor
+  thead
+    background-color: $bulma-table-head-background-color
+    td,
+    th
+      border-width: $bulma-table-head-cell-border-width
+      color: $bulma-table-head-cell-color
+  tfoot
+    background-color: $bulma-table-foot-background-color
+    td,
+    th
+      border-width: $bulma-table-foot-cell-border-width
+      color: $bulma-table-foot-cell-color
+  tbody
+    background-color: $bulma-table-body-background-color
+    tr
+      &:last-child
+        td,
+        th
+          border-bottom-width: 0
+  // Modifiers
+  &.bulma-is-bordered
+    td,
+    th
+      border-width: 1px
+    tr
+      &:last-child
+        td,
+        th
+          border-bottom-width: 1px
+  &.bulma-is-fullwidth
+    width: 100%
+  &.bulma-is-hoverable
+    tbody
+      tr:not(.bulma-is-selected)
+        &:hover
+          background-color: $bulma-table-row-hover-background-color
+    &.bulma-is-striped
+      tbody
+        tr:not(.bulma-is-selected)
+          &:hover
+            background-color: $bulma-table-row-hover-background-color
+            &:nth-child(even)
+              background-color: $bulma-table-striped-row-even-hover-background-color
+  &.bulma-is-narrow
+    td,
+    th
+      padding: 0.25em 0.5em
+  &.bulma-is-striped
+    tbody
+      tr:not(.bulma-is-selected)
+        &:nth-child(even)
+          background-color: $bulma-table-striped-row-even-background-color
+
+.bulma-table-container
+  @extend %block
+  +bulma-overflow-touch
+  overflow: auto
+  overflow-y: hidden
+  max-width: 100%

@@ -1,0 +1,149 @@
+$bulma-pagination-color: $bulma-grey-darker !default
+$bulma-pagination-border-color: $bulma-grey-lighter !default
+$bulma-pagination-margin: -0.25rem !default
+$bulma-pagination-min-width: $bulma-control-height !default
+
+$bulma-pagination-item-font-size: 1em !default
+$bulma-pagination-item-margin: 0.25rem !default
+$bulma-pagination-item-padding-left: 0.5em !default
+$bulma-pagination-item-padding-right: 0.5em !default
+
+$bulma-pagination-hover-color: $bulma-link-hover !default
+$bulma-pagination-hover-border-color: $bulma-link-hover-border !default
+
+$bulma-pagination-focus-color: $bulma-link-focus !default
+$bulma-pagination-focus-border-color: $bulma-link-focus-border !default
+
+$bulma-pagination-active-color: $bulma-link-active !default
+$bulma-pagination-active-border-color: $bulma-link-active-border !default
+
+$bulma-pagination-disabled-color: $bulma-grey !default
+$bulma-pagination-disabled-background-color: $bulma-grey-lighter !default
+$bulma-pagination-disabled-border-color: $bulma-grey-lighter !default
+
+$bulma-pagination-current-color: $bulma-link-invert !default
+$bulma-pagination-current-background-color: $bulma-link !default
+$bulma-pagination-current-border-color: $bulma-link !default
+
+$bulma-pagination-ellipsis-color: $bulma-grey-light !default
+
+$bulma-pagination-shadow-inset: inset 0 1px 2px rgba($bulma-black, 0.2)
+
+.bulma-pagination
+  font-size: $bulma-size-normal
+  margin: $bulma-pagination-margin
+  // Sizes
+  &.bulma-is-small
+    font-size: $bulma-size-small
+  &.bulma-is-medium
+    font-size: $bulma-size-medium
+  &.bulma-is-large
+    font-size: $bulma-size-large
+  &.bulma-is-rounded
+    .bulma-pagination-previous,
+    .bulma-pagination-next
+      padding-left: 1em
+      padding-right: 1em
+      border-radius: $bulma-radius-rounded
+    .bulma-pagination-link
+      border-radius: $bulma-radius-rounded
+
+.bulma-pagination,
+.bulma-pagination-list
+  align-items: center
+  display: flex
+  justify-content: center
+  text-align: center
+
+.bulma-pagination-previous,
+.bulma-pagination-next,
+.bulma-pagination-link,
+.bulma-pagination-ellipsis
+  @extend %control
+  @extend %unselectable
+  font-size: $bulma-pagination-item-font-size
+  justify-content: center
+  margin: $bulma-pagination-item-margin
+  padding-left: $bulma-pagination-item-padding-left
+  padding-right: $bulma-pagination-item-padding-right
+  text-align: center
+
+.bulma-pagination-previous,
+.bulma-pagination-next,
+.bulma-pagination-link
+  border-color: $bulma-pagination-border-color
+  color: $bulma-pagination-color
+  min-width: $bulma-pagination-min-width
+  &:hover
+    border-color: $bulma-pagination-hover-border-color
+    color: $bulma-pagination-hover-color
+  &:focus
+    border-color: $bulma-pagination-focus-border-color
+  &:active
+    box-shadow: $bulma-pagination-shadow-inset
+  &[disabled]
+    background-color: $bulma-pagination-disabled-background-color
+    border-color: $bulma-pagination-disabled-border-color
+    box-shadow: none
+    color: $bulma-pagination-disabled-color
+    opacity: 0.5
+
+.bulma-pagination-previous,
+.bulma-pagination-next
+  padding-left: 0.75em
+  padding-right: 0.75em
+  white-space: nowrap
+
+.bulma-pagination-link
+  &.bulma-is-current
+    background-color: $bulma-pagination-current-background-color
+    border-color: $bulma-pagination-current-border-color
+    color: $bulma-pagination-current-color
+
+.bulma-pagination-ellipsis
+  color: $bulma-pagination-ellipsis-color
+  pointer-events: none
+
+.bulma-pagination-list
+  flex-wrap: wrap
+
++bulma-mobile
+  .bulma-pagination
+    flex-wrap: wrap
+  .bulma-pagination-previous,
+  .bulma-pagination-next
+    flex-grow: 1
+    flex-shrink: 1
+  .bulma-pagination-list
+    li
+      flex-grow: 1
+      flex-shrink: 1
+
++bulma-tablet
+  .bulma-pagination-list
+    flex-grow: 1
+    flex-shrink: 1
+    justify-content: flex-start
+    order: 1
+  .bulma-pagination-previous
+    order: 2
+  .bulma-pagination-next
+    order: 3
+  .bulma-pagination
+    justify-content: space-between
+    &.bulma-is-centered
+      .bulma-pagination-previous
+        order: 1
+      .bulma-pagination-list
+        justify-content: center
+        order: 2
+      .bulma-pagination-next
+        order: 3
+    &.bulma-is-right
+      .bulma-pagination-previous
+        order: 1
+      .bulma-pagination-next
+        order: 2
+      .bulma-pagination-list
+        justify-content: flex-end
+        order: 3

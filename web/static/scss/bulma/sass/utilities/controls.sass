@@ -1,0 +1,50 @@
+$bulma-control-radius: $bulma-radius !default
+$bulma-control-radius-small: $bulma-radius-small !default
+
+$bulma-control-border-width: 1px !default
+
+$bulma-control-height: 2.25em !default
+$bulma-control-line-height: 1.5 !default
+
+$bulma-control-padding-vertical: calc(0.375em - #{$bulma-control-border-width}) !default
+$bulma-control-padding-horizontal: calc(0.625em - #{$bulma-control-border-width}) !default
+
+=bulma-control
+  -moz-appearance: none
+  -webkit-appearance: none
+  align-items: center
+  border: $bulma-control-border-width solid transparent
+  border-radius: $bulma-control-radius
+  box-shadow: none
+  display: inline-flex
+  font-size: $bulma-size-normal
+  height: $bulma-control-height
+  justify-content: flex-start
+  line-height: $bulma-control-line-height
+  padding-bottom: $bulma-control-padding-vertical
+  padding-left: $bulma-control-padding-horizontal
+  padding-right: $bulma-control-padding-horizontal
+  padding-top: $bulma-control-padding-vertical
+  position: relative
+  vertical-align: top
+  // States
+  &:focus,
+  &.bulma-is-focused,
+  &:active,
+  &.bulma-is-active
+    outline: none
+  &[disabled],
+  fieldset[disabled] &
+    cursor: not-allowed
+
+%control
+  +bulma-control
+
+// The controls sizes use mixins so they can be used at different breakpoints
+=bulma-control-small
+  border-radius: $bulma-control-radius-small
+  font-size: $bulma-size-small
+=bulma-control-medium
+  font-size: $bulma-size-medium
+=bulma-control-large
+  font-size: $bulma-size-large
