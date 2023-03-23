@@ -24,6 +24,7 @@ import (
 	"github.com/kiprotect/go-helpers/maps"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
+	"net/http"
 	"regexp"
 )
 
@@ -89,8 +90,8 @@ func (i *InMemoryUserProvider) Create(user *api.ExternalUser) error {
 	return nil
 }
 
-func extractAccessToken(c *gin.Context) (string, bool) {
-	authorizationHeader := c.Request.Header.Get("Authorization")
+func extractAccessToken(request *http.Request) (string, bool) {
+	authorizationHeader := request.Header.Get("Authorization")
 
 	if authorizationHeader == "" {
 		return "", false
@@ -105,9 +106,9 @@ func extractAccessToken(c *gin.Context) (string, bool) {
 }
 
 // Return a user with the given access token
-func (i *InMemoryUserProvider) Get(c *gin.Context) (*api.ExternalUser, error) {
+func (i *InMemoryUserProvider) Get(controller api.Controller, request *http.Request) (*api.ExternalUser, error) {
 
-	accessToken, ok := extractAccessToken(c)
+	accessToken, ok := extractAccessToken(request)
 
 	if !ok {
 		return nil, fmt.Errorf("malformed/missing authorization header")

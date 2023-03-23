@@ -67,6 +67,20 @@ func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.Han
 
 	decorator := func(c *gin.Context) {
 
+		controllerObj, ok := c.Get("controller")
+
+		if !ok {
+			api.HandleError(c, 500, fmt.Errorf("internal server error: controller missing"))
+			return
+		}
+
+		controller, ok := controllerObj.(api.Controller)
+
+		if !ok {
+			api.HandleError(c, 500, fmt.Errorf("internal server error: controller missing"))
+			return
+		}
+
 		ch, ok := c.Get("userProvider")
 
 		if !ok {
@@ -81,7 +95,7 @@ func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.Han
 			return
 		}
 
-		user, err := userProvider.Get(c)
+		user, err := userProvider.Get(controller, c.Request)
 
 		if err != nil {
 			api.HandleError(c, 401, fmt.Errorf("authorization error: %v", err))

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/api"
 )
 
 func UserForm(c Context) Element {
@@ -66,9 +67,9 @@ func UserForm(c Context) Element {
 
 // <h1 class="bulma-navbar-item bulma-navbar-title">Projects › My Example Project</h1><div aria-label="menu" aria-expanded="false" class="bulma-navbar-burger bulma-burger is-hidden-desktop" data-target="sidebar" role="button"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></div></div><div class="bulma-navbar-menu"><div class="bulma-navbar-end"><div class="kip-navbar-dropdown-menu bulma-navbar-item bulma-has-dropdown"><a aria-haspopup="true" aria-expanded="false" class="bulma-navbar-link" role="button" tabindex="0"><span><span class="icon is-small"><i class="fas fa-th-large"></i></span><span class="bulma-is-hidden-navbar">Apps</span></span></a><div class="kip-navbar-dropdown bulma-navbar-dropdown bulma-is-right"><a class="kip-navbar-dropdown__item bulma-dropdown-item" href="/klaro"><span><span class="icon is-small"><i class="fas fa-check-circle"></i></span>Klaro</span></a><a class="kip-navbar-dropdown__item bulma-dropdown-item" href="/kodex"><span><span class="icon is-small"><i class="fas fa-book-open"></i></span>Kodex</span></a><a class="kip-navbar-dropdown__item bulma-dropdown-item" href="/admin"><span><span class="icon is-small"><i class="fas fa-cogs"></i></span>Administration</span></a></div></div><div class="kip-navbar-dropdown-menu bulma-navbar-item bulma-has-dropdown"><a aria-haspopup="true" aria-expanded="false" class="bulma-navbar-link" role="button" tabindex="0"><div class="kip-nowrap"><span class="icon is-small"><i class="fas fa-user-circle"></i></span><span class="kip-overflow-ellipsis bulma-is-hidden-navbar">azure@kiprotect.com</span></div></a><div class="kip-navbar-dropdown bulma-navbar-dropdown bulma-is-right"><a class="kip-navbar-dropdown__item bulma-dropdown-item" href="/logout"><span><span class="icon is-small"><i class="fas fa-sign-out-alt"></i></span>Log out</span></a></div></div></div></div></header>
 
-func Root(c Context) Element {
+func Authorized(c Context) Element {
 
-	var title = "example"
+	var title = "test"
 
 	return F(
 		Doctype("html"),
@@ -92,4 +93,49 @@ func Root(c Context) Element {
 			),
 		),
 	)
+
+}
+
+func Login(c Context) Element {
+	return Div("log in first...")
+}
+
+func Root(controller api.Controller) (func(c Context) Element, error) {
+
+	userProvider, err := controller.UserProvider()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return func(c Context) Element {
+
+		// we set the user provider
+		SetUserProvider(c, userProvider)
+
+		externalUser, _ := userProvider.Get(controller, c.Request())
+
+		router := UseRouter(c)
+
+		if router.Matches("/login") {
+			return router.Match("/login", Login)
+		}
+
+		if externalUser == nil {
+			c.Redirect("/login")
+			return nil
+		}
+
+		apiUser, err := externalUser.ApiUser(controller)
+
+		if err != nil {
+			c.Redirect("/login")
+			return nil
+		}
+
+		SetUser(c, apiUser)
+
+		return c.Element("authorized", Authorized)
+
+	}, nil
 }

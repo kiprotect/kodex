@@ -70,7 +70,7 @@ func API(controller kodex.Controller, definitions interface{}) ([]cli.Command, e
 
 }
 
-func RunAPI(controller kodex.Controller, definitions *api.Definitions, prefix string, handlerMaker func(http.Handler) http.Handler, blueprintName string) error {
+func RunAPI(controller kodex.Controller, definitions *api.Definitions, prefix string, handlerMaker func(api.Controller, http.Handler) (http.Handler, error), blueprintName string) error {
 	kodex.Log.Infof("Running Kodex - API %s", kodex.Version)
 
 	var wg sync.WaitGroup
@@ -112,6 +112,7 @@ func RunAPI(controller kodex.Controller, definitions *api.Definitions, prefix st
 	}
 
 	var addr = host + ":" + strconv.Itoa(port)
+
 	srv, _, err := ginHelpers.RunApi(apiController, addr, prefix, handlerMaker, &wg)
 
 	if err != nil {

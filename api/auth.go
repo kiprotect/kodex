@@ -19,6 +19,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kiprotect/kodex"
+	"net/http"
 )
 
 type UserProviderDefinition struct {
@@ -33,7 +34,7 @@ type UserProviderMaker func(settings kodex.Settings) (UserProvider, error)
 
 type UserProvider interface {
 	Initialize(group *gin.RouterGroup) error
-	Get(context *gin.Context) (*ExternalUser, error)
+	Get(controller Controller, request *http.Request) (*ExternalUser, error)
 }
 
 type CreateUserProvider interface {

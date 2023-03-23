@@ -80,7 +80,7 @@ func Router(controller api.Controller, prefix string, decorator gin.HandlerFunc)
 
 }
 
-func RunApi(controller api.Controller, addr string, prefix string, handlerMaker func(http.Handler) http.Handler, wg *sync.WaitGroup) (*http.Server, *gin.Engine, error) {
+func RunApi(controller api.Controller, addr string, prefix string, handlerMaker func(api.Controller, http.Handler) (http.Handler, error), wg *sync.WaitGroup) (*http.Server, *gin.Engine, error) {
 
 	g, err := Router(controller, prefix, nil)
 
@@ -93,7 +93,9 @@ func RunApi(controller api.Controller, addr string, prefix string, handlerMaker 
 	kodex.Log.Info("Started API - listening on http://" + addr)
 
 	if handlerMaker != nil {
-		handler = handlerMaker(g)
+		if handler, err = handlerMaker(controller, g); err != nil {
+			return nil, nil, err
+		}
 	} else {
 		handler = g
 	}

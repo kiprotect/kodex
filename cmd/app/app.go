@@ -74,11 +74,18 @@ func (a *AppWithApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func RunApp(controller kodex.Controller, definitions *api.Definitions, blueprintName string) error {
 	kodex.Log.Infof("Running Kodex - App %s", kodex.Version)
 
-	handlerMaker := func(api http.Handler) http.Handler {
-		return &AppWithApiHandler{
-			App: web.AppServer(),
-			API: api,
+	handlerMaker := func(controller api.Controller, api http.Handler) (http.Handler, error) {
+
+		app, err := web.AppServer(controller)
+
+		if err != nil {
+			return nil, err
 		}
+
+		return &AppWithApiHandler{
+			App: app,
+			API: api,
+		}, nil
 	}
 
 	return apiCmd.RunAPI(controller, definitions, "/api", handlerMaker, blueprintName)
