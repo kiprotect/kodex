@@ -4,7 +4,7 @@ import (
 	. "github.com/kiprotect/gospel"
 )
 
-func Tabs(tabs []TabConfig) Element {
+func Tabs(args ...any) Element {
 	return Div(
 		Class("bulma-tabs"),
 		Class("active"),
@@ -13,19 +13,15 @@ func Tabs(tabs []TabConfig) Element {
 			Span("cm-tabs-more", "&or;"),
 		),
 		Ul(
-			"tabs",
+			args,
 		),
 	)
 }
 
-type TabConfig struct {
-	Name string
-}
-
-func Tab(active bool) Element {
+func Tab(args ...any) Element {
 	return Li(
 		Class("bulma-is-active"),
-		"test",
+		args,
 	)
 }
 

@@ -1,0 +1,122 @@
+@import "../variables.scss";
+
+.kip-list {
+
+    // to do: check if this breaks anything
+    overflow-x: auto;
+    overflow-y: visible;
+
+    padding-bottom: 0;
+
+    .kip-item {
+        min-width: 800px;
+        display: flex;
+        flex-basis: 0;
+        flex-direction: row;
+        align-items: top;
+        justify-items: flex-end;
+        padding: map-get($kip-space, lg);
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &:nth-child(2n) {
+            background: #fafafa;
+        }
+
+        &.kip-is-header {
+            padding-top: 0;
+            margin-bottom: map-get($kip-space, xs);
+            background: none;
+        }
+
+        &.kip-is-card {
+            background: #fff;
+            box-shadow: $kip-shadow-sm;
+            border-radius: $kip-border-radius;
+            margin-bottom: map-get($kip-space, lg);
+        }
+
+        &.kip-is-clickable {
+            cursor: pointer;
+        }
+
+        &.kip-expandable {
+            cursor: pointer;
+        }
+
+        form {
+            margin: 0;
+
+            label.label {
+                font-weight: 300;
+            }
+        }
+
+        span.action {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+        }
+
+        @media (min-width: $kip-tablet) {
+            span.action {
+                display: none;
+            }
+
+            &:hover {
+                span.action {
+                    display: inline-block;
+                }
+            }
+        }
+
+
+        .kip-col {
+            display: flex;
+            align-content: center;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            margin: map-get($kip-space, sm);
+            flex-grow: 1;
+            flex-basis: 0;
+            
+            &.kip-wraps {
+                white-space: normal;
+            }
+
+            &.kip-is-xs {
+                flex-grow: 1;
+            }
+            &.kip-is-sm {
+                flex-grow: 2;
+            }
+            &.kip-is-md {
+                flex-grow: 5;
+            }
+            &.kip-is-lg {
+                flex-grow: 10;
+            }
+            &.kip-is-xl {
+                flex-grow: 20;
+            }
+            &.kip-is-icon {
+                flex-basis: 40px;
+                text-align: right;
+                flex-grow: 0;
+                overflow: visible;
+            }
+            &, p {
+                font-size: 16px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+        }
+
+        .kip-content {
+            flex: 10;
+        }
+    }
+}

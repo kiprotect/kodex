@@ -30,12 +30,18 @@ func ProjectDetails(c Context, projectId string) Element {
 	}
 
 	return Div(
-		project.Name(),
-		ui.Tabs([]ui.TabConfig{
-			ui.TabConfig{
-				Name: "foo",
-			},
-		}),
+		Div(
+			Class("bulma-content"),
+			H2(Class("bulma-title"), project.Name()),
+		),
+		ui.Tabs(
+			ui.Tab(A(Href("test"), "Configuration")),
+			ui.Tab(A(Href("test"), "Changes")),
+			ui.Tab(A(Href("test"), "Settings")),
+		),
+		Div(
+			"[in progress]",
+		),
 	)
 }
 
@@ -83,9 +89,17 @@ func Projects(c Context) Element {
 
 	for _, project := range projects {
 		kodex.Log.Infof("Name: %s", project.Name())
-		projectItem := Li(A(Href(Fmt("/projects/%s", Hex(project.ID()))), project.Name()))
+		projectItem := A(
+			Href(Fmt("/projects/%s", Hex(project.ID()))),
+			ui.ListItem(
+				ui.ListColumn("md", project.Name()),
+			),
+		)
 		pis = append(pis, projectItem)
 	}
 
-	return Ul(pis...)
+	return F(
+		ui.List(pis),
+		Button(Class("bulma-button", "bulma-is-success"), "New Project"),
+	)
 }
