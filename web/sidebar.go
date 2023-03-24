@@ -4,22 +4,23 @@ import (
 	. "github.com/kiprotect/gospel"
 )
 
-func WithSidebar(c Context) Element {
+func WithSidebar(sidebar Element, content Element) ElementFunction {
 
-	sidebar := c.Element("sidebar", Sidebar)
-	content := c.Element("mainContent", MainContent)
+	return func(c Context) Element {
 
-	return Div(
-		Class("kip-with-sidebar"),
-		Div(
-			Class("kip-with-sidebar__sidebar"),
-			sidebar,
-		),
-		Div(
-			Class("kip-with-sidebar__content"),
-			content,
-		),
-	)
+		return Div(
+			Class("kip-with-sidebar"),
+			Div(
+				Class("kip-with-sidebar__sidebar"),
+				sidebar,
+			),
+			Div(
+				Class("kip-with-sidebar__content"),
+				content,
+			),
+		)
+	}
+
 }
 
 func NavItem(c Context) Element {

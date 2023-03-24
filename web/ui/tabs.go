@@ -18,9 +18,15 @@ func Tabs(args ...any) Element {
 	)
 }
 
+func ActiveTab(active bool) Attribute {
+	if active {
+		return Class("bulma-is-active")
+	}
+	return nil
+}
+
 func Tab(args ...any) Element {
 	return Li(
-		Class("bulma-is-active"),
 		args,
 	)
 }

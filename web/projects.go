@@ -9,7 +9,7 @@ import (
 
 // Project details
 
-func ProjectDetails(c Context, projectId string) Element {
+func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	controller := UseController(c)
 	user := UseExternalUser(c)
@@ -29,47 +29,28 @@ func ProjectDetails(c Context, projectId string) Element {
 		return nil
 	}
 
+	title := GetVar[string](c, "title")
+
+	SetVar(c, "title", "foobar")
+
+	Log.Info("New Title: %s", title.Get())
+
+	Log.Info(tab)
+
 	return Div(
 		Div(
 			Class("bulma-content"),
 			H2(Class("bulma-title"), project.Name()),
 		),
 		ui.Tabs(
-			ui.Tab(A(Href("test"), "Configuration")),
-			ui.Tab(A(Href("test"), "Changes")),
-			ui.Tab(A(Href("test"), "Settings")),
+			ui.Tab(ui.ActiveTab(tab == "configuration"), A(Href(Fmt("/projects/%s/configuration", projectId)), "Configuration")),
+			ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Changes")),
+			ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(Fmt("/projects/%s/settings", projectId)), "Settings")),
 		),
 		Div(
 			"[in progress]",
 		),
 	)
-}
-
-// Projects list
-
-func projects(controller api.Controller, user *api.ExternalUser) ([]kodex.Project, error) {
-
-	objectRoles, err := controller.ObjectRolesForUser("project", user)
-
-	if err != nil {
-		return nil, err
-	}
-
-	ids := make([]interface{}, len(objectRoles))
-
-	for i, role := range objectRoles {
-		ids[i] = role.ObjectID()
-	}
-
-	projects, err := controller.Projects(map[string]interface{}{
-		"id": kodex.In{Values: ids},
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return projects, nil
 }
 
 func Projects(c Context) Element {
@@ -102,4 +83,33 @@ func Projects(c Context) Element {
 		ui.List(pis),
 		Button(Class("bulma-button", "bulma-is-success"), "New Project"),
 	)
+}
+
+// Helper Functions
+
+// Projects list
+
+func projects(controller api.Controller, user *api.ExternalUser) ([]kodex.Project, error) {
+
+	objectRoles, err := controller.ObjectRolesForUser("project", user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]interface{}, len(objectRoles))
+
+	for i, role := range objectRoles {
+		ids[i] = role.ObjectID()
+	}
+
+	projects, err := controller.Projects(map[string]interface{}{
+		"id": kodex.In{Values: ids},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return projects, nil
 }

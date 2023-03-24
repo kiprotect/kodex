@@ -6,7 +6,7 @@ import (
 )
 
 func SetUserProvider(c gospel.Context, userProvider api.UserProvider) {
-	gospel.SetVar(c, userProvider, "userProvider")
+	gospel.SetVar(c, "userProvider", userProvider)
 }
 
 func UseUserProvider(c gospel.Context) api.UserProvider {
@@ -14,7 +14,7 @@ func UseUserProvider(c gospel.Context) api.UserProvider {
 }
 
 func SetUser(c gospel.Context, user api.User) {
-	gospel.SetVar(c, user, "user")
+	gospel.SetVar(c, "user", user)
 }
 
 func UseUser(c gospel.Context) api.User {
@@ -22,7 +22,7 @@ func UseUser(c gospel.Context) api.User {
 }
 
 func SetExternalUser(c gospel.Context, user *api.ExternalUser) {
-	gospel.SetVar(c, user, "externalUser")
+	gospel.SetVar(c, "externalUser", user)
 }
 
 func UseExternalUser(c gospel.Context) *api.ExternalUser {

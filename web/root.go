@@ -67,37 +67,53 @@ func UserForm(c Context) Element {
 
 // <h1 class="bulma-navbar-item bulma-navbar-title">Projects › My Example Project</h1><div aria-label="menu" aria-expanded="false" class="bulma-navbar-burger bulma-burger is-hidden-desktop" data-target="sidebar" role="button"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></div></div><div class="bulma-navbar-menu"><div class="bulma-navbar-end"><div class="kip-navbar-dropdown-menu bulma-navbar-item bulma-has-dropdown"><a aria-haspopup="true" aria-expanded="false" class="bulma-navbar-link" role="button" tabindex="0"><span><span class="icon is-small"><i class="fas fa-th-large"></i></span><span class="bulma-is-hidden-navbar">Apps</span></span></a><div class="kip-navbar-dropdown bulma-navbar-dropdown bulma-is-right"><a class="kip-navbar-dropdown__item bulma-dropdown-item" href="/klaro"><span><span class="icon is-small"><i class="fas fa-check-circle"></i></span>Klaro</span></a><a class="kip-navbar-dropdown__item bulma-dropdown-item" href="/kodex"><span><span class="icon is-small"><i class="fas fa-book-open"></i></span>Kodex</span></a><a class="kip-navbar-dropdown__item bulma-dropdown-item" href="/admin"><span><span class="icon is-small"><i class="fas fa-cogs"></i></span>Administration</span></a></div></div><div class="kip-navbar-dropdown-menu bulma-navbar-item bulma-has-dropdown"><a aria-haspopup="true" aria-expanded="false" class="bulma-navbar-link" role="button" tabindex="0"><div class="kip-nowrap"><span class="icon is-small"><i class="fas fa-user-circle"></i></span><span class="kip-overflow-ellipsis bulma-is-hidden-navbar">azure@kiprotect.com</span></div></a><div class="kip-navbar-dropdown bulma-navbar-dropdown bulma-is-right"><a class="kip-navbar-dropdown__item bulma-dropdown-item" href="/logout"><span><span class="icon is-small"><i class="fas fa-sign-out-alt"></i></span>Log out</span></a></div></div></div></div></header>
 
-func Authorized(c Context) Element {
+func AuthorizedContent(c Context) Element {
 
-	var title = "test"
+	userProvider := UseUserProvider(c)
+	controller := UseController(c)
+
+	// we get the user from the provider...
+	externalUser, _ := userProvider.Get(controller, c.Request())
+
+	// we redirect to the login page
+	if externalUser == nil {
+		return c.Redirect("/login")
+	}
+
+	// we set the user
+	apiUser, err := externalUser.ApiUser(controller)
+
+	if err != nil {
+		return c.Redirect("/login")
+	}
+
+	SetExternalUser(c, externalUser)
+	SetUser(c, apiUser)
 
 	return F(
-		Doctype("html"),
-		Html(
-			Lang("en"),
-			Head(
-				Meta(Charset("utf-8")),
-				Title(title),
-				// Link(Rel("apple-touch-icon"), Sizes("180x180"), Href("/icons/apple-touch-icon.png")),
-				// Link(Rel("icon"), Type("image/png"), Sizes("32x32"), Href("/icons/favicon-32x32.png")),
-				Link(Rel("stylesheet"), Href("/static/main.css")),
-				Script(Src("/static/gospel.js"), Type("module")),
-			),
-			Body(
-				Class("kip-fonts", "bulma-body"),
-				Div(
-					Class("kip"),
-					c.Element("navHeader", Navbar),
-					c.Element("contentWithSidebar", WithSidebar),
-				),
-			),
-		),
+		c.Element("navHeader", Navbar),
+		c.Element("contentWithSidebar", WithSidebar(
+			c.Element("sidebar", Sidebar),
+			c.Element("mainContent", MainContent),
+		)),
 	)
 
 }
 
 func Login(c Context) Element {
 	return Div("log in first...")
+}
+
+func AppContent(c Context) Element {
+
+	router := UseRouter(c)
+
+	return router.Match(
+		c,
+		Route("/login", Login),
+		Route("", AuthorizedContent),
+	)
+
 }
 
 func Root(controller api.Controller) (func(c Context) Element, error) {
@@ -116,33 +132,33 @@ func Root(controller api.Controller) (func(c Context) Element, error) {
 		// we set the controller
 		SetController(c, controller)
 
-		externalUser, _ := userProvider.Get(controller, c.Request())
+		Log.Info("Getting title...")
 
-		router := UseRouter(c)
+		InitVar(c, "title", "Kodex")
 
-		// we always allow the login page
-		if router.Matches("/login") {
-			return c.Element("login", Login)
-		}
+		title := UseVar[string](c, "title")
 
-		// we redirect to the login page
-		if externalUser == nil {
-			c.Redirect("/login")
-			return nil
-		}
-
-		// we set the user
-		apiUser, err := externalUser.ApiUser(controller)
-
-		if err != nil {
-			c.Redirect("/login")
-			return nil
-		}
-
-		SetExternalUser(c, externalUser)
-		SetUser(c, apiUser)
-
-		return c.Element("authorized", Authorized)
+		return F(
+			Doctype("html"),
+			Html(
+				Lang("en"),
+				Head(
+					Meta(Charset("utf-8")),
+					Title(title),
+					// Link(Rel("apple-touch-icon"), Sizes("180x180"), Href("/icons/apple-touch-icon.png")),
+					// Link(Rel("icon"), Type("image/png"), Sizes("32x32"), Href("/icons/favicon-32x32.png")),
+					Link(Rel("stylesheet"), Href("/static/main.css")),
+					Script(Src("/static/gospel.js"), Type("module")),
+				),
+				Body(
+					Class("kip-fonts", "bulma-body"),
+					Div(
+						Class("kip"),
+						c.Element("appContent", AppContent),
+					),
+				),
+			),
+		)
 
 	}, nil
 }

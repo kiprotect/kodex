@@ -12,7 +12,8 @@ func MainContent(c Context) Element {
 	return Div(
 		Class("bulma-container"),
 		router.Match(
-			Route("/projects/(?P<projectId>[^/]+)", ProjectDetails),
+			c,
+			Route("/projects/(?P<projectId>[^/]+)(?:/(?P<tab>configuration|changes|settings))?", ProjectDetails),
 			Route("/projects", Projects),
 		),
 		Div(
