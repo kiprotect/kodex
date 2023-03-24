@@ -80,7 +80,7 @@ func Authorized(c Context) Element {
 				Title(title),
 				// Link(Rel("apple-touch-icon"), Sizes("180x180"), Href("/icons/apple-touch-icon.png")),
 				// Link(Rel("icon"), Type("image/png"), Sizes("32x32"), Href("/icons/favicon-32x32.png")),
-				Link(Rel("stylesheet"), Href("static/main.css")),
+				Link(Rel("stylesheet"), Href("/static/main.css")),
 				Script(Src("/static/gospel.js"), Type("module")),
 			),
 			Body(
@@ -113,19 +113,25 @@ func Root(controller api.Controller) (func(c Context) Element, error) {
 		// we set the user provider
 		SetUserProvider(c, userProvider)
 
+		// we set the controller
+		SetController(c, controller)
+
 		externalUser, _ := userProvider.Get(controller, c.Request())
 
 		router := UseRouter(c)
 
+		// we always allow the login page
 		if router.Matches("/login") {
-			return router.Match("/login", Login)
+			return c.Element("login", Login)
 		}
 
+		// we redirect to the login page
 		if externalUser == nil {
 			c.Redirect("/login")
 			return nil
 		}
 
+		// we set the user
 		apiUser, err := externalUser.ApiUser(controller)
 
 		if err != nil {
@@ -133,6 +139,7 @@ func Root(controller api.Controller) (func(c Context) Element, error) {
 			return nil
 		}
 
+		SetExternalUser(c, externalUser)
 		SetUser(c, apiUser)
 
 		return c.Element("authorized", Authorized)

@@ -1,0 +1,77 @@
+@import "../variables.scss";
+
+@media (min-width: $kip-tablet) {
+    .bulma-tabs span.bulma-more {
+        display: none;
+    }
+}
+
+.bulma-tabs {
+    position: relative;
+
+    @media (max-width: $kip-tablet - 1px) {
+        background: #fff;
+        box-shadow: $kip-shadow-sm;
+        span.bulma-more {
+            position: absolute;
+            right: 0.5em;
+            padding-top: 0.6em;
+            padding-right: 0.3em;
+            transform: scaleY(0.6) scaleX(0.8);
+            font-weight: 800;
+        }
+        ul {
+            display: block;
+
+            li {
+                display: block;
+                position: relative;
+                width: 100%;
+                text-align: left;
+
+                &:not(.bulma-is-active) {
+                    display: none;
+                }
+
+                a {
+                    justify-content: left;
+                    border-bottom: none !important;
+                }
+            }
+        }
+    }
+}
+
+.bulma-tabs.active {
+    @media (max-width: $kip-tablet - 1px) {
+        position: relative;
+        min-height: 40px;
+        overflow: visible;
+        z-index: 10;
+        ul {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            position: absolute;
+            width: 100%;
+            height: auto;
+            background: #fff;
+            box-shadow: $kip-shadow-sm;
+
+            li {
+                margin: 0 !important;
+            }
+
+            li:not(.bulma-is-active) {
+                order: 2;
+                display: block;
+            }
+
+            li.bulma-is-active {
+                order: 1;
+                background: #eee;
+                display: block;
+            }
+        }
+    }
+}

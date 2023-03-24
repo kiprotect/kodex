@@ -20,3 +20,11 @@ func SetUser(c gospel.Context, user api.User) {
 func UseUser(c gospel.Context) api.User {
 	return gospel.UseVar[api.User](c, "user")
 }
+
+func SetExternalUser(c gospel.Context, user *api.ExternalUser) {
+	gospel.SetVar(c, user, "externalUser")
+}
+
+func UseExternalUser(c gospel.Context) *api.ExternalUser {
+	return gospel.UseVar[*api.ExternalUser](c, "externalUser")
+}

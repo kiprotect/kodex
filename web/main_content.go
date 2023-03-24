@@ -4,10 +4,6 @@ import (
 	. "github.com/kiprotect/gospel"
 )
 
-func Projects(c Context) Element {
-	return Div("heydo")
-}
-
 func MainContent(c Context) Element {
 
 	// get the router
@@ -18,7 +14,10 @@ func MainContent(c Context) Element {
 	return Div(
 		Class("bulma-container"),
 		Span("You are logged in as user ", Strong(user.Email()), ", nice!"),
-		router.Match("/projects", Projects),
+		router.Match(
+			Route("/projects/(?P<projectId>[^/]+)", ProjectDetails),
+			Route("/projects", Projects),
+		),
 		Div(
 		// c.Element("kodex", Kodex),
 		// c.Element("userForm", UserForm),
