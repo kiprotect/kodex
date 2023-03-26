@@ -29,13 +29,11 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		return nil
 	}
 
-	title := GetVar[string](c, "title")
+	title := GlobalVar[string](c, "title", "")
 
-	SetVar(c, "title", "foobar")
+	title.Set("foobar")
 
 	Log.Info("New Title: %s", title.Get())
-
-	Log.Info(tab)
 
 	return Div(
 		Div(
@@ -47,6 +45,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Changes")),
 			ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(Fmt("/projects/%s/settings", projectId)), "Settings")),
 		),
+		UserForm(c),
 		Div(
 			"[in progress]",
 		),

@@ -7,7 +7,7 @@ import (
 func Navbar(c Context) Element {
 
 	// get the logged in user
-	user := UseUser(c)
+	user := UseExternalUser(c)
 
 	return Header(
 		Class("kip-navbar", "bulma-navbar", "bulma-is-fixed-top"),
@@ -36,7 +36,7 @@ func Navbar(c Context) Element {
 			),
 		),
 		Div(
-			H1(Class("bulma-navbar-item", "bulma-navbar-title"), user.Email()),
+			H1(Class("bulma-navbar-item", "bulma-navbar-title"), user.Email),
 		),
 	)
 }

@@ -6,9 +6,9 @@ import (
 )
 
 func SetController(c gospel.Context, controller api.Controller) {
-	gospel.SetVar(c, "controller", controller)
+	gospel.GlobalVar(c, "controller", controller)
 }
 
 func UseController(c gospel.Context) api.Controller {
-	return gospel.UseVar[api.Controller](c, "controller")
+	return gospel.UseGlobal[api.Controller](c, "controller")
 }

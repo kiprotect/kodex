@@ -26,10 +26,6 @@ func UserForm(c Context) Element {
 	// this creates a callback function in the context
 	createUser := Func(c, func() {
 
-		router := UseRouter(c)
-
-		router.RedirectTo("foobar")
-
 		kodex.Log.Infof("Creating user with name '%s' and choice '%s'...", name.Get(), choice.Get())
 		// newUser := controller.create(name)
 		// change state according to result...
@@ -71,24 +67,18 @@ func AuthorizedContent(c Context) Element {
 
 	userProvider := UseUserProvider(c)
 	controller := UseController(c)
+	router := UseRouter(c)
 
 	// we get the user from the provider...
 	externalUser, _ := userProvider.Get(controller, c.Request())
 
 	// we redirect to the login page
 	if externalUser == nil {
-		return c.Redirect("/login")
-	}
-
-	// we set the user
-	apiUser, err := externalUser.ApiUser(controller)
-
-	if err != nil {
-		return c.Redirect("/login")
+		router.RedirectTo("/login")
+		return nil
 	}
 
 	SetExternalUser(c, externalUser)
-	SetUser(c, apiUser)
 
 	return F(
 		c.Element("navHeader", Navbar),
@@ -132,11 +122,7 @@ func Root(controller api.Controller) (func(c Context) Element, error) {
 		// we set the controller
 		SetController(c, controller)
 
-		Log.Info("Getting title...")
-
-		InitVar(c, "title", "Kodex")
-
-		title := UseVar[string](c, "title")
+		title := GlobalVar(c, "title", "Kodex")
 
 		return F(
 			Doctype("html"),
@@ -144,7 +130,7 @@ func Root(controller api.Controller) (func(c Context) Element, error) {
 				Lang("en"),
 				Head(
 					Meta(Charset("utf-8")),
-					Title(title),
+					Title(title.Get()),
 					// Link(Rel("apple-touch-icon"), Sizes("180x180"), Href("/icons/apple-touch-icon.png")),
 					// Link(Rel("icon"), Type("image/png"), Sizes("32x32"), Href("/icons/favicon-32x32.png")),
 					Link(Rel("stylesheet"), Href("/static/main.css")),
