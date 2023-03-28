@@ -1,0 +1,11 @@
+@import "../variables.scss";
+
+.bulma-message {
+    width: 100%;
+    .bulma-message-body {
+        @media (max-width: $kip-tablet) {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+    }
+}

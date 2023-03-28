@@ -1,0 +1,89 @@
+@import "../../variables.scss";
+
+$kip-switch-width: 26px;
+$kip-switch-padding: $kip-switch-width + 8px;
+
+.kip-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: $kip-switch-padding;
+    transition: width 0.4s;
+
+    input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .kip-slider {
+        background-color: $cm-red2;
+        box-shadow: $kip-box-shadow;
+        color: #fff;
+        font-weight: 400;
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding-left: $kip-switch-padding;
+        padding-top: 4px;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+        text-align: left;
+
+        span.kip-text {
+            white-space: nowrap;
+        }
+
+        .kip-knob {
+            display: block;
+            left: 0;
+            position: absolute;
+            width: 100%;
+            -webkit-transition: 0.4s;
+            transition: 0.4s;
+        }
+
+        .kip-knob::before {
+            position: absolute;
+            left: 4px;
+            content: "";
+            height: $kip-switch-width;
+            width: $kip-switch-width;
+            background-color: white;
+        }
+    }
+
+    input:checked + .kip-slider {
+        padding-left: 12px;
+        background-color: $kip-lightgreen;
+        text-align: right;
+
+        span.kip-text {
+            margin-right: $kip-switch-padding;
+        }
+
+        .kip-knob {
+            -webkit-transform: translateX(calc(100% - #{$kip-switch-padding}));
+            -ms-transform: translateX(calc(100% - #{$kip-switch-padding}));
+            transform: translateX(calc(100% - #{$kip-switch-padding}));
+        }
+    }
+
+    .kip-slider.kip-round {
+        border-radius: $kip-switch-padding;
+    }
+
+    .kip-slider.kip-round .kip-knob::before {
+        border-radius: 50%;
+    }
+
+    &.kip-switch-updating {
+        input:checked + .kip-slider, input:not(:checked) + .kip-slider {
+            background-color: $kip-gray-dark;
+        }
+    }
+
+}

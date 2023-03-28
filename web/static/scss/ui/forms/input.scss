@@ -1,0 +1,42 @@
+@import "../../variables";
+
+.kip-retracting-label-input {
+    display: inline-block; // Needed for a bug in Chrome
+    position: relative;
+    width: 100%; // Needed for a bug in Chrome
+    padding-top: 8px;
+
+    > .kip-label {
+        background-color: $kip-white;
+        position: absolute;
+        top: 16px;
+        left: 8px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: calc(100% - (2 * 8px));
+        overflow: hidden;
+        pointer-events: none;
+        transition: transform 150ms cubic-bezier(0.47, 0, 0.74, 0.71),
+            opacity 150ms cubic-bezier(0.47, 0, 0.74, 0.71),
+            color 150ms cubic-bezier(0.47, 0, 0.74, 0.71);
+        padding: 0 8px;
+        transform: scale(0.75) translateX(-16%) translateY(-26px);
+        border-radius: $kip-border-radius;
+        border: 1px solid $kip-link;
+    }
+
+    > .kip-input:not([disabled]):placeholder-shown:not(:focus) + .kip-label {
+        transform: none;
+        border: 0;
+        padding-top: 2px;
+        color: #888;
+    }
+
+    p.kip-description {
+        font-size: 14px;
+        padding-top: 2px;
+        margin-bottom: 4px;
+        color: #666;
+    }
+
+}

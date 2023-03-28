@@ -1,0 +1,45 @@
+@import "../../variables";
+
+.kip-search-select {
+    $kip-border: 1px solid $cm-green1;
+
+    margin-top: map-get($kip-space, md);
+    margin-bottom: map-get($kip-space, md);
+    display: flex;
+
+    .kip-candidates {
+        position: absolute;
+        top: 55px;
+        left: 0;
+        z-index: 10;
+        background: #fff;
+        margin-bottom: 10px;
+        border: $kip-border;
+        border-radius: $kip-border-radius;
+        width: 100%;
+
+        .kip-candidate {
+            border-bottom: $kip-border;
+            padding: map-get($kip-space, md);
+            cursor: pointer;
+
+            p {
+                color: $kip-gray-dark;
+                font-size: 14px;
+            }
+
+            &:last-child {
+                border-bottom: 0;
+            }
+        }
+    }
+
+    .kip-candidates:hover {
+        display: block !important;
+    }
+
+    input:not(:focus) ~ .kip-candidates {
+        display: none;
+    }
+
+}

@@ -1,0 +1,51 @@
+@import "../../variables";
+
+.kip-select {
+    position: relative;
+    background: $kip-white;
+    border-radius: $kip-border-radius;
+    box-shadow: $kip-box-shadow;
+    margin-bottom: map-get($kip-space, lg);
+    display: flex;
+    flex-wrap: wrap;
+    cursor: pointer;
+    .kip-select-item {
+        padding: map-get($kip-space, md);
+        border-bottom: 1px solid $kip-gray-light;
+        width: 100%;
+        order: 2;
+
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: map-get($kip-space, sm);
+        }
+
+        p {
+            font-size: 14px;
+            color: $kip-gray-dark;
+        }
+
+        &.kip-is-selected {
+            order: 1;
+        }
+
+    }
+
+    span.bulma-more {
+        position: absolute;
+        right: 0.5em;
+        padding-top: 1.0em;
+        padding-right: 0.3em;
+        transform: scaleY(0.6) scaleX(0.8);
+        font-weight: 800;
+    }
+
+    &:not(.kip-is-active) {
+        .kip-select-item {
+            &:not(.kip-is-selected) {
+                display: none;
+            }
+        }
+    }
+}

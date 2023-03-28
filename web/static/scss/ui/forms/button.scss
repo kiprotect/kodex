@@ -1,0 +1,15 @@
+@import "../../variables";
+
+.bulma-button {
+    &.kip-no-text {
+        padding-right: 4px;
+        .bulma-icon {
+            padding-right: 0;
+        }
+    }
+    .bulma-icon.kip-logo:first-child:not(:last-child) {
+        padding: 2px;
+        height: 40px;
+        margin-right: map-get($kip-space, sm);
+    }
+}

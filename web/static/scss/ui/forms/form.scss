@@ -1,0 +1,38 @@
+@import "../../variables.scss";
+
+.kip-form {
+    width: 100%;
+}
+
+.kip-input {
+    // For some reason, textarea tries to use a system font.
+    @include font-nunito;
+    font-size: 14px;
+
+    background-color: $kip-white;
+    border: 1px solid $kip-green;
+    border-radius: 4px;
+    box-sizing: border-box;
+    padding: 12px 18px;
+    width: 100%;
+
+    &[disabled] {
+        background-color: $kip-gray-light;
+    }
+}
+
+.bulma-control.bulma-has-icons-left {
+    .bulma-icon + .kip-input {
+        padding-top: 12px;
+        padding-left: 36px;
+    }
+}
+
+.kip-textarea {
+    // For some reason, textarea tries to use a monospace font.
+    @include font-nunito;
+    font-size: 14px;
+
+    @extend .kip-input;
+    resize: vertical;
+}

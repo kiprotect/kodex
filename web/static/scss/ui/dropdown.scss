@@ -1,0 +1,81 @@
+@import "../variables.scss";
+
+.kip-dropdown {
+    position: relative;
+
+    > button {
+        display: inline-flex;
+        vertical-align: middle;
+        align-items: center;
+        justify-content: center;
+        width: 2em;
+        height: 2em;
+        font-size: 1em;
+
+        // reset button
+        border: none;
+        background-color: transparent;
+
+        &:focus,
+        &:hover {
+            border-radius: 25px;
+            background-color: $kip-gray-light;
+        }
+    }
+
+    > .kip-dropdowncontent {
+        display: none;
+        background: #fff;
+        box-shadow: $kip-shadow-dropdown;
+        width: auto;
+
+        &.kip-dropdownexpanded {
+            display: block;
+            position: absolute;
+            top: 35px;
+            z-index: 100;
+            left: 0;
+            border-radius: $kip-border-radius;
+        }
+
+        ul.kip-dropdownmenu {
+            list-style: none;
+            text-align: left;
+            max-width: 300px;
+            min-width: 200px;
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+            border: 1px solid #ececec;
+            border-radius: $kip-border-radius;
+
+            li {
+                height: auto;
+                a {
+                    display: block;
+
+                    span {
+                        display: inline-flex;
+                        align-items: center;
+                    }
+
+                    padding: map-get($kip-space, sm);
+                    padding-left: 16px;
+
+                    .icon {
+                        margin-right: 0.45em;
+                    }
+
+                    &:hover {
+                        background-color: $kip-blue;
+                        color: $kip-white;
+                    }
+                }
+            }
+        }
+    }
+
+    &.is-right .kip-dropdowncontent.kip-dropdownexpanded {
+        right: 0;
+        left: auto;
+    }
+}
