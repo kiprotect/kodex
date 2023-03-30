@@ -1,0 +1,23 @@
+@import "../../variables";
+
+.kip-provider-list {
+    .label {
+        font-size: 14px;
+        line-height: 17px;
+        margin-bottom: 24px;
+    }
+    .list {
+        display: inline-block;
+        width: 100%;
+    }
+    .item:not(:last-of-type) {
+        margin-bottom: 1em;
+    }
+    .bulma-button {
+        @include font-muli;
+        width: 100%;
+    }
+    .bulma-button:not(.bulma-is-success) {
+        color: #555;
+    }
+}

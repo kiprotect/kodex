@@ -2,7 +2,6 @@
 @import 'app.scss';
 @import 'card.scss';
 @import 'dropdown.scss';
-@import 'forms/index.scss';
 @import 'message.scss';
 @import 'modal.scss';
 @import 'navbar.scss';
@@ -12,3 +11,8 @@
 @import 'with-sidebar.scss';
 @import 'tabs.scss';
 @import 'list.scss';
+
+// second level imports
+
+@import 'accounts/index.scss';
+@import 'forms/index.scss';

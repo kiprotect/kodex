@@ -91,7 +91,54 @@ func AuthorizedContent(c Context) Element {
 }
 
 func Login(c Context) Element {
-	return Div("log in first...")
+	return Div(
+		Class("kip-with-app-selector"),
+		A(
+			Class("kip-with-app-selector-link"),
+			Href("/#"),
+			Img(
+				Class("kip-logo", Alt("projects")),
+				Src("/static/images/kodexlogo-blue.png"),
+			),
+			Img(
+				Class("kip-small-logo", Alt("projects")),
+				Src("/static/images/kiprotect-k.png"),
+			),
+		),
+		Section(
+			Class("kip-centered-card", "kip-is-info", "kip-is-fullheight"),
+			Div(
+				Class("kip-card", "kip-is-centered", "kip-account"),
+				Div(
+					Class("kip-card-header"),
+					Div(
+						Class("kip-card-title"),
+						H2("Login"),
+					),
+				),
+				Div(
+					Class("kip-card-content", "kip-card-centered"),
+					Div(
+						Class("kip-login"),
+						Div(
+							Class("kip-provider-list"),
+							Ul(
+								Li(
+									A(
+										Href("/api/v1/login"),
+										Button(
+											Class("bulma-button", "bulma-is-success", "bulma-is-flex"),
+											"Log in via SSO",
+										),										
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+		),
+	)
 }
 
 func AppContent(c Context) Element {
