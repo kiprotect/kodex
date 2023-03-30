@@ -31,7 +31,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	title := GlobalVar[string](c, "title", "")
 
-	title.Set("foobar")
+	title.Set(Fmt("Projects > %s", project.Name()))
 
 	Log.Info("New Title: %s", title.Get())
 
@@ -41,14 +41,11 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			H2(Class("bulma-title"), project.Name()),
 		),
 		ui.Tabs(
-			ui.Tab(ui.ActiveTab(tab == "configuration"), A(Href(Fmt("/projects/%s/configuration", projectId)), "Configuration")),
+			ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),
 			ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Changes")),
 			ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(Fmt("/projects/%s/settings", projectId)), "Settings")),
 		),
-		UserForm(c),
-		Div(
-			"[in progress]",
-		),
+		c.Element("actions", Actions(project)),
 	)
 }
 
