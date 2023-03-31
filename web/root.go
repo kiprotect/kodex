@@ -90,19 +90,22 @@ func AuthorizedContent(c Context) Element {
 
 }
 
+func Logout(c Context) Element {
+	return Div()
+}
+
 func Login(c Context) Element {
 	return Div(
 		Class("kip-with-app-selector"),
 		A(
 			Class("kip-with-app-selector-link"),
 			Href("/#"),
-			Img(
-				Class("kip-logo", Alt("projects")),
-				Src("/static/images/kodexlogo-blue.png"),
-			),
-			Img(
-				Class("kip-small-logo", Alt("projects")),
-				Src("/static/images/kiprotect-k.png"),
+			Div(
+				Class("kip-logo-wrapper"),
+				Img(
+					Class("kip-logo", Alt("projects")),
+					Src("/static/images/kodexlogo-white.png"),
+				),
 			),
 		),
 		Section(
@@ -129,7 +132,7 @@ func Login(c Context) Element {
 										Button(
 											Class("bulma-button", "bulma-is-success", "bulma-is-flex"),
 											"Log in via SSO",
-										),										
+										),
 									),
 								),
 							),
@@ -148,6 +151,7 @@ func AppContent(c Context) Element {
 	return router.Match(
 		c,
 		Route("/login", Login),
+		Route("/logout", Logout),
 		Route("", AuthorizedContent),
 	)
 

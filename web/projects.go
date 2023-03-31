@@ -35,6 +35,15 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	Log.Info("New Title: %s", title.Get())
 
+	var content Element
+
+	switch tab {
+	case "actions":
+		content = c.Element("actions", Actions(project))
+	default:
+		content = Div("...")
+	}
+
 	return Div(
 		Div(
 			Class("bulma-content"),
@@ -45,7 +54,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Changes")),
 			ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(Fmt("/projects/%s/settings", projectId)), "Settings")),
 		),
-		c.Element("actions", Actions(project)),
+		content,
 	)
 }
 

@@ -17,7 +17,7 @@ func Actions(project kodex.Project) ElementFunction {
 		return F(
 			router.Match(
 				c,
-				Route("/(?P<actionId>[^/]+)", ActionDetails(project)),
+				Route("/details/(?P<actionId>[^/]+)", ActionDetails(project)),
 				Route("", ActionsList(project)),
 			),
 		)
@@ -50,24 +50,32 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 			kodex.Log.Info("Changing name to %s", name)
 		})
 
+		// edit the name of the action
 		editActionName := func(c Context) Element {
-			return F(
-				Form(
-					Method("POST"),
-					OnSubmit(onSubmit),
-					Input(Class("bulma-control", "bulma-input"), Value(name)),
-					Button(
-						Class("bulma-button", "bulma-is-success"),
-						Type("submit"),
-						"Change",
+			return Form(
+				Method("POST"),
+				OnSubmit(onSubmit),
+				Div(
+					Class("bulma-field", "bulma-has-addons"),
+					P(
+						Class("bulma-control"),
+						Input(Class("bulma-control", "bulma-input"), Value(name)),
+					),
+					P(
+						Class("bulma-control"),
+						Button(
+							Class("bulma-button", "bulma-is-success"),
+							Type("submit"),
+							"Change",
+						),
 					),
 				),
 			)
 		}
 
 		return Div(
-			H1(
-				Class("bulma-title"),
+			H2(
+				Class("bulma-subtitle"),
 				router.Match(
 					c,
 					Route("/name/edit",
@@ -78,7 +86,7 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 							action.Name(),
 							A(
 								Href(router.CurrentRoute().Path+"/name/edit"),
-								"&nbsp;",
+								"&nbsp;&nbsp;",
 								I(Class("fas fa-edit")),
 							),
 						),
@@ -88,9 +96,75 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 			P(
 				Fmt("Type: %s", action.ActionType()),
 			),
+			c.Element("actionEditor", ActionEditor(action)),
 		)
 	}
 
+}
+
+func NewAction(project kodex.Project) ElementFunction {
+	return func(c Context) Element {
+
+		name := Var(c, "")
+		error := Var(c, "")
+		router := UseRouter(c)
+
+		onSubmit := Func(c, func() {
+
+			if name.Get() == "" {
+				error.Set("Please enter a name")
+				return
+			}
+
+			action := project.MakeActionConfig(nil)
+
+			action.SetName(name.Get())
+
+			if err := action.Save(); err != nil {
+				error.Set("Cannot save action")
+			} else {
+				router.RedirectUp()
+			}
+		})
+
+		var errorNotice Element
+
+		if error.Get() != "" {
+			errorNotice = P(
+				Class("bulma-help", "bulma-is-danger"),
+				error.Get(),
+			)
+		}
+
+		return Form(
+			Method("POST"),
+			OnSubmit(onSubmit),
+			Div(
+				Class("bulma-field"),
+				errorNotice,
+				Label(
+					Class("bulma-label", "Name"),
+					Input(
+						Class("bulma-input"),
+						Type("text"),
+						Value(name),
+						Placeholder("action name"),
+					),
+				),
+			),
+			Div(
+				Class("bulma-field"),
+				P(
+					Class("bulma-control"),
+					Button(
+						Class("bulma-button", "bulma-is-success"),
+						Type("submit"),
+						"Create Action",
+					),
+				),
+			),
+		)
+	}
 }
 
 func ActionsList(project kodex.Project) ElementFunction {
@@ -111,7 +185,7 @@ func ActionsList(project kodex.Project) ElementFunction {
 
 		for _, action := range actions {
 			actionItem := A(
-				Href(Fmt("/projects/%s/actions/%s", Hex(project.ID()), Hex(action.ID()))),
+				Href(Fmt("/projects/%s/actions/details/%s", Hex(project.ID()), Hex(action.ID()))),
 				ui.ListItem(
 					ui.ListColumn("md", action.Name()),
 				),
@@ -119,9 +193,21 @@ func ActionsList(project kodex.Project) ElementFunction {
 			ais = append(ais, actionItem)
 		}
 
+		router := UseRouter(c)
+
 		return F(
-			ui.List(ais),
-			Button(Class("bulma-button", "bulma-is-success"), "New Action"),
+			router.Match(
+				c,
+				Route("/new", c.Element("newAction", NewAction(project))),
+				Route("", F(
+					ui.List(ais),
+					A(
+						Href(router.CurrentRoute().Path+"/new"),
+						Class("bulma-button", "bulma-is-success"),
+						"New Action"),
+				),
+				),
+			),
 		)
 	}
 }
