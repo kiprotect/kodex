@@ -30,6 +30,10 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 
 		action, err := project.Controller().ActionConfig(Unhex(actionId))
 
+		if err != nil {
+			return nil
+		}
+
 		// make sure this action belongs to the project...
 		if !bytes.Equal(action.Project().ID(), project.ID()) {
 			return nil
@@ -47,7 +51,7 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 			action.SetName(name.Get())
 			action.Save()
 			router.RedirectUp()
-			kodex.Log.Info("Changing name to %s", name)
+			kodex.Log.Infof("Changing name to %s", name)
 		})
 
 		// edit the name of the action

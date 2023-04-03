@@ -45,7 +45,7 @@ func MakeInMemoryActionConfig(id []byte, project kodex.Project) *InMemoryActionC
 }
 
 func (c *InMemoryActionConfig) ID() []byte {
-	return []byte(c.name)
+	return c.id
 }
 
 func (c *InMemoryActionConfig) InternalID() []byte {

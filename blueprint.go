@@ -17,7 +17,9 @@
 package kodex
 
 import (
+	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/go-helpers/maps"
@@ -30,6 +32,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -285,7 +288,6 @@ func LoadBlueprintConfig(settingsObj Settings, filename, version string) (map[st
 		if filename, err = NormalizePath(filename); err != nil {
 			return nil, err
 		}
-		Log.Info(filename)
 		// we check if we can directly locate the blueprint. If not, we try to
 		// find it using the blueprints directories.
 		if _, err := os.Stat(filename); err != nil {
@@ -787,36 +789,87 @@ func initKeys(project Project, config map[string]interface{}) error {
 	return nil
 }
 
+type ByID[T Model] struct {
+	Entries []T
+}
+
+func (b ByID[T]) Len() int {
+	return len(b.Entries)
+}
+
+func (b ByID[T]) Swap(i, j int) {
+	b.Entries[i], b.Entries[j] = b.Entries[j], b.Entries[i]
+}
+
+func (b ByID[T]) Less(i, j int) bool {
+	if bytes.Compare(b.Entries[i].ID(), b.Entries[j].ID()) <= 0 {
+		return true
+	}
+	return false
+}
+
+func Sort[T Model](models []T) {
+
+	sortedByID := &ByID[T]{
+		Entries: models,
+	}
+	sort.Sort(sortedByID)
+}
+
 func ExportBlueprint(project Project) (map[string]interface{}, error) {
 	blueprint := make(map[string]interface{})
 
 	blueprint["project"] = project
 
+	// we sort all dependent objects to make diffing possible...
+
 	if actions, err := project.Controller().ActionConfigs(map[string]interface{}{"project.id": project.ID()}); err != nil {
 		return nil, err
 	} else {
+
+		Sort(actions)
+
 		blueprint["actions"] = actions
 	}
 
 	if sources, err := project.Controller().Sources(map[string]interface{}{"project.id": project.ID()}); err != nil {
 		return nil, err
 	} else {
+
+		Sort(sources)
+
 		blueprint["sources"] = sources
 	}
 
 	if destinations, err := project.Controller().Destinations(map[string]interface{}{"project.id": project.ID()}); err != nil {
 		return nil, err
 	} else {
+
+		Sort(destinations)
+
 		blueprint["destinations"] = destinations
 	}
 
 	if streams, err := project.Controller().Streams(map[string]interface{}{"project.id": project.ID()}); err != nil {
 		return nil, err
 	} else {
+
+		Sort(streams)
+
 		blueprint["streams"] = streams
 	}
 
-	return blueprint, nil
+	if jsonData, err := json.Marshal(blueprint); err != nil {
+		return nil, err
+	} else {
+		var mapData map[string]interface{}
+
+		if err := json.Unmarshal(jsonData, &mapData); err != nil {
+			return nil, err
+		}
+
+		return mapData, nil
+	}
 
 }
 

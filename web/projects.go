@@ -4,8 +4,14 @@ import (
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
+	ctrlHelpers "github.com/kiprotect/kodex/api/helpers/controller"
 	"github.com/kiprotect/kodex/web/ui"
 )
+
+func InMemoryController(c Context) (api.Controller, error) {
+	controller := UseController(c)
+	return ctrlHelpers.InMemoryController(controller.Settings(), map[string]interface{}{}, controller.APIDefinitions())
+}
 
 // Project details
 
@@ -29,6 +35,29 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		return nil
 	}
 
+	exportedBlueprint, err := kodex.ExportBlueprint(project)
+
+	if err != nil {
+		Log.Error("Error: %v", err)
+		return nil
+	}
+
+	ctrl, err := InMemoryController(c)
+
+	if err != nil {
+		Log.Error("Error: %v", err)
+		return nil
+	}
+
+	importedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
+
+	importedProject, err := importedBlueprint.Create(ctrl, true)
+
+	if err != nil {
+		Log.Error("Import error: %v", err)
+		return nil
+	}
+
 	title := GlobalVar[string](c, "title", "")
 
 	title.Set(Fmt("Projects > %s", project.Name()))
@@ -39,12 +68,41 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	switch tab {
 	case "actions":
-		content = c.Element("actions", Actions(project))
+		content = c.Element("actions", Actions(importedProject))
 	case "changes":
-		content = c.Element("changes", ChangeRequests(project))
+		content = c.Element("changes", ChangeRequests(importedProject))
 	default:
 		content = Div("...")
 	}
+
+	router := UseRouter(c)
+	req := router.Request()
+
+	// we persist the project changes (if there were any)
+	if req.Method == "POST" && c.Interactive() {
+		Log.Error("Updating blueprint...")
+
+		exportedBlueprint, err = kodex.ExportBlueprint(importedProject)
+
+		if err != nil {
+			Log.Error("cannot export blueprint: %v", err)
+			return nil
+		}
+
+		Log.Info("%v", exportedBlueprint)
+
+		importedBlueprint = kodex.MakeBlueprint(exportedBlueprint)
+
+		// we store the blueprint again
+		if _, err := importedBlueprint.Create(controller, false); err != nil {
+			Log.Error("Error saving blueprint: %v", err)
+
+			return nil
+		}
+
+	}
+
+	Log.Info("%v", exportedBlueprint)
 
 	return Div(
 		Div(
