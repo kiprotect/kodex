@@ -40,6 +40,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	switch tab {
 	case "actions":
 		content = c.Element("actions", Actions(project))
+	case "changes":
+		content = c.Element("changes", ChangeRequests(project))
 	default:
 		content = Div("...")
 	}
