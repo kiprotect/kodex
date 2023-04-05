@@ -30,10 +30,6 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 
 		action, err := project.Controller().ActionConfig(Unhex(actionId))
 
-		if err != nil {
-			return nil
-		}
-
 		// make sure this action belongs to the project...
 		if !bytes.Equal(action.Project().ID(), project.ID()) {
 			return nil
@@ -43,6 +39,8 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 			return nil
 		}
 
+		AddBreadcrumb(c, action.Name(), Fmt("/details/%s", Hex(action.ID())))
+
 		router := UseRouter(c)
 
 		name := Var(c, action.Name())
@@ -51,7 +49,7 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 			action.SetName(name.Get())
 			action.Save()
 			router.RedirectUp()
-			kodex.Log.Infof("Changing name to %s", name)
+			kodex.Log.Info("Changing name to %s", name)
 		})
 
 		// edit the name of the action
@@ -123,6 +121,10 @@ func NewAction(project kodex.Project) ElementFunction {
 			action := project.MakeActionConfig(nil)
 
 			action.SetName(name.Get())
+			action.SetActionType("form")
+			action.SetConfigData(map[string]any{
+				"fields": []any{},
+			})
 
 			if err := action.Save(); err != nil {
 				error.Set("Cannot save action")
@@ -149,7 +151,7 @@ func NewAction(project kodex.Project) ElementFunction {
 				Label(
 					Class("bulma-label", "Name"),
 					Input(
-						Class("bulma-input"),
+						Class("bulma-input", If(error.Get() != "", "bulma-is-danger")),
 						Type("text"),
 						Value(name),
 						Placeholder("action name"),

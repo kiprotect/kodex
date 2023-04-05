@@ -6,11 +6,151 @@ import (
 	"github.com/kiprotect/kodex/api"
 	ctrlHelpers "github.com/kiprotect/kodex/api/helpers/controller"
 	"github.com/kiprotect/kodex/web/ui"
+	"strings"
 )
 
 func InMemoryController(c Context) (api.Controller, error) {
 	controller := UseController(c)
 	return ctrlHelpers.InMemoryController(controller.Settings(), map[string]interface{}{}, controller.APIDefinitions())
+}
+
+func NewProject() ElementFunction {
+	return func(c Context) Element {
+
+		name := Var(c, "")
+		error := Var(c, "")
+		router := UseRouter(c)
+		controller := UseController(c)
+
+		onSubmit := Func(c, func() {
+
+			if name.Get() == "" {
+				error.Set("Please enter a name")
+				return
+			}
+
+			controller.Begin()
+
+			success := false
+
+			defer func() {
+				if success {
+					controller.Commit()
+				}
+				controller.Rollback()
+			}()
+
+			project := controller.MakeProject(nil)
+
+			project.SetName(name.Get())
+
+			if err := project.Save(); err != nil {
+				error.Set("Cannot save project")
+				return
+			}
+
+			org := UseDefaultOrganization(c)
+
+			if org == nil {
+				error.Set("Cannot get organization")
+				return
+			}
+
+			apiOrg, err := org.ApiOrganization(controller)
+
+			if err != nil {
+				error.Set("Cannot get organization")
+				return
+			}
+
+			// we always add admin and superuser roles
+			for _, orgRole := range []string{"admin", "superuser"} {
+				role := controller.MakeObjectRole(project, apiOrg)
+				values := map[string]interface{}{
+					"organization_role": orgRole,
+					"role":              "superuser",
+				}
+
+				if err := role.Create(values); err != nil {
+					error.Set(Fmt("Cannot create role: %v", err))
+					return
+				}
+				if err := role.Save(); err != nil {
+					error.Set(Fmt("Cannot save role: %v", err))
+					return
+				}
+			}
+
+			// we try to add default roles as well
+			if defaultRoles, err := controller.DefaultObjectRoles(apiOrg.ID()); err != nil {
+				kodex.Log.Errorf("Cannot load default roles: %v", err)
+			} else {
+				for _, defaultRole := range defaultRoles {
+					if defaultRole.ObjectType() != "project" {
+						continue
+					}
+
+					role := controller.MakeObjectRole(project, apiOrg)
+
+					values := map[string]interface{}{
+						"organization_role": defaultRole.OrganizationRole(),
+						"role":              defaultRole.ObjectRole(),
+					}
+
+					if err := role.Create(values); err != nil {
+						return
+					}
+					if err := role.Save(); err != nil {
+						return
+					}
+
+				}
+			}
+
+			success = true
+
+			router.RedirectTo(Fmt("/projects/%s", Hex(project.ID())))
+		})
+
+		var errorNotice Element
+
+		if error.Get() != "" {
+			errorNotice = P(
+				Class("bulma-help", "bulma-is-danger"),
+				error.Get(),
+			)
+		}
+
+		return Form(
+			Method("POST"),
+			OnSubmit(onSubmit),
+			H1(Class("bulma-subtitle"), "New Project"),
+			Div(
+				Class("bulma-field"),
+				errorNotice,
+				Label(
+					Class("bulma-label", "Name"),
+					Input(
+						Class("bulma-input", If(error.Get() != "", "bulma-is-danger")),
+						Type("text"),
+						Value(name),
+						Placeholder("project name"),
+					),
+				),
+			),
+			Div(
+				Class("bulma-field"),
+				P(
+					Class("bulma-control"),
+					Button(
+						Class("bulma-button", "bulma-is-success"),
+						Type("submit"),
+						"Create Project",
+					),
+				),
+			),
+		)
+	}
 }
 
 // Project details
@@ -28,6 +168,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		Log.Error("%v", err)
 		return nil
 	}
+
+	AddBreadcrumb(c, project.Name(), Fmt("/%s", Hex(project.ID())))
 
 	// we check that the user can access the project
 	if ok, err := controller.CanAccess(user, project, []string{"read", "write", "admin"}); !ok || err != nil {
@@ -58,13 +200,13 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		return nil
 	}
 
-	title := GlobalVar[string](c, "title", "")
-
-	title.Set(Fmt("Projects > %s", project.Name()))
-
-	Log.Info("New Title: %s", title.Get())
-
 	var content Element
+
+	if tab == "" {
+		tab = "actions"
+	}
+
+	AddBreadcrumb(c, strings.Title(tab), Fmt("/%s", tab))
 
 	switch tab {
 	case "actions":
@@ -131,6 +273,8 @@ func Projects(c Context) Element {
 		return nil
 	}
 
+	AddBreadcrumb(c, "Projects", "/projects")
+
 	pis := make([]any, 0, len(projects))
 
 	for _, project := range projects {
@@ -145,8 +289,13 @@ func Projects(c Context) Element {
 	}
 
 	return F(
-		ui.List(pis),
-		Button(Class("bulma-button", "bulma-is-success"), "New Project"),
+		ui.List(
+			ui.ListHeader(
+				ui.ListColumn("md", "Name"),
+			),
+			pis,
+		),
+		A(Href("/projects/new"), Class("bulma-button", "bulma-is-success"), "New Project"),
 	)
 }
 

@@ -115,15 +115,13 @@ func Root(controller api.Controller) (func(c Context) Element, error) {
 		// we set the controller
 		SetController(c, controller)
 
-		title := GlobalVar(c, "title", "Kodex")
-
 		return F(
 			Doctype("html"),
 			Html(
 				Lang("en"),
 				Head(
 					Meta(Charset("utf-8")),
-					Title(title.Get()),
+					Title(MainTitle(c)),
 					// Link(Rel("apple-touch-icon"), Sizes("180x180"), Href("/icons/apple-touch-icon.png")),
 					// Link(Rel("icon"), Type("image/png"), Sizes("32x32"), Href("/icons/favicon-32x32.png")),
 					Link(Rel("stylesheet"), Href("/static/main.css")),

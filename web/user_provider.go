@@ -20,3 +20,14 @@ func SetExternalUser(c gospel.Context, user *api.ExternalUser) {
 func UseExternalUser(c gospel.Context) *api.ExternalUser {
 	return gospel.UseGlobal[*api.ExternalUser](c, "externalUser")
 }
+
+func UseDefaultOrganization(c gospel.Context) *api.UserOrganization {
+	user := UseExternalUser(c)
+
+	for _, role := range user.Roles {
+		if role.Organization.Default {
+			return role.Organization
+		}
+	}
+	return nil
+}

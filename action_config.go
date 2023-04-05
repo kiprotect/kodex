@@ -65,13 +65,13 @@ var ActionConfigForm = forms.Form{
 		{
 			Name: "type",
 			Validators: []forms.Validator{
-				forms.IsRequired{},
 				forms.IsString{},
 			},
 		},
 		{
 			Name: "config",
 			Validators: []forms.Validator{
+				forms.IsOptional{Default: map[string]interface{}{}},
 				forms.IsStringMap{},
 			},
 		},

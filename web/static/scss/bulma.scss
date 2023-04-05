@@ -1,5 +1,7 @@
 // define any variables here to override the defaults from Bulma
 
+@import 'variables.scss';
+
 $bulma-body-background-color: #f5f6fa;
 
 $bulma-gap: $kip-gap;
@@ -21,6 +23,9 @@ $bulma-button-border-color: $kip-green;
 $bulma-button-hover-color: darken($kip-blue, 20%);
 $bulma-button-hover-border-color: darken($kip-green, 20%);
 
+.kip .bulma-button {
+    box-shadow: $kip-shadow-sm;
+}
 
 @import "bulma/bulma.sass";
 

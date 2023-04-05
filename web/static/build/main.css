@@ -5367,6 +5367,10 @@ readers do not read off random characters that represent icons */
   font-family: "Font Awesome 5 Brands";
 }
 
+.kip .bulma-button {
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.05), 1px 1px 1px 0 rgba(0, 0, 0, 0.05);
+}
+
 /*! bulma.io v0.7.5 | MIT License | github.com/jgthms/bulma */
 @keyframes spinAround {
   from {
@@ -14442,7 +14446,7 @@ a.bulma-dropdown-item .icon {
   margin-bottom: 1em;
 }
 .kip-app-selector .kip-app-list .bulma-button {
-  font-family: Muli, sans-serif;
+  font-family: Oxanium, sans-serif;
   width: 200px;
   justify-content: left;
 }
@@ -14498,7 +14502,7 @@ a.bulma-dropdown-item .icon {
   min-width: 200px;
   min-height: 80%;
   background: #fff;
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.05), 3px 3px 3px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.05), 1px 1px 1px 0 rgba(0, 0, 0, 0.05);
   border-radius: 4px;
 }
 .kip-card .kip-card-content {
@@ -14592,7 +14596,7 @@ a.bulma-dropdown-item .icon {
   font-size: 20px;
   display: flex;
   align-items: space-between;
-  font-family: Muli, sans-serif;
+  font-family: Oxanium, sans-serif;
 }
 .kip-card .kip-card-header .kip-card-title {
   flex-grow: 1;
@@ -14820,7 +14824,7 @@ a.bulma-dropdown-item .icon {
 }
 
 .kip-navbar {
-  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+  box-shadow: 0 1px 1px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
   background-color: #fff;
   z-index: 30;
   position: relative;
@@ -14881,7 +14885,7 @@ a.bulma-dropdown-item .icon {
   position: relative;
 }
 .kip-navbar .bulma-navbar-title {
-  font-family: Muli, sans-serif;
+  font-family: Oxanium, sans-serif;
   display: inline-block;
   flex-grow: 1;
   text-align: center;
@@ -15025,7 +15029,7 @@ ul.kip-menu-list li ul {
   overflow-x: hidden;
   white-space: nowrap;
   transition: width 150ms ease-in-out;
-  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+  box-shadow: 0 1px 1px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
   background: linear-gradient(to top, #2581c4, #1a936f);
   background-size: 100% 750px;
   background-repeat: repeat-x;
@@ -15103,7 +15107,7 @@ ul.kip-menu-list li ul {
 @media (max-width: 768px) {
   .bulma-tabs {
     background: #fff;
-    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.05), 3px 3px 3px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.05), 1px 1px 1px 0 rgba(0, 0, 0, 0.05);
   }
   .bulma-tabs span.bulma-more {
     position: absolute;
@@ -15146,7 +15150,7 @@ ul.kip-menu-list li ul {
     width: 100%;
     height: auto;
     background: #fff;
-    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.05), 3px 3px 3px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.05), 1px 1px 1px 0 rgba(0, 0, 0, 0.05);
   }
   .bulma-tabs.active ul li {
     margin: 0 !important;
@@ -15166,6 +15170,7 @@ ul.kip-menu-list li ul {
   overflow-x: auto;
   overflow-y: visible;
   padding-bottom: 0;
+  margin-bottom: 16px;
 }
 .kip-list .kip-item {
   min-width: 800px;
@@ -15174,7 +15179,7 @@ ul.kip-menu-list li ul {
   flex-direction: row;
   align-items: top;
   justify-items: flex-end;
-  padding: 24px;
+  padding: 16px;
 }
 .kip-list .kip-item:last-child {
   border-bottom: none;
@@ -15189,9 +15194,9 @@ ul.kip-menu-list li ul {
 }
 .kip-list .kip-item.kip-is-card {
   background: #fff;
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.05), 3px 3px 3px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.05), 1px 1px 1px 0 rgba(0, 0, 0, 0.05);
   border-radius: 4px;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 .kip-list .kip-item.kip-is-clickable {
   cursor: pointer;
@@ -15274,7 +15279,7 @@ ul.kip-menu-list li ul {
   margin-bottom: 1em;
 }
 .kip-provider-list .bulma-button {
-  font-family: Muli, sans-serif;
+  font-family: Oxanium, sans-serif;
   width: 100%;
 }
 .kip-provider-list .bulma-button:not(.bulma-is-success) {
@@ -15298,7 +15303,7 @@ ul.kip-menu-list li ul {
 }
 
 .kip-input, .kip-textarea {
-  font-family: Nunito, sans-serif;
+  font-family: Open Sans, sans-serif;
   font-size: 14px;
   background-color: #fff;
   border: 1px solid #1a936f;
@@ -15317,7 +15322,7 @@ ul.kip-menu-list li ul {
 }
 
 .kip-textarea {
-  font-family: Nunito, sans-serif;
+  font-family: Open Sans, sans-serif;
   font-size: 14px;
   resize: vertical;
 }
@@ -15396,7 +15401,7 @@ ul.kip-menu-list li ul {
   position: relative;
   background: #fff;
   border-radius: 4px;
-  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+  box-shadow: 0 1px 1px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
   margin-bottom: 24px;
   display: flex;
   flex-wrap: wrap;
@@ -15446,7 +15451,7 @@ ul.kip-menu-list li ul {
 }
 .kip-switch .kip-slider {
   background-color: #e15669;
-  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+  box-shadow: 0 1px 1px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
   color: #fff;
   font-weight: 400;
   position: absolute;
@@ -15510,7 +15515,7 @@ html {
 body.kip-fonts {
   margin: 0;
   padding: 0;
-  font-family: Nunito, sans-serif;
+  font-family: Open Sans, sans-serif;
 }
 
 div.kip fieldset {
@@ -15532,7 +15537,7 @@ div.kip ul li {
   margin: 0;
 }
 div.kip select, div.kip input {
-  font-family: Nunito, sans-serif;
+  font-family: Open Sans, sans-serif;
 }
 div.kip h1,
 div.kip h2,
@@ -15540,7 +15545,7 @@ div.kip h3,
 div.kip h4,
 div.kip h5,
 div.kip h6 {
-  font-family: Muli, sans-serif;
+  font-family: Oxanium, sans-serif;
 }
 
 /*# sourceMappingURL=main.css.map */

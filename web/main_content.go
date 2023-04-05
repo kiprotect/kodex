@@ -11,14 +11,12 @@ func MainContent(c Context) Element {
 
 	return Div(
 		Class("bulma-container"),
+		c.Element("breadcrumbs", Breadcrumbs),
 		router.Match(
 			c,
+			Route("/projects/new", c.Element("newProject", NewProject())),
 			Route("/projects/(?P<projectId>[^/]+)(?:/(?P<tab>actions|changes|settings))?", ProjectDetails),
-			Route("/projects", Projects),
-		),
-		Div(
-		// c.Element("kodex", Kodex),
-		// c.Element("userForm", UserForm),
+			Route("/projects", c.Element("projects", Projects)),
 		),
 	)
 }

@@ -6,7 +6,7 @@
 
 .kip-input {
     // For some reason, textarea tries to use a system font.
-    @include font-nunito;
+    @include font-open-sans;
     font-size: 14px;
 
     background-color: $kip-white;
@@ -30,7 +30,7 @@
 
 .kip-textarea {
     // For some reason, textarea tries to use a monospace font.
-    @include font-nunito;
+    @include font-open-sans;
     font-size: 14px;
 
     @extend .kip-input;

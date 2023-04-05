@@ -7,6 +7,7 @@
     overflow-y: visible;
 
     padding-bottom: 0;
+    margin-bottom: map-get($kip-space, md);
 
     .kip-item {
         min-width: 800px;
@@ -15,7 +16,7 @@
         flex-direction: row;
         align-items: top;
         justify-items: flex-end;
-        padding: map-get($kip-space, lg);
+        padding: map-get($kip-space, md);
 
         &:last-child {
             border-bottom: none;
@@ -35,7 +36,7 @@
             background: #fff;
             box-shadow: $kip-shadow-sm;
             border-radius: $kip-border-radius;
-            margin-bottom: map-get($kip-space, lg);
+            margin-bottom: map-get($kip-space, sm);
         }
 
         &.kip-is-clickable {

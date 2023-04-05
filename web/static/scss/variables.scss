@@ -1,7 +1,7 @@
 @import "./colors.scss";
 
 $kip-border-radius: 5px;
-$kip-box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1),
+$kip-box-shadow: 0 1px 1px rgba(10, 10, 10, 0.1),
     0 0 0 1px rgba(10, 10, 10, 0.1);
 
 $kip-shadow-light-sm: 0 2px 5px 0 rgba(0, 0, 0, 0.11);
@@ -30,8 +30,8 @@ $kip-space: (
 
 // Shadows
 
-$kip-shadow-sm: 0 4px 4px 0 rgba(0, 0, 0, 0.05),
-    3px 3px 3px 0 rgba(0, 0, 0, 0.05);
+$kip-shadow-sm: 0 2px 2px 0 rgba(0, 0, 0, 0.05),
+    1px 1px 1px 0 rgba(0, 0, 0, 0.05);
 $kip-shadow-dropdown: 0 3px 6px -2px rgba(0, 0, 0, 0.5);
 
 $kip-weight-normal: 300;
@@ -63,10 +63,10 @@ $kip-fs: (
 
 // Fonts
 
-@mixin font-nunito {
-    font-family: Nunito, sans-serif;
+@mixin font-open-sans {
+    font-family: Open Sans, sans-serif;
 }
 
-@mixin font-muli {
-    font-family: Muli, sans-serif;
+@mixin font-oxanium {
+    font-family: Oxanium, sans-serif;
 }

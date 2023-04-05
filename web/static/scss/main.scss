@@ -14,7 +14,7 @@ html {
 body.kip-fonts {
     margin: 0;
     padding: 0;
-    @include font-nunito;
+    @include font-open-sans;
 }
 
 div.kip {
@@ -43,7 +43,7 @@ div.kip {
     }
 
     select, input {
-        @include font-nunito;
+        @include font-open-sans;
     }
 
     h1,
@@ -52,6 +52,6 @@ div.kip {
     h4,
     h5,
     h6 {
-        @include font-muli;
+        @include font-oxanium;
     }
 }
