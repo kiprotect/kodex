@@ -5,6 +5,7 @@ import (
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/web/ui"
+	"time"
 	//	"github.com/kiprotect/kodex/api"
 )
 
@@ -87,6 +88,7 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 						F(
 							action.Name(),
 							A(
+								Style("float: right"),
 								Href(router.CurrentRoute().Path+"/name/edit"),
 								"&nbsp;&nbsp;",
 								I(Class("fas fa-edit")),
@@ -95,10 +97,20 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 					),
 				),
 			),
-			P(
-				Fmt("Type: %s", action.ActionType()),
+			Div(
+				Class("bulma-tags"),
+				Span(
+					Class("bulma-tag", "bulma-is-success"),
+					Fmt("last modified: %s", HumanDuration(time.Now().Sub(action.CreatedAt()))),
+				),
+				Span(
+					Class("bulma-tag", "bulma-is-success"),
+					"Type: ", "&nbsp;", B(action.ActionType()),
+				),
 			),
-			c.Element("actionEditor", ActionEditor(action)),
+			c.Element("actionEditor",
+				ActionEditor(action),
+			),
 		)
 	}
 

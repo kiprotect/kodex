@@ -29,12 +29,6 @@ type FormAction struct {
 
 var Validators = map[string]forms.ValidatorMaker{}
 
-type ParametrizedValidator interface {
-	GenerateParams(key, salt []byte) error
-	SetParams(params interface{}) error
-	Params() interface{}
-}
-
 type IsAction struct {
 	Action kodex.Action
 	Type   string                 `json:"type"`
@@ -111,6 +105,10 @@ func MakeFormAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 			form:       form,
 		}, nil
 	}
+}
+
+func (a *FormAction) Form() *forms.Form {
+	return a.form
 }
 
 func (a *FormAction) Params() interface{} {
