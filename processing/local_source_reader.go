@@ -204,8 +204,9 @@ func (d *LocalSourceReader) read() {
 
 		select {
 		case <-d.stopChannel:
-			// we stop reading any more payloads and return...
-			stopping = true
+			// we stop...
+			d.stopChannel <- true
+			return
 		case <-time.After(time.Millisecond):
 			break
 		}
@@ -221,10 +222,9 @@ func (d *LocalSourceReader) read() {
 		// we didn't receive any new items...
 		if payload == nil || len(payload.Items()) == 0 {
 			if stopping {
-				d.stopChannel <- true
+
 				return
 			}
-			continue
 		}
 
 		if payload.EndOfStream() {
