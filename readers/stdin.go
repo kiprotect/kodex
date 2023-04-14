@@ -140,7 +140,7 @@ func (s *StdinReader) Read() (kodex.Payload, error) {
 		}
 	}
 
-	kodex.Log.Debugf("Read %d items...", len(items))
+	kodex.Log.Debugf("Read %d items... (%v)", len(items), endOfStdin)
 
 	payload.items = items
 	payload.endOfStream = endOfStdin
