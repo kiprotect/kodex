@@ -24,7 +24,8 @@ import (
 
 type FormAction struct {
 	kodex.BaseAction
-	form *forms.Form
+	actions []kodex.Action
+	form    *forms.Form
 }
 
 var Validators = map[string]forms.ValidatorMaker{}
@@ -75,6 +76,8 @@ func MakeFormAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 		combinedValidators[k] = v
 	}
 
+	actions := make([]kodex.Action, 0)
+
 	makeIsAction := func(config map[string]interface{}, context *forms.FormDescriptionContext) (forms.Validator, error) {
 		isAction := &IsAction{}
 		if params, err := IsActionForm.Validate(config); err != nil {
@@ -82,13 +85,19 @@ func MakeFormAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 		} else if err := IsActionForm.Coerce(isAction, params); err != nil {
 			return nil, err
 		}
+		// to do: better action name (?)
 		if action, err := kodex.MakeAction(spec.Name, spec.Description, isAction.Type, spec.ID, isAction.Config, spec.Definitions); err != nil {
 			return nil, err
 		} else if _, ok := action.(kodex.DoableAction); !ok {
 			return nil, fmt.Errorf("undoable action")
 		} else {
 			isAction.Action = action
+
+			// we append the action to the list of actions
+			actions = append(actions, action)
+
 		}
+
 		return isAction, nil
 	}
 
@@ -102,6 +111,7 @@ func MakeFormAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 	} else {
 		return &FormAction{
 			BaseAction: kodex.MakeBaseAction(spec, "form"),
+			actions:    actions,
 			form:       form,
 		}, nil
 	}
@@ -112,14 +122,46 @@ func (a *FormAction) Form() *forms.Form {
 }
 
 func (a *FormAction) Params() interface{} {
-	return map[string]interface{}{}
+
+	actionParams := make([]interface{}, 0, len(a.actions))
+
+	for _, action := range a.actions {
+		actionParams = append(actionParams, action.Params())
+	}
+
+	return actionParams
 }
 
 func (a *FormAction) GenerateParams(key, salt []byte) error {
+
+	for _, action := range a.actions {
+		if err := action.GenerateParams(key, salt); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func (a *FormAction) SetParams(params interface{}) error {
+
+	paramsList, ok := params.([]interface{})
+
+	if !ok {
+		return fmt.Errorf("expected a list of parameters")
+	}
+
+	if len(paramsList) != len(a.actions) {
+		return fmt.Errorf("action parameter list mismatch")
+	}
+
+	for i, action := range a.actions {
+
+		if err := action.SetParams(paramsList[i]); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
