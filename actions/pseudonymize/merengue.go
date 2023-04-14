@@ -71,6 +71,9 @@ func (p *MerenguePseudonymizer) Pseudonymize(value interface{}) (interface{}, er
 	if input, err = toByteString(value); err != nil {
 		return nil, err
 	}
+	if p.key == nil {
+		return nil, fmt.Errorf("key not initialized")
+	}
 	result := merengue.Pseudonymize(input, uint(len(input)*8), p.key, merengue.Sha256)
 	switch p.encode {
 	case "base64":
