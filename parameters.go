@@ -136,10 +136,12 @@ func (p *ParameterSet) ParametersFor(action Action, parameterGroup *ParameterGro
 	if p.parameterStore == nil {
 		return nil, false, fmt.Errorf("no parameter store given")
 	}
+
 	found := false
 	var i = 0
 	var parameters *Parameters
 	for i, parameters = range p.parameters {
+
 		if bytes.Equal(parameters.Action().ID(), action.ID()) {
 			if valid, err := parameters.Valid(action, parameterGroup); err == nil && valid {
 				return parameters, false, nil

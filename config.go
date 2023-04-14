@@ -347,9 +347,11 @@ func (b *BaseConfig) Processor(internal bool) (*Processor, error) {
 	}
 
 	parameterSet, err := MakeParameterSet(actions, b.Stream().Project().Controller().ParameterStore())
+
 	if err != nil {
 		return nil, err
 	}
+
 	channelWriter, err := b.Self.ChannelWriter(internal)
 
 	if err != nil {
