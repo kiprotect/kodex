@@ -15176,10 +15176,14 @@ ul.kip-menu-list li ul {
   min-width: 800px;
   display: flex;
   flex-basis: 0;
+  flex-wrap: wrap;
   flex-direction: row;
   align-items: top;
   justify-items: flex-end;
   padding: 16px;
+}
+.kip-list .kip-item.kip-is-danger {
+  background: #ffd7df !important;
 }
 .kip-list .kip-item:last-child {
   border-bottom: none;
@@ -15222,6 +15226,12 @@ ul.kip-menu-list li ul {
   .kip-list .kip-item:hover span.action {
     display: inline-block;
   }
+}
+.kip-list .kip-item .kip-break {
+  flex-basis: 100%;
+  margin-top: 8px;
+  border-top: 1px solid #ccc;
+  height: 16px;
 }
 .kip-list .kip-item .kip-col {
   display: flex;
@@ -15506,6 +15516,87 @@ ul.kip-menu-list li ul {
 }
 .kip-switch.kip-switch-updating input:checked + .kip-slider, .kip-switch.kip-switch-updating input:not(:checked) + .kip-slider {
   background-color: #777;
+}
+
+.kip-action-config p {
+  margin-bottom: 16px;
+}
+.kip-action-config textarea.kip-is-invalid {
+  border-color: #f00;
+  background: #fdd;
+}
+
+.kip-form-config .kip-add-field, .kip-form-config .kip-add-validator {
+  gap: 8px;
+  flex-direction: row;
+  display: flex;
+}
+.kip-form-config ul.kip-fields.kip-top-level {
+  margin-left: -24px;
+  margin-right: -24px;
+}
+.kip-form-config ul.kip-fields.kip-top-level > li {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+.kip-form-config ul.kip-fields > li {
+  padding: 16px;
+}
+.kip-form-config ul.kip-fields > li.bulma-message {
+  margin-bottom: 0;
+}
+.kip-form-config ul.kip-fields > li .kip-active-validator {
+  padding-left: 10px;
+  border-left: 2px dashed #eee;
+  margin-top: 8px;
+}
+.kip-form-config ul.kip-fields > li .kip-active-validator .kip-is-invalid {
+  border-color: #f00;
+  background: #fdd;
+}
+.kip-form-config ul.kip-fields > li .kip-active-validator > .kip-validator-type {
+  display: flex;
+  margin-bottom: 8px;
+}
+.kip-form-config ul.kip-fields > li .kip-active-validator > .kip-validator-type h4 {
+  font-size: 24px;
+  margin-top: 8px;
+}
+.kip-form-config ul.kip-fields > li .kip-active-validator > .kip-validator-type span {
+  user-select: none;
+  flex-grow: 1;
+  margin-top: 16px;
+  margin-left: 16px;
+}
+.kip-form-config ul.kip-fields > li .kip-active-validator > .kip-validator-type a {
+  opacity: 8%;
+  margin-top: 16px;
+}
+.kip-form-config ul.kip-fields > li .kip-active-validator > .kip-validator-type:hover a, .kip-form-config ul.kip-fields > li .kip-active-validator > .kip-validator-type :active a {
+  opacity: 100%;
+}
+.kip-form-config ul.kip-validators > li {
+  display: inline-block;
+  cursor: pointer;
+  background: #eee;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 4px;
+  font-size: 12px;
+  text-select: none;
+  margin-right: 8px;
+}
+.kip-form-config ul.kip-validators > li.is-active {
+  background: #88d498;
+  color: #fff;
+}
+.kip-form-config ul.kip-validators > li.kip-controls {
+  border: none;
+  background: none;
+}
+.kip-form-config .kip-add-field .bulma-button {
+  margin-top: 8px;
+  height: 44px;
 }
 
 html {

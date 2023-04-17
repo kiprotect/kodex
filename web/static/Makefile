@@ -1,2 +1,2 @@
 sass:
-	npx sass scss/main.scss build/main.css
+	npx sass -I scss scss/main.scss build/main.css

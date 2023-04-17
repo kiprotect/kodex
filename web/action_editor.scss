@@ -1,0 +1,116 @@
+@import "variables.scss";
+
+.kip-action-config {
+    p {
+        margin-bottom: map-get($kip-space, md);
+    }
+
+    textarea.kip-is-invalid {
+        border-color: #f00;
+        background: #fdd;
+    }
+}
+
+.kip-form-config {
+
+    .kip-add-field, .kip-add-validator {
+        gap: map-get($kip-space, sm);
+        flex-direction: row;
+        display: flex;
+    }
+
+    ul.kip-fields {
+
+        &.kip-top-level {
+            margin-left: -24px;
+            margin-right: -24px;
+
+            > li {
+                padding-left: 24px;
+                padding-right: 24px;
+            }
+        }
+
+        > li {
+
+            &.bulma-message {
+                margin-bottom: 0;
+            }
+
+            padding: map-get($kip-space, md);
+
+            .kip-active-validator {
+                padding-left: 10px;
+                border-left: 2px dashed #eee;
+                margin-top: map-get($kip-space, sm);
+
+                .kip-is-invalid {
+                    border-color: #f00;
+                    background: #fdd;
+                }
+
+                > .kip-validator-type {
+                    display: flex;
+                    margin-bottom: map-get($kip-space, sm);
+
+                    h4 {
+                        font-size: 24px;
+                        margin-top: 8px;
+                    }
+
+                    span {
+                        user-select: none;
+                        flex-grow: 1;
+                        margin-top: 16px;
+                        margin-left: map-get($kip-space, md);
+                    }
+
+                    a {
+                        opacity: 8%;
+                        margin-top: 16px;
+                    }
+
+                    &:hover, :active {
+                        a {
+                            opacity: 100%;
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+    ul.kip-validators {
+
+        > li {
+            display: inline-block;
+            cursor: pointer;
+            background: #eee;
+            border: 1px solid #eee;
+            border-radius: $kip-border-radius;
+            padding: map-get($kip-space, xs);
+            font-size: 12px;
+            text-select: none;
+            margin-right: map-get($kip-space, sm);
+
+            &.is-active {
+                background: $kip-lightgreen;
+                color: #fff;
+            }
+        }
+
+        > li.kip-controls {
+            border: none;
+            background: none;
+        }
+
+    }
+
+    .kip-add-field {
+        .bulma-button {
+            margin-top: 8px;
+            height: 44px;
+        }        
+    }
+}

@@ -160,7 +160,6 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	controller := UseController(c)
 	user := UseExternalUser(c)
 
-	// we fetch the project
 	project, err := controller.Project(Unhex(projectId))
 
 	if err != nil {

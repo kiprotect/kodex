@@ -13,10 +13,15 @@
         min-width: 800px;
         display: flex;
         flex-basis: 0;
+        flex-wrap: wrap;
         flex-direction: row;
         align-items: top;
         justify-items: flex-end;
         padding: map-get($kip-space, md);
+
+        &.kip-is-danger {
+            background: scale-color($bulma-danger, $lightness: 80%) !important;
+        }
 
         &:last-child {
             border-bottom: none;
@@ -73,6 +78,12 @@
             }
         }
 
+        .kip-break {
+            flex-basis: 100%;
+            margin-top: map-get($kip-space, sm);
+            border-top: 1px solid #ccc;
+            height: map-get($kip-space, md);
+        }
 
         .kip-col {
             display: flex;
