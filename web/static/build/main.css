@@ -15193,6 +15193,7 @@ ul.kip-menu-list li ul {
 }
 .kip-list .kip-item.kip-is-header {
   padding-top: 0;
+  font-weight: bolder;
   margin-bottom: 4px;
   background: none;
 }
@@ -15526,6 +15527,9 @@ ul.kip-menu-list li ul {
   background: #fdd;
 }
 
+.kip-form-config {
+  width: 100%;
+}
 .kip-form-config .kip-add-field, .kip-form-config .kip-add-validator {
   gap: 8px;
   flex-direction: row;
@@ -15541,9 +15545,6 @@ ul.kip-menu-list li ul {
 }
 .kip-form-config ul.kip-fields > li {
   padding: 16px;
-}
-.kip-form-config ul.kip-fields > li.bulma-message {
-  margin-bottom: 0;
 }
 .kip-form-config ul.kip-fields > li .kip-active-validator {
   padding-left: 10px;

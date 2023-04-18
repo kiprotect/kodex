@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
@@ -159,6 +160,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	controller := UseController(c)
 	user := UseExternalUser(c)
+	router := UseRouter(c)
 
 	project, err := controller.Project(Unhex(projectId))
 
@@ -207,28 +209,21 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	AddBreadcrumb(c, strings.Title(tab), Fmt("/%s", tab))
 
-	switch tab {
-	case "actions":
-		content = c.Element("actions", Actions(importedProject))
-	case "changes":
-		content = c.Element("changes", ChangeRequests(importedProject))
-	default:
-		content = Div("...")
-	}
+	error := Var(c, "")
 
-	router := UseRouter(c)
-	req := router.Request()
-
-	// we persist the project changes (if there were any)
-	if req.Method == "POST" && c.Interactive() {
+	onUpdate := func() {
+		// we persist the project changes (if there were any)
 		Log.Error("Updating blueprint...")
 
 		exportedBlueprint, err = kodex.ExportBlueprint(importedProject)
 
 		if err != nil {
 			Log.Error("cannot export blueprint: %v", err)
-			return nil
+			error.Set(Fmt("export error: %v", err))
+			return
 		}
+
+		ep, _ := json.Marshal(exportedBlueprint)
 
 		Log.Info("%v", exportedBlueprint)
 
@@ -236,20 +231,31 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 		// we store the blueprint again
 		if _, err := importedBlueprint.Create(controller, false); err != nil {
-			Log.Error("Error saving blueprint: %v", err)
-
-			return nil
+			Log.Error("Error saving blueprint: %v (%s)", err, string(ep))
+			error.Set(Fmt("save error: %v (%s)", err, string(ep)))
+			return
 		}
+
+		// we redirect to the current path...
+		router.RedirectTo(router.CurrentPath())
 
 	}
 
-	Log.Info("%v", exportedBlueprint)
+	switch tab {
+	case "actions":
+		content = c.Element("actions", Actions(importedProject, onUpdate))
+	case "changes":
+		content = c.Element("changes", ChangeRequests(importedProject))
+	default:
+		content = Div("...")
+	}
 
 	return Div(
 		Div(
 			Class("bulma-content"),
 			H2(Class("bulma-title"), project.Name()),
 		),
+		If(error.Get() != "", Div(Class("bulma-message", "bulma-is-danger"), Div(Class("bulma-message-body"), error.Get()))),
 		ui.Tabs(
 			ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),
 			ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Changes")),

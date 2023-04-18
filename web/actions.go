@@ -9,7 +9,7 @@ import (
 	//	"github.com/kiprotect/kodex/api"
 )
 
-func Actions(project kodex.Project) ElementFunction {
+func Actions(project kodex.Project, onUpdate func()) ElementFunction {
 
 	return func(c Context) Element {
 
@@ -18,25 +18,25 @@ func Actions(project kodex.Project) ElementFunction {
 		return F(
 			router.Match(
 				c,
-				Route("/details/(?P<actionId>[^/]+)", ActionDetails(project)),
-				Route("", ActionsList(project)),
+				Route("/details/(?P<actionId>[^/]+)", ActionDetails(project, onUpdate)),
+				Route("", ActionsList(project, onUpdate)),
 			),
 		)
 	}
 }
 
-func ActionDetails(project kodex.Project) func(c Context, actionId string) Element {
+func ActionDetails(project kodex.Project, onUpdate func()) func(c Context, actionId string) Element {
 
 	return func(c Context, actionId string) Element {
 
 		action, err := project.Controller().ActionConfig(Unhex(actionId))
 
-		// make sure this action belongs to the project...
-		if !bytes.Equal(action.Project().ID(), project.ID()) {
+		if err != nil {
 			return nil
 		}
 
-		if err != nil {
+		// make sure this action belongs to the project...
+		if !bytes.Equal(action.Project().ID(), project.ID()) {
 			return nil
 		}
 
@@ -109,19 +109,18 @@ func ActionDetails(project kodex.Project) func(c Context, actionId string) Eleme
 				),
 			),
 			c.Element("actionEditor",
-				ActionEditor(action),
+				ActionEditor(action, onUpdate),
 			),
 		)
 	}
 
 }
 
-func NewAction(project kodex.Project) ElementFunction {
+func NewAction(project kodex.Project, onUpdate func()) ElementFunction {
 	return func(c Context) Element {
 
 		name := Var(c, "")
 		error := Var(c, "")
-		router := UseRouter(c)
 
 		onSubmit := Func(c, func() {
 
@@ -141,7 +140,7 @@ func NewAction(project kodex.Project) ElementFunction {
 			if err := action.Save(); err != nil {
 				error.Set("Cannot save action")
 			} else {
-				router.RedirectUp()
+				onUpdate()
 			}
 		})
 
@@ -185,7 +184,7 @@ func NewAction(project kodex.Project) ElementFunction {
 	}
 }
 
-func ActionsList(project kodex.Project) ElementFunction {
+func ActionsList(project kodex.Project, onUpdate func()) ElementFunction {
 
 	return func(c Context) Element {
 
@@ -216,7 +215,7 @@ func ActionsList(project kodex.Project) ElementFunction {
 		return F(
 			router.Match(
 				c,
-				Route("/new", c.Element("newAction", NewAction(project))),
+				Route("/new", c.Element("newAction", NewAction(project, onUpdate))),
 				Route("", F(
 					ui.List(ais),
 					A(

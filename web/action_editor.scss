@@ -13,6 +13,8 @@
 
 .kip-form-config {
 
+    width: 100%;
+
     .kip-add-field, .kip-add-validator {
         gap: map-get($kip-space, sm);
         flex-direction: row;
@@ -20,6 +22,7 @@
     }
 
     ul.kip-fields {
+
 
         &.kip-top-level {
             margin-left: -24px;
@@ -32,10 +35,6 @@
         }
 
         > li {
-
-            &.bulma-message {
-                margin-bottom: 0;
-            }
 
             padding: map-get($kip-space, md);
 

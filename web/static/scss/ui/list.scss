@@ -33,6 +33,7 @@
 
         &.kip-is-header {
             padding-top: 0;
+            font-weight: bolder;
             margin-bottom: map-get($kip-space, xs);
             background: none;
         }

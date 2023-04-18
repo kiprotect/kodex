@@ -6,9 +6,11 @@ import (
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions"
+	"reflect"
+	"strconv"
 )
 
-func ActionEditor(action kodex.ActionConfig) ElementFunction {
+func ActionEditor(action kodex.ActionConfig, onUpdate func()) ElementFunction {
 	return func(c Context) Element {
 
 		kodex.Log.Infof("Config data: %v", action.ConfigData())
@@ -17,7 +19,7 @@ func ActionEditor(action kodex.ActionConfig) ElementFunction {
 
 		switch action.ActionType() {
 		case "form":
-			content = FormEditor(c, action)
+			content = FormEditor(c, action, onUpdate)
 		}
 
 		return Div(
@@ -31,7 +33,7 @@ func ActionEditor(action kodex.ActionConfig) ElementFunction {
 	}
 }
 
-func FormEditor(c Context, actionConfig kodex.ActionConfig) Element {
+func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func()) Element {
 
 	action, err := actionConfig.Action()
 
@@ -47,7 +49,7 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig) Element {
 
 	form := formAction.Form()
 
-	onUpdate := func() {
+	onActionUpdate := func() {
 
 		bytes, err := json.Marshal(form)
 
@@ -62,18 +64,21 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig) Element {
 		}
 
 		actionConfig.SetConfigData(config)
+
+		// we update the project
+		onUpdate()
+
 	}
 
 	return Div(
 		Class("kip-action-form"),
-		FormFields(c, actionConfig, form, onUpdate, []string{"root"}),
+		FormFields(c, form, onActionUpdate, []string{"root"}),
 	)
 }
 
 func NewField(c Context, form *forms.Form, onUpdate func()) Element {
 
 	name := Var(c, "")
-	router := UseRouter(c)
 	error := Var(c, "")
 
 	onSubmit := Func(c, func() {
@@ -90,13 +95,12 @@ func NewField(c Context, form *forms.Form, onUpdate func()) Element {
 			}
 		}
 
-		kodex.Log.Info("submitting...")
 		form.Fields = append(form.Fields, forms.Field{
 			Name:       name.Get(),
 			Validators: []forms.Validator{},
 		})
+
 		onUpdate()
-		router.RedirectTo(router.CurrentPath())
 	})
 
 	var errorNotice Element
@@ -137,11 +141,34 @@ func NewField(c Context, form *forms.Form, onUpdate func()) Element {
 	)
 }
 
-func Validators(c Context, field forms.Field, path []string) Element {
+func typeOf(validator forms.Validator) string {
+	if t := reflect.TypeOf(validator); t.Kind() == reflect.Ptr {
+		return t.Elem().Name()
+	} else {
+		return t.Name()
+	}
+}
+
+func Validators(c Context, field *forms.Field, path []string, onUpdate func(), selected bool) Element {
 
 	router := UseRouter(c)
 
 	validators := make([]Element, 0)
+
+	for i, validator := range field.Validators {
+		validators = append(validators,
+			Li(
+				A(
+					Href(
+						PathWithQuery(router.CurrentPath(), map[string][]string{
+							"field": append(path, Fmt("%d", i)),
+						}),
+					),
+					typeOf(validator),
+				),
+			),
+		)
+	}
 
 	return Ul(
 		Class("kip-validators"),
@@ -149,7 +176,7 @@ func Validators(c Context, field forms.Field, path []string) Element {
 		Li(
 			A(
 				Href(PathWithQuery(router.CurrentPath(), map[string][]string{
-					"field":  append(path, field.Name),
+					"field":  path,
 					"action": []string{"addValidator"},
 				})),
 				I(
@@ -179,7 +206,7 @@ func queryAction(c Context) string {
 	return ""
 }
 
-func DeleteFieldNotice(c Context, form *forms.Form, field forms.Field, path []string, onUpdate func()) Element {
+func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func()) Element {
 
 	router := UseRouter(c)
 
@@ -200,9 +227,6 @@ func DeleteFieldNotice(c Context, form *forms.Form, field forms.Field, path []st
 		form.Fields = newFields
 
 		onUpdate()
-
-		// we redirect to the regular form path
-		router.RedirectTo(router.CurrentPath())
 	})
 
 	return Li(
@@ -239,17 +263,47 @@ func DeleteFieldNotice(c Context, form *forms.Form, field forms.Field, path []st
 	)
 }
 
-func NewValidator(c Context, field forms.Field, path []string, onUpdate func()) Element {
+func StringMapValidator(c Context, validator *forms.IsStringMap, path []string, onUpdate func()) Element {
 
-	validatorType := Var(c, "test")
+	return Div(
+		Style("flex-grow: 1;"),
+		H2(
+			Class("bulma-subtitle"),
+			"New map<string,any> validator",
+		),
+		Input(Class("bulma-control"), Type("checkbox")),
+		FormFields(c, validator.Form, onUpdate, path),
+	)
+}
+
+func NewValidator(c Context, field *forms.Field, path []string, onUpdate func()) Element {
+
 	router := UseRouter(c)
 
+	validatorType := Var(c, router.Query().Get("validatorType"))
+
 	onSubmit := Func(c, func() {
-		router.RedirectTo(PathWithQuery(router.CurrentPath(), map[string][]string{
+
+		switch validatorType.Get() {
+		case "IsStringMap":
+
+			validator := forms.IsStringMap{
+				Form: &forms.Form{
+					Strict: true,
+					Fields: []forms.Field{},
+				},
+			}
+
+			field.Validators = append(field.Validators, validator)
+
+			onUpdate()
+		}
+
+		/*router.RedirectTo(PathWithQuery(router.CurrentPath(), map[string][]string{
 			"field":         append(path, field.Name),
 			"validatorType": []string{validatorType.Get()},
 			"action":        []string{"addValidator"},
-		}))
+		}))*/
 	})
 
 	return Form(
@@ -282,33 +336,51 @@ func NewValidator(c Context, field forms.Field, path []string, onUpdate func()) 
 	)
 }
 
-func Field(c Context, form *forms.Form, field forms.Field, path []string, onUpdate func()) Element {
+func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func()) Element {
 
 	router := UseRouter(c)
 
 	queryPath := queryPath(c)
 	queryAction := queryAction(c)
 
-	matches := true
+	fullMatch := true
+	match := true
 
-	for i, pe := range path {
-		if i >= len(queryPath) {
-			matches = false
+	for i, pe := range queryPath {
+		if i >= len(path) {
+			fullMatch = false
 			break
-		} else if queryPath[i] != pe {
-			matches = false
+		} else if path[i] != pe {
+			match = false
 			break
 		}
 	}
 
-	if matches && queryAction == "delete" {
+	if match && queryAction == "delete" {
 		return DeleteFieldNotice(c, form, field, path, onUpdate)
 	}
 
 	var extraContent Element
 
-	if matches && queryAction == "addValidator" {
+	var index int = -1
+
+	if field, ok := router.Query()["validator"]; ok {
+
+		index, _ = strconv.Atoi(field[0])
+	}
+
+	if fullMatch && queryAction == "addValidator" {
 		extraContent = NewValidator(c, field, path, onUpdate)
+	} else if match && queryAction == "editValidator" && index >= 0 && index < len(field.Validators) {
+
+		validator := field.Validators[index]
+
+		switch vt := validator.(type) {
+		case *forms.IsStringMap:
+			extraContent = FormFields(c, vt.Form, onUpdate, path)
+		default:
+			extraContent = Span(Fmt("don't know: %v", vt))
+		}
 	}
 
 	return F(
@@ -322,7 +394,7 @@ func Field(c Context, form *forms.Form, field forms.Field, path []string, onUpda
 			),
 			Div(
 				Class("kip-col", "kip-is-md"),
-				Validators(c, field, path),
+				Validators(c, field, path, onUpdate, matches),
 			),
 			Div(
 				Class("kip-col", "kip-is-icon"),
@@ -341,11 +413,16 @@ func Field(c Context, form *forms.Form, field forms.Field, path []string, onUpda
 	)
 }
 
-func FormFields(c Context, actionConfig kodex.ActionConfig, form *forms.Form, onUpdate func(), path []string) Element {
+func FormFields(c Context, form *forms.Form, onUpdate func(), path []string) Element {
 
 	fields := []Element{}
 
-	for _, field := range form.Fields {
+	// we copy the fields as they might change during iteration
+	// since we e.g. can delete a field in an action...
+	fvs := form.Fields
+
+	for i, _ := range fvs {
+		field := &fvs[i]
 		fields = append(fields, Field(c, form, field, append(path, field.Name), onUpdate))
 	}
 
@@ -354,7 +431,7 @@ func FormFields(c Context, actionConfig kodex.ActionConfig, form *forms.Form, on
 		Ul(
 			Class("kip-fields", "kip-top-level", "kip-list"),
 			Li(
-				Class("kip-item"),
+				Class("kip-item", "kip-is-header"),
 				Div(
 					Class("kip-col", "kip-is-sm"),
 					"Name",
