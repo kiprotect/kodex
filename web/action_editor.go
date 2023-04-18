@@ -394,7 +394,7 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 			),
 			Div(
 				Class("kip-col", "kip-is-md"),
-				Validators(c, field, path, onUpdate, matches),
+				Validators(c, field, path, onUpdate, match),
 			),
 			Div(
 				Class("kip-col", "kip-is-icon"),
