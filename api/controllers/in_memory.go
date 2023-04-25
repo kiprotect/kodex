@@ -232,7 +232,8 @@ func (c *InMemoryController) ChangeRequest(id []byte) (api.ChangeRequest, error)
 }
 
 func (c *InMemoryController) MakeChangeRequest(object kodex.Model, user api.User) (api.ChangeRequest, error) {
-	return nil, fmt.Errorf("not implemented")
+	changeRequest := MakeInMemoryChangeRequest(object.Type(), object.ID(), user, c)
+	return changeRequest, nil
 }
 
 /* Users */

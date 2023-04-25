@@ -39,10 +39,14 @@ type InMemoryChangeRequest struct {
 	controller  *InMemoryController
 }
 
-func MakeInMemoryChangeRequest(objectType string, objectID []byte, controller *InMemoryController) api.ChangeRequest {
+func MakeInMemoryChangeRequest(objectType string, objectID []byte, user api.User, controller *InMemoryController) api.ChangeRequest {
 	inMemoryChangeRequest := &InMemoryChangeRequest{
+		BaseChangeRequest: api.BaseChangeRequest{
+			Creator_: user,
+		},
 		objectID:   objectID,
 		objectType: objectType,
+		controller: controller,
 		reviews:    make(map[string]api.ChangeRequestReview),
 	}
 	inMemoryChangeRequest.Self = inMemoryChangeRequest

@@ -3,6 +3,7 @@ package web
 import (
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/web/ui"
 )
 
@@ -39,6 +40,79 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 	}
 }
 
+func NewChangeRequest(project kodex.Project) ElementFunction {
+	return func(c Context) Element {
+
+		title := Var(c, "")
+		error := Var(c, "")
+		router := UseRouter(c)
+		user := UseApiUser(c)
+
+		controller := UseController(c)
+
+		onSubmit := Func(c, func() {
+
+			if title.Get() == "" {
+				error.Set("Please enter a title")
+				return
+			}
+
+			changeRequest, err := controller.MakeChangeRequest(project, user)
+
+			if err != nil {
+				error.Set(Fmt("Cannot create change request: %v", err))
+				return
+			}
+
+			changeRequest.SetTitle(title.Get())
+			changeRequest.SetStatus(api.Draft)
+
+			if err := changeRequest.Save(); err != nil {
+				error.Set(Fmt("Cannot save change request: %v", err))
+			} else {
+				router.RedirectUp()
+			}
+		})
+
+		var errorNotice Element
+
+		if error.Get() != "" {
+			errorNotice = P(
+				Class("bulma-help", "bulma-is-danger"),
+				error.Get(),
+			)
+		}
+
+		return Form(
+			Method("POST"),
+			OnSubmit(onSubmit),
+			Div(
+				Class("bulma-field"),
+				errorNotice,
+				Label(
+					Class("bulma-label", "Title"),
+					Input(
+						Class("bulma-input", If(error.Get() != "", "bulma-is-danger")),
+						Value(title),
+						Placeholder("change request title"),
+					),
+				),
+			),
+			Div(
+				Class("bulma-field"),
+				P(
+					Class("bulma-control"),
+					Button(
+						Class("bulma-button", "bulma-is-success"),
+						Type("submit"),
+						"Create Change Request",
+					),
+				),
+			),
+		)
+	}
+}
+
 func ChangeRequestList(project kodex.Project) ElementFunction {
 
 	return func(c Context) Element {
@@ -59,7 +133,7 @@ func ChangeRequestList(project kodex.Project) ElementFunction {
 			changeRequestItem := A(
 				Href(Fmt("/projects/%s/changes/details/%s", Hex(project.ID()), Hex(changeRequest.ID()))),
 				ui.ListItem(
-					ui.ListColumn("md", Hex(changeRequest.ID())),
+					ui.ListColumn("md", changeRequest.Title()),
 				),
 			)
 			cri = append(cri, changeRequestItem)
@@ -70,7 +144,7 @@ func ChangeRequestList(project kodex.Project) ElementFunction {
 		return F(
 			router.Match(
 				c,
-				//				Route("/new", c.Element("newChangeRequest", NewAction(project))),
+				Route("/new", c.Element("newChangeRequest", NewChangeRequest(project))),
 				Route("", F(
 					ui.List(cri),
 					A(

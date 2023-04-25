@@ -13,6 +13,14 @@ func UseUserProvider(c gospel.Context) api.UserProvider {
 	return gospel.UseGlobal[api.UserProvider](c, "userProvider")
 }
 
+func SetApiUser(c gospel.Context, user api.User) {
+	gospel.GlobalVar(c, "apiUser", user)
+}
+
+func UseApiUser(c gospel.Context) api.User {
+	return gospel.UseGlobal[api.User](c, "apiUser")
+}
+
 func SetExternalUser(c gospel.Context, user *api.ExternalUser) {
 	gospel.GlobalVar(c, "externalUser", user)
 }

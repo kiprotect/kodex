@@ -221,13 +221,13 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		tab = "actions"
 	}
 
-	msg := PersistentVar(c, "foobar")
+	msg := PersistentVar(c, map[string]any{"foo": "bar"})
 
 	AddBreadcrumb(c, strings.Title(tab), Fmt("/%s", tab))
 
 	onUpdate := func(path string) {
 
-		msg.Set("barbara")
+		msg.Set(map[string]any{"bar": "baz"})
 
 		// we persist the project changes (if there were any)
 		Log.Error("Updating blueprint...")
@@ -259,6 +259,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	}
 
+	onUpdate = nil
+
 	switch tab {
 	case "actions":
 		content = c.Element("actions", Actions(importedProject, onUpdate))
@@ -273,7 +275,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			Class("bulma-content"),
 			H2(Class("bulma-title"), project.Name()),
 		),
-		msg.Get(),
+		ui.Message("warning", "Project is in read-only mode, please open a change request to edit it."),
+		Fmt("%t", msg.Get()),
 		If(error.Get() != "", ui.Message("danger", error.Get())),
 		ui.Tabs(
 			ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),

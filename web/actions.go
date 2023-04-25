@@ -49,8 +49,7 @@ func ActionDetails(project kodex.Project, onUpdate func(string)) func(c Context,
 		onSubmit := Func(c, func() {
 			action.SetName(name.Get())
 			action.Save()
-			router.RedirectUp()
-			kodex.Log.Info("Changing name to %s", name)
+			onUpdate(router.LastPath())
 		})
 
 		// edit the name of the action
@@ -81,17 +80,21 @@ func ActionDetails(project kodex.Project, onUpdate func(string)) func(c Context,
 				Class("bulma-subtitle"),
 				router.Match(
 					c,
-					Route("/name/edit",
-						c.ElementFunction("editName", editActionName),
+					If(onUpdate != nil,
+						Route("/name/edit",
+							c.ElementFunction("editName", editActionName),
+						),
 					),
 					Route("",
 						F(
 							action.Name(),
-							A(
-								Style("float: right"),
-								Href(router.CurrentRoute().Path+"/name/edit"),
-								"&nbsp;&nbsp;",
-								I(Class("fas fa-edit")),
+							If(onUpdate != nil,
+								A(
+									Style("float: right"),
+									Href(router.CurrentRoute().Path+"/name/edit"),
+									"&nbsp;&nbsp;",
+									I(Class("fas fa-edit")),
+								),
 							),
 						),
 					),
@@ -216,13 +219,16 @@ func ActionsList(project kodex.Project, onUpdate func(string)) ElementFunction {
 		return F(
 			router.Match(
 				c,
-				Route("/new", c.Element("newAction", NewAction(project, onUpdate))),
+				If(onUpdate != nil, Route("/new", c.Element("newAction", NewAction(project, onUpdate)))),
 				Route("", F(
 					ui.List(ais),
-					A(
-						Href(router.CurrentRoute().Path+"/new"),
-						Class("bulma-button", "bulma-is-success"),
-						"New Action"),
+					If(onUpdate != nil,
+						A(
+							Href(router.CurrentRoute().Path+"/new"),
+							Class("bulma-button", "bulma-is-success"),
+							"New Action",
+						),
+					),
 				),
 				),
 			),

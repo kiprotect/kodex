@@ -20,7 +20,14 @@ func AuthorizedContent(c Context) Element {
 		return nil
 	}
 
+	apiUser, err := externalUser.ApiUser(controller)
+
+	if err != nil {
+		return Div("errr")
+	}
+
 	SetExternalUser(c, externalUser)
+	SetApiUser(c, apiUser)
 
 	return F(
 		c.Element("navHeader", Navbar),

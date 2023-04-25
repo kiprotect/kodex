@@ -70,6 +70,10 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(string
 
 	}
 
+	if onUpdate == nil {
+		onActionUpdate = nil
+	}
+
 	return Div(
 		Class("kip-action-form"),
 		FormFields(c, form, onActionUpdate, []string{"root"}),
@@ -174,14 +178,16 @@ func Validators(c Context, field *forms.Field, path []string, onUpdate func(stri
 	return Ul(
 		Class("kip-validators"),
 		validators,
-		Li(
-			A(
-				Href(PathWithQuery(router.CurrentPath(), map[string][]string{
-					"field":  path,
-					"action": []string{"addValidator"},
-				})),
-				I(
-					Class("fa", "fa-plus"),
+		If(onUpdate != nil,
+			Li(
+				A(
+					Href(PathWithQuery(router.CurrentPath(), map[string][]string{
+						"field":  path,
+						"action": []string{"addValidator"},
+					})),
+					I(
+						Class("fa", "fa-plus"),
+					),
 				),
 			),
 		),
@@ -406,13 +412,15 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 			),
 			Div(
 				Class("kip-col", "kip-is-icon"),
-				A(
-					Href(PathWithQuery(router.CurrentPath(), map[string][]string{
-						"field":  path,
-						"action": []string{"delete"},
-					})),
-					I(
-						Class("fa", "fa-trash"),
+				If(onUpdate != nil,
+					A(
+						Href(PathWithQuery(router.CurrentPath(), map[string][]string{
+							"field":  path,
+							"action": []string{"delete"},
+						})),
+						I(
+							Class("fa", "fa-trash"),
+						),
 					),
 				),
 			),
@@ -450,13 +458,15 @@ func FormFields(c Context, form *forms.Form, onUpdate func(string), path []strin
 				),
 				Div(
 					Class("kip-col", "kip-is-icon"),
-					"Menu",
+					"",
 				),
 			),
 			fields,
-			Li(
-				Class("kip-item"),
-				NewField(c, form, path, onUpdate),
+			If(onUpdate != nil,
+				Li(
+					Class("kip-item"),
+					NewField(c, form, path, onUpdate),
+				),
 			),
 		),
 	)
