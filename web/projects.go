@@ -158,17 +158,31 @@ func NewProject() ElementFunction {
 
 func ProjectDetails(c Context, projectId string, tab string) Element {
 
+	error := Var(c, "")
+
 	controller := UseController(c)
 	user := UseExternalUser(c)
-	router := UseRouter(c)
 
-	project, err := controller.Project(Unhex(projectId))
+	// we load the project
+	projectVar := CachedVar(c, func() kodex.Project {
 
-	if err != nil {
-		// to do: return error
-		Log.Error("%v", err)
-		return nil
-	}
+		Log.Error("Loading project....")
+
+		project, err := controller.Project(Unhex(projectId))
+
+		if err != nil {
+			error.Set(Fmt("Cannot load project: %v", err))
+			// to do: return error
+			Log.Error("%v", err)
+			return nil
+		}
+
+		return project
+
+	})
+
+	// we retrieve the project...
+	project := projectVar.Get()
 
 	AddBreadcrumb(c, project.Name(), Fmt("/%s", Hex(project.ID())))
 
@@ -207,11 +221,14 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		tab = "actions"
 	}
 
+	msg := PersistentVar(c, "foobar")
+
 	AddBreadcrumb(c, strings.Title(tab), Fmt("/%s", tab))
 
-	error := Var(c, "")
+	onUpdate := func(path string) {
 
-	onUpdate := func() {
+		msg.Set("barbara")
+
 		// we persist the project changes (if there were any)
 		Log.Error("Updating blueprint...")
 
@@ -236,8 +253,9 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			return
 		}
 
-		// we redirect to the current path...
-		router.RedirectTo(router.CurrentPath())
+		// we redirect to the requested path...
+		router := UseRouter(c)
+		router.RedirectTo(path)
 
 	}
 
@@ -255,7 +273,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			Class("bulma-content"),
 			H2(Class("bulma-title"), project.Name()),
 		),
-		If(error.Get() != "", Div(Class("bulma-message", "bulma-is-danger"), Div(Class("bulma-message-body"), error.Get()))),
+		msg.Get(),
+		If(error.Get() != "", ui.Message("danger", error.Get())),
 		ui.Tabs(
 			ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),
 			ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Changes")),

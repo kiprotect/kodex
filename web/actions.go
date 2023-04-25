@@ -9,7 +9,7 @@ import (
 	//	"github.com/kiprotect/kodex/api"
 )
 
-func Actions(project kodex.Project, onUpdate func()) ElementFunction {
+func Actions(project kodex.Project, onUpdate func(string)) ElementFunction {
 
 	return func(c Context) Element {
 
@@ -25,7 +25,7 @@ func Actions(project kodex.Project, onUpdate func()) ElementFunction {
 	}
 }
 
-func ActionDetails(project kodex.Project, onUpdate func()) func(c Context, actionId string) Element {
+func ActionDetails(project kodex.Project, onUpdate func(string)) func(c Context, actionId string) Element {
 
 	return func(c Context, actionId string) Element {
 
@@ -116,11 +116,12 @@ func ActionDetails(project kodex.Project, onUpdate func()) func(c Context, actio
 
 }
 
-func NewAction(project kodex.Project, onUpdate func()) ElementFunction {
+func NewAction(project kodex.Project, onUpdate func(string)) ElementFunction {
 	return func(c Context) Element {
 
 		name := Var(c, "")
 		error := Var(c, "")
+		router := UseRouter(c)
 
 		onSubmit := Func(c, func() {
 
@@ -140,7 +141,7 @@ func NewAction(project kodex.Project, onUpdate func()) ElementFunction {
 			if err := action.Save(); err != nil {
 				error.Set("Cannot save action")
 			} else {
-				onUpdate()
+				onUpdate(router.CurrentPath())
 			}
 		})
 
@@ -184,7 +185,7 @@ func NewAction(project kodex.Project, onUpdate func()) ElementFunction {
 	}
 }
 
-func ActionsList(project kodex.Project, onUpdate func()) ElementFunction {
+func ActionsList(project kodex.Project, onUpdate func(string)) ElementFunction {
 
 	return func(c Context) Element {
 

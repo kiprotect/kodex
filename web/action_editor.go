@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-func ActionEditor(action kodex.ActionConfig, onUpdate func()) ElementFunction {
+func ActionEditor(action kodex.ActionConfig, onUpdate func(string)) ElementFunction {
 	return func(c Context) Element {
 
 		kodex.Log.Infof("Config data: %v", action.ConfigData())
@@ -33,7 +33,7 @@ func ActionEditor(action kodex.ActionConfig, onUpdate func()) ElementFunction {
 	}
 }
 
-func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func()) Element {
+func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(string)) Element {
 
 	action, err := actionConfig.Action()
 
@@ -49,7 +49,7 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func()) Ele
 
 	form := formAction.Form()
 
-	onActionUpdate := func() {
+	onActionUpdate := func(path string) {
 
 		bytes, err := json.Marshal(form)
 
@@ -66,7 +66,7 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func()) Ele
 		actionConfig.SetConfigData(config)
 
 		// we update the project
-		onUpdate()
+		onUpdate(path)
 
 	}
 
@@ -76,10 +76,11 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func()) Ele
 	)
 }
 
-func NewField(c Context, form *forms.Form, onUpdate func()) Element {
+func NewField(c Context, form *forms.Form, path []string, onUpdate func(string)) Element {
 
 	name := Var(c, "")
 	error := Var(c, "")
+	router := UseRouter(c)
 
 	onSubmit := Func(c, func() {
 
@@ -100,7 +101,7 @@ func NewField(c Context, form *forms.Form, onUpdate func()) Element {
 			Validators: []forms.Validator{},
 		})
 
-		onUpdate()
+		onUpdate(router.CurrentPathWithQuery())
 	})
 
 	var errorNotice Element
@@ -149,7 +150,7 @@ func typeOf(validator forms.Validator) string {
 	}
 }
 
-func Validators(c Context, field *forms.Field, path []string, onUpdate func(), selected bool) Element {
+func Validators(c Context, field *forms.Field, path []string, onUpdate func(string), selected bool) Element {
 
 	router := UseRouter(c)
 
@@ -206,7 +207,7 @@ func queryAction(c Context) string {
 	return ""
 }
 
-func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func()) Element {
+func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func(string)) Element {
 
 	router := UseRouter(c)
 
@@ -226,7 +227,7 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 
 		form.Fields = newFields
 
-		onUpdate()
+		onUpdate(router.CurrentPathWithQuery())
 	})
 
 	return Li(
@@ -263,7 +264,7 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 	)
 }
 
-func StringMapValidator(c Context, validator *forms.IsStringMap, path []string, onUpdate func()) Element {
+func StringMapValidator(c Context, validator *forms.IsStringMap, path []string, onUpdate func(string)) Element {
 
 	return Div(
 		Style("flex-grow: 1;"),
@@ -276,7 +277,7 @@ func StringMapValidator(c Context, validator *forms.IsStringMap, path []string, 
 	)
 }
 
-func NewValidator(c Context, field *forms.Field, path []string, onUpdate func()) Element {
+func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(string)) Element {
 
 	router := UseRouter(c)
 
@@ -296,7 +297,7 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func())
 
 			field.Validators = append(field.Validators, validator)
 
-			onUpdate()
+			onUpdate(router.CurrentPathWithQuery())
 		}
 
 		/*router.RedirectTo(PathWithQuery(router.CurrentPath(), map[string][]string{
@@ -336,7 +337,7 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func())
 	)
 }
 
-func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func()) Element {
+func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func(string)) Element {
 
 	router := UseRouter(c)
 
@@ -348,15 +349,17 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 
 	for i, pe := range queryPath {
 		if i >= len(path) {
+			// there are segments beyond this field
 			fullMatch = false
 			break
 		} else if path[i] != pe {
+			fullMatch = false
 			match = false
 			break
 		}
 	}
 
-	if match && queryAction == "delete" {
+	if fullMatch && queryAction == "delete" {
 		return DeleteFieldNotice(c, form, field, path, onUpdate)
 	}
 
@@ -364,20 +367,25 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 
 	var index int = -1
 
-	if field, ok := router.Query()["validator"]; ok {
+	if len(queryPath) > len(path) {
+		// we get the validator index from the query path
+		var err error
 
-		index, _ = strconv.Atoi(field[0])
+		if index, err = strconv.Atoi(queryPath[len(path)]); err != nil {
+			// invalid index, we ignore...
+			index = -1
+		}
 	}
 
 	if fullMatch && queryAction == "addValidator" {
 		extraContent = NewValidator(c, field, path, onUpdate)
-	} else if match && queryAction == "editValidator" && index >= 0 && index < len(field.Validators) {
+	} else if match && index >= 0 && index < len(field.Validators) {
 
 		validator := field.Validators[index]
 
 		switch vt := validator.(type) {
 		case *forms.IsStringMap:
-			extraContent = FormFields(c, vt.Form, onUpdate, path)
+			extraContent = FormFields(c, vt.Form, onUpdate, append(path, Fmt("%d", index)))
 		default:
 			extraContent = Span(Fmt("don't know: %v", vt))
 		}
@@ -413,7 +421,7 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 	)
 }
 
-func FormFields(c Context, form *forms.Form, onUpdate func(), path []string) Element {
+func FormFields(c Context, form *forms.Form, onUpdate func(string), path []string) Element {
 
 	fields := []Element{}
 
@@ -448,7 +456,7 @@ func FormFields(c Context, form *forms.Form, onUpdate func(), path []string) Ele
 			fields,
 			Li(
 				Class("kip-item"),
-				NewField(c, form, onUpdate),
+				NewField(c, form, path, onUpdate),
 			),
 		),
 	)
