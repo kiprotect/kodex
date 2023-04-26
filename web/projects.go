@@ -7,7 +7,9 @@ import (
 	"github.com/kiprotect/kodex/api"
 	ctrlHelpers "github.com/kiprotect/kodex/api/helpers/controller"
 	"github.com/kiprotect/kodex/web/ui"
+	"github.com/wI2L/jsondiff"
 	"strings"
+	"time"
 )
 
 func InMemoryController(c Context) (api.Controller, error) {
@@ -220,17 +222,19 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	if tab == "" {
 		tab = "actions"
 	}
-
-	msg := PersistentVar(c, map[string]any{"foo": "bar"})
+	changeRequestId := PersistentGlobalVar(c, "changeRequestId", "")
+	msg := PersistentVar(c, jsondiff.Patch{})
 
 	AddBreadcrumb(c, strings.Title(tab), Fmt("/%s", tab))
 
-	onUpdate := func(path string) {
+	Log.Info("msg: %v", msg.Get())
 
-		msg.Set(map[string]any{"bar": "baz"})
+	onUpdate := func(path string) {
 
 		// we persist the project changes (if there were any)
 		Log.Error("Updating blueprint...")
+
+		lastBlueprint := exportedBlueprint
 
 		exportedBlueprint, err = kodex.ExportBlueprint(importedProject)
 
@@ -240,9 +244,23 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			return
 		}
 
+		patch, err := jsondiff.Compare(lastBlueprint, exportedBlueprint)
+
+		if err != nil {
+			error.Set(Fmt("Cannot create patch: %v", err))
+			return
+			// handle error
+		}
+
+		Log.Info("Patch: %v", patch)
+
+		error.Set(Fmt("Patch: %v", patch))
+
+		msg.Set(patch)
+
 		ep, _ := json.Marshal(exportedBlueprint)
 
-		Log.Info("%v", exportedBlueprint)
+		Log.Info("Exported blueprint: %v", exportedBlueprint)
 
 		importedBlueprint = kodex.MakeBlueprint(exportedBlueprint)
 
@@ -259,7 +277,9 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	}
 
-	onUpdate = nil
+	if changeRequestId.Get() == "" {
+		onUpdate = nil
+	}
 
 	switch tab {
 	case "actions":
@@ -275,8 +295,27 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			Class("bulma-content"),
 			H2(Class("bulma-title"), project.Name()),
 		),
-		ui.Message("warning", "Project is in read-only mode, please open a change request to edit it."),
-		Fmt("%t", msg.Get()),
+		Div(
+			Class("bulma-tags"),
+			Span(
+				Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
+				Fmt("last modified: %s", HumanDuration(time.Now().Sub(project.CreatedAt()))),
+			),
+		),
+
+		If(
+			onUpdate == nil,
+			ui.Message("warning",
+				F(
+					I(
+						Class("fa", "fa-lock"),
+					),
+					" Read-only mode, please open a change request to edit project.",
+				),
+			),
+		),
+		Fmt("Change request: %s", changeRequestId.Get()),
+		Fmt("Diff: %v", msg.Get()),
 		If(error.Get() != "", ui.Message("danger", error.Get())),
 		ui.Tabs(
 			ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),

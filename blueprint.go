@@ -35,7 +35,32 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
+
+var BlueprintDateForm = forms.Form{
+	Fields: []forms.Field{
+		{
+			Name: "created_at",
+			Validators: []forms.Validator{
+				forms.IsTime{Format: "rfc3339"},
+			},
+		},
+		{
+			Name: "updated_at",
+			Validators: []forms.Validator{
+				forms.IsTime{Format: "rfc3339"},
+			},
+		},
+		{
+			Name: "deleted_at",
+			Validators: []forms.Validator{
+				forms.IsOptional{},
+				forms.IsTime{Format: "rfc3339"},
+			},
+		},
+	},
+}
 
 var BlueprintProjectForm = forms.Form{
 	Fields: []forms.Field{
@@ -360,6 +385,10 @@ func initSources(project Project, config map[string]interface{}) error {
 			return err
 		}
 
+		if err := FixDates(source, sourceMapConfig); err != nil {
+			return err
+		}
+
 		if err := source.Save(); err != nil {
 			return err
 		}
@@ -395,9 +424,14 @@ func initActionConfigs(project Project, config map[string]interface{}) error {
 		}
 
 		Log.Debugf("Creating action: %s", name)
+
 		action := project.MakeActionConfig(id)
 
 		if err := action.Create(actionMapConfig); err != nil {
+			return err
+		}
+
+		if err := FixDates(action, actionMapConfig); err != nil {
 			return err
 		}
 
@@ -439,6 +473,10 @@ func initDestinations(project Project, config map[string]interface{}) error {
 		destination := project.MakeDestination(id)
 
 		if err := destination.Create(destinationMapConfig); err != nil {
+			return err
+		}
+
+		if err := FixDates(destination, destinationMapConfig); err != nil {
 			return err
 		}
 
@@ -501,6 +539,10 @@ func initStreams(project Project, config map[string]interface{}) error {
 				return err
 			}
 
+			if err := FixDates(stream, streamConfigMap); err != nil {
+				return err
+			}
+
 			if err := stream.Save(); err != nil {
 				return err
 			}
@@ -538,18 +580,25 @@ func initStreamSources(stream Stream, config map[string]interface{}) error {
 	}
 
 	for i, sourceConfig := range sourceConfigs {
+
 		sourceName, ok := sourceConfig["source"].(string)
+
 		if !ok {
 			return fmt.Errorf("name missing for source %d", i)
 		}
+
 		sourceStatus, ok := sourceConfig["status"].(string)
+
 		if !ok {
 			sourceStatus = "active"
 		}
+
 		source, ok := sourcesByName[sourceName]
+
 		if !ok {
 			return fmt.Errorf("source '%s' does not exist", sourceName)
 		}
+
 		if err := stream.AddSource(source, SourceStatus(sourceStatus)); err != nil {
 			return err
 		}
@@ -598,6 +647,10 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 				}
 
 			} else if err := config.Update(params); err != nil {
+				return err
+			}
+
+			if err := FixDates(config, params); err != nil {
 				return err
 			}
 
@@ -676,6 +729,40 @@ func initConfigDestinations(config Config, configData map[string]interface{}) er
 	return nil
 }
 
+type Dates struct {
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
+}
+
+type DatesSettable interface {
+	SetCreatedAt(time.Time) error
+	SetUpdatedAt(time.Time) error
+	SetDeletedAt(*time.Time) error
+}
+
+func FixDates(object Model, data map[string]interface{}) error {
+
+	settable, ok := object.(DatesSettable)
+
+	if !ok {
+		// can't set dates on this object...
+		return nil
+	}
+
+	dates := &Dates{}
+	if params, err := BlueprintDateForm.Validate(data); err != nil {
+		return err
+	} else if err := BlueprintDateForm.Coerce(dates, params); err != nil {
+		return err
+	} else {
+		settable.SetCreatedAt(dates.CreatedAt)
+		settable.SetUpdatedAt(dates.UpdatedAt)
+		settable.SetDeletedAt(dates.DeletedAt)
+		return nil
+	}
+}
+
 func initProject(controller Controller, configData map[string]interface{}, createProject bool) (Project, error) {
 	projectConfigData, ok := configData["project"]
 
@@ -718,6 +805,10 @@ func initProject(controller Controller, configData map[string]interface{}, creat
 		project = controller.MakeProject(id)
 
 		if err := project.Create(params); err != nil {
+			return nil, err
+		}
+
+		if err := FixDates(project, projectConfig); err != nil {
 			return nil, err
 		}
 

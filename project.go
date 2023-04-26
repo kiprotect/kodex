@@ -19,6 +19,7 @@ package kodex
 import (
 	"encoding/json"
 	"github.com/kiprotect/go-helpers/forms"
+	"time"
 )
 
 type Project interface {
@@ -29,6 +30,9 @@ type Project interface {
 	SetDescription(string) error
 	Data() interface{}
 	SetData(interface{}) error
+	SetCreatedAt(time time.Time) error
+	SetUpdatedAt(time time.Time) error
+	SetDeletedAt(time *time.Time) error
 
 	MakeActionConfig(id []byte) ActionConfig
 	MakeDestination(id []byte) Destination

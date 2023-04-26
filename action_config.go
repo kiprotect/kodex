@@ -207,7 +207,6 @@ func (b *BaseActionConfig) MarshalJSON() ([]byte, error) {
 		"description": b.Self.Description(),
 		"type":        b.Self.ActionType(),
 		"data":        b.Self.Data(),
-		"project":     b.Self.Project(),
 		"config":      b.Self.ConfigData(),
 	}
 

@@ -103,11 +103,11 @@ func ActionDetails(project kodex.Project, onUpdate func(string)) func(c Context,
 			Div(
 				Class("bulma-tags"),
 				Span(
-					Class("bulma-tag", "bulma-is-success"),
+					Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
 					Fmt("last modified: %s", HumanDuration(time.Now().Sub(action.CreatedAt()))),
 				),
 				Span(
-					Class("bulma-tag", "bulma-is-success"),
+					Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
 					"Type: ", "&nbsp;", B(action.ActionType()),
 				),
 			),

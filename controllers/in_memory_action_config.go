@@ -29,6 +29,9 @@ type InMemoryActionConfig struct {
 	actionType  string
 	description string
 	name        string
+	createdAt   time.Time
+	updatedAt   time.Time
+	deletedAt   *time.Time
 	data        interface{}
 	configData  map[string]interface{}
 }
@@ -106,16 +109,31 @@ func (c *InMemoryActionConfig) SetDescription(description string) error {
 	return nil
 }
 
+func (c *InMemoryActionConfig) SetUpdatedAt(t time.Time) error {
+	c.updatedAt = t
+	return nil
+}
+
+func (c *InMemoryActionConfig) SetCreatedAt(t time.Time) error {
+	c.createdAt = t
+	return nil
+}
+
+func (c *InMemoryActionConfig) SetDeletedAt(t *time.Time) error {
+	c.deletedAt = t
+	return nil
+}
+
 func (c *InMemoryActionConfig) UpdatedAt() time.Time {
-	return time.Now().UTC()
+	return c.updatedAt
 }
 
 func (c *InMemoryActionConfig) CreatedAt() time.Time {
-	return time.Now().UTC()
+	return c.createdAt
 }
 
 func (c *InMemoryActionConfig) DeletedAt() *time.Time {
-	return nil
+	return c.deletedAt
 }
 
 func (c *InMemoryActionConfig) Refresh() error {

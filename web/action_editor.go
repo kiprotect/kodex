@@ -365,7 +365,7 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 		}
 	}
 
-	if fullMatch && queryAction == "delete" {
+	if onUpdate != nil && fullMatch && queryAction == "delete" {
 		return DeleteFieldNotice(c, form, field, path, onUpdate)
 	}
 

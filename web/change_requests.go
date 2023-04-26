@@ -26,6 +26,7 @@ func ChangeRequests(project kodex.Project) ElementFunction {
 func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId string) Element {
 	return func(c Context, changeRequestId string) Element {
 
+		router := UseRouter(c)
 		controller := UseController(c)
 
 		// we retrieve the action configs of the project...
@@ -36,7 +37,31 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 			return nil
 		}
 
-		return Div(Hex(changeRequest.ID()))
+		onSubmit := Func(c, func() {
+
+			changeRequestId := PersistentGlobalVar(c, "changeRequestId", "")
+			changeRequestId.Set(Hex(changeRequest.ID()))
+			router.RedirectUp()
+		})
+
+		return Div(
+			changeRequest.Title(),
+			Form(
+				Method("POST"),
+				OnSubmit(onSubmit),
+				Div(
+					Class("bulma-field"),
+					P(
+						Class("bulma-control"),
+						Button(
+							Class("bulma-button", "bulma-is-success"),
+							Type("submit"),
+							"Work On Change Request",
+						),
+					),
+				),
+			),
+		)
 	}
 }
 
