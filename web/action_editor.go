@@ -6,11 +6,12 @@ import (
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions"
+	"github.com/kiprotect/kodex/api"
 	"reflect"
 	"strconv"
 )
 
-func ActionEditor(action kodex.ActionConfig, onUpdate func(string)) ElementFunction {
+func ActionEditor(action kodex.ActionConfig, onUpdate func(api.Change, string)) ElementFunction {
 	return func(c Context) Element {
 
 		kodex.Log.Infof("Config data: %v", action.ConfigData())
@@ -33,7 +34,7 @@ func ActionEditor(action kodex.ActionConfig, onUpdate func(string)) ElementFunct
 	}
 }
 
-func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(string)) Element {
+func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(api.Change, string)) Element {
 
 	action, err := actionConfig.Action()
 
@@ -49,7 +50,7 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(string
 
 	form := formAction.Form()
 
-	onActionUpdate := func(path string) {
+	onActionUpdate := func(change api.Change, path string) {
 
 		bytes, err := json.Marshal(form)
 
@@ -66,7 +67,7 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(string
 		actionConfig.SetConfigData(config)
 
 		// we update the project
-		onUpdate(path)
+		onUpdate(change, path)
 
 	}
 
@@ -80,7 +81,7 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(string
 	)
 }
 
-func NewField(c Context, form *forms.Form, path []string, onUpdate func(string)) Element {
+func NewField(c Context, form *forms.Form, path []string, onUpdate func(api.Change, string)) Element {
 
 	name := Var(c, "")
 	error := Var(c, "")
@@ -105,7 +106,7 @@ func NewField(c Context, form *forms.Form, path []string, onUpdate func(string))
 			Validators: []forms.Validator{},
 		})
 
-		onUpdate(router.CurrentPathWithQuery())
+		onUpdate(api.Change{}, router.CurrentPathWithQuery())
 	})
 
 	var errorNotice Element
@@ -154,7 +155,7 @@ func typeOf(validator forms.Validator) string {
 	}
 }
 
-func Validators(c Context, field *forms.Field, path []string, onUpdate func(string), selected bool) Element {
+func Validators(c Context, field *forms.Field, path []string, onUpdate func(api.Change, string), selected bool) Element {
 
 	router := UseRouter(c)
 
@@ -213,7 +214,7 @@ func queryAction(c Context) string {
 	return ""
 }
 
-func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func(string)) Element {
+func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func(api.Change, string)) Element {
 
 	router := UseRouter(c)
 
@@ -233,7 +234,7 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 
 		form.Fields = newFields
 
-		onUpdate(router.CurrentPathWithQuery())
+		onUpdate(api.Change{}, router.CurrentPathWithQuery())
 	})
 
 	return Li(
@@ -270,7 +271,7 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 	)
 }
 
-func StringMapValidator(c Context, validator *forms.IsStringMap, path []string, onUpdate func(string)) Element {
+func StringMapValidator(c Context, validator *forms.IsStringMap, path []string, onUpdate func(api.Change, string)) Element {
 
 	return Div(
 		Style("flex-grow: 1;"),
@@ -283,7 +284,7 @@ func StringMapValidator(c Context, validator *forms.IsStringMap, path []string, 
 	)
 }
 
-func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(string)) Element {
+func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(api.Change, string)) Element {
 
 	router := UseRouter(c)
 
@@ -303,7 +304,7 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(st
 
 			field.Validators = append(field.Validators, validator)
 
-			onUpdate(router.CurrentPathWithQuery())
+			onUpdate(api.Change{}, router.CurrentPathWithQuery())
 		}
 
 		/*router.RedirectTo(PathWithQuery(router.CurrentPath(), map[string][]string{
@@ -343,7 +344,7 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(st
 	)
 }
 
-func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func(string)) Element {
+func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func(api.Change, string)) Element {
 
 	router := UseRouter(c)
 
@@ -429,7 +430,7 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 	)
 }
 
-func FormFields(c Context, form *forms.Form, onUpdate func(string), path []string) Element {
+func FormFields(c Context, form *forms.Form, onUpdate func(api.Change, string), path []string) Element {
 
 	fields := []Element{}
 

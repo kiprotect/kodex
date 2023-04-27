@@ -41,6 +41,8 @@ type ChangeRequest interface {
 	SetDescription(string) error
 	SetData(interface{}) error
 	Data() interface{}
+	Changes() []Change
+	SetChanges([]Change) error
 	SetStatus(ChangeRequestStatus) error
 	Status() ChangeRequestStatus
 	Reviews() ([]ChangeRequestReview, error)

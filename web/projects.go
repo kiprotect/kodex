@@ -1,13 +1,12 @@
 package web
 
 import (
-	"encoding/json"
+	"bytes"
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
 	ctrlHelpers "github.com/kiprotect/kodex/api/helpers/controller"
 	"github.com/kiprotect/kodex/web/ui"
-	"github.com/wI2L/jsondiff"
 	"strings"
 	"time"
 )
@@ -156,8 +155,6 @@ func NewProject() ElementFunction {
 	}
 }
 
-// Project details
-
 func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	error := Var(c, "")
@@ -186,6 +183,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	// we retrieve the project...
 	project := projectVar.Get()
 
+	msg := PersistentVar(c, api.Change{})
+
 	AddBreadcrumb(c, project.Name(), Fmt("/%s", Hex(project.ID())))
 
 	// we check that the user can access the project
@@ -208,8 +207,50 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		return nil
 	}
 
-	importedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
+	var content Element
 
+	if tab == "" {
+		tab = "actions"
+	}
+
+	changeRequestId := PersistentGlobalVar(c, "changeRequestId", "")
+
+	changeRequestVar := CachedVar(c, func() api.ChangeRequest {
+
+		if changeRequestId.Get() == "" {
+			return nil
+		}
+
+		// we retrieve the action configs of the project...
+		changeRequest, err := controller.ChangeRequest(Unhex(changeRequestId.Get()))
+
+		if err != nil {
+			error.Set(Fmt("cannot load change request: %v", err))
+			// to do: error handling
+			return nil
+		}
+
+		if !bytes.Equal(changeRequest.ObjectID(), project.ID()) {
+			error.Set(Fmt("change request not valid for this project"))
+			return nil
+		}
+
+		return changeRequest
+
+	})
+
+	changeRequest := changeRequestVar.Get()
+
+	if changeRequest != nil {
+
+		if changeRequest.Changes() != nil {
+			if err := api.ApplyChanges(exportedBlueprint, changeRequest.Changes()); err != nil {
+				error.Set(Fmt("cannot apply changes: %v", err))
+			}
+		}
+	}
+
+	importedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
 	importedProject, err := importedBlueprint.Create(ctrl, true)
 
 	if err != nil {
@@ -217,57 +258,32 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		return nil
 	}
 
-	var content Element
-
-	if tab == "" {
-		tab = "actions"
-	}
-	changeRequestId := PersistentGlobalVar(c, "changeRequestId", "")
-	msg := PersistentVar(c, jsondiff.Patch{})
-
 	AddBreadcrumb(c, strings.Title(tab), Fmt("/%s", tab))
 
-	Log.Info("msg: %v", msg.Get())
+	onUpdate := func(change api.Change, path string) {
 
-	onUpdate := func(path string) {
+		changeRequest := changeRequestVar.Get()
 
 		// we persist the project changes (if there were any)
 		Log.Error("Updating blueprint...")
 
-		lastBlueprint := exportedBlueprint
+		msg.Set(change)
 
-		exportedBlueprint, err = kodex.ExportBlueprint(importedProject)
+		changes := changeRequest.Changes()
 
-		if err != nil {
-			Log.Error("cannot export blueprint: %v", err)
-			error.Set(Fmt("export error: %v", err))
+		if changes == nil {
+			changes = []api.Change{change}
+		} else {
+			changes = append(changes, change)
+		}
+
+		if err := changeRequest.SetChanges(changes); err != nil {
+			error.Set(Fmt("cannot apply changes: %v", err))
 			return
 		}
 
-		patch, err := jsondiff.Compare(lastBlueprint, exportedBlueprint)
-
-		if err != nil {
-			error.Set(Fmt("Cannot create patch: %v", err))
-			return
-			// handle error
-		}
-
-		Log.Info("Patch: %v", patch)
-
-		error.Set(Fmt("Patch: %v", patch))
-
-		msg.Set(patch)
-
-		ep, _ := json.Marshal(exportedBlueprint)
-
-		Log.Info("Exported blueprint: %v", exportedBlueprint)
-
-		importedBlueprint = kodex.MakeBlueprint(exportedBlueprint)
-
-		// we store the blueprint again
-		if _, err := importedBlueprint.Create(controller, false); err != nil {
-			Log.Error("Error saving blueprint: %v (%s)", err, string(ep))
-			error.Set(Fmt("save error: %v (%s)", err, string(ep)))
+		if err := changeRequest.Save(); err != nil {
+			error.Set(Fmt("cannot save change request: %v", err))
 			return
 		}
 
@@ -277,7 +293,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	}
 
-	if changeRequestId.Get() == "" {
+	if changeRequestVar.Get() == nil {
 		onUpdate = nil
 	}
 
@@ -314,8 +330,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 				),
 			),
 		),
+		Fmt("Change: %v", msg.Get()),
 		Fmt("Change request: %s", changeRequestId.Get()),
-		Fmt("Diff: %v", msg.Get()),
 		If(error.Get() != "", ui.Message("danger", error.Get())),
 		ui.Tabs(
 			ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),

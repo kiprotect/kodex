@@ -4,12 +4,13 @@ import (
 	"bytes"
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/web/ui"
 	"time"
 	//	"github.com/kiprotect/kodex/api"
 )
 
-func Actions(project kodex.Project, onUpdate func(string)) ElementFunction {
+func Actions(project kodex.Project, onUpdate func(api.Change, string)) ElementFunction {
 
 	return func(c Context) Element {
 
@@ -25,7 +26,15 @@ func Actions(project kodex.Project, onUpdate func(string)) ElementFunction {
 	}
 }
 
-func ActionDetails(project kodex.Project, onUpdate func(string)) func(c Context, actionId string) Element {
+func withChangePath(changePath []api.PathElement, onUpdate func(api.Change, string)) func(api.Change, string) {
+	return func(change api.Change, path string) {
+		// we prepend the given path to the change
+		change.Path = append(changePath, change.Path...)
+		onUpdate(change, path)
+	}
+}
+
+func ActionDetails(project kodex.Project, onUpdate func(api.Change, string)) func(c Context, actionId string) Element {
 
 	return func(c Context, actionId string) Element {
 
@@ -46,10 +55,20 @@ func ActionDetails(project kodex.Project, onUpdate func(string)) func(c Context,
 
 		name := Var(c, action.Name())
 
+		changePath := []api.PathElement{
+			api.DirectPath("actions"),
+			api.ByIdPath("id", Hex(action.ID())),
+		}
+
 		onSubmit := Func(c, func() {
-			action.SetName(name.Get())
-			action.Save()
-			onUpdate(router.LastPath())
+
+			change := api.Change{
+				Op:    api.Update,
+				Path:  append(changePath, api.DirectPath("name")),
+				Value: name.Get(),
+			}
+
+			onUpdate(change, router.LastPath())
 		})
 
 		// edit the name of the action
@@ -68,7 +87,7 @@ func ActionDetails(project kodex.Project, onUpdate func(string)) func(c Context,
 						Button(
 							Class("bulma-button", "bulma-is-success"),
 							Type("submit"),
-							"Change",
+							"api.Change",
 						),
 					),
 				),
@@ -119,7 +138,7 @@ func ActionDetails(project kodex.Project, onUpdate func(string)) func(c Context,
 
 }
 
-func NewAction(project kodex.Project, onUpdate func(string)) ElementFunction {
+func NewAction(project kodex.Project, onUpdate func(api.Change, string)) ElementFunction {
 	return func(c Context) Element {
 
 		name := Var(c, "")
@@ -144,7 +163,7 @@ func NewAction(project kodex.Project, onUpdate func(string)) ElementFunction {
 			if err := action.Save(); err != nil {
 				error.Set("Cannot save action")
 			} else {
-				onUpdate(router.CurrentPath())
+				onUpdate(api.Change{}, router.CurrentPath())
 			}
 		})
 
@@ -188,7 +207,7 @@ func NewAction(project kodex.Project, onUpdate func(string)) ElementFunction {
 	}
 }
 
-func ActionsList(project kodex.Project, onUpdate func(string)) ElementFunction {
+func ActionsList(project kodex.Project, onUpdate func(api.Change, string)) ElementFunction {
 
 	return func(c Context) Element {
 
