@@ -63,6 +63,10 @@ func ByIdPath(identifier string, value any) PathElement {
 func ApplyChanges(object map[string]any, changes []Change) error {
 	for _, change := range changes {
 
+		if len(change.Path) < 1 {
+			return fmt.Errorf("invalid change path")
+		}
+
 		var obj, previousObj any
 
 		obj = object

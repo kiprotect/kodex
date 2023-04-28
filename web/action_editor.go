@@ -463,11 +463,13 @@ func FormFields(c Context, form *forms.Form, onUpdate func(api.Change, string), 
 				),
 			),
 			fields,
-			If(onUpdate != nil,
-				Li(
-					Class("kip-item"),
-					NewField(c, form, path, onUpdate),
-				),
+			DoIf(onUpdate != nil,
+				func() Element {
+					return Li(
+						Class("kip-item"),
+						NewField(c, form, path, onUpdate),
+					)
+				},
 			),
 		),
 	)
