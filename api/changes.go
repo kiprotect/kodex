@@ -114,7 +114,7 @@ func prependPath(changes []Change, pathElements []PathElement) []Change {
 }
 
 // Performs a diff on two maps
-func diffMap(a, b map[string]any) []Change {
+func diffMap(a, b map[string]any, options DiffOptions) []Change {
 
 	changes := make([]Change, 0)
 
@@ -150,7 +150,7 @@ func diffMap(a, b map[string]any) []Change {
 		}
 
 		// we diff the changes between a & b, prepend the current path and return them
-		changes = append(changes, prependPath(diffAny(va, vb), []PathElement{DirectPath(ka)})...)
+		changes = append(changes, prependPath(diffAny(va, vb, options), []PathElement{DirectPath(ka)})...)
 
 	}
 
@@ -158,47 +158,79 @@ func diffMap(a, b map[string]any) []Change {
 }
 
 // Performs a diff on two arrays
-func diffArray(a, b []any) []Change {
+func diffArray(a, b []any, options DiffOptions) []Change {
 
 	changes := make([]Change, 0)
 
 	// we check if both arrays have maps with identifiers
 
-	withIds := true
+	withIds := false
 
-	for _, va := range a {
-		if mapVa, ok := va.(map[string]any); ok {
-			if _, ok := mapVa["id"]; !ok {
-				withIds = false
-				break
-			}
-		} else {
-			withIds = false
-			break
-		}
-	}
+	var identifier string
 
-	if withIds {
-		for _, vb := range b {
-			if mapVb, ok := vb.(map[string]any); ok {
-				if _, ok := mapVb["id"]; !ok {
-					withIds = false
-					break
+identifiers:
+	for _, identifier = range options.Identifiers {
+
+		for _, va := range a {
+			if mapVa, ok := va.(map[string]any); ok {
+				if _, ok := mapVa[identifier]; !ok {
+					continue identifiers
 				}
 			} else {
-				withIds = false
-				break
+				continue identifiers
 			}
 		}
+
+		for _, vb := range b {
+			if mapVb, ok := vb.(map[string]any); ok {
+				if _, ok := mapVb[identifier]; !ok {
+					continue identifiers
+				}
+			} else {
+				continue identifiers
+			}
+		}
+
+		// we found a working identifier!
+		withIds = true
+		break
+
 	}
 
-	equal := func(a, b any) bool {
+	fmt.Println(withIds)
+
+	similarity := func(a, b any) int {
+
+		mapA, okA := a.(map[string]any)
+		mapB, okB := b.(map[string]any)
+
 		if withIds {
-			mapA := a.(map[string]any)
-			mapB := b.(map[string]any)
-			return mapA["id"] == mapB["id"]
+			if mapA[identifier] == mapB[identifier] {
+				return 0
+			}
+			return 1
 		}
-		return len(diffAny(a, b)) == 0
+
+		d := diffAny(a, b, options)
+
+		if okA && okB {
+
+			innerChanges := 0
+
+			for _, change := range d {
+				if len(change.Path) == 1 {
+					innerChanges += 1
+				}
+			}
+
+			if innerChanges == 0 && len(d) > 0 {
+				return 1
+			}
+
+			return innerChanges
+		}
+
+		return len(d)
 	}
 
 	// - we find removed objects and add 'Remove' changes for them
@@ -210,32 +242,40 @@ func diffArray(a, b []any) []Change {
 
 	am := make([]any, 0, len(a))
 
-	usedObjects := make(map[int]bool)
+	bToAm := make(map[int]int)
 	removedObjects := 0
 
 	// we add 'Remove' changes for removed objects
 	for i, va := range a {
-		found := false
+
+		bestSimilarity := 0
+		bestJ := -1
+
 		for j, vb := range b {
 
-			if _, ok := usedObjects[j]; ok {
+			if _, ok := bToAm[j]; ok {
 				continue
 			}
 
-			if equal(va, vb) {
-				found = true
-				usedObjects[j] = true
-				am = append(am, va)
-				break
+			s := similarity(va, vb)
+
+			if bestJ == -1 || s < bestSimilarity {
+				bestJ = j
+				bestSimilarity = s
 			}
 		}
 
-		if !found {
+		fmt.Println(bestJ, bestSimilarity, va, b[bestJ])
+
+		if bestJ != -1 && bestSimilarity == 0 {
+			bToAm[bestJ] = len(am)
+			am = append(am, va)
+		} else {
 
 			var path []PathElement
 
 			if withIds {
-				path = []PathElement{ByIdPath("id", va.(map[string]any)["id"])}
+				path = []PathElement{ByIdPath(identifier, va.(map[string]any)[identifier])}
 			} else {
 				path = []PathElement{ArrayPath(i - removedObjects)}
 			}
@@ -252,27 +292,14 @@ func diffArray(a, b []any) []Change {
 		}
 	}
 
-	usedObjects = make(map[int]bool)
-
 	// we add 'Insert' changes for new objects
 	for i, vb := range b {
 
-		found := false
+		if _, ok := bToAm[i]; !ok {
 
-		for j, va := range a {
-
-			if _, ok := usedObjects[j]; ok {
-				continue
+			if i >= len(am) {
+				i = len(am) - 1
 			}
-
-			if equal(va, vb) {
-				found = true
-				usedObjects[j] = true
-				break
-			}
-		}
-
-		if !found {
 
 			// this object was added, we add the corresponding change
 			changes = append(changes, Change{
@@ -281,12 +308,15 @@ func diffArray(a, b []any) []Change {
 				Path:  []PathElement{ArrayPath(i)},
 			})
 
-			if i >= len(am) {
-				am = append(am, vb)
-			} else {
-				// we insert the added object to the working list
-				am = append(am[:i+1], am[i:]...)
-				am[i] = vb
+			// we insert the added object to the working list
+			am = append(am[:i+1], am[i:]...)
+			am[i] = vb
+			bToAm[i] = i
+			for bi, j := range bToAm {
+				// if j >= i it will increase by one
+				if j >= i {
+					bToAm[bi] = j + 1
+				}
 			}
 
 		}
@@ -294,17 +324,18 @@ func diffArray(a, b []any) []Change {
 
 	// now only the order of objects in the working list and b should differ
 
-	for i, vb := range b {
+	amToB := make(map[int]int)
 
-		var j int
+	for i, j := range bToAm {
+		amToB[j] = i
+	}
 
-		for j = i; j < len(am); j++ {
-			if equal(vb, am[j]) {
-				break
-			}
-		}
+	for i, _ := range b {
+
+		j := bToAm[i]
 
 		if i != j {
+
 			// element is at position i but should be at j, we swap it
 			changes = append(changes, Change{
 				Op:    Swap,
@@ -314,6 +345,10 @@ func diffArray(a, b []any) []Change {
 
 			// we swap the items in the working list
 			am[i], am[j] = am[j], am[i]
+
+			// the value that was at j > i will now be at i
+			bToAm[amToB[i]] = j
+
 		}
 	}
 
@@ -323,12 +358,12 @@ func diffArray(a, b []any) []Change {
 		var path []PathElement
 
 		if withIds {
-			path = []PathElement{ByIdPath("id", va.(map[string]any)["id"])}
+			path = []PathElement{ByIdPath(identifier, va.(map[string]any)[identifier])}
 		} else {
 			path = []PathElement{ArrayPath(i)}
 		}
 
-		if elementChanges := diffAny(va, b[i]); len(elementChanges) > 0 {
+		if elementChanges := diffAny(va, b[i], options); len(elementChanges) > 0 {
 			changes = append(changes, prependPath(elementChanges, path)...)
 		}
 
@@ -337,14 +372,14 @@ func diffArray(a, b []any) []Change {
 	return changes
 }
 
-func diffAny(a, b any) []Change {
+func diffAny(a, b any, options DiffOptions) []Change {
 
 	taMap, okA := a.(map[string]any)
 	tbMap, okB := b.(map[string]any)
 
 	if okA && okB {
 		// two maps, we diff them
-		return diffMap(taMap, tbMap)
+		return diffMap(taMap, tbMap, options)
 	}
 
 	taArray, okA := a.([]any)
@@ -352,7 +387,7 @@ func diffAny(a, b any) []Change {
 
 	if okA && okB {
 		// two array, we diff them
-		return diffArray(taArray, tbArray)
+		return diffArray(taArray, tbArray, options)
 	}
 
 	if a != b {
@@ -370,14 +405,27 @@ func diffAny(a, b any) []Change {
 	return nil
 }
 
+type DiffOptions struct {
+	Identifiers []string
+}
+
+func DiffWithOptions(a, b map[string]any, options DiffOptions) []Change {
+	return diffMap(a, b, options)
+}
+
 // Returns the difference between two data structures as a sequence of changes
 func Diff(a, b map[string]any) []Change {
-	return diffMap(a, b)
+	return diffMap(a, b, DiffOptions{Identifiers: []string{"id"}})
 }
 
 // Applies a sequence of changes to an object
 func ApplyChanges(object map[string]any, changes []Change) error {
+
 	for _, change := range changes {
+
+		makeErr := func(err error) error {
+			return fmt.Errorf("%v: %v", change, err)
+		}
 
 		if len(change.Path) < 1 {
 			return fmt.Errorf("invalid change path")
@@ -401,7 +449,7 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 			// we expect a map with a given key that we can descend into...
 			case Direct:
 				if mapObj, ok := obj.(map[string]any); !ok {
-					return fmt.Errorf("expected a map")
+					return makeErr(fmt.Errorf("direct: expected a map for path %v, got %T", pathElement, obj))
 				} else if subObj, ok := mapObj[pathElement.Name]; !ok {
 					return fmt.Errorf("unknown key: %s", pathElement.Name)
 				} else {
@@ -414,7 +462,7 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 				} else if len(arrayObj) <= pathElement.Index {
 					return fmt.Errorf("array element out of bounds")
 				} else {
-					obj = arrayObj
+					obj = arrayObj[pathElement.Index]
 				}
 			// we expect and array consisting of map elements that we can descend into...
 			case ById:
@@ -424,7 +472,7 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 					found := false
 					for _, arrayItem := range arrayObj {
 						if mapObj, ok := arrayItem.(map[string]any); !ok {
-							return fmt.Errorf("expected a map")
+							return fmt.Errorf("byID: expected a map")
 						} else if idValue, ok := mapObj[pathElement.Identifier]; !ok {
 							return fmt.Errorf("identifier missing")
 						} else if idValue == pathElement.Value {

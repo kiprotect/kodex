@@ -9,6 +9,51 @@ type TestCase struct {
 	Expected []any
 }
 
+func TestDeepMapDiff(t *testing.T) {
+	a := map[string]any{
+		"fields": []any{
+			map[string]any{
+				"name": "bar",
+				"validators": []any{
+					map[string]any{
+						"type": "IsStringMap",
+					},
+				},
+			},
+		},
+	}
+
+	b := map[string]any{
+		"fields": []any{
+			map[string]any{
+				"name": "bar",
+				"validators": []any{
+					map[string]any{
+						"type": "IsStringMap",
+					},
+					map[string]any{
+						"type": "IsString",
+					},
+				},
+			},
+		},
+	}
+
+	changes := Diff(a, b)
+
+	if len(changes) != 1 {
+		t.Fatalf("expected 1 change, got %d - %v", len(changes), changes)
+	}
+
+	if err := ApplyChanges(a, changes); err != nil {
+		t.Fatal(err, changes)
+	}
+
+	if newChanges := Diff(a, b); len(newChanges) != 0 {
+		t.Fatalf("should be identical: %v - %v - %v", a, b, changes)
+	}
+}
+
 func TestMapDiff(t *testing.T) {
 	a := map[string]any{
 		"foo": map[string]any{"bum": 1},
@@ -16,15 +61,15 @@ func TestMapDiff(t *testing.T) {
 	}
 
 	b := map[string]any{
-		"foo": map[string]any{"bum": 2},
-		"baz": []any{"test", 1, 2, 3, "foo"},
+		"foo":    map[string]any{"bum": 2},
+		"baz":    []any{"test", 1, 2, 3, "foo"},
 		"number": 4,
 	}
 
 	changes := Diff(a, b)
 
 	if len(changes) != 6 {
-		t.Fatalf("expected 5 changes, got %d - %v", len(changes), changes)
+		t.Fatalf("expected 6 changes, got %d - %v", len(changes), changes)
 	}
 
 	if err := ApplyChanges(a, changes); err != nil {
@@ -36,6 +81,34 @@ func TestMapDiff(t *testing.T) {
 	}
 }
 
+func TestDiffWithDuplicateIds(t *testing.T) {
+
+	// the diff library does not check for ID uniqueness...
+
+	a := map[string]any{
+		"foo": []any{map[string]any{"id": "a"}, map[string]any{"id": "a"}, map[string]any{"id": "c"}, map[string]any{"id": "c"}},
+	}
+
+	b := map[string]any{
+		"foo": []any{map[string]any{"id": "a", "baz": "bam"}, map[string]any{"id": "a", "buz": "bar"}, map[string]any{"id": "c"}},
+	}
+
+	changes := Diff(a, b)
+
+	if len(changes) != 3 {
+		t.Fatalf("expected 3 changes, got %d - %v", len(changes), changes)
+	}
+
+	if err := ApplyChanges(a, changes); err != nil {
+		t.Fatal(err)
+	}
+
+	if changes := Diff(a, b); len(changes) == 0 {
+		// we expect this to fail...
+		t.Fatalf("should not be identical - %v vs %v", a, b)
+	}
+
+}
 func TestDiffWithIds(t *testing.T) {
 	a := map[string]any{
 		"foo": []any{map[string]any{"id": "a"}, map[string]any{"id": "b"}, map[string]any{"id": "c"}},
@@ -55,10 +128,8 @@ func TestDiffWithIds(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	changes = Diff(a, b)
-
-	if len(changes) != 0 {
-		t.Fatalf("should be identical - %v vs %v", a, b)
+	if newChanges := Diff(a, b); len(newChanges) != 0 {
+		t.Fatalf("should be identical - %v vs %v - %v", a, b, newChanges)
 	}
 
 }

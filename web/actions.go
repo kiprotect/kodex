@@ -54,22 +54,29 @@ func ActionDetails(project kodex.Project, onUpdate func(api.Change, string)) fun
 		router := UseRouter(c)
 
 		name := Var(c, action.Name())
-
-		changePath := []api.PathElement{
-			api.DirectPath("actions"),
-			api.ByIdPath("id", Hex(action.ID())),
-		}
+		error := Var(c, "")
 
 		onSubmit := Func(c, func() {
 
-			change := api.Change{
-				Op:    api.Update,
-				Path:  append(changePath, api.DirectPath("name")),
-				Value: name.Get(),
+			if err := action.SetName(name.Get()); err != nil {
+				error.Set(Fmt("cannot set name: %v", err))
 			}
 
-			onUpdate(change, router.LastPath())
+			if err := action.Save(); err != nil {
+				error.Set(Fmt("cannot save: %v", err))
+			}
+
+			onUpdate(api.Change{}, router.LastPath())
 		})
+
+		var errorNotice Element
+
+		if error.Get() != "" {
+			errorNotice = P(
+				Class("bulma-help", "bulma-is-danger"),
+				error.Get(),
+			)
+		}
 
 		// edit the name of the action
 		editActionName := func(c Context) Element {
@@ -78,6 +85,7 @@ func ActionDetails(project kodex.Project, onUpdate func(api.Change, string)) fun
 				OnSubmit(onSubmit),
 				Div(
 					Class("bulma-field", "bulma-has-addons"),
+					errorNotice,
 					P(
 						Class("bulma-control"),
 						Input(Class("bulma-control", "bulma-input"), Value(name)),

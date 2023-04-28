@@ -183,7 +183,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	// we retrieve the project...
 	project := projectVar.Get()
 
-	msg := PersistentVar(c, api.Change{})
+	msg := PersistentVar(c, []api.Change{})
 
 	AddBreadcrumb(c, project.Name(), Fmt("/%s", Hex(project.ID())))
 
@@ -267,14 +267,23 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		// we persist the project changes (if there were any)
 		Log.Error("Updating blueprint...")
 
-		msg.Set(change)
+		changedBlueprint, err := kodex.ExportBlueprint(importedProject)
 
-		changes := changeRequest.Changes()
+		if err != nil {
+			error.Set(Fmt("cannot export changes: %v", err))
+			return
+		}
 
-		if changes == nil {
-			changes = []api.Change{change}
-		} else {
-			changes = append(changes, change)
+		changes := api.DiffWithOptions(exportedBlueprint, changedBlueprint, api.DiffOptions{
+			Identifiers: []string{"id", "name"},
+		})
+
+		msg.Set(changes)
+
+		existingChanges := changeRequest.Changes()
+
+		if existingChanges != nil {
+			changes = append(existingChanges, changes...)
 		}
 
 		if err := changeRequest.SetChanges(changes); err != nil {
