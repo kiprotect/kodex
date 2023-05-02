@@ -134,6 +134,32 @@ func TestDiffWithIds(t *testing.T) {
 
 }
 
+func TestAdvancedEquality(t *testing.T) {
+	a := map[string]any{
+		"foo": []any{1, map[string]any{"blub": "blab"}, map[string]any{"blip": "blop"}, "aka", 5, 6},
+	}
+
+	b := map[string]any{
+		"foo": []any{"aka", "aka", map[string]any{"blom": "blab", "bleb": "blob"}, map[string]any{"fooz": "bar"}, 4, "mama"},
+	}
+
+	changes := Diff(a, b)
+
+	if len(changes) != 10 {
+		t.Fatalf("expected 10 changes, got %d - %v", len(changes), changes)
+	}
+
+	if err := ApplyChanges(a, changes); err != nil {
+		t.Fatalf("%v, %v", err, changes)
+	}
+
+	newChanges := Diff(a, b)
+
+	if len(newChanges) != 0 {
+		t.Fatalf("should be identical - %v vs %v . %v", a, b, changes)
+	}
+
+}
 func TestDiffWithoutIds(t *testing.T) {
 	a := map[string]any{
 		"foo": []any{1, map[string]any{"blub": "blab"}, map[string]any{"blip": "blop"}, "aka", 5, 6},

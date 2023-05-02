@@ -43,6 +43,11 @@ func (p PathElement) String() string {
 	return "unknown"
 }
 
+type ChangeSet struct {
+	Description string   `json:"description"`
+	Changes     []Change `json:"changes"`
+}
+
 type Change struct {
 	Op          Op            `json:"op"`
 	Value       any           `json:"value"`
@@ -199,38 +204,52 @@ identifiers:
 
 	fmt.Println(withIds)
 
-	similarity := func(a, b any) int {
+	equal := func(a, b any) bool {
 
 		mapA, okA := a.(map[string]any)
 		mapB, okB := b.(map[string]any)
 
 		if withIds {
+
 			if mapA[identifier] == mapB[identifier] {
-				return 0
+				return true
 			}
-			return 1
+			return false
 		}
 
-		d := diffAny(a, b, options)
+		diff := diffAny(a, b, options)
 
-		if okA && okB {
-
-			innerChanges := 0
-
-			for _, change := range d {
-				if len(change.Path) == 1 {
-					innerChanges += 1
-				}
-			}
-
-			if innerChanges == 0 && len(d) > 0 {
-				return 1
-			}
-
-			return innerChanges
+		if !okA || !okB {
+			// only exactly equal objects are considered equal
+			// if there are not maps
+			return len(diff) == 0
 		}
 
-		return len(d)
+		topLevelChanges := 0
+		innerChanges := 0
+
+		for _, change := range diff {
+			if len(change.Path) == 1 {
+				// this is a change in a top-level property...
+				topLevelChanges += 1
+			} else {
+				innerChanges += 1
+			}
+		}
+
+		if topLevelChanges <= 1 {
+			// only one or zero top-level changes
+			return true
+		}
+
+		if topLevelChanges < 2 && innerChanges < 2 {
+			// only a few top level & inner changes
+			return true
+		}
+
+		// too many changes
+		return false
+
 	}
 
 	// - we find removed objects and add 'Remove' changes for them
@@ -248,27 +267,27 @@ identifiers:
 	// we add 'Remove' changes for removed objects
 	for i, va := range a {
 
-		bestSimilarity := 0
-		bestJ := -1
+		found := false
 
-		for j, vb := range b {
+		var j int
+		var vb any
+
+		for j, vb = range b {
 
 			if _, ok := bToAm[j]; ok {
+				// we've already used this element
 				continue
 			}
 
-			s := similarity(va, vb)
-
-			if bestJ == -1 || s < bestSimilarity {
-				bestJ = j
-				bestSimilarity = s
+			if equal(va, vb) {
+				found = true
+				break
 			}
+
 		}
 
-		fmt.Println(bestJ, bestSimilarity, va, b[bestJ])
-
-		if bestJ != -1 && bestSimilarity == 0 {
-			bToAm[bestJ] = len(am)
+		if found {
+			bToAm[j] = len(am)
 			am = append(am, va)
 		} else {
 
@@ -297,10 +316,6 @@ identifiers:
 
 		if _, ok := bToAm[i]; !ok {
 
-			if i >= len(am) {
-				i = len(am) - 1
-			}
-
 			// this object was added, we add the corresponding change
 			changes = append(changes, Change{
 				Op:    Insert,
@@ -308,13 +323,18 @@ identifiers:
 				Path:  []PathElement{ArrayPath(i)},
 			})
 
+			if i >= len(am) {
+				bToAm[i] = len(am)
+				am = append(am, vb)
+			} else {
+				am = append(am[:i+1], am[i:]...)
+				am[i] = vb
+				bToAm[i] = i
+			}
+
 			// we insert the added object to the working list
-			am = append(am[:i+1], am[i:]...)
-			am[i] = vb
-			bToAm[i] = i
 			for bi, j := range bToAm {
-				// if j >= i it will increase by one
-				if j >= i {
+				if j > i {
 					bToAm[bi] = j + 1
 				}
 			}
@@ -342,6 +362,8 @@ identifiers:
 				Value: j, // target
 				Path:  []PathElement{ArrayPath(i)},
 			})
+
+			fmt.Println(i, j, am)
 
 			// we swap the items in the working list
 			am[i], am[j] = am[j], am[i]
@@ -416,6 +438,49 @@ func DiffWithOptions(a, b map[string]any, options DiffOptions) []Change {
 // Returns the difference between two data structures as a sequence of changes
 func Diff(a, b map[string]any) []Change {
 	return diffMap(a, b, DiffOptions{Identifiers: []string{"id"}})
+}
+
+type Copyable interface {
+	Copy() any
+}
+
+func copy(a any) any {
+	if ac, ok := a.(Copyable); ok {
+		return ac.Copy()
+	}
+
+	switch va := a.(type) {
+	case map[string]any:
+		return copyMap(va)
+	case []any:
+		return copyArray(va)
+	default:
+		// we can't copy this...
+		return a
+	}
+
+}
+
+func copyMap(a map[string]any) map[string]any {
+
+	ac := make(map[string]any)
+
+	for k, v := range a {
+		ac[k] = copy(v)
+	}
+
+	return ac
+}
+
+func copyArray(a []any) []any {
+
+	ac := make([]any, len(a))
+
+	for i, v := range a {
+		ac[i] = copy(v)
+	}
+
+	return ac
 }
 
 // Applies a sequence of changes to an object
@@ -561,12 +626,14 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 				}
 
 				index := lastPathElement.Index
+				// we copy the value before inserting it...
+				value := copy(change.Value)
 
 				if index == -1 || index == len(arrayObj) {
-					arrayObj = append(arrayObj, change.Value)
+					arrayObj = append(arrayObj, value)
 				} else {
 					arrayObj = append(arrayObj[:index+1], arrayObj[index:]...)
-					arrayObj[index] = change.Value
+					arrayObj[index] = value
 				}
 
 				previousMapObj[beforeLastPathElement.Name] = arrayObj
@@ -647,6 +714,9 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 		// we expect a map element and a 'Direct' path element
 		case Update:
 
+			// we copy the value before updating it...
+			value := copy(change.Value)
+
 			if lastPathElement.PathType != Direct {
 				return fmt.Errorf("expected a direct path")
 			}
@@ -654,7 +724,7 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 			if mapObj, ok := obj.(map[string]any); !ok {
 				return fmt.Errorf("object is not a map")
 			} else {
-				mapObj[lastPathElement.Name] = change.Value
+				mapObj[lastPathElement.Name] = value
 			}
 		}
 	}
