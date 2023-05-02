@@ -95,7 +95,7 @@ func ActionDetails(project kodex.Project, onUpdate func(api.Change, string)) fun
 						Button(
 							Class("bulma-button", "bulma-is-success"),
 							Type("submit"),
-							"api.Change",
+							"Change",
 						),
 					),
 				),

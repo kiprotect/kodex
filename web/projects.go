@@ -183,7 +183,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	// we retrieve the project...
 	project := projectVar.Get()
 
-	msg := PersistentVar(c, []api.Change{})
+	msg := PersistentVar(c, []api.ChangeSet{})
 
 	AddBreadcrumb(c, project.Name(), Fmt("/%s", Hex(project.ID())))
 
@@ -244,9 +244,14 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	if changeRequest != nil {
 
 		if changeRequest.Changes() != nil {
-			if err := api.ApplyChanges(exportedBlueprint, changeRequest.Changes()); err != nil {
-				error.Set(Fmt("cannot apply changes: %v", err))
+			msg.Set(changeRequest.Changes())
+
+			for _, changeSet := range changeRequest.Changes() {
+				if err := api.ApplyChanges(exportedBlueprint, changeSet.Changes); err != nil {
+					error.Set(Fmt("cannot apply changes: %v", err))
+				}
 			}
+
 		}
 	}
 
@@ -278,15 +283,18 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			Identifiers: []string{"id", "name"},
 		})
 
-		msg.Set(changes)
+		// msg.Set(changes)
 
-		existingChanges := changeRequest.Changes()
+		changeSets := changeRequest.Changes()
 
-		if existingChanges != nil {
-			changes = append(existingChanges, changes...)
+		changeSet := api.ChangeSet{
+			Description: "foo",
+			Changes:     changes,
 		}
 
-		if err := changeRequest.SetChanges(changes); err != nil {
+		changeSets = append(changeSets, changeSet)
+
+		if err := changeRequest.SetChanges(changeSets); err != nil {
 			error.Set(Fmt("cannot apply changes: %v", err))
 			return
 		}

@@ -31,7 +31,7 @@ type InMemoryChangeRequest struct {
 	title       string
 	description string
 	status      api.ChangeRequestStatus
-	changes     []api.Change
+	changes     []api.ChangeSet
 	objectID    []byte
 	id          []byte
 	reviews     map[string]api.ChangeRequestReview
@@ -45,7 +45,7 @@ func MakeInMemoryChangeRequest(objectType string, objectID []byte, user api.User
 		BaseChangeRequest: api.BaseChangeRequest{
 			Creator_: user,
 		},
-		changes:    []api.Change{},
+		changes:    []api.ChangeSet{},
 		objectID:   objectID,
 		objectType: objectType,
 		controller: controller,
@@ -55,11 +55,11 @@ func MakeInMemoryChangeRequest(objectType string, objectID []byte, user api.User
 	return inMemoryChangeRequest
 }
 
-func (c *InMemoryChangeRequest) Changes() []api.Change {
+func (c *InMemoryChangeRequest) Changes() []api.ChangeSet {
 	return c.changes
 }
 
-func (c *InMemoryChangeRequest) SetChanges(changes []api.Change) error {
+func (c *InMemoryChangeRequest) SetChanges(changes []api.ChangeSet) error {
 	c.changes = changes
 	return nil
 }
