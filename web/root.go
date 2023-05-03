@@ -129,10 +129,11 @@ func Root(controller api.Controller) (func(c Context) Element, error) {
 				Head(
 					Meta(Charset("utf-8")),
 					Title(MainTitle(c)),
+					Link(Rel("preload"), Href("/static/main.css"), As("style")),
 					// Link(Rel("apple-touch-icon"), Sizes("180x180"), Href("/icons/apple-touch-icon.png")),
 					// Link(Rel("icon"), Type("image/png"), Sizes("32x32"), Href("/icons/favicon-32x32.png")),
 					Link(Rel("stylesheet"), Href("/static/main.css")),
-					Script(Src("/static/gospel.js"), Type("module")),
+					Script(Defer(), Src("/static/gospel.js"), Type("module")),
 				),
 				Body(
 					Class("kip-fonts", "bulma-body"),
