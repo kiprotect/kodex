@@ -51,3 +51,4 @@ bench: dep
 
 clean:
 	@go clean $(GOFLAGS) -i ./...
+	find plugins -name "*.so" -exec rm {} \;
