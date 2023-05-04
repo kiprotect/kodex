@@ -109,6 +109,7 @@ func TestDiffWithDuplicateIds(t *testing.T) {
 	}
 
 }
+
 func TestDiffWithIds(t *testing.T) {
 	a := map[string]any{
 		"foo": []any{map[string]any{"id": "a"}, map[string]any{"id": "b"}, map[string]any{"id": "c"}},
@@ -130,6 +131,129 @@ func TestDiffWithIds(t *testing.T) {
 
 	if newChanges := Diff(a, b); len(newChanges) != 0 {
 		t.Fatalf("should be identical - %v vs %v - %v", a, b, newChanges)
+	}
+
+}
+
+func TestDiffWithIdsAndSwap(t *testing.T) {
+	a := []any{
+		map[string]any{
+			"id": "a",
+		},
+		map[string]any{
+			"id": "b",
+		},
+		map[string]any{
+			"id": "c",
+		},
+	}
+
+	b := []any{
+		map[string]any{
+			"id": "c",
+		},
+		map[string]any{
+			"id": "a",
+		},
+		map[string]any{
+			"id": "d",
+		},
+		map[string]any{
+			"id": "b",
+		},
+	}
+
+	changes := Diff(a, b)
+
+	if len(changes) != 3 {
+		t.Fatalf("expected 3 changes, got %d - %v", len(changes), changes)
+	}
+
+	ap, err := ApplyChangesWithObject(a, changes)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if newChanges := Diff(ap, b); len(newChanges) != 0 {
+		t.Fatalf("should be identical - %v vs %v - %v (%v)", ap, b, newChanges, changes)
+	}
+
+}
+
+func TestDiffWithIdsAndSwapAndRemoves(t *testing.T) {
+	a := []any{
+		map[string]any{
+			"id": "a",
+		},
+		map[string]any{
+			"id": "b",
+		},
+		map[string]any{
+			"id": "c",
+		},
+	}
+
+	b := []any{
+		map[string]any{
+			"id": "d",
+		},
+	}
+
+	changes := Diff(a, b)
+
+	if len(changes) != 4 {
+		t.Fatalf("expected 3 changes, got %d - %v", len(changes), changes)
+	}
+
+	ap, err := ApplyChangesWithObject(a, changes)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if newChanges := Diff(ap, b); len(newChanges) != 0 {
+		t.Fatalf("should be identical - %v vs %v - %v (%v)", ap, b, newChanges, changes)
+	}
+
+}
+
+func TestDiffWithIdsAndSwapAndRemove(t *testing.T) {
+	a := []any{
+		map[string]any{
+			"id": "a",
+		},
+		map[string]any{
+			"id": "b",
+		},
+		map[string]any{
+			"id": "c",
+		},
+	}
+
+	b := []any{
+		map[string]any{
+			"id": "d",
+		},
+		map[string]any{
+			"id": "a",
+		},
+	}
+
+	changes := Diff(a, b)
+
+	if len(changes) != 3 {
+		t.Fatalf("expected 3 changes, got %d - %v", len(changes), changes)
+	}
+
+	ap, err := ApplyChangesWithObject(a, changes)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if newChanges := Diff(ap, b); len(newChanges) != 0 {
+		t.Fatalf("should be identical - %v vs %v - %v (%v)", ap, b, newChanges, changes)
 	}
 
 }
@@ -171,8 +295,8 @@ func TestDiffWithoutIds(t *testing.T) {
 
 	changes := Diff(a, b)
 
-	if len(changes) != 10 {
-		t.Fatalf("expected 10 changes, got %d - %v", len(changes), changes)
+	if len(changes) != 9 {
+		t.Fatalf("expected 9 changes, got %d - %v", len(changes), changes)
 	}
 
 	if err := ApplyChanges(a, changes); err != nil {

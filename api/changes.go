@@ -46,6 +46,7 @@ func (p PathElement) String() string {
 type ChangeSet struct {
 	Description string   `json:"description"`
 	Changes     []Change `json:"changes"`
+	Data        any      `json:"data"`
 }
 
 type Change struct {
@@ -202,8 +203,6 @@ identifiers:
 
 	}
 
-	fmt.Println(withIds)
-
 	equal := func(a, b any) bool {
 
 		mapA, okA := a.(map[string]any)
@@ -323,6 +322,12 @@ identifiers:
 				Path:  []PathElement{ArrayPath(i)},
 			})
 
+			for bi, j := range bToAm {
+				if j >= i {
+					bToAm[bi] = j + 1
+				}
+			}
+
 			if i >= len(am) {
 				bToAm[i] = len(am)
 				am = append(am, vb)
@@ -330,13 +335,6 @@ identifiers:
 				am = append(am[:i+1], am[i:]...)
 				am[i] = vb
 				bToAm[i] = i
-			}
-
-			// we insert the added object to the working list
-			for bi, j := range bToAm {
-				if j > i {
-					bToAm[bi] = j + 1
-				}
 			}
 
 		}
@@ -350,9 +348,7 @@ identifiers:
 		amToB[j] = i
 	}
 
-	for i, _ := range b {
-
-		j := bToAm[i]
+	for i, j := range bToAm {
 
 		if i != j {
 
@@ -363,13 +359,11 @@ identifiers:
 				Path:  []PathElement{ArrayPath(i)},
 			})
 
-			fmt.Println(i, j, am)
+			// we update the mapping
+			bToAm[amToB[i]] = j
 
 			// we swap the items in the working list
 			am[i], am[j] = am[j], am[i]
-
-			// the value that was at j > i will now be at i
-			bToAm[amToB[i]] = j
 
 		}
 	}
@@ -431,13 +425,13 @@ type DiffOptions struct {
 	Identifiers []string
 }
 
-func DiffWithOptions(a, b map[string]any, options DiffOptions) []Change {
-	return diffMap(a, b, options)
+func DiffWithOptions(a, b any, options DiffOptions) []Change {
+	return diffAny(a, b, options)
 }
 
 // Returns the difference between two data structures as a sequence of changes
-func Diff(a, b map[string]any) []Change {
-	return diffMap(a, b, DiffOptions{Identifiers: []string{"id"}})
+func Diff(a, b any) []Change {
+	return diffAny(a, b, DiffOptions{Identifiers: []string{"id"}})
 }
 
 type Copyable interface {
@@ -483,17 +477,22 @@ func copyArray(a []any) []any {
 	return ac
 }
 
+func ApplyChanges(object any, changes []Change) error {
+	_, err := ApplyChangesWithObject(object, changes)
+	return err
+}
+
 // Applies a sequence of changes to an object
-func ApplyChanges(object map[string]any, changes []Change) error {
+func ApplyChangesWithObject(object any, changes []Change) (any, error) {
 
 	for _, change := range changes {
 
-		makeErr := func(err error) error {
-			return fmt.Errorf("%v: %v", change, err)
+		makeErr := func(err error) (any, error) {
+			return nil, fmt.Errorf("%v: %v", change, err)
 		}
 
 		if len(change.Path) < 1 {
-			return fmt.Errorf("invalid change path")
+			return makeErr(fmt.Errorf("invalid change path"))
 		}
 
 		var obj, previousObj any
@@ -516,30 +515,30 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 				if mapObj, ok := obj.(map[string]any); !ok {
 					return makeErr(fmt.Errorf("direct: expected a map for path %v, got %T", pathElement, obj))
 				} else if subObj, ok := mapObj[pathElement.Name]; !ok {
-					return fmt.Errorf("unknown key: %s", pathElement.Name)
+					return makeErr(fmt.Errorf("unknown key: %s", pathElement.Name))
 				} else {
 					obj = subObj
 				}
 			// we expect an array with a specific index that we can descend into...
 			case Array:
 				if arrayObj, ok := obj.([]any); !ok {
-					return fmt.Errorf("expected a array")
+					return makeErr(fmt.Errorf("expected a array"))
 				} else if len(arrayObj) <= pathElement.Index {
-					return fmt.Errorf("array element out of bounds")
+					return makeErr(fmt.Errorf("array element out of bounds"))
 				} else {
 					obj = arrayObj[pathElement.Index]
 				}
 			// we expect and array consisting of map elements that we can descend into...
 			case ById:
 				if arrayObj, ok := obj.([]any); !ok {
-					return fmt.Errorf("expected a array")
+					return makeErr(fmt.Errorf("expected a array"))
 				} else {
 					found := false
 					for _, arrayItem := range arrayObj {
 						if mapObj, ok := arrayItem.(map[string]any); !ok {
-							return fmt.Errorf("byID: expected a map")
+							return makeErr(fmt.Errorf("byID: expected a map"))
 						} else if idValue, ok := mapObj[pathElement.Identifier]; !ok {
-							return fmt.Errorf("identifier missing")
+							return makeErr(fmt.Errorf("identifier missing"))
 						} else if idValue == pathElement.Value {
 							found = true
 							obj = mapObj
@@ -547,7 +546,7 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 						}
 					}
 					if !found {
-						return fmt.Errorf("object with id '%s=%v' not found", pathElement.Identifier, pathElement.Value)
+						return makeErr(fmt.Errorf("object with id '%s=%v' not found", pathElement.Identifier, pathElement.Value))
 					}
 				}
 			}
@@ -560,34 +559,31 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 		// we expect an array element and a 'Array' path element
 		case Swap:
 
-			targetIndex, ok := change.Value.(int)
+			var targetIndex int
 
-			if !ok {
-				return fmt.Errorf("expected a target index")
+			switch ct := change.Value.(type) {
+			case int:
+				targetIndex = ct
+			case int64:
+				targetIndex = int(ct)
+			case float64:
+				targetIndex = int(ct)
+			default:
+				return makeErr(fmt.Errorf("expected an integer index, got %T", change.Value))
 			}
 
 			if lastPathElement.PathType != Array {
-				return fmt.Errorf("expected an array path element")
+				return makeErr(fmt.Errorf("expected an array path element"))
 			}
 
 			if arrayObj, ok := obj.([]any); !ok {
-				return fmt.Errorf("expected an array for insertion, got %T", obj)
+				return makeErr(fmt.Errorf("expected an array for insertion, got %T", obj))
 			} else if lastPathElement.Index >= len(arrayObj) || lastPathElement.Index < 0 {
-				return fmt.Errorf("move: source out of bounds")
+				return makeErr(fmt.Errorf("move: source out of bounds"))
 			} else {
 
 				if targetIndex < 0 || targetIndex > len(arrayObj)-1 {
-					return fmt.Errorf("move: target out of bounds")
-				}
-
-				if len(change.Path) < 2 {
-					return fmt.Errorf("expected at least 2 path elements")
-				}
-
-				beforeLastPathElement := change.Path[len(change.Path)-2]
-
-				if beforeLastPathElement.PathType != Direct {
-					return fmt.Errorf("expected a direct path")
+					return makeErr(fmt.Errorf("move: target out of bounds"))
 				}
 
 				index := lastPathElement.Index
@@ -599,31 +595,14 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 		case Insert:
 
 			if lastPathElement.PathType != Array {
-				return fmt.Errorf("expected an array path element")
+				return makeErr(fmt.Errorf("expected an array path element"))
 			}
 
 			if arrayObj, ok := obj.([]any); !ok {
-				return fmt.Errorf("expected an array for insertion, got %T", obj)
+				return makeErr(fmt.Errorf("expected an array for insertion, got %T", obj))
 			} else if lastPathElement.Index > len(arrayObj) || lastPathElement.Index < -1 {
-				return fmt.Errorf("insert: out of bounds")
+				return makeErr(fmt.Errorf("insert: out of bounds"))
 			} else {
-
-				// the parent object should be a map
-				previousMapObj, ok := previousObj.(map[string]any)
-
-				if !ok {
-					return fmt.Errorf("expected a map, got %T", previousObj)
-				}
-
-				if len(change.Path) < 2 {
-					return fmt.Errorf("expected at least 2 path elements")
-				}
-
-				beforeLastPathElement := change.Path[len(change.Path)-2]
-
-				if beforeLastPathElement.PathType != Direct {
-					return fmt.Errorf("expected a direct path")
-				}
 
 				index := lastPathElement.Index
 				// we copy the value before inserting it...
@@ -636,7 +615,31 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 					arrayObj[index] = value
 				}
 
-				previousMapObj[beforeLastPathElement.Name] = arrayObj
+				// we also allow top-level lists, in that case previousObj is nil
+				if previousObj != nil {
+
+					if len(change.Path) < 2 {
+						return makeErr(fmt.Errorf("expected at least 2 path elements"))
+					}
+
+					beforeLastPathElement := change.Path[len(change.Path)-2]
+
+					if beforeLastPathElement.PathType != Direct {
+						return makeErr(fmt.Errorf("expected a direct path"))
+					}
+
+					// the parent object should be a map
+					previousMapObj, ok := previousObj.(map[string]any)
+
+					if !ok {
+						return makeErr(fmt.Errorf("expected a map, got %T", previousObj))
+					}
+
+					previousMapObj[beforeLastPathElement.Name] = arrayObj
+
+				} else {
+					object = arrayObj
+				}
 
 			}
 		// we expect either a map and a 'Direct' path element, or an array
@@ -646,7 +649,7 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 			if mapObj, ok := obj.(map[string]any); ok {
 
 				if lastPathElement.PathType != Direct {
-					return fmt.Errorf("expected a direct path element")
+					return makeErr(fmt.Errorf("expected a direct path element"))
 				}
 
 				// we remove the key from the map
@@ -654,26 +657,20 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 
 			} else if arrayObj, ok := obj.([]any); ok {
 
-				previousMapObj, ok := previousObj.(map[string]any)
-
-				if !ok {
-					return fmt.Errorf("expected a map with a array")
-				}
-
 				var index int
 
 				if lastPathElement.PathType == Array {
 					if lastPathElement.Index >= len(arrayObj) || lastPathElement.Index < -1 {
-						return fmt.Errorf("remove: out of bounds")
+						return makeErr(fmt.Errorf("remove: out of bounds"))
 					}
 					index = lastPathElement.Index
 				} else if lastPathElement.PathType == ById {
 					found := false
 					for i, elem := range arrayObj {
 						if mapElem, ok := elem.(map[string]any); !ok {
-							return fmt.Errorf("expected a map element")
+							return makeErr(fmt.Errorf("expected a map element"))
 						} else if value, ok := mapElem[lastPathElement.Identifier]; !ok {
-							return fmt.Errorf("identifier missing")
+							return makeErr(fmt.Errorf("identifier missing"))
 						} else if value == lastPathElement.Value {
 							index = i
 							found = true
@@ -681,18 +678,8 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 						}
 					}
 					if !found {
-						return fmt.Errorf("element not found")
+						return makeErr(fmt.Errorf("element not found"))
 					}
-				}
-
-				if len(change.Path) < 2 {
-					return fmt.Errorf("expected at least 2 path elements")
-				}
-
-				beforeLastPathElement := change.Path[len(change.Path)-2]
-
-				if beforeLastPathElement.PathType != Direct {
-					return fmt.Errorf("expected a direct path")
 				}
 
 				if index == -1 {
@@ -705,11 +692,33 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 					arrayObj = append(arrayObj[:index], arrayObj[index+1:]...)
 				}
 
-				// we remove the item from the array
-				previousMapObj[beforeLastPathElement.Name] = arrayObj
+				if previousObj != nil {
+
+					previousMapObj, ok := previousObj.(map[string]any)
+
+					if !ok {
+						return makeErr(fmt.Errorf("expected a map with a array"))
+					}
+
+					if len(change.Path) < 2 {
+						return makeErr(fmt.Errorf("expected at least 2 path elements"))
+					}
+
+					beforeLastPathElement := change.Path[len(change.Path)-2]
+
+					if beforeLastPathElement.PathType != Direct {
+						return makeErr(fmt.Errorf("expected a direct path"))
+					}
+
+					// we remove the item from the array
+					previousMapObj[beforeLastPathElement.Name] = arrayObj
+
+				} else {
+					object = arrayObj
+				}
 
 			} else {
-				return fmt.Errorf("expected a map or array")
+				return makeErr(fmt.Errorf("expected a map or array"))
 			}
 		// we expect a map element and a 'Direct' path element
 		case Update:
@@ -718,15 +727,15 @@ func ApplyChanges(object map[string]any, changes []Change) error {
 			value := copy(change.Value)
 
 			if lastPathElement.PathType != Direct {
-				return fmt.Errorf("expected a direct path")
+				return makeErr(fmt.Errorf("expected a direct path"))
 			}
 
 			if mapObj, ok := obj.(map[string]any); !ok {
-				return fmt.Errorf("object is not a map")
+				return makeErr(fmt.Errorf("object is not a map"))
 			} else {
 				mapObj[lastPathElement.Name] = value
 			}
 		}
 	}
-	return nil
+	return object, nil
 }
