@@ -8,6 +8,7 @@
 @import 'ui/index.scss';
 
 @import '../../action_editor.scss';
+@import '../../ui/message.scss';
 
 html {
     background: $kip-background-color;
@@ -55,5 +56,9 @@ div.kip {
     h5,
     h6 {
         @include font-oxanium;
+    }
+
+    hr {
+        border-top: 1px solid #ddd;
     }
 }

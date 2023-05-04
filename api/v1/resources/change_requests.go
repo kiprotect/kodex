@@ -33,7 +33,7 @@ var updateChangeRequestStatusForn = forms.Form{
 			Validators: []forms.Validator{
 				forms.IsRequired{},
 				api.IsChangeRequestStatus{},
-				forms.IsIn{Choices: []interface{}{api.Draft, api.Ready, api.Withdrawn, api.Rejected, api.Approved}},
+				forms.IsIn{Choices: []interface{}{api.DraftCR, api.ReadyCR, api.WithdrawnCR, api.RejectedCR, api.ApprovedCR}},
 			},
 		},
 	},
@@ -89,10 +89,10 @@ func UpdateChangeRequestStatus(c *gin.Context) {
 
 	if !isReviewer {
 		// requests can only go from "draft" to "ready" or "withdrawn"
-		if request.Status() == api.Draft && (status != api.Ready && status != api.Withdrawn) {
+		if request.Status() == api.DraftCR && (status != api.ReadyCR && status != api.WithdrawnCR) {
 			api.HandleError(c, 400, fmt.Errorf("cannot set status from %s to %s", request.Status(), status))
 			return
-		} else if request.Status() == api.Ready && (status != api.Withdrawn && status != api.Draft) {
+		} else if request.Status() == api.ReadyCR && (status != api.WithdrawnCR && status != api.DraftCR) {
 			api.HandleError(c, 400, fmt.Errorf("cannot set status from %s to %s", request.Status(), status))
 			return
 		}

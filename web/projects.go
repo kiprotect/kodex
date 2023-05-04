@@ -155,6 +155,11 @@ func NewProject() ElementFunction {
 	}
 }
 
+type ChangeInfo struct {
+	Description string
+	Data        any
+}
+
 func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	error := Var(c, "")
@@ -183,7 +188,29 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	// we retrieve the project...
 	project := projectVar.Get()
 
-	msg := PersistentVar(c, []api.ChangeSet{})
+	if project == nil {
+		// to do: error handling...
+		return nil
+	}
+
+	objectRolesVar := CachedVar(c, func() []api.ObjectRole {
+		roles, err := controller.RolesForObject(project)
+
+		if err != nil {
+			error.Set(Fmt("Cannot load object roles: %v", err))
+			Log.Error("%v", err)
+			return nil
+		}
+		return roles
+
+	})
+
+	objectRoles := objectRolesVar.Get()
+
+	if objectRoles == nil {
+		// to do: error handling...
+		return nil
+	}
 
 	AddBreadcrumb(c, project.Name(), Fmt("/%s", Hex(project.ID())))
 
@@ -226,12 +253,12 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 		if err != nil {
 			error.Set(Fmt("cannot load change request: %v", err))
-			// to do: error handling
+			changeRequestId.Set("")
 			return nil
 		}
 
 		if !bytes.Equal(changeRequest.ObjectID(), project.ID()) {
-			error.Set(Fmt("change request not valid for this project"))
+			changeRequestId.Set("")
 			return nil
 		}
 
@@ -244,8 +271,6 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	if changeRequest != nil {
 
 		if changeRequest.Changes() != nil {
-			msg.Set(changeRequest.Changes())
-
 			for _, changeSet := range changeRequest.Changes() {
 				if err := api.ApplyChanges(exportedBlueprint, changeSet.Changes); err != nil {
 					error.Set(Fmt("cannot apply changes: %v", err))
@@ -259,13 +284,33 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	importedProject, err := importedBlueprint.Create(ctrl, true)
 
 	if err != nil {
-		Log.Error("Import error: %v", err)
-		return nil
+
+		if changeRequest != nil {
+
+			exportedBlueprint, err = kodex.ExportBlueprint(project)
+
+			if err != nil {
+				Log.Error("Error: %v", err)
+				return nil
+			}
+
+			importedBlueprint = kodex.MakeBlueprint(exportedBlueprint)
+			importedProject, err = importedBlueprint.Create(ctrl, true)
+
+			if err != nil {
+				return Div(Fmt("uh oh: %v (%s)", err, changeRequest.Changes()))
+			}
+
+		} else {
+			Log.Error("Import error: %v", err)
+			return nil
+		}
+
 	}
 
 	AddBreadcrumb(c, strings.Title(tab), Fmt("/%s", tab))
 
-	onUpdate := func(change api.Change, path string) {
+	onUpdate := func(change ChangeInfo, path string) {
 
 		changeRequest := changeRequestVar.Get()
 
@@ -283,12 +328,11 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			Identifiers: []string{"id", "name"},
 		})
 
-		// msg.Set(changes)
-
 		changeSets := changeRequest.Changes()
 
 		changeSet := api.ChangeSet{
-			Description: "foo",
+			Description: change.Description,
+			Data:        change.Data,
 			Changes:     changes,
 		}
 
@@ -314,6 +358,35 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		onUpdate = nil
 	}
 
+	userRoles := []Element{}
+
+	foundRoles := map[string]any{}
+
+	for _, role := range user.Roles {
+		for _, orgRole := range role.Roles {
+			for _, objRole := range objectRoles {
+				if objRole.OrganizationRole() == orgRole {
+
+					if _, ok := foundRoles[objRole.ObjectRole()]; ok {
+						continue
+					}
+
+					foundRoles[objRole.ObjectRole()] = true
+
+					userRoles = append(userRoles, Span(Class("bulma-tag", "bulma-is-dark"), objRole.ObjectRole()))
+				}
+			}
+		}
+	}
+
+	roles := F(
+		H3("Your object roles"),
+		Div(
+			Class("bulma-tags"),
+			userRoles,
+		),
+	)
+
 	switch tab {
 	case "actions":
 		content = c.Element("actions", Actions(importedProject, onUpdate))
@@ -322,6 +395,12 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	default:
 		content = Div("...")
 	}
+
+	onDoneEditing := Func(c, func() {
+		changeRequestId.Set("")
+		router := UseRouter(c)
+		router.RedirectTo(router.CurrentPath())
+	})
 
 	return Div(
 		Div(
@@ -347,15 +426,55 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 				),
 			),
 		),
-		Fmt("Change: %v", msg.Get()),
-		Fmt("Change request: %s", changeRequestId.Get()),
+		DoIf(
+			changeRequest != nil,
+			func() Element {
+				return F(
+					ui.Message("info",
+						F(
+							I(
+								Class("fa", "fa-check"),
+							),
+							" Working on change request ",
+							A(
+								Href(
+									Fmt("/projects/%s/changes/details/%s",
+										projectId,
+										Hex(changeRequest.ID()),
+									),
+								),
+								changeRequest.Title(),
+							),
+							Fmt(", %d changes so far.", len(changeRequest.Changes())),
+							Form(
+								Method("POST"),
+								OnSubmit(onDoneEditing),
+								Div(
+									Class("bulma-field"),
+									P(
+										Class("bulma-control"),
+										Button(
+											Class("bulma-button", "bulma-is-info"),
+											Type("submit"),
+											"Finish work",
+										),
+									),
+								),
+							),
+						),
+					),
+				)
+			},
+		),
 		If(error.Get() != "", ui.Message("danger", error.Get())),
 		ui.Tabs(
 			ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),
-			ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Changes")),
+			ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Change Requests")),
 			ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(Fmt("/projects/%s/settings", projectId)), "Settings")),
 		),
 		content,
+		Hr(),
+		roles,
 	)
 }
 
@@ -377,7 +496,6 @@ func Projects(c Context) Element {
 	pis := make([]any, 0, len(projects))
 
 	for _, project := range projects {
-		kodex.Log.Infof("Name: %s", project.Name())
 		projectItem := A(
 			Href(Fmt("/projects/%s", Hex(project.ID()))),
 			ui.ListItem(

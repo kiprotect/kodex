@@ -26,11 +26,11 @@ import (
 type ChangeRequestStatus string
 
 const (
-	Draft     ChangeRequestStatus = "draft"
-	Ready     ChangeRequestStatus = "ready"
-	Withdrawn ChangeRequestStatus = "withdrawn"
-	Approved  ChangeRequestStatus = "approved"
-	Rejected  ChangeRequestStatus = "rejected"
+	DraftCR     ChangeRequestStatus = "draft"
+	ReadyCR     ChangeRequestStatus = "ready"
+	WithdrawnCR ChangeRequestStatus = "withdrawn"
+	ApprovedCR  ChangeRequestStatus = "approved"
+	RejectedCR  ChangeRequestStatus = "rejected"
 )
 
 type ChangeRequest interface {
@@ -98,9 +98,9 @@ var ChangeRequestForm = forms.Form{
 		{
 			Name: "status",
 			Validators: []forms.Validator{
-				forms.IsOptional{Default: Draft},
+				forms.IsOptional{Default: DraftCR},
 				IsChangeRequestStatus{},
-				forms.IsIn{Choices: []interface{}{Draft, Ready}},
+				forms.IsIn{Choices: []interface{}{DraftCR, ReadyCR}},
 			},
 		},
 	},

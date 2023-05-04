@@ -9,6 +9,11 @@
     padding-bottom: 0;
     margin-bottom: map-get($kip-space, md);
 
+    > a {
+        text-decoration: none;
+        color: $bulma-text;
+    }
+
     .kip-item {
         min-width: 800px;
         display: flex;

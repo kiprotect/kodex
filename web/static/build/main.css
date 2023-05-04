@@ -15172,6 +15172,10 @@ ul.kip-menu-list li ul {
   padding-bottom: 0;
   margin-bottom: 16px;
 }
+.kip-list > a {
+  text-decoration: none;
+  color: hsl(0, 0%, 29%);
+}
 .kip-list .kip-item {
   min-width: 800px;
   display: flex;
@@ -15600,6 +15604,11 @@ ul.kip-menu-list li ul {
   height: 44px;
 }
 
+.bulma-message .bulma-field {
+  margin-bottom: 0;
+  margin-top: 0.75rem;
+}
+
 html {
   background: #f5f6fa;
 }
@@ -15638,6 +15647,9 @@ div.kip h4,
 div.kip h5,
 div.kip h6 {
   font-family: Oxanium, sans-serif;
+}
+div.kip hr {
+  border-top: 1px solid #ddd;
 }
 
 /*# sourceMappingURL=main.css.map */

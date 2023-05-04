@@ -4,13 +4,12 @@ import (
 	"bytes"
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
-	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/web/ui"
 	"time"
 	//	"github.com/kiprotect/kodex/api"
 )
 
-func Actions(project kodex.Project, onUpdate func(api.Change, string)) ElementFunction {
+func Actions(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
 
 	return func(c Context) Element {
 
@@ -26,15 +25,7 @@ func Actions(project kodex.Project, onUpdate func(api.Change, string)) ElementFu
 	}
 }
 
-func withChangePath(changePath []api.PathElement, onUpdate func(api.Change, string)) func(api.Change, string) {
-	return func(change api.Change, path string) {
-		// we prepend the given path to the change
-		change.Path = append(changePath, change.Path...)
-		onUpdate(change, path)
-	}
-}
-
-func ActionDetails(project kodex.Project, onUpdate func(api.Change, string)) func(c Context, actionId string) Element {
+func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) func(c Context, actionId string) Element {
 
 	return func(c Context, actionId string) Element {
 
@@ -58,15 +49,22 @@ func ActionDetails(project kodex.Project, onUpdate func(api.Change, string)) fun
 
 		onSubmit := Func(c, func() {
 
-			if err := action.SetName(name.Get()); err != nil {
+			if name.Get() == "" {
+				error.Set("please enter a name")
+				return
+			}
+
+			if err := action.Update(map[string]any{"name": name.Get()}); err != nil {
 				error.Set(Fmt("cannot set name: %v", err))
+				return
 			}
 
 			if err := action.Save(); err != nil {
 				error.Set(Fmt("cannot save: %v", err))
+				return
 			}
 
-			onUpdate(api.Change{}, router.LastPath())
+			onUpdate(ChangeInfo{}, router.LastPath())
 		})
 
 		var errorNotice Element
@@ -83,19 +81,21 @@ func ActionDetails(project kodex.Project, onUpdate func(api.Change, string)) fun
 			return Form(
 				Method("POST"),
 				OnSubmit(onSubmit),
-				Div(
-					Class("bulma-field", "bulma-has-addons"),
+				Fieldset(
 					errorNotice,
-					P(
-						Class("bulma-control"),
-						Input(Class("bulma-control", "bulma-input"), Value(name)),
-					),
-					P(
-						Class("bulma-control"),
-						Button(
-							Class("bulma-button", "bulma-is-success"),
-							Type("submit"),
-							"Change",
+					Div(
+						Class("bulma-field", "bulma-has-addons"),
+						P(
+							Class("bulma-control"),
+							Input(Class("bulma-control", "bulma-input"), Value(name)),
+						),
+						P(
+							Class("bulma-control"),
+							Button(
+								Class("bulma-button", "bulma-is-success"),
+								Type("submit"),
+								"Change",
+							),
 						),
 					),
 				),
@@ -146,7 +146,7 @@ func ActionDetails(project kodex.Project, onUpdate func(api.Change, string)) fun
 
 }
 
-func NewAction(project kodex.Project, onUpdate func(api.Change, string)) ElementFunction {
+func NewAction(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
 	return func(c Context) Element {
 
 		name := Var(c, "")
@@ -171,7 +171,7 @@ func NewAction(project kodex.Project, onUpdate func(api.Change, string)) Element
 			if err := action.Save(); err != nil {
 				error.Set("Cannot save action")
 			} else {
-				onUpdate(api.Change{}, router.CurrentPath())
+				onUpdate(ChangeInfo{}, router.CurrentPath())
 			}
 		})
 
@@ -215,7 +215,7 @@ func NewAction(project kodex.Project, onUpdate func(api.Change, string)) Element
 	}
 }
 
-func ActionsList(project kodex.Project, onUpdate func(api.Change, string)) ElementFunction {
+func ActionsList(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
 
 	return func(c Context) Element {
 
