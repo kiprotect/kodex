@@ -43,12 +43,14 @@ var BlueprintDateForm = forms.Form{
 		{
 			Name: "created_at",
 			Validators: []forms.Validator{
+				forms.IsOptional{},
 				forms.IsTime{Format: "rfc3339"},
 			},
 		},
 		{
 			Name: "updated_at",
 			Validators: []forms.Validator{
+				forms.IsOptional{},
 				forms.IsTime{Format: "rfc3339"},
 			},
 		},
@@ -756,9 +758,21 @@ func FixDates(object Model, data map[string]interface{}) error {
 	} else if err := BlueprintDateForm.Coerce(dates, params); err != nil {
 		return err
 	} else {
-		settable.SetCreatedAt(dates.CreatedAt)
-		settable.SetUpdatedAt(dates.UpdatedAt)
-		settable.SetDeletedAt(dates.DeletedAt)
+
+		if !dates.CreatedAt.IsZero() {
+			settable.SetCreatedAt(dates.CreatedAt)
+		} else {
+			settable.SetCreatedAt(time.Now())
+		}
+		if !dates.UpdatedAt.IsZero() {
+			settable.SetUpdatedAt(dates.UpdatedAt)
+		} else {
+			settable.SetUpdatedAt(time.Now())
+		}
+		if dates.DeletedAt != nil {
+			settable.SetDeletedAt(dates.DeletedAt)
+		}
+
 		return nil
 	}
 }
