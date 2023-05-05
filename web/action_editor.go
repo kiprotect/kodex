@@ -87,7 +87,7 @@ func NewField(c Context, form *forms.Form, path []string, onUpdate func(ChangeIn
 	error := Var(c, "")
 	router := UseRouter(c)
 
-	onSubmit := Func(c, func() {
+	onSubmit := Func[any](c, func() {
 
 		if name.Get() == "" {
 			error.Set("Please enter a name")

@@ -496,10 +496,12 @@ func Projects(c Context) Element {
 	pis := make([]any, 0, len(projects))
 
 	for _, project := range projects {
+
 		projectItem := A(
 			Href(Fmt("/projects/%s", Hex(project.ID()))),
 			ui.ListItem(
 				ui.ListColumn("md", project.Name()),
+				ui.ListColumn("sm", HumanDuration(time.Now().Sub(project.CreatedAt()))),
 			),
 		)
 		pis = append(pis, projectItem)
@@ -509,6 +511,7 @@ func Projects(c Context) Element {
 		ui.List(
 			ui.ListHeader(
 				ui.ListColumn("md", "Name"),
+				ui.ListColumn("sm", "Created At"),
 			),
 			pis,
 		),

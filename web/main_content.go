@@ -16,7 +16,7 @@ func MainContent(c Context) Element {
 			c,
 			Route("/projects/new", c.Element("newProject", NewProject())),
 			Route("/projects/(?P<projectId>[^/]+)(?:/(?P<tab>actions|changes|settings))?", ProjectDetails),
-			Route("/projects", c.Element("projects", Projects)),
+			Route("/projects|", c.Element("projects", Projects)),
 		),
 	)
 }

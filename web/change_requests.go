@@ -58,6 +58,8 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 		case "changes":
 		}
 
+		canMerge := true
+
 		return Div(
 			H2(Class("bulma-subtitle"), changeRequest.Title()),
 			ui.Tabs(
@@ -66,23 +68,31 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 				ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes/details/%s/changes", Hex(project.ID()), changeRequestId)), "Changes")),
 			),
 			content,
-			If(
-				changeRequestIdVar.Get() != changeRequestId,
-				F(
-					Hr(),
-					Form(
-						Method("POST"),
-						OnSubmit(onSubmit),
-						Div(
-							Class("bulma-field"),
-							P(
-								Class("bulma-control"),
-								Button(
-									Class("bulma-button", "bulma-is-success"),
-									Type("submit"),
-									"Work on this change request",
-								),
-							),
+			Hr(),
+			Form(
+				Class("bulma-is-inline"),
+				Method("POST"),
+				OnSubmit(onSubmit),
+				Div(
+					Class("bulma-buttons", "bulma-has-addons"),
+					If(
+						changeRequestIdVar.Get() != changeRequestId,
+						Button(
+							Name("action"),
+							Value("edit"),
+							Class("bulma-button"),
+							Type("submit"),
+							"Edit",
+						),
+					),
+					If(
+						canMerge,
+						Button(
+							Name("action"),
+							Value("merge"),
+							Class("bulma-button"),
+							Type("submit"),
+							"Merge",
 						),
 					),
 				),
@@ -187,7 +197,7 @@ func ChangeRequestList(project kodex.Project) ElementFunction {
 					ui.ListColumn("md", changeRequest.Title()),
 					ui.ListColumn("sm", changeRequest.Creator().DisplayName()),
 					ui.ListColumn("sm", HumanDuration(time.Now().Sub(changeRequest.CreatedAt()))),
-					ui.ListColumn("icon", "*"),
+					ui.ListColumn("icon", changeRequest.Status()),
 				),
 			)
 			cri = append(cri, changeRequestItem)
