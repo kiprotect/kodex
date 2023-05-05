@@ -21,6 +21,21 @@ const (
 	Array  PathType = 2
 )
 
+func OpName(op Op) string {
+	switch op {
+	case Insert:
+		return "insert"
+	case Remove:
+		return "remove"
+	case Update:
+		return "update"
+	case Swap:
+		return "swap"
+	default:
+		return "unknown"
+	}
+}
+
 // Project details
 
 type PathElement struct {

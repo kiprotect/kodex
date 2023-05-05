@@ -100,7 +100,6 @@ var ChangeRequestForm = forms.Form{
 			Validators: []forms.Validator{
 				forms.IsOptional{Default: DraftCR},
 				IsChangeRequestStatus{},
-				forms.IsIn{Choices: []interface{}{DraftCR, ReadyCR}},
 			},
 		},
 	},

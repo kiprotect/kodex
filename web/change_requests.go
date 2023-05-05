@@ -1,10 +1,12 @@
 package web
 
 import (
+	"encoding/json"
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/web/ui"
+	"strings"
 	"time"
 )
 
@@ -22,6 +24,50 @@ func ChangeRequests(project kodex.Project) ElementFunction {
 			),
 		)
 	}
+}
+
+func Discussion(changeRequest api.ChangeRequest) Element {
+	return Div("coming soon...")
+}
+
+func Changes(changeRequest api.ChangeRequest) Element {
+
+	cri := make([]Element, 0)
+
+	for a, changeSet := range changeRequest.Changes() {
+
+		for b, change := range changeSet.Changes {
+
+			pathStrs := make([]string, len(change.Path))
+
+			for i, pathElement := range change.Path {
+				pathStrs[i] = pathElement.String()
+			}
+
+			value, _ := json.MarshalIndent(change.Value, "", "  ")
+
+			changeItem := ui.ListItem(
+				ui.ListColumn("xs", Fmt("%d.%d", a+1, b+1)),
+				ui.ListColumn("sm", Strong(api.OpName(change.Op))),
+				ui.ListColumn("sm", strings.Join(pathStrs, " &gt; ")),
+				ui.ListColumn("md", Pre(string(value))),
+			)
+
+			cri = append(cri, changeItem)
+
+		}
+	}
+
+	return ui.List(
+		ui.ListHeader(
+			ui.ListColumn("xs", "#No"),
+			ui.ListColumn("sm", "Operator"),
+			ui.ListColumn("sm", "Path"),
+			ui.ListColumn("md", "Change Value (JSON)"),
+		),
+		cri,
+	)
+
 }
 
 func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId, tab string) Element {
@@ -44,7 +90,7 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 
 		changeRequestIdVar := PersistentGlobalVar(c, "changeRequestId", "")
 
-		onSubmit := Func(c, func() {
+		onSubmit := Func[any](c, func() {
 			changeRequestIdVar.Set(Hex(changeRequest.ID()))
 			router.RedirectTo(router.CurrentPath())
 		})
@@ -53,9 +99,11 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 
 		switch tab {
 		case "discussion":
+			content = Discussion(changeRequest)
 		case "description":
 			content = Div(Class("bulma-content"), IfElse(changeRequest.Description() != "", changeRequest.Description(), "(no description given)"))
 		case "changes":
+			content = Changes(changeRequest)
 		}
 
 		canMerge := true
@@ -111,7 +159,7 @@ func NewChangeRequest(project kodex.Project) ElementFunction {
 
 		controller := UseController(c)
 
-		onSubmit := Func(c, func() {
+		onSubmit := Func[any](c, func() {
 
 			if title.Get() == "" {
 				error.Set("Please enter a title")
@@ -197,7 +245,7 @@ func ChangeRequestList(project kodex.Project) ElementFunction {
 					ui.ListColumn("md", changeRequest.Title()),
 					ui.ListColumn("sm", changeRequest.Creator().DisplayName()),
 					ui.ListColumn("sm", HumanDuration(time.Now().Sub(changeRequest.CreatedAt()))),
-					ui.ListColumn("icon", changeRequest.Status()),
+					ui.ListColumn("icon", string(changeRequest.Status())),
 				),
 			)
 			cri = append(cri, changeRequestItem)

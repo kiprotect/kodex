@@ -221,7 +221,7 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 
 	router := UseRouter(c)
 
-	onSubmit := Func(c, func() {
+	onSubmit := Func[any](c, func() {
 
 		newFields := []forms.Field{}
 
@@ -293,7 +293,7 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(Ch
 
 	validatorType := Var(c, router.Query().Get("validatorType"))
 
-	onSubmit := Func(c, func() {
+	onSubmit := Func[any](c, func() {
 
 		switch validatorType.Get() {
 		case "IsStringMap":

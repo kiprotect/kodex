@@ -24,7 +24,7 @@ func NewProject() ElementFunction {
 		router := UseRouter(c)
 		controller := UseController(c)
 
-		onSubmit := Func(c, func() {
+		onSubmit := Func[any](c, func() {
 
 			if name.Get() == "" {
 				error.Set("Please enter a name")
@@ -212,6 +212,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		return nil
 	}
 
+	AddBreadcrumb(c, "Projects", "/projects")
 	AddBreadcrumb(c, project.Name(), Fmt("/%s", Hex(project.ID())))
 
 	// we check that the user can access the project
@@ -396,7 +397,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		content = Div("...")
 	}
 
-	onDoneEditing := Func(c, func() {
+	onDoneEditing := Func[any](c, func() {
 		changeRequestId.Set("")
 		router := UseRouter(c)
 		router.RedirectTo(router.CurrentPath())

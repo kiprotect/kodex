@@ -51,7 +51,7 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 		name := Var(c, action.Name())
 		error := Var(c, "")
 
-		onSubmit := Func(c, func() {
+		onSubmit := Func[any](c, func() {
 
 			if name.Get() == "" {
 				error.Set("please enter a name")
@@ -114,7 +114,7 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 				ActionEditor(action, onUpdate),
 			)
 		case "test":
-			content = Div("testing")
+			content = Div("coming soon")
 		}
 
 		return Div(
@@ -171,7 +171,7 @@ func NewAction(project kodex.Project, onUpdate func(ChangeInfo, string)) Element
 		error := Var(c, "")
 		router := UseRouter(c)
 
-		onSubmit := Func(c, func() {
+		onSubmit := Func[any](c, func() {
 
 			if name.Get() == "" {
 				error.Set("Please enter a name")
