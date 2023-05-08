@@ -40,6 +40,9 @@ type Project interface {
 	MakeStream(id []byte) Stream
 	DeleteRelated() error
 
+	// datasets (for testing, error logging, ...)
+	MakeDataset(id []byte) Dataset
+
 	Controller() Controller
 }
 

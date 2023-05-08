@@ -40,6 +40,7 @@ type InMemoryController struct {
 	mutex            sync.Mutex
 	streams          map[string]kodex.Stream
 	sources          map[string]kodex.Source
+	datasets         map[string]kodex.Dataset
 	destinations     map[string]kodex.Destination
 	actionConfigs    map[string]kodex.ActionConfig
 	projects         map[string]kodex.Project
@@ -96,6 +97,22 @@ func (c *InMemoryController) SaveSource(source kodex.Source) error {
 		}
 	}
 	c.sources[string(source.ID())] = source
+	return nil
+}
+
+func (c *InMemoryController) SaveDataset(dataset kodex.Dataset) error {
+	inMemoryDataset, ok := dataset.(*InMemoryDataset)
+
+	if !ok {
+		return fmt.Errorf("not an in-memory dataset")
+	}
+
+	if existingDataset, ok := c.datasets[string(dataset.ID())].(*InMemoryDataset); ok {
+		if bytes.Equal(existingDataset.InternalID(), inMemoryDataset.InternalID()) && existingDataset != inMemoryDataset {
+			return fmt.Errorf("ID conflict")
+		}
+	}
+	c.datasets[string(dataset.ID())] = dataset
 	return nil
 }
 
@@ -263,6 +280,50 @@ outer:
 	}
 
 	return actionConfigs, nil
+}
+
+/* Dataset Management */
+
+func (c *InMemoryController) Datasets(filters map[string]interface{}) ([]kodex.Dataset, error) {
+	datasets := make([]kodex.Dataset, 0, len(c.datasets))
+
+outer:
+	for _, dataset := range c.datasets {
+		for key, value := range filters {
+			switch key {
+			case "project.id":
+				bytesValue, ok := value.([]byte)
+				if !ok {
+					return nil, fmt.Errorf("expected at name")
+				}
+				if !bytes.Equal(dataset.Project().ID(), bytesValue) {
+					continue outer
+				}
+			case "name":
+				strValue, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("expected a name")
+				}
+				if dataset.Name() != strValue {
+					continue outer
+				}
+			default:
+				return nil, fmt.Errorf("unknown filter key: %s", key)
+			}
+		}
+		datasets = append(datasets, dataset)
+	}
+
+	return datasets, nil
+}
+
+func (c *InMemoryController) Dataset(id []byte) (kodex.Dataset, error) {
+	for _, dataset := range c.datasets {
+		if bytes.Equal(dataset.ID(), id) {
+			return dataset, nil
+		}
+	}
+	return nil, kodex.NotFound
 }
 
 /* Source Management */

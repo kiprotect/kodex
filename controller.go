@@ -77,6 +77,10 @@ type Controller interface {
 	// Send a pingback with stats for a processable entity
 	Ping(Processable, ProcessingStats) error
 
+	// Datasets
+	Dataset(id []byte) (Dataset, error)
+	Datasets(filter map[string]any) ([]Dataset, error)
+
 	// Projects
 	MakeProject(id []byte) Project
 	Project(projectID []byte) (Project, error)

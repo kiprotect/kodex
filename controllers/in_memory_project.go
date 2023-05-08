@@ -139,6 +139,13 @@ func (c *InMemoryProject) MakeStream(id []byte) kodex.Stream {
 	return stream
 }
 
+func (c *InMemoryProject) MakeDataset(id []byte) kodex.Dataset {
+	if id == nil {
+		id = kodex.RandomID()
+	}
+	return MakeInMemoryDataset(id, c)
+}
+
 func (c *InMemoryProject) MakeActionConfig(id []byte) kodex.ActionConfig {
 	if id == nil {
 		id = kodex.RandomID()
