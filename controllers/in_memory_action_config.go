@@ -150,5 +150,9 @@ func (c *InMemoryActionConfig) Save() error {
 }
 
 func (c *InMemoryActionConfig) Delete() error {
-	return fmt.Errorf("InMemoryActionConfig.Delete not implemented")
+	controller, ok := c.Project().Controller().(*InMemoryController)
+	if !ok {
+		return fmt.Errorf("not an in-memory controller")
+	}
+	return controller.DeleteActionConfig(c)
 }

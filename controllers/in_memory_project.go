@@ -53,9 +53,16 @@ func (i *InMemoryProject) InternalID() []byte {
 }
 
 func (i *InMemoryProject) Delete() error {
-	now := time.Now()
-	i.deletedAt = &now
-	return nil
+
+	if err := i.DeleteRelated(); err != nil {
+		return err
+	}
+
+	controller, ok := i.Controller().(*InMemoryController)
+	if !ok {
+		return fmt.Errorf("not an in-memory controller")
+	}
+	return controller.DeleteProject(i)
 }
 
 func (i *InMemoryProject) CreatedAt() time.Time {

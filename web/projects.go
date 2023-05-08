@@ -2,11 +2,13 @@ package web
 
 import (
 	"bytes"
+	"encoding/json"
 	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
 	ctrlHelpers "github.com/kiprotect/kodex/api/helpers/controller"
 	"github.com/kiprotect/kodex/web/ui"
+	"io"
 	"strings"
 	"time"
 )
@@ -149,6 +151,142 @@ func NewProject() ElementFunction {
 						Type("submit"),
 						"Create Project",
 					),
+				),
+			),
+		)
+	}
+}
+
+func Settings(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
+
+	return func(c Context) Element {
+
+		error := Var(c, "")
+		router := UseRouter(c)
+
+		onSubmit := Func[any](c, func() {
+
+			request := c.Request()
+
+			file, _, err := request.FormFile("blueprint")
+
+			if err != nil {
+				error.Set(Fmt("Cannot retrieve file: %v", err))
+				return
+			}
+
+			content, err := io.ReadAll(file)
+
+			if err != nil {
+				error.Set(Fmt("Cannot read file: %v", err))
+				return
+			}
+
+			error.Set(Fmt("file length: %d", len(content)))
+
+			var data map[string]any
+
+			if err := json.Unmarshal(content, &data); err != nil {
+				error.Set(Fmt("cannot unmarshal JSON: %v", err))
+				return
+			}
+
+			data["project"] = map[string]any{
+				"id":   Hex(project.ID()),
+				"name": project.Name(),
+			}
+
+			blueprint := kodex.MakeBlueprint(data)
+
+			err = blueprint.CreateWithProject(project.Controller(), project)
+
+			if err != nil {
+				error.Set(Fmt("Error creating blueprint: %v", err))
+				return
+			}
+
+			actionConfigs, _ := project.Controller().ActionConfigs(map[string]any{})
+
+			error.Set(Fmt("Success: %d", len(actionConfigs)))
+
+			onUpdate(ChangeInfo{}, router.CurrentPath())
+		})
+
+		return F(
+			ui.MessageWithTitle(
+				"info",
+				"Import Blueprint",
+				F(
+					P(
+						"You can import a blueprint from a JSON file.",
+					),
+					Br(),
+					If(
+						error.Get() != "",
+						P(
+							Class("bulma-help", "bulma-is-danger"),
+							error.Get(),
+						),
+					),
+					IfElse(
+						onUpdate != nil,
+						F(
+							Form(
+								Method("POST"),
+								Enctype("multipart/form-data"),
+								OnSubmit(onSubmit),
+								Div(
+									Id("blueprint-file"),
+									Class("bulma-file", "bulma-has-name"),
+									Label(
+										Class("bulma-file-label"),
+										Input(
+											Class("bulma-file-input"),
+											Type("file"),
+											Id("blueprint"),
+											Name("blueprint"),
+										),
+										Span(
+											Class("bulma-file-cta"),
+											Span(
+												Class("bulma-file-icon"),
+												I(
+													Class("fas", "fa-upload"),
+												),
+											),
+											Span(
+												Class("bulma-file-label"),
+												"Info file...",
+											),
+										),
+										Span(
+											Class("bulma-file-name"),
+											"screenshot",
+										),
+									),
+								),
+								Hr(),
+								Button(
+									Class("bulma-button", "bulma-is-success"),
+									Type("submit"),
+									"Import Blueprint",
+								),
+							),
+						),
+						P(
+							"You need to open a change request to import first.",
+						),
+					),
+					Script(`
+						console.log("hey");
+						const fileInput = document.querySelector('#blueprint-file input[type=file]');
+						  fileInput.onchange = () => {
+						    if (fileInput.files.length > 0) {
+						      const fileName = document.querySelector('#blueprint-file .bulma-file-name');
+						      fileName.textContent = fileInput.files[0].name;
+						    }
+						  }
+					`),
 				),
 			),
 		)
@@ -393,6 +531,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		content = c.Element("actions", Actions(importedProject, onUpdate))
 	case "changes":
 		content = c.Element("changes", ChangeRequests(importedProject))
+	case "settings":
+		content = c.Element("settings", Settings(importedProject, onUpdate))
 	default:
 		content = Div("...")
 	}

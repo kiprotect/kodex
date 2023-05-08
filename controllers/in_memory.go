@@ -123,10 +123,25 @@ func (c *InMemoryController) SaveDestination(destination kodex.Destination) erro
 	}
 	if existingDestination, ok := c.destinations[string(destination.ID())].(*InMemoryDestination); ok {
 		if bytes.Equal(existingDestination.InternalID(), inMemoryDestination.InternalID()) && existingDestination != inMemoryDestination {
-			return fmt.Errorf("ID conflict")
+			return fmt.Errorf("ID conflict (destination)")
 		}
 	}
 	c.destinations[string(destination.ID())] = destination
+	return nil
+}
+
+func (c *InMemoryController) DeleteDestination(destination *InMemoryDestination) error {
+	delete(c.destinations, string(destination.ID()))
+	return nil
+}
+
+func (c *InMemoryController) DeleteActionConfig(actionConfig *InMemoryActionConfig) error {
+	delete(c.actionConfigs, string(actionConfig.ID()))
+	return nil
+}
+
+func (c *InMemoryController) DeleteProject(project *InMemoryProject) error {
+	delete(c.projects, string(project.ID()))
 	return nil
 }
 
@@ -142,7 +157,7 @@ func (c *InMemoryController) SaveStream(stream kodex.Stream) error {
 	}
 	if existingStream, ok := c.streams[string(stream.ID())].(*InMemoryStream); ok {
 		if bytes.Equal(existingStream.InternalID(), inMemoryStream.InternalID()) && existingStream != inMemoryStream {
-			return fmt.Errorf("ID conflict")
+			return fmt.Errorf("ID conflict (stream)")
 		}
 	}
 	c.streams[string(stream.ID())] = stream
@@ -156,7 +171,7 @@ func (c *InMemoryController) SaveProject(project kodex.Project) error {
 	}
 	if existingProject, ok := c.projects[string(project.ID())].(*InMemoryProject); ok {
 		if bytes.Equal(existingProject.InternalID(), inMemoryProject.InternalID()) && existingProject != inMemoryProject {
-			return fmt.Errorf("ID conflict")
+			return fmt.Errorf("ID conflict (project)")
 		}
 	}
 	c.projects[string(project.ID())] = project

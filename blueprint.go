@@ -1007,28 +1007,63 @@ func (b *Blueprint) Create(controller Controller, createProject bool) (Project, 
 		return nil, err
 	}
 
-	if err := initSources(project, b.config); err != nil {
-		return nil, err
-	}
-	if err := initDestinations(project, b.config); err != nil {
-		return nil, err
-	}
-	if err := initActionConfigs(project, b.config); err != nil {
-		return nil, err
-	}
-	if err := initStreams(project, b.config); err != nil {
-		return nil, err
-	}
-	if err := initKeys(project, b.config); err != nil {
+	if err := b.createWithProject(controller, project); err != nil {
 		return nil, err
 	}
 
-	if err := controller.Commit(); err != nil {
-		return nil, err
-	}
-
-	// everything worked out nicely
 	succeeded = true
 
 	return project, nil
+}
+
+func (b *Blueprint) CreateWithProject(controller Controller, project Project) error {
+
+	succeeded := false
+
+	if err := controller.Begin(); err != nil {
+		return err
+	}
+
+	defer func() {
+		// we roll back the transaction, but only if it hasn't been successful
+		if !succeeded {
+			if err := controller.Rollback(); err != nil {
+				Log.Error(err)
+			}
+		}
+	}()
+
+	if err := b.createWithProject(controller, project); err != nil {
+		return err
+	}
+
+	succeeded = true
+
+	return nil
+
+}
+
+func (b *Blueprint) createWithProject(controller Controller, project Project) error {
+
+	if err := initSources(project, b.config); err != nil {
+		return err
+	}
+	if err := initDestinations(project, b.config); err != nil {
+		return err
+	}
+	if err := initActionConfigs(project, b.config); err != nil {
+		return err
+	}
+	if err := initStreams(project, b.config); err != nil {
+		return err
+	}
+	if err := initKeys(project, b.config); err != nil {
+		return err
+	}
+
+	if err := controller.Commit(); err != nil {
+		return err
+	}
+
+	return nil
 }

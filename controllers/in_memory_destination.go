@@ -52,7 +52,11 @@ func (i *InMemoryDestination) InternalID() []byte {
 }
 
 func (i *InMemoryDestination) Delete() error {
-	return fmt.Errorf("InMemoryDestination.Delete not implemented")
+	controller, ok := i.Project().Controller().(*InMemoryController)
+	if !ok {
+		return fmt.Errorf("not an in-memory controller")
+	}
+	return controller.DeleteDestination(i)
 }
 
 func (i *InMemoryDestination) CreatedAt() time.Time {
