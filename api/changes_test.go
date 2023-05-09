@@ -9,6 +9,79 @@ type TestCase struct {
 	Expected []any
 }
 
+func TestByteArrays(t *testing.T) {
+	a := map[string]any{
+		"foo": []byte("test"),
+		"bar": []byte("bar"),
+	}
+
+	b := map[string]any{
+		"foo": []byte("test"),
+		"bar": []byte("bar"),
+	}
+
+	changes := Diff(a, b)
+
+	if len(changes) != 0 {
+		t.Fatalf("expected 0 change, got %d - %v", len(changes), changes)
+	}
+
+}
+
+func TestDifferentTypes(t *testing.T) {
+	a := map[string]any{
+		"foo": int64(4),
+		"bar": float64(3),
+	}
+
+	b := map[string]any{
+		"foo": float64(4),
+		"bar": int64(3),
+	}
+
+	changes := Diff(a, b)
+
+	if len(changes) != 0 {
+		t.Fatalf("expected 0 change, got %d - %v", len(changes), changes)
+	}
+
+	if err := ApplyChanges(a, changes); err != nil {
+		t.Fatal(err, changes)
+	}
+
+	if newChanges := Diff(a, b); len(newChanges) != 0 {
+		t.Fatalf("should be identical: %v - %v - %v", a, b, changes)
+	}
+
+}
+
+func TestDifferentTypesDifferentValues(t *testing.T) {
+	a := map[string]any{
+		"foo": int64(4),
+		"bar": float64(3.3),
+	}
+
+	b := map[string]any{
+		"foo": float64(4.1),
+		"bar": int64(3),
+	}
+
+	changes := Diff(a, b)
+
+	if len(changes) != 2 {
+		t.Fatalf("expected 2 changes, got %d - %v", len(changes), changes)
+	}
+
+	if err := ApplyChanges(a, changes); err != nil {
+		t.Fatal(err, changes)
+	}
+
+	if newChanges := Diff(a, b); len(newChanges) != 0 {
+		t.Fatalf("should be identical: %v - %v - %v", a, b, changes)
+	}
+
+}
+
 func TestDeepMapDiff(t *testing.T) {
 	a := map[string]any{
 		"fields": []any{

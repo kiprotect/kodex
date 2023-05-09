@@ -79,7 +79,7 @@ func (c *InMemoryController) SaveActionConfig(actionConfig kodex.ActionConfig) e
 	}
 	if existingActionConfig, ok := c.actionConfigs[string(actionConfig.ID())].(*InMemoryActionConfig); ok {
 		if bytes.Equal(existingActionConfig.InternalID(), inMemoryActionConfig.InternalID()) && existingActionConfig != inMemoryActionConfig {
-			return fmt.Errorf("ID conflict")
+			return fmt.Errorf("ID conflict (action config)")
 		}
 	}
 	c.actionConfigs[string(actionConfig.ID())] = actionConfig
@@ -93,7 +93,7 @@ func (c *InMemoryController) SaveSource(source kodex.Source) error {
 	}
 	if existingSource, ok := c.sources[string(source.ID())].(*InMemorySource); ok {
 		if bytes.Equal(existingSource.InternalID(), inMemorySource.InternalID()) && existingSource != inMemorySource {
-			return fmt.Errorf("ID conflict")
+			return fmt.Errorf("ID conflict (source)")
 		}
 	}
 	c.sources[string(source.ID())] = source
@@ -109,7 +109,7 @@ func (c *InMemoryController) SaveDataset(dataset kodex.Dataset) error {
 
 	if existingDataset, ok := c.datasets[string(dataset.ID())].(*InMemoryDataset); ok {
 		if bytes.Equal(existingDataset.InternalID(), inMemoryDataset.InternalID()) && existingDataset != inMemoryDataset {
-			return fmt.Errorf("ID conflict")
+			return fmt.Errorf("ID conflict (dataset)")
 		}
 	}
 	c.datasets[string(dataset.ID())] = dataset

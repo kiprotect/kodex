@@ -26,6 +26,9 @@ type InMemoryDestination struct {
 	kodex.BaseDestination
 	name            string
 	description     string
+	createdAt       time.Time
+	updatedAt       time.Time
+	deletedAt       *time.Time
 	data            interface{}
 	destinationType string
 	configData      map[string]interface{}
@@ -60,15 +63,30 @@ func (i *InMemoryDestination) Delete() error {
 }
 
 func (i *InMemoryDestination) CreatedAt() time.Time {
-	return time.Now().UTC()
+	return i.createdAt
 }
 
 func (i *InMemoryDestination) DeletedAt() *time.Time {
-	return nil
+	return i.deletedAt
 }
 
 func (i *InMemoryDestination) UpdatedAt() time.Time {
-	return time.Now().UTC()
+	return i.updatedAt
+}
+
+func (i *InMemoryDestination) SetCreatedAt(t time.Time) error {
+	i.createdAt = t
+	return nil
+}
+
+func (i *InMemoryDestination) SetUpdatedAt(t time.Time) error {
+	i.updatedAt = t
+	return nil
+}
+
+func (i *InMemoryDestination) SetDeletedAt(t *time.Time) error {
+	i.deletedAt = t
+	return nil
 }
 
 func (i *InMemoryDestination) Save() error {

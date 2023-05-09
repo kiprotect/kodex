@@ -31,7 +31,7 @@ type FormAction struct {
 var Validators = map[string]forms.ValidatorMaker{}
 
 type IsAction struct {
-	Action kodex.Action
+	Action kodex.Action           `json:"-"`
 	Type   string                 `json:"type"`
 	Config map[string]interface{} `json:"config"`
 }
@@ -81,13 +81,13 @@ func MakeFormAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 	makeIsAction := func(config map[string]interface{}, context *forms.FormDescriptionContext) (forms.Validator, error) {
 		isAction := &IsAction{}
 		if params, err := IsActionForm.Validate(config); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error validating action form: %v", err)
 		} else if err := IsActionForm.Coerce(isAction, params); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error coercing action form: %v", err)
 		}
 		// to do: better action name (?)
 		if action, err := kodex.MakeAction(spec.Name, spec.Description, isAction.Type, spec.ID, isAction.Config, spec.Definitions); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error making action: %v", err)
 		} else if _, ok := action.(kodex.DoableAction); !ok {
 			return nil, fmt.Errorf("undoable action")
 		} else {

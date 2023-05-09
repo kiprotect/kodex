@@ -70,6 +70,50 @@ func Changes(changeRequest api.ChangeRequest) Element {
 
 }
 
+func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.ChangeRequest) Element {
+
+	router := UseRouter(c)
+
+	onSubmit := Func[any](c, func() {
+
+	})
+
+	return ui.MessageWithTitle(
+		"info",
+		Div(
+			Class("kip-col", "kip-is-lg"),
+			"Do you really want to merge this change request?",
+		),
+		Div(
+			P(
+				"Merging the request will apply all changes to the current project. This cannot be undone!",
+			),
+			Form(
+				Method("POST"),
+				OnSubmit(onSubmit),
+				Div(
+					Class("bulma-field", "bulma-is-grouped"),
+					P(
+						Class("bulma-control"),
+						A(
+							Class("bulma-button"),
+							Href(router.CurrentPath()),
+							"Cancel",
+						),
+					),
+					P(
+						Class("bulma-control"),
+						Button(
+							Class("bulma-button", "bulma-is-success"),
+							"Merge",
+						),
+					),
+				),
+			),
+		),
+	)
+}
+
 func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId, tab string) Element {
 	return func(c Context, changeRequestId, tab string) Element {
 
@@ -79,6 +123,7 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 
 		router := UseRouter(c)
 		controller := UseController(c)
+		showMergeRequest := Var(c, false)
 
 		// we retrieve the action configs of the project...
 		changeRequest, err := controller.ChangeRequest(Unhex(changeRequestId))
@@ -91,8 +136,18 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 		changeRequestIdVar := PersistentGlobalVar(c, "changeRequestId", "")
 
 		onSubmit := Func[any](c, func() {
-			changeRequestIdVar.Set(Hex(changeRequest.ID()))
-			router.RedirectTo(router.CurrentPath())
+
+			req := c.Request()
+
+			action := req.FormValue("action")
+
+			switch action {
+			case "edit":
+				changeRequestIdVar.Set(Hex(changeRequest.ID()))
+				router.RedirectTo(router.CurrentPath())
+			case "merge":
+				showMergeRequest.Set(true)
+			}
 		})
 
 		var content Element
@@ -110,37 +165,43 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 
 		return Div(
 			H2(Class("bulma-subtitle"), changeRequest.Title()),
-			ui.Tabs(
-				ui.Tab(ui.ActiveTab(tab == "description"), A(Href(Fmt("/projects/%s/changes/details/%s/description", Hex(project.ID()), changeRequestId)), "Description")),
-				ui.Tab(ui.ActiveTab(tab == "discussion"), A(Href(Fmt("/projects/%s/changes/details/%s/discussion", Hex(project.ID()), changeRequestId)), "Discussion")),
-				ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes/details/%s/changes", Hex(project.ID()), changeRequestId)), "Changes")),
-			),
-			content,
-			Hr(),
-			Form(
-				Class("bulma-is-inline"),
-				Method("POST"),
-				OnSubmit(onSubmit),
-				Div(
-					Class("bulma-buttons", "bulma-has-addons"),
-					If(
-						changeRequestIdVar.Get() != changeRequestId,
-						Button(
-							Name("action"),
-							Value("edit"),
-							Class("bulma-button"),
-							Type("submit"),
-							"Edit",
-						),
+			IfElse(
+				showMergeRequest.Get(),
+				MergeRequestNotice(c, project, changeRequest),
+				F(
+					ui.Tabs(
+						ui.Tab(ui.ActiveTab(tab == "description"), A(Href(Fmt("/projects/%s/changes/details/%s/description", Hex(project.ID()), changeRequestId)), "Description")),
+						ui.Tab(ui.ActiveTab(tab == "discussion"), A(Href(Fmt("/projects/%s/changes/details/%s/discussion", Hex(project.ID()), changeRequestId)), "Discussion")),
+						ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes/details/%s/changes", Hex(project.ID()), changeRequestId)), "Changes")),
 					),
-					If(
-						canMerge,
-						Button(
-							Name("action"),
-							Value("merge"),
-							Class("bulma-button"),
-							Type("submit"),
-							"Merge",
+					content,
+					Hr(),
+					Form(
+						Class("bulma-is-inline"),
+						Method("POST"),
+						OnSubmit(onSubmit),
+						Div(
+							Class("bulma-buttons", "bulma-has-addons"),
+							If(
+								changeRequestIdVar.Get() != changeRequestId,
+								Button(
+									Name("action"),
+									Value("edit"),
+									Class("bulma-button", "bulma-is-success"),
+									Type("submit"),
+									"Open",
+								),
+							),
+							If(
+								canMerge,
+								Button(
+									Name("action"),
+									Value("merge"),
+									Class("bulma-button", "bulma-is-primary"),
+									Type("submit"),
+									"Merge",
+								),
+							),
 						),
 					),
 				),

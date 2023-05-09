@@ -28,6 +28,9 @@ type InMemorySource struct {
 	name        string
 	description string
 	sourceType  string
+	createdAt   time.Time
+	updatedAt   time.Time
+	deletedAt   *time.Time
 	data        interface{}
 	reader      kodex.Reader
 	configData  map[string]interface{}
@@ -73,6 +76,33 @@ func (i *InMemorySource) Streams(status kodex.SourceStatus) ([]kodex.Stream, err
 	return streams, nil
 }
 
+func (i *InMemorySource) CreatedAt() time.Time {
+	return i.createdAt
+}
+
+func (i *InMemorySource) DeletedAt() *time.Time {
+	return i.deletedAt
+}
+
+func (i *InMemorySource) UpdatedAt() time.Time {
+	return i.updatedAt
+}
+
+func (i *InMemorySource) SetCreatedAt(t time.Time) error {
+	i.createdAt = t
+	return nil
+}
+
+func (i *InMemorySource) SetUpdatedAt(t time.Time) error {
+	i.updatedAt = t
+	return nil
+}
+
+func (i *InMemorySource) SetDeletedAt(t *time.Time) error {
+	i.deletedAt = t
+	return nil
+}
+
 func (i *InMemorySource) Delete() error {
 	return nil
 }
@@ -83,18 +113,6 @@ func (i *InMemorySource) ID() []byte {
 
 func (c *InMemorySource) InternalID() []byte {
 	return c.id
-}
-
-func (i *InMemorySource) CreatedAt() time.Time {
-	return time.Now().UTC()
-}
-
-func (i *InMemorySource) DeletedAt() *time.Time {
-	return nil
-}
-
-func (i *InMemorySource) UpdatedAt() time.Time {
-	return time.Now().UTC()
 }
 
 func (i *InMemorySource) ConfigData() map[string]interface{} {

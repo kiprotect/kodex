@@ -9,6 +9,7 @@ import (
 	ctrlHelpers "github.com/kiprotect/kodex/api/helpers/controller"
 	"github.com/kiprotect/kodex/web/ui"
 	"io"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -161,6 +162,48 @@ func Settings(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementF
 
 	return func(c Context) Element {
 
+		router := UseRouter(c)
+
+		return router.Match(
+			c,
+			Route("/export-blueprint",
+				c.ElementFunction("downloadBlueprint",
+					func(c Context) Element {
+
+						changedBlueprint, err := kodex.ExportBlueprint(project)
+
+						if err != nil {
+							return Div("Cannot download blueprint")
+						}
+
+						bytes, err := json.MarshalIndent(changedBlueprint, "", "  ")
+
+						if err != nil {
+							return Div("Cannot download blueprint")
+						}
+
+						c.SetRespondWith(func(c Context, w http.ResponseWriter) {
+							w.Header().Add("content-type", "application/json")
+							// w.Header().Add("content-disposition", "attachment; filename=blueprint.json;")
+							w.Write(bytes)
+						})
+
+						return nil
+					}),
+			),
+			Route(
+				"",
+				c.ElementFunction("settings", SettingsTab(project, onUpdate)),
+			),
+		)
+	}
+
+}
+
+func SettingsTab(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
+
+	return func(c Context) Element {
+
 		error := Var(c, "")
 		router := UseRouter(c)
 
@@ -214,7 +257,7 @@ func Settings(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementF
 
 		return F(
 			ui.MessageWithTitle(
-				"info",
+				"grey",
 				"Import Blueprint",
 				F(
 					P(
@@ -261,7 +304,7 @@ func Settings(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementF
 										),
 										Span(
 											Class("bulma-file-name"),
-											"screenshot",
+											"please select a file",
 										),
 									),
 								),
@@ -287,6 +330,22 @@ func Settings(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementF
 						    }
 						  }
 					`),
+				),
+			),
+			ui.MessageWithTitle(
+				"grey",
+				"Export Blueprint",
+				F(
+					P(
+						"You can export a blueprint to a JSON file.",
+					),
+					Br(),
+					A(
+						Href(Fmt("/projects/%s/settings/export-blueprint", Hex(project.ID()))),
+						Class("bulma-button", "bulma-is-success"),
+						Type("submit"),
+						"Export Blueprint",
+					),
 				),
 			),
 		)
@@ -413,6 +472,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			for _, changeSet := range changeRequest.Changes() {
 				if err := api.ApplyChanges(exportedBlueprint, changeSet.Changes); err != nil {
 					error.Set(Fmt("cannot apply changes: %v", err))
+				} else {
+					error.Set(Fmt("changes successfully applied"))
 				}
 			}
 
@@ -421,6 +482,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	importedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
 	importedProject, err := importedBlueprint.Create(ctrl, true)
+
+	error.Set(Fmt("Error importing project: %v", err))
 
 	if err != nil {
 

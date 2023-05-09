@@ -1,7 +1,9 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
+	"reflect"
 )
 
 type Op int
@@ -223,8 +225,7 @@ identifiers:
 		mapA, okA := a.(map[string]any)
 		mapB, okB := b.(map[string]any)
 
-		if withIds {
-
+		if withIds && okA && okB {
 			if mapA[identifier] == mapB[identifier] {
 				return true
 			}
@@ -421,19 +422,60 @@ func diffAny(a, b any, options DiffOptions) []Change {
 		return diffArray(taArray, tbArray, options)
 	}
 
-	if a != b {
-		// the value changed, we return an update c hange
-		return []Change{
-			{
-				Op:    Update,
-				Value: b,
-				Path:  []PathElement{},
-			},
+	aSlice, okASlice := a.([]byte)
+	bSlice, okBSlice := b.([]byte)
+
+	// we check if the two values are equal byte slices
+	if okASlice && okBSlice {
+		if bytes.Equal(aSlice, bSlice) {
+			return nil
 		}
 	}
 
-	// nothing changed
-	return nil
+	if a != nil && b != nil {
+
+		aType := reflect.TypeOf(a)
+		bType := reflect.TypeOf(b)
+		aValue := reflect.ValueOf(a)
+		bValue := reflect.ValueOf(b)
+
+		if aValue.CanConvert(bType) && bValue.CanConvert(aType) {
+			// we convert a to b's type (a')
+			aValueConverted := aValue.Convert(bType)
+			// we convert b to a's type (b')
+			bValueConverted := bValue.Convert(aType)
+
+			// to do: once on Go 1.20 we can probably use value.Equal(...)
+			// if both a' == b && a == b' it follows that a == b
+			// even if the types are different (e.g. float64 vs int64)
+			if aValueConverted.Interface() == b && bValueConverted.Interface() == a {
+				return nil
+			}
+		}
+
+	}
+
+	// to do: enable once we're on Go 1.20
+	// if aValue.Comparable() && bValue.Comparable() {
+	//	if a == b {
+	//		return nil
+	//	}
+	//}
+
+	// this might panic if the two values are not comparable
+	// code above should fix that in Go 1.20
+	if a == b {
+		return nil
+	}
+
+	// the value changed, we return an update c hange
+	return []Change{
+		{
+			Op:    Update,
+			Value: b,
+			Path:  []PathElement{},
+		},
+	}
 }
 
 type DiffOptions struct {

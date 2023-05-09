@@ -118,7 +118,7 @@ func (b *BaseActionConfig) checkActionConfig(actionType string, config map[strin
 			Definitions: definitions,
 		}
 		if _, err := definition.Maker(spec); err != nil {
-			return err
+			return fmt.Errorf("error making action '%s': %v", spec.Name, err)
 		}
 	}
 	return nil
@@ -158,12 +158,12 @@ func (b *BaseActionConfig) Update(values map[string]interface{}) error {
 func (b *BaseActionConfig) Create(values map[string]interface{}) error {
 
 	if params, err := ActionConfigForm.Validate(values); err != nil {
-		return err
+		return fmt.Errorf("error in action config form: %v", err)
 	} else {
 		actionType := params["type"].(string)
 		actionConfig := params["config"].(map[string]interface{})
 		if err := b.checkActionConfig(actionType, actionConfig); err != nil {
-			return err
+			return fmt.Errorf("error checking action config: %v", err)
 		}
 		return b.update(params)
 	}

@@ -32,6 +32,9 @@ type InMemoryStream struct {
 	description string
 	prio        float64
 	prioT       time.Time
+	createdAt   time.Time
+	updatedAt   time.Time
+	deletedAt   *time.Time
 	config      map[string]interface{}
 	configs     []kodex.Config
 	sources     map[string]kodex.SourceMap
@@ -67,6 +70,33 @@ func (c *InMemoryStream) Data() interface{} {
 
 func (c *InMemoryStream) SetData(data interface{}) error {
 	c.data = data
+	return nil
+}
+
+func (i *InMemoryStream) CreatedAt() time.Time {
+	return i.createdAt
+}
+
+func (i *InMemoryStream) DeletedAt() *time.Time {
+	return i.deletedAt
+}
+
+func (i *InMemoryStream) UpdatedAt() time.Time {
+	return i.updatedAt
+}
+
+func (i *InMemoryStream) SetCreatedAt(t time.Time) error {
+	i.createdAt = t
+	return nil
+}
+
+func (i *InMemoryStream) SetUpdatedAt(t time.Time) error {
+	i.updatedAt = t
+	return nil
+}
+
+func (i *InMemoryStream) SetDeletedAt(t *time.Time) error {
+	i.deletedAt = t
 	return nil
 }
 
@@ -151,18 +181,6 @@ func (i *InMemoryStream) Save() error {
 
 func (i *InMemoryStream) Refresh() error {
 	return nil
-}
-
-func (i *InMemoryStream) CreatedAt() time.Time {
-	return time.Now().UTC()
-}
-
-func (i *InMemoryStream) DeletedAt() *time.Time {
-	return nil
-}
-
-func (i *InMemoryStream) UpdatedAt() time.Time {
-	return time.Now().UTC()
 }
 
 func (i *InMemoryStream) Delete() error {

@@ -35,6 +35,9 @@ type InMemoryConfig struct {
 	description   string
 	version       string
 	source        string
+	createdAt     time.Time
+	updatedAt     time.Time
+	deletedAt     *time.Time
 	destinations  map[string][]kodex.DestinationMap
 	config        map[string]interface{}
 	data          interface{}
@@ -72,15 +75,30 @@ func (c *InMemoryConfig) Destinations() (map[string][]kodex.DestinationMap, erro
 	return c.destinations, nil
 }
 
-func (c *InMemoryConfig) UpdatedAt() time.Time {
-	return time.Now().UTC()
+func (i *InMemoryConfig) CreatedAt() time.Time {
+	return i.createdAt
 }
 
-func (c *InMemoryConfig) CreatedAt() time.Time {
-	return time.Now().UTC()
+func (i *InMemoryConfig) DeletedAt() *time.Time {
+	return i.deletedAt
 }
 
-func (c *InMemoryConfig) DeletedAt() *time.Time {
+func (i *InMemoryConfig) UpdatedAt() time.Time {
+	return i.updatedAt
+}
+
+func (i *InMemoryConfig) SetCreatedAt(t time.Time) error {
+	i.createdAt = t
+	return nil
+}
+
+func (i *InMemoryConfig) SetUpdatedAt(t time.Time) error {
+	i.updatedAt = t
+	return nil
+}
+
+func (i *InMemoryConfig) SetDeletedAt(t *time.Time) error {
+	i.deletedAt = t
 	return nil
 }
 

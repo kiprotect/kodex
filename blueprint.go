@@ -400,18 +400,26 @@ func initSources(project Project, config map[string]interface{}) error {
 }
 
 func initActionConfigs(project Project, config map[string]interface{}) error {
+
 	actionsConfig, ok := maps.ToStringMapList(config["actions"])
+
 	if !ok {
 		Log.Debug("actions config does not exist")
 		return nil
 	}
+
 	Log.Debug("Initializing actions...")
+
 	for _, actionConfig := range actionsConfig {
+
 		name, ok := actionConfig["name"].(string)
+
 		if !ok {
 			return fmt.Errorf("name is missing")
 		}
+
 		actionMapConfig, ok := maps.ToStringMap(actionConfig)
+
 		if !ok {
 			return fmt.Errorf("invalid config for action %s", name)
 		}
@@ -430,7 +438,7 @@ func initActionConfigs(project Project, config map[string]interface{}) error {
 		action := project.MakeActionConfig(id)
 
 		if err := action.Create(actionMapConfig); err != nil {
-			return err
+			return fmt.Errorf("error creating action '%s': %v", name, err)
 		}
 
 		if err := FixDates(action, actionMapConfig); err != nil {
@@ -652,7 +660,7 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 				return err
 			}
 
-			if err := FixDates(config, params); err != nil {
+			if err := FixDates(config, mapConfigConfig); err != nil {
 				return err
 			}
 
@@ -1046,23 +1054,22 @@ func (b *Blueprint) CreateWithProject(controller Controller, project Project) er
 func (b *Blueprint) createWithProject(controller Controller, project Project) error {
 
 	if err := initSources(project, b.config); err != nil {
-		return err
+		return fmt.Errorf("error creating sources: %v", err)
 	}
 	if err := initDestinations(project, b.config); err != nil {
-		return err
+		return fmt.Errorf("error creating destinations: %v", err)
 	}
 	if err := initActionConfigs(project, b.config); err != nil {
-		return err
+		return fmt.Errorf("error creating action configs: %v", err)
 	}
 	if err := initStreams(project, b.config); err != nil {
-		return err
+		return fmt.Errorf("error creating streams: %v", err)
 	}
 	if err := initKeys(project, b.config); err != nil {
-		return err
+		return fmt.Errorf("error creating keys: %v", err)
 	}
-
 	if err := controller.Commit(); err != nil {
-		return err
+		return fmt.Errorf("error committing changes: %v", err)
 	}
 
 	return nil
