@@ -1,4 +1,4 @@
-image: golang:1.16
+image: golang:1.20
 
 services:
   - redis:latest
