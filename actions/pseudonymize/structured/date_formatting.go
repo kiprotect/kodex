@@ -84,7 +84,7 @@ func (e Elements) Less(i, j int) bool {
 	return del.Order() < der.Order()
 }
 
-//helper function to parse date strings using a given format
+// helper function to parse date strings using a given format
 func parseDateString(format []FormatField, dateString string) ([]Type, error) {
 	/*
 		Parses a date string following the given format

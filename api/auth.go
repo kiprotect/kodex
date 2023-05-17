@@ -33,7 +33,7 @@ type UserProviderDefinitions map[string]UserProviderDefinition
 type UserProviderMaker func(settings kodex.Settings) (UserProvider, error)
 
 type UserProvider interface {
-	Initialize(group *gin.RouterGroup) error
+	Initialize(controller Controller, group *gin.RouterGroup) error
 	Get(controller Controller, request *http.Request) (*ExternalUser, error)
 }
 

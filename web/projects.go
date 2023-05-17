@@ -472,8 +472,6 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			for _, changeSet := range changeRequest.Changes() {
 				if err := api.ApplyChanges(exportedBlueprint, changeSet.Changes); err != nil {
 					error.Set(Fmt("cannot apply changes: %v", err))
-				} else {
-					error.Set(Fmt("changes successfully applied"))
 				}
 			}
 
@@ -483,9 +481,9 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	importedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
 	importedProject, err := importedBlueprint.Create(ctrl, true)
 
-	error.Set(Fmt("Error importing project: %v", err))
-
 	if err != nil {
+
+		error.Set(Fmt("Error importing project: %v", err))
 
 		if changeRequest != nil {
 

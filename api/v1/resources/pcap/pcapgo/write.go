@@ -45,18 +45,18 @@ type Writer struct {
 // to the given writer.  If this is a new empty writer (as opposed to
 // an append), you must call WriteFileHeader before WritePacket.
 //
-//  // Write a new file:
-//  f, _ := os.Create("/tmp/file.pcap")
-//  w := pcapgo.NewWriter(f)
-//  w.WriteFileHeader(65536, layers.LinkTypeEthernet)  // new file, must do this.
-//  w.WritePacket(gopacket.CaptureInfo{...}, data1)
-//  f.Close()
-//  // Append to existing file (must have same snaplen and linktype)
-//  f2, _ := os.OpenFile("/tmp/file.pcap", os.O_APPEND, 0700)
-//  w2 := pcapgo.NewWriter(f2)
-//  // no need for file header, it's already written.
-//  w2.WritePacket(gopacket.CaptureInfo{...}, data2)
-//  f2.Close()
+//	// Write a new file:
+//	f, _ := os.Create("/tmp/file.pcap")
+//	w := pcapgo.NewWriter(f)
+//	w.WriteFileHeader(65536, layers.LinkTypeEthernet)  // new file, must do this.
+//	w.WritePacket(gopacket.CaptureInfo{...}, data1)
+//	f.Close()
+//	// Append to existing file (must have same snaplen and linktype)
+//	f2, _ := os.OpenFile("/tmp/file.pcap", os.O_APPEND, 0700)
+//	w2 := pcapgo.NewWriter(f2)
+//	// no need for file header, it's already written.
+//	w2.WritePacket(gopacket.CaptureInfo{...}, data2)
+//	f2.Close()
 func NewWriter(w io.Writer) *Writer {
 	return &Writer{w: w}
 }

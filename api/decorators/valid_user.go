@@ -57,8 +57,8 @@ func CheckScopes(requiredScopes, userScopes []string) bool {
 	return false
 }
 
-//Makes sure that the user has provided a valid access token.
-//Stores the token, user ID and user in the context.
+// Makes sure that the user has provided a valid access token.
+// Stores the token, user ID and user in the context.
 func ValidUser(settings kodex.Settings, scopes []string, superUser bool) gin.HandlerFunc {
 
 	testDecorator := func(c *gin.Context) {

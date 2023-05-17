@@ -45,7 +45,7 @@ func InitializeRouterGroup(engine *gin.Engine, prefix string,
 		return nil, err
 	}
 
-	if err := userProvider.Initialize(endpoints); err != nil {
+	if err := userProvider.Initialize(controller, endpoints); err != nil {
 		return nil, err
 	}
 

@@ -81,7 +81,7 @@ func MakeInMemoryUserProvider(settings kodex.Settings) (api.UserProvider, error)
 	}
 }
 
-func (i *InMemoryUserProvider) Initialize(group *gin.RouterGroup) error {
+func (i *InMemoryUserProvider) Initialize(controller api.Controller, group *gin.RouterGroup) error {
 	return nil
 }
 
