@@ -274,19 +274,6 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 	)
 }
 
-func StringMapValidator(c Context, validator *forms.IsStringMap, path []string, onUpdate func(ChangeInfo, string)) Element {
-
-	return Div(
-		Style("flex-grow: 1;"),
-		H2(
-			Class("bulma-subtitle"),
-			"New map<string,any> validator",
-		),
-		Input(Class("bulma-control"), Type("checkbox")),
-		FormFields(c, validator.Form, onUpdate, path),
-	)
-}
-
 func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	router := UseRouter(c)
@@ -395,7 +382,9 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 
 		switch vt := validator.(type) {
 		case *forms.IsStringMap:
-			extraContent = FormFields(c, vt.Form, onUpdate, append(path, Fmt("%d", index)))
+			if vt.Form != nil {
+				extraContent = FormFields(c, vt.Form, onUpdate, append(path, Fmt("%d", index)))
+			}
 		default:
 			extraContent = Span(Fmt("don't know: %v", vt))
 		}

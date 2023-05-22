@@ -17,6 +17,7 @@
 package kodex
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"github.com/kiprotect/go-helpers/forms"
 )
@@ -145,7 +146,7 @@ func (b *BaseStream) MarshalJSON() ([]byte, error) {
 		"name":        b.Self.Name(),
 		"status":      b.Self.Status(),
 		"description": b.Self.Description(),
-		"project":     b.Self.Project(),
+		"projectID":   hex.EncodeToString(b.Self.Project().ID()),
 		"data":        b.Self.Data(),
 		"configs":     configs,
 		"sources":     sourcesList,

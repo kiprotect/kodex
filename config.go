@@ -284,6 +284,16 @@ func (b *BaseConfig) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 
+	actionConfigsList := make([]any, 0)
+
+	for _, actionConfig := range actionConfigs {
+		actionConfigData := map[string]any{
+			"name": actionConfig.Name(),
+		}
+
+		actionConfigsList = append(actionConfigsList, actionConfigData)
+	}
+
 	destinations, err := b.Self.Destinations()
 
 	if err != nil {
@@ -308,7 +318,7 @@ func (b *BaseConfig) MarshalJSON() ([]byte, error) {
 		"description":  b.Self.Description(),
 		"source":       b.Self.Source(),
 		"status":       b.Self.Status(),
-		"actions":      actionConfigs,
+		"actions":      actionConfigsList,
 		"destinations": destinationsList,
 		"version":      b.Self.Version(),
 		"data":         b.Self.Data(),
