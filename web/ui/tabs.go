@@ -1,7 +1,7 @@
 package ui
 
 import (
-	. "github.com/kiprotect/gospel"
+	. "github.com/gospel-dev/gospel"
 )
 
 func Tabs(args ...any) Element {

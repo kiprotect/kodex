@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/kiprotect/gospel"
+	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex/api"
 )
 
@@ -31,10 +31,7 @@ func AuthorizedContent(c Context) Element {
 
 	return F(
 		c.Element("navHeader", Navbar),
-		c.Element("contentWithSidebar", WithSidebar(
-			c.Element("sidebar", Sidebar),
-			c.Element("mainContent", MainContent),
-		)),
+		c.Element("mainContent", MainContent),
 	)
 
 }
@@ -186,6 +183,8 @@ func Root(controller api.Controller, plugins []WebPlugin) (func(c Context) Eleme
 
 		// we set the controller
 		SetController(c, controller)
+
+		SetPlugins(c, plugins)
 
 		return F(
 			Doctype("html"),

@@ -16,3 +16,8 @@
 
 @import 'accounts/index.scss';
 @import 'forms/index.scss';
+
+.bulma-container {
+    margin-top: $kip-navbar-height;
+    padding-top: 30px;
+}

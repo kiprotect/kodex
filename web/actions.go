@@ -2,7 +2,7 @@ package web
 
 import (
 	"bytes"
-	. "github.com/kiprotect/gospel"
+	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/web/ui"
 	"time"

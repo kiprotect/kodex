@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/kiprotect/gospel"
+	. "github.com/gospel-dev/gospel"
 )
 
 type Breadcrumb struct {

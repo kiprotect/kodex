@@ -8,7 +8,7 @@ require (
 	github.com/google/btree v1.1.2
 	github.com/google/gopacket v1.1.19
 	github.com/kiprotect/go-helpers v0.0.0-20211210144244-79ce90e73e79
-	github.com/kiprotect/gospel v0.0.0-00010101000000-000000000000
+	github.com/gospel-dev/gospel v0.0.0-00010101000000-000000000000
 	github.com/sirupsen/logrus v1.9.0
 	github.com/streadway/amqp v1.0.0
 	github.com/urfave/cli v1.22.9
@@ -40,6 +40,6 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/kiprotect/gospel => ../gospel
+replace github.com/gospel-dev/gospel => ../gospel
 
 replace github.com/kiprotect/go-helpers => ../go-helpers

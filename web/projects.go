@@ -3,7 +3,7 @@ package web
 import (
 	"bytes"
 	"encoding/json"
-	. "github.com/kiprotect/gospel"
+	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
 	ctrlHelpers "github.com/kiprotect/kodex/api/helpers/controller"

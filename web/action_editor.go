@@ -2,8 +2,8 @@ package web
 
 import (
 	"encoding/json"
+	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/go-helpers/forms"
-	. "github.com/kiprotect/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions"
 	"reflect"

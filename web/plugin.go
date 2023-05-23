@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/kiprotect/gospel"
+	"github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex/api"
 )
 
@@ -10,5 +10,5 @@ type WebPluginMaker interface {
 }
 
 type WebPlugin interface {
-	Root(gospel.Context) gospel.Element
+	MainRoutes(gospel.Context) []*gospel.RouteConfig
 }

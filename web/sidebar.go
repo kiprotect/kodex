@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/kiprotect/gospel"
+	. "github.com/gospel-dev/gospel"
 )
 
 func WithSidebar(sidebar Element, content Element) ElementFunction {

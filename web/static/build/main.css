@@ -15518,6 +15518,11 @@ ul.kip-menu-list li ul {
   background-color: #777;
 }
 
+.bulma-container {
+  margin-top: 3.25rem;
+  padding-top: 30px;
+}
+
 .kip-action-config p {
   margin-bottom: 16px;
 }

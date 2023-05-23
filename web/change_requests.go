@@ -2,7 +2,7 @@ package web
 
 import (
 	"encoding/json"
-	. "github.com/kiprotect/gospel"
+	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/web/ui"

@@ -2,7 +2,7 @@ package web
 
 import (
 	"fmt"
-	"github.com/kiprotect/gospel"
+	"github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex/api"
 )
 
