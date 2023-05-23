@@ -40,7 +40,32 @@ func AuthorizedContent(c Context) Element {
 }
 
 func Logout(c Context) Element {
-	return Div()
+
+	userProvider := UseUserProvider(c)
+	controller := UseController(c)
+
+	userProvider.Logout(controller, c.Request(), c.ResponseWriter())
+
+	return Section(
+		Class("kip-centered-card", "kip-is-info", "kip-is-fullheight"),
+		Div(
+			Class("kip-card", "kip-is-centered", "kip-account"),
+			Div(
+				Class("kip-card-header"),
+				Div(
+					Class("kip-card-title"),
+					H2("Logout"),
+				),
+			),
+			Div(
+				Class("kip-card-content", "kip-card-centered"),
+				P(
+					"You have been logged out. ",
+					A(Href("/login"), "Log back in."),
+				),
+			),
+		),
+	)
 }
 
 func Login(c Context) Element {

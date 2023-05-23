@@ -58,16 +58,22 @@ func Navbar(c Context) Element {
 									Class("fas", "fa-user-circle"),
 								),
 							),
-							Span(
-								Class("kip-overflow-ellipsis", "bulma-is-hidden-navbar"),
-								user.Email,
-							),
 						),
 					),
 					Div(
 						Class("kip-navbar-dropdown", "bulma-navbar-dropdown", "bulma-is-right"),
+						Div(
+							Class("bulma-dropdown-item"),
+							Span(
+								Class("kip-overflow-ellipsis"),
+								user.Email,
+							),
+						),
+						Hr(
+							Class("bulma-dropdown-divider"),
+						),
 						A(
-							Class("kip-navbar-dropdown__item", "bulma-dropdown-item"),
+							Class("bulma-dropdown-item"),
 							Href("/logout"),
 							Span(
 								Class("icon", "is-small"),

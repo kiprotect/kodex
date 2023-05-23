@@ -14815,7 +14815,7 @@ a.bulma-dropdown-item .icon {
 .kip-navbar-dropdown {
   max-width: 300px;
 }
-.kip-navbar-dropdown__item {
+.kip-navbar-dropdown .bulma-dropdown-item {
   display: block;
   overflow: hidden;
   font-weight: bold;

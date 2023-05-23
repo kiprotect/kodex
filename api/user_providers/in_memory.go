@@ -105,6 +105,11 @@ func extractAccessToken(request *http.Request) (string, bool) {
 	return result[1], true
 }
 
+func (i *InMemoryUserProvider) Logout(controller api.Controller, request *http.Request, writer http.ResponseWriter) error {
+	// currently we do not need any logout mechanism...
+	return nil
+}
+
 // Return a user with the given access token
 func (i *InMemoryUserProvider) Get(controller api.Controller, request *http.Request) (*api.ExternalUser, error) {
 

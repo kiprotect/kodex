@@ -34,6 +34,7 @@ type UserProviderMaker func(settings kodex.Settings) (UserProvider, error)
 
 type UserProvider interface {
 	Initialize(controller Controller, group *gin.RouterGroup) error
+	Logout(controller Controller, request *http.Request, writer http.ResponseWriter) error
 	Get(controller Controller, request *http.Request) (*ExternalUser, error)
 }
 
