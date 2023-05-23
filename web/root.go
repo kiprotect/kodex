@@ -171,7 +171,7 @@ func AppContent(c Context) Element {
 
 }
 
-func Root(controller api.Controller) (func(c Context) Element, error) {
+func Root(controller api.Controller, plugins []WebPlugin) (func(c Context) Element, error) {
 
 	userProvider, err := controller.UserProvider()
 
