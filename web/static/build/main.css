@@ -14881,7 +14881,6 @@ a.bulma-dropdown-item .icon {
   align-items: center;
   flex-shrink: 1;
   line-height: 1.5;
-  padding: 0.5rem 0.75rem;
   position: relative;
 }
 .kip-navbar .bulma-navbar-title {
@@ -14903,6 +14902,10 @@ a.bulma-dropdown-item .icon {
   .kip-navbar .bulma-navbar-title {
     margin-left: 10px;
   }
+}
+.kip-navbar .bulma-navbar-item,
+.kip-navbar .bulma-navbar-link {
+  height: 100%;
 }
 .kip-navbar .bulma-navbar-item::after,
 .kip-navbar .bulma-navbar-link::after {

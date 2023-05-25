@@ -77,7 +77,6 @@
         align-items: center;
         flex-shrink: 1;
         line-height: 1.5;
-        padding: 0.5rem 0.75rem;
         position: relative;
     }
 
@@ -101,6 +100,9 @@
     }
     .bulma-navbar-item,
     .bulma-navbar-link {
+
+        height: 100%;
+
         &::after {
             border-color: $kip-darkblue;
         }

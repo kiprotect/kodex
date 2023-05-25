@@ -6,51 +6,45 @@ import (
 
 func AppNavbar(c Context) Element {
 	return Div(
-		Class("bulma-navbar-end"),
-		Div(
-			Class("bulma-navbar-dropdown-menu", "bulma-navbar-item", "bulma-has-dropdown"),
-		),
-		Div(
-			Id("app-dropdown"),
-			Class("bulma-navbar-dropdown-menu", "bulma-navbar-item", "bulma-has-dropdown"),
-			A(
-				Attrib("aria-has-popup")("true"),
-				Attrib("aria-expanded")("true"),
-				Class("bulma-navbar-link"),
-				OnClick("toggleUserMenu(event)"),
-				Div(
-					Class("kip-nowrap"),
-					Span(
-						Class("icon", "is-small"),
-						I(
-							Class("fas", "fa-user-circle"),
-						),
+		Id("app-dropdown"),
+		Class("kip-navbar-dropdown-menu", "bulma-navbar-item", "bulma-has-dropdown"),
+		A(
+			Attrib("aria-has-popup")("true"),
+			Attrib("aria-expanded")("true"),
+			Class("bulma-navbar-link"),
+			OnClick("toggleUserMenu(event)"),
+			Div(
+				Class("kip-nowrap"),
+				Span(
+					Class("icon", "is-small"),
+					I(
+						Class("fas", "fa-th-large"),
 					),
 				),
 			),
+		),
+		Div(
+			Class("kip-navbar-dropdown", "bulma-navbar-dropdown", "bulma-is-right"),
 			Div(
-				Class("kip-navbar-dropdown", "bulma-navbar-dropdown", "bulma-is-right"),
-				Div(
-					Class("bulma-dropdown-item"),
-					Span(
-						Class("kip-overflow-ellipsis"),
-						"test",
+				Class("bulma-dropdown-item"),
+				Span(
+					Class("kip-overflow-ellipsis"),
+					"test",
+				),
+			),
+			Hr(
+				Class("bulma-dropdown-divider"),
+			),
+			A(
+				Class("bulma-dropdown-item"),
+				Href("/logout"),
+				Span(
+					Class("icon", "is-small"),
+					I(
+						Class("fas", "fa-sign-out-alt"),
 					),
 				),
-				Hr(
-					Class("bulma-dropdown-divider"),
-				),
-				A(
-					Class("bulma-dropdown-item"),
-					Href("/logout"),
-					Span(
-						Class("icon", "is-small"),
-						I(
-							Class("fas", "fa-sign-out-alt"),
-						),
-					),
-					"Logout",
-				),
+				"Logout",
 			),
 		),
 	)
@@ -62,51 +56,45 @@ func UserNavbar(c Context) Element {
 	user := UseExternalUser(c)
 
 	return Div(
-		Class("bulma-navbar-end"),
-		Div(
-			Class("bulma-navbar-dropdown-menu", "bulma-navbar-item", "bulma-has-dropdown"),
-		),
-		Div(
-			Id("user-dropdown"),
-			Class("bulma-navbar-dropdown-menu", "bulma-navbar-item", "bulma-has-dropdown"),
-			A(
-				Attrib("aria-has-popup")("true"),
-				Attrib("aria-expanded")("true"),
-				Class("bulma-navbar-link"),
-				OnClick("toggleUserMenu(event)"),
-				Div(
-					Class("kip-nowrap"),
-					Span(
-						Class("icon", "is-small"),
-						I(
-							Class("fas", "fa-user-circle"),
-						),
+		Id("user-dropdown"),
+		Class("kip-navbar-dropdown-menu", "bulma-navbar-item", "bulma-has-dropdown"),
+		A(
+			Attrib("aria-has-popup")("true"),
+			Attrib("aria-expanded")("true"),
+			Class("bulma-navbar-link"),
+			OnClick("toggleUserMenu(event)"),
+			Div(
+				Class("kip-nowrap"),
+				Span(
+					Class("icon", "is-small"),
+					I(
+						Class("fas", "fa-user-circle"),
 					),
 				),
 			),
+		),
+		Div(
+			Class("kip-navbar-dropdown", "bulma-navbar-dropdown", "bulma-is-right"),
 			Div(
-				Class("kip-navbar-dropdown", "bulma-navbar-dropdown", "bulma-is-right"),
-				Div(
-					Class("bulma-dropdown-item"),
-					Span(
-						Class("kip-overflow-ellipsis"),
-						user.Email,
+				Class("bulma-dropdown-item"),
+				Span(
+					Class("kip-overflow-ellipsis"),
+					user.Email,
+				),
+			),
+			Hr(
+				Class("bulma-dropdown-divider"),
+			),
+			A(
+				Class("bulma-dropdown-item"),
+				Href("/logout"),
+				Span(
+					Class("icon", "is-small"),
+					I(
+						Class("fas", "fa-sign-out-alt"),
 					),
 				),
-				Hr(
-					Class("bulma-dropdown-divider"),
-				),
-				A(
-					Class("bulma-dropdown-item"),
-					Href("/logout"),
-					Span(
-						Class("icon", "is-small"),
-						I(
-							Class("fas", "fa-sign-out-alt"),
-						),
-					),
-					"Logout",
-				),
+				"Logout",
 			),
 		),
 	)
@@ -141,9 +129,12 @@ func Navbar(c Context) Element {
 			),
 		),
 		Div(
-			Class("bulma-navbar-meanu"),
-			AppNavbar(c),
-			UserNavbar(c),
+			Class("bulma-navbar-menu"),
+			Div(
+				Class("bulma-navbar-end"),
+				AppNavbar(c),
+				UserNavbar(c),
+			),
 		),
 		Script(`
 
