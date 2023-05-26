@@ -625,12 +625,15 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 	}
 
 	for _, configConfig := range configConfigs {
+
 		name, ok := configConfig["name"].(string)
+
 		if !ok {
 			return fmt.Errorf("name is missing")
 		}
 
 		mapConfigConfig, ok := maps.ToStringMap(configConfig)
+
 		if !ok {
 			return fmt.Errorf("invalid config: %s", name)
 		}
@@ -644,7 +647,7 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 
 			configID, _ := params["id"].([]byte)
 
-			if config, err = stream.Config(name); err != nil {
+			if config, err = stream.Config(configID); err != nil {
 
 				if err != NotFound {
 					return err

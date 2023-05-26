@@ -55,9 +55,9 @@ func MakeInMemoryStream(id []byte, config map[string]interface{}, project *InMem
 	return stream, nil
 }
 
-func (c *InMemoryStream) Config(name string) (kodex.Config, error) {
+func (c *InMemoryStream) Config(id []byte) (kodex.Config, error) {
 	for _, config := range c.configs {
-		if config.Name() == name {
+		if string(config.ID()) == string(id) {
 			return config, nil
 		}
 	}
@@ -123,8 +123,8 @@ func (c *InMemoryStream) MakeConfig(id []byte) kodex.Config {
 }
 
 func (c *InMemoryStream) SaveConfig(config kodex.Config) error {
-	for _, config := range c.configs {
-		if string(config.ID()) == string(config.ID()) {
+	for _, existingConfig := range c.configs {
+		if string(existingConfig.ID()) == string(config.ID()) {
 			return nil
 		}
 	}

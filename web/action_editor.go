@@ -14,8 +14,6 @@ import (
 func ActionEditor(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) ElementFunction {
 	return func(c Context) Element {
 
-		kodex.Log.Infof("Config data: %v", action.ConfigData())
-
 		var content Element
 
 		switch action.ActionType() {

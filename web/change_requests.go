@@ -73,10 +73,55 @@ func Changes(changeRequest api.ChangeRequest) Element {
 func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.ChangeRequest) Element {
 
 	router := UseRouter(c)
+	error := Var(c, "")
 
 	onSubmit := Func[any](c, func() {
 
+		// we export the current blueprint
+		exportedBlueprint, err := kodex.ExportBlueprint(project)
+
+		if err != nil {
+			error.Set(Fmt("Cannot export blueprint: %v", err))
+			return
+		}
+
+		for _, changeSet := range changeRequest.Changes() {
+			if err := api.ApplyChanges(exportedBlueprint, changeSet.Changes); err != nil {
+				error.Set(Fmt("cannot apply changes: %v", err))
+				return
+			}
+		}
+
+		importedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
+
+		// we re-import the blueprint
+		_, err = importedBlueprint.Create(project.Controller(), false)
+
+		if err != nil {
+			error.Set(Fmt("Cannot import project: %v", err))
+			return
+		}
+
+		if err := changeRequest.Delete(); err != nil {
+			error.Set(Fmt("Cannot delete change request: %v", err))
+			return
+		}
+
+		// we remove the current change request
+		changeRequestId := PersistentGlobalVar(c, "changeRequestId", "")
+		changeRequestId.Set("")
+
+		router.RedirectTo(Fmt("/projects/%s", Hex(project.ID())))
 	})
+
+	var errorNotice Element
+
+	if error.Get() != "" {
+		errorNotice = P(
+			Class("bulma-help", "bulma-is-danger"),
+			error.Get(),
+		)
+	}
 
 	return ui.MessageWithTitle(
 		"info",
@@ -85,6 +130,7 @@ func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.Chan
 			"Do you really want to merge this change request?",
 		),
 		Div(
+			errorNotice,
 			P(
 				"Merging the request will apply all changes to the current project. This cannot be undone!",
 			),

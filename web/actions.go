@@ -268,13 +268,20 @@ func ActionsList(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 				c,
 				If(onUpdate != nil, Route("/new", c.Element("newAction", NewAction(project, onUpdate)))),
 				Route("", F(
-					ui.List(
-						ui.ListHeader(
-							ui.ListColumn("md", "Name"),
-							ui.ListColumn("sm", "Created At"),
-							ui.ListColumn("sm", "Type"),
+					IfElse(
+						len(ais) > 0,
+						ui.List(
+							ui.ListHeader(
+								ui.ListColumn("md", "Name"),
+								ui.ListColumn("sm", "Created At"),
+								ui.ListColumn("sm", "Type"),
+							),
+							ais,
 						),
-						ais,
+						ui.Message(
+							"info",
+							"No existing actions.",
+						),
 					),
 					If(onUpdate != nil,
 						A(

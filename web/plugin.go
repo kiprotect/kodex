@@ -12,3 +12,7 @@ type WebPluginMaker interface {
 type WebPlugin interface {
 	MainRoutes(gospel.Context) []*gospel.RouteConfig
 }
+
+type AppLinkPlugin interface {
+	AppLink() (string, string, string)
+}

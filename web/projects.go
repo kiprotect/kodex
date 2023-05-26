@@ -363,11 +363,10 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	controller := UseController(c)
 	user := UseExternalUser(c)
+	router := UseRouter(c)
 
 	// we load the project
 	projectVar := CachedVar(c, func() kodex.Project {
-
-		Log.Error("Loading project....")
 
 		project, err := controller.Project(Unhex(projectId))
 
@@ -514,9 +513,6 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 		changeRequest := changeRequestVar.Get()
 
-		// we persist the project changes (if there were any)
-		Log.Error("Updating blueprint...")
-
 		changedBlueprint, err := kodex.ExportBlueprint(importedProject)
 
 		if err != nil {
@@ -527,8 +523,6 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		changes := api.DiffWithOptions(exportedBlueprint, changedBlueprint, api.DiffOptions{
 			Identifiers: []string{"id", "name"},
 		})
-
-		Log.Info("Changes: %v", changes)
 
 		changeSets := changeRequest.Changes()
 
@@ -589,99 +583,108 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		),
 	)
 
-	switch tab {
-	case "streams":
-		content = c.Element("streams", Streams(importedProject, onUpdate))
-	case "actions":
-		content = c.Element("actions", Actions(importedProject, onUpdate))
-	case "changes":
-		content = c.Element("changes", ChangeRequests(importedProject))
-	case "settings":
-		content = c.Element("settings", Settings(importedProject, onUpdate))
-	default:
-		content = Div("...")
-	}
+	mainContent := func(c Context) Element {
 
-	onDoneEditing := Func[any](c, func() {
-		changeRequestId.Set("")
-		router := UseRouter(c)
-		router.RedirectTo(router.CurrentPath())
-	})
+		switch tab {
+		case "streams":
+			content = c.Element("streams", Streams(importedProject, onUpdate))
+		case "actions":
+			content = c.Element("actions", Actions(importedProject, onUpdate))
+		case "changes":
+			content = c.Element("changes", ChangeRequests(project))
+		case "settings":
+			content = c.Element("settings", Settings(importedProject, onUpdate))
+		default:
+			content = Div("...")
+		}
 
-	return Div(
-		Div(
-			Class("bulma-content"),
-			H2(Class("bulma-title"), project.Name()),
-		),
-		Div(
-			Class("bulma-tags"),
-			Span(
-				Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
-				Fmt("last modified: %s", HumanDuration(time.Now().Sub(project.CreatedAt()))),
+		onDoneEditing := Func[any](c, func() {
+			changeRequestId.Set("")
+			router := UseRouter(c)
+			router.RedirectTo(router.CurrentPath())
+		})
+
+		return Div(
+			Div(
+				Class("bulma-content"),
+				H2(Class("bulma-title"), project.Name()),
 			),
-		),
-
-		If(
-			onUpdate == nil,
-			ui.Message("warning",
-				F(
-					I(
-						Class("fa", "fa-lock"),
-					),
-					" Read-only mode, please open a change request to edit project.",
+			Div(
+				Class("bulma-tags"),
+				Span(
+					Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
+					Fmt("last modified: %s", HumanDuration(time.Now().Sub(project.CreatedAt()))),
 				),
 			),
-		),
-		DoIf(
-			changeRequest != nil,
-			func() Element {
-				return F(
-					ui.Message("info",
-						F(
-							I(
-								Class("fa", "fa-check"),
-							),
-							" Working on change request ",
-							A(
-								Href(
-									Fmt("/projects/%s/changes/details/%s",
-										projectId,
-										Hex(changeRequest.ID()),
-									),
+
+			If(
+				onUpdate == nil,
+				ui.Message("warning",
+					F(
+						I(
+							Class("fa", "fa-lock"),
+						),
+						" Read-only mode, please open a change request to edit project.",
+					),
+				),
+			),
+			DoIf(
+				changeRequest != nil,
+				func() Element {
+					return F(
+						ui.Message("info",
+							F(
+								I(
+									Class("fa", "fa-check"),
 								),
-								changeRequest.Title(),
-							),
-							Fmt(", %d changes so far.", len(changeRequest.Changes())),
-							Form(
-								Method("POST"),
-								OnSubmit(onDoneEditing),
-								Div(
-									Class("bulma-field"),
-									P(
-										Class("bulma-control"),
-										Button(
-											Class("bulma-button", "bulma-is-info"),
-											Type("submit"),
-											"Finish work",
+								" Working on change request ",
+								A(
+									Href(
+										Fmt("/projects/%s/changes/details/%s",
+											projectId,
+											Hex(changeRequest.ID()),
+										),
+									),
+									changeRequest.Title(),
+								),
+								Fmt(", %d changes so far.", len(changeRequest.Changes())),
+								Form(
+									Method("POST"),
+									OnSubmit(onDoneEditing),
+									Div(
+										Class("bulma-field"),
+										P(
+											Class("bulma-control"),
+											Button(
+												Class("bulma-button", "bulma-is-info"),
+												Type("submit"),
+												"Finish work",
+											),
 										),
 									),
 								),
 							),
 						),
-					),
-				)
-			},
-		),
-		If(error.Get() != "", ui.Message("danger", error.Get())),
-		ui.Tabs(
-			ui.Tab(ui.ActiveTab(tab == "streams"), A(Href(Fmt("/projects/%s/streams", projectId)), "Streams")),
-			ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),
-			ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Change Requests")),
-			ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(Fmt("/projects/%s/settings", projectId)), "Settings")),
-		),
-		content,
-		Hr(),
-		roles,
+					)
+				},
+			),
+			If(error.Get() != "", ui.Message("danger", error.Get())),
+			ui.Tabs(
+				ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),
+				ui.Tab(ui.ActiveTab(tab == "streams"), A(Href(Fmt("/projects/%s/streams", projectId)), "Streams")),
+				ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Change Requests")),
+				ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(Fmt("/projects/%s/settings", projectId)), "Settings")),
+			),
+			content,
+			Hr(),
+			roles,
+		)
+	}
+
+	return router.Match(
+		c,
+		If(tab == "streams", Route("/details/(?P<streamId>[^/]+)(?:/(?P<tab>configs|sources))?", StreamDetails(importedProject, onUpdate))),
+		Route("", mainContent),
 	)
 }
 

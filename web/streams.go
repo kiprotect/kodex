@@ -18,7 +18,6 @@ func Streams(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFu
 		return F(
 			router.Match(
 				c,
-				Route("/details/(?P<streamId>[^/]+)(?:/(?P<tab>edit|test))?", StreamDetails(project, onUpdate)),
 				Route("", StreamsList(project, onUpdate)),
 			),
 		)
@@ -30,13 +29,13 @@ func StreamDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 	return func(c Context, streamId, tab string) Element {
 
 		if tab == "" {
-			tab = "edit"
+			tab = "configs"
 		}
 
 		stream, err := project.Controller().Stream(Unhex(streamId))
 
 		if err != nil {
-			return nil
+			return Div(Fmt("can't find stream: %v (%s)", err, streamId))
 		}
 
 		// make sure this stream belongs to the project...
@@ -109,50 +108,61 @@ func StreamDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 		var content Element
 
 		switch tab {
+		case "configs":
+			content = c.Element("streamConfigs", StreamConfigs(stream, onUpdate))
+		case "sources":
+			content = Div("coming soon...")
 		}
 
-		return Div(
-			H2(
-				Class("bulma-subtitle"),
-				router.Match(
-					c,
-					If(onUpdate != nil,
-						Route("/name/edit",
-							c.ElementFunction("editName", editStreamName),
+		mainContent := func(c Context) Element {
+			return Div(
+				H2(
+					Class("bulma-title"),
+					router.Match(
+						c,
+						If(onUpdate != nil,
+							Route("/name/edit",
+								c.ElementFunction("editName", editStreamName),
+							),
 						),
-					),
-					Route("/configs", StreamConfigs(stream, onUpdate)),
-					Route("",
-						F(
-							stream.Name(),
-							If(onUpdate != nil,
-								A(
-									Style("float: right"),
-									Href(router.CurrentRoute().Path+"/name/edit"),
-									"&nbsp;&nbsp;",
-									I(Class("fas fa-edit")),
+						Route("",
+							F(
+								"Stream: ",
+								stream.Name(),
+								If(onUpdate != nil,
+									A(
+										Style("float: right"),
+										Href(router.CurrentRoute().Path+"/name/edit"),
+										"&nbsp;&nbsp;",
+										I(Class("fas fa-edit")),
+									),
 								),
 							),
 						),
 					),
 				),
-			),
-			Div(
-				Class("bulma-tags"),
-				Span(
-					Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
-					Fmt("last modified: %s", HumanDuration(time.Now().Sub(stream.CreatedAt()))),
+				Div(
+					Class("bulma-tags"),
+					Span(
+						Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
+						Fmt("last modified: %s", HumanDuration(time.Now().Sub(stream.CreatedAt()))),
+					),
 				),
-			),
-			Div(Class("bulma-content"), IfElse(stream.Description() != "", stream.Description(), "(no description given)")),
-			ui.Tabs(
-				ui.Tab(ui.ActiveTab(tab == "edit"), A(Href(Fmt("/projects/%s/streams/details/%s/edit", Hex(project.ID()), streamId)), "Edit")),
-				ui.Tab(ui.ActiveTab(tab == "test"), A(Href(Fmt("/projects/%s/streams/details/%s/test", Hex(project.ID()), streamId)), "Test")),
-			),
-			content,
+				Div(Class("bulma-content"), IfElse(stream.Description() != "", stream.Description(), "(no description given)")),
+				ui.Tabs(
+					ui.Tab(ui.ActiveTab(tab == "configs"), A(Href(Fmt("/projects/%s/streams/details/%s/configs", Hex(project.ID()), streamId)), "Configs")),
+					ui.Tab(ui.ActiveTab(tab == "sources"), A(Href(Fmt("/projects/%s/streams/details/%s/sources", Hex(project.ID()), streamId)), "Sources")),
+				),
+				content,
+			)
+		}
+
+		return router.Match(
+			c,
+			If(tab == "configs", Route("/details/(?P<configId>[^/]+)(?:/(?P<tab>actions|settings))?", StreamConfigDetails(stream, onUpdate))),
+			Route("", mainContent),
 		)
 	}
-
 }
 
 func NewStream(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
@@ -254,12 +264,20 @@ func StreamsList(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 				c,
 				If(onUpdate != nil, Route("/new", c.Element("newStream", NewStream(project, onUpdate)))),
 				Route("", F(
-					ui.List(
-						ui.ListHeader(
-							ui.ListColumn("md", "Name"),
-							ui.ListColumn("sm", "Created At"),
+
+					IfElse(
+						len(ais) > 0,
+						ui.List(
+							ui.ListHeader(
+								ui.ListColumn("md", "Name"),
+								ui.ListColumn("sm", "Created At"),
+							),
+							ais,
 						),
-						ais,
+						ui.Message(
+							"info",
+							"No existing streams.",
+						),
 					),
 					If(onUpdate != nil,
 						A(

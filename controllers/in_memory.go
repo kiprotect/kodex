@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"bytes"
-	"encoding/hex"
 	"fmt"
 	"github.com/kiprotect/kodex"
 	"sync"
@@ -290,7 +289,6 @@ outer:
 				return nil, fmt.Errorf("unknown filter key: %s", key)
 			}
 		}
-		kodex.Log.Infof("%s ---", hex.EncodeToString(actionConfig.ID()))
 		actionConfigs = append(actionConfigs, actionConfig)
 	}
 

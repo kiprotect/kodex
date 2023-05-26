@@ -18,9 +18,27 @@ func StreamConfigs(stream kodex.Stream, onUpdate func(ChangeInfo, string)) Eleme
 		return F(
 			router.Match(
 				c,
-				Route("/details/(?P<configId>[^/]+)(?:/(?P<tab>edit|test))?", StreamConfigDetails(stream, onUpdate)),
 				Route("", StreamConfigsList(stream, onUpdate)),
 			),
+		)
+	}
+}
+
+func ConfigSettings(config kodex.Config, onUpdate func(ChangeInfo, string)) func(c Context) Element {
+	return func(c Context) Element {
+		return F(
+			H2(
+				Class("bulma-subtitle"),
+				"API URL",
+			),
+			P(
+				"To transform data using this config, use the following URL in a POST request, e.g. ", Code("curl -X POST -h \"Content-Type: application/json\" -d '{\"items\": [...]}' ..."),
+			),
+			Hr(),
+			Pre(
+				Span(Id("host")), Fmt("/api/v1/configs/%s/transform", Hex(config.ID())),
+			),
+			Script(`host.innerText = location.protocol + '//' + location.host;`),
 		)
 	}
 }
@@ -30,13 +48,13 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 	return func(c Context, configId, tab string) Element {
 
 		if tab == "" {
-			tab = "edit"
+			tab = "actions"
 		}
 
-		config, err := stream.Config(configId)
+		config, err := stream.Config(Unhex(configId))
 
 		if err != nil {
-			return nil
+			return Div(Fmt("Cannot get config %s...", configId))
 		}
 
 		// make sure this config belongs to the stream...
@@ -44,6 +62,7 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 			return nil
 		}
 
+		AddBreadcrumb(c, "Configs", "")
 		AddBreadcrumb(c, config.Name(), Fmt("/details/%s", Hex(config.ID())))
 
 		router := UseRouter(c)
@@ -109,11 +128,17 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 		var content Element
 
 		switch tab {
+		case "actions":
+			content = c.Element("configActions", ConfigActionsList(config, onUpdate))
+		case "settings":
+			content = c.Element("configSettings", ConfigSettings(config, onUpdate))
 		}
+
+		basePath := Fmt("/projects/%s/streams/details/%s/configs/details/%s", Hex(stream.Project().ID()), Hex(stream.ID()), configId)
 
 		return Div(
 			H2(
-				Class("bulma-subtitle"),
+				Class("bulma-title"),
 				router.Match(
 					c,
 					If(onUpdate != nil,
@@ -123,6 +148,7 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 					),
 					Route("",
 						F(
+							"Config: ",
 							config.Name(),
 							If(onUpdate != nil,
 								A(
@@ -140,13 +166,17 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 				Class("bulma-tags"),
 				Span(
 					Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
+					Fmt("id: %s", Hex(config.ID())),
+				),
+				Span(
+					Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
 					Fmt("last modified: %s", HumanDuration(time.Now().Sub(config.CreatedAt()))),
 				),
 			),
 			Div(Class("bulma-content"), IfElse(config.Description() != "", config.Description(), "(no description given)")),
 			ui.Tabs(
-				ui.Tab(ui.ActiveTab(tab == "edit"), A(Href(Fmt("/streams/details/%s/configs/details/%s/edit", Hex(stream.ID()), configId)), "Edit")),
-				ui.Tab(ui.ActiveTab(tab == "test"), A(Href(Fmt("/streams/details/%s/configs/details/%s/test", Hex(stream.ID()), configId)), "Test")),
+				ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(basePath+"/actions"), "Actions")),
+				ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(basePath+"/settings"), "Settings")),
 			),
 			content,
 		)
@@ -180,7 +210,7 @@ func NewStreamConfig(stream kodex.Stream, onUpdate func(ChangeInfo, string)) Ele
 
 			configs, _ := stream.Configs()
 
-			kodex.Log.Infof("Configs: %s", configs)
+			kodex.Log.Infof("Configs: %d", len(configs))
 
 		})
 
@@ -256,12 +286,19 @@ func StreamConfigsList(stream kodex.Stream, onUpdate func(ChangeInfo, string)) E
 				c,
 				If(onUpdate != nil, Route("/new", c.Element("newStreamConfig", NewStreamConfig(stream, onUpdate)))),
 				Route("", F(
-					ui.List(
-						ui.ListHeader(
-							ui.ListColumn("md", "Name"),
-							ui.ListColumn("sm", "Created At"),
+					IfElse(
+						len(ais) > 0,
+						ui.List(
+							ui.ListHeader(
+								ui.ListColumn("md", "Name"),
+								ui.ListColumn("sm", "Created At"),
+							),
+							ais,
 						),
-						ais,
+						ui.Message(
+							"info",
+							"No existing configs.",
+						),
 					),
 					If(onUpdate != nil,
 						A(

@@ -259,7 +259,6 @@ func (i *BasicInternalWriter) Teardown() error {
 }
 
 func (i *BasicInternalWriter) Close() error {
-	Log.Info("Closing internal writer...")
 	return nil
 }
 

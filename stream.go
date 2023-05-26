@@ -40,7 +40,7 @@ type Stream interface {
 	Processable // Processable includes Model
 	PriorityModel
 	Configs() ([]Config, error)
-	Config(string) (Config, error)
+	Config(id []byte) (Config, error)
 	MakeConfig(id []byte) Config
 
 	AddSource(Source, SourceStatus) error
