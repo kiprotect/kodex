@@ -137,7 +137,7 @@ func (c *InMemoryStream) Configs() ([]kodex.Config, error) {
 }
 
 func (c *InMemoryStream) ID() []byte {
-	return []byte(c.name)
+	return c.id
 }
 
 func (c *InMemoryStream) InternalID() []byte {

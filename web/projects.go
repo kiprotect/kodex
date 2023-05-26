@@ -528,6 +528,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			Identifiers: []string{"id", "name"},
 		})
 
+		Log.Info("Changes: %v", changes)
+
 		changeSets := changeRequest.Changes()
 
 		changeSet := api.ChangeSet{
@@ -588,6 +590,8 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	)
 
 	switch tab {
+	case "streams":
+		content = c.Element("streams", Streams(importedProject, onUpdate))
 	case "actions":
 		content = c.Element("actions", Actions(importedProject, onUpdate))
 	case "changes":
@@ -670,6 +674,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		),
 		If(error.Get() != "", ui.Message("danger", error.Get())),
 		ui.Tabs(
+			ui.Tab(ui.ActiveTab(tab == "streams"), A(Href(Fmt("/projects/%s/streams", projectId)), "Streams")),
 			ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),
 			ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Change Requests")),
 			ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(Fmt("/projects/%s/settings", projectId)), "Settings")),
