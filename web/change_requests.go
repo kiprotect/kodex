@@ -273,7 +273,7 @@ func NewChangeRequest(project kodex.Project) ElementFunction {
 				return
 			}
 
-			changeRequest, err := controller.MakeChangeRequest(project, user)
+			changeRequest, err := controller.MakeChangeRequest(nil, project, user)
 
 			if err != nil {
 				error.Set(Fmt("Cannot create change request: %v", err))
@@ -340,7 +340,7 @@ func ChangeRequestList(project kodex.Project) ElementFunction {
 
 		if err != nil {
 			// to do: error handling
-			return nil
+			return Div(Fmt("Cannot show change requests: %v", err))
 		}
 
 		cri := make([]Element, 0, len(changeRequests))

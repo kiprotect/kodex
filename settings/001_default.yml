@@ -13,6 +13,7 @@ user-provider:
     users:
       - email: max@mustermann.de
         id: max-mustermann
+        displayName: Max Mustermann
         accessToken:
           token: aabbccdd # the token use to authenticate against the API
           scopes: [kiprotect:api] # grants access to everything

@@ -572,7 +572,7 @@ outer:
 	for _, project := range c.projects {
 		for key, value := range filters {
 			switch key {
-			case "ID":
+			case "id":
 				switch tv := value.(type) {
 				case []byte:
 					if !bytes.Equal(project.ID(), tv) {

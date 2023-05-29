@@ -224,15 +224,29 @@ func (c *InMemoryController) MakeOrganization() api.Organization {
 /* Change Requests */
 
 func (c *InMemoryController) ChangeRequests(object kodex.Model) ([]api.ChangeRequest, error) {
-	return nil, fmt.Errorf("not implemented")
+	requests := make([]api.ChangeRequest, 0)
+	for _, request := range c.changeRequests {
+		if request.ObjectType() == object.Type() && string(request.ObjectID()) == string(object.ID()) {
+			requests = append(requests, request)
+		}
+	}
+	return requests, nil
+
 }
 
 func (c *InMemoryController) ChangeRequest(id []byte) (api.ChangeRequest, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	if request, ok := c.changeRequests[string(id)]; ok {
+		return request, nil
+	}
+	return nil, kodex.NotFound
 }
 
-func (c *InMemoryController) MakeChangeRequest(object kodex.Model, user api.User) (api.ChangeRequest, error) {
-	changeRequest := MakeInMemoryChangeRequest(object.Type(), object.ID(), user, c)
+func (c *InMemoryController) MakeChangeRequest(id []byte, object kodex.Model, user api.User) (api.ChangeRequest, error) {
+	if id == nil {
+		id = kodex.RandomID()
+	}
+	changeRequest := MakeInMemoryChangeRequest(id, object.Type(), object.ID(), user, c)
 	return changeRequest, nil
 }
 

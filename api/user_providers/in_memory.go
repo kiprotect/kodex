@@ -90,8 +90,13 @@ func (i *InMemoryUserProvider) Create(user *api.ExternalUser) error {
 	return nil
 }
 
-func extractAccessToken(request *http.Request) (string, bool) {
-	authorizationHeader := request.Header.Get("Authorization")
+func extractAccessToken(r *http.Request) (string, bool) {
+
+	if authCookie, err := r.Cookie("kodex-auth"); err == nil {
+		return authCookie.Value, true
+	}
+
+	authorizationHeader := r.Header.Get("Authorization")
 
 	if authorizationHeader == "" {
 		return "", false

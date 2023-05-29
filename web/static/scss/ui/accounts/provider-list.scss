@@ -6,17 +6,16 @@
         line-height: 17px;
         margin-bottom: 24px;
     }
-    .list {
+    ul {
+
         display: inline-block;
         width: 100%;
+
+        li:not(:last-of-type) {
+            margin-bottom: 1em;
+        }
     }
-    .item:not(:last-of-type) {
-        margin-bottom: 1em;
-    }
-    .bulma-button {
-        @include font-oxanium;
-        width: 100%;
-    }
+
     .bulma-button:not(.bulma-is-success) {
         color: #555;
     }

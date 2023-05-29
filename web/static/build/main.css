@@ -15284,16 +15284,12 @@ ul.kip-menu-list li ul {
   line-height: 17px;
   margin-bottom: 24px;
 }
-.kip-provider-list .list {
+.kip-provider-list ul {
   display: inline-block;
   width: 100%;
 }
-.kip-provider-list .item:not(:last-of-type) {
+.kip-provider-list ul li:not(:last-of-type) {
   margin-bottom: 1em;
-}
-.kip-provider-list .bulma-button {
-  font-family: Oxanium, sans-serif;
-  width: 100%;
 }
 .kip-provider-list .bulma-button:not(.bulma-is-success) {
   color: #555;

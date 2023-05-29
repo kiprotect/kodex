@@ -40,11 +40,12 @@ type InMemoryChangeRequest struct {
 	controller  *InMemoryController
 }
 
-func MakeInMemoryChangeRequest(objectType string, objectID []byte, user api.User, controller *InMemoryController) api.ChangeRequest {
+func MakeInMemoryChangeRequest(id []byte, objectType string, objectID []byte, user api.User, controller *InMemoryController) api.ChangeRequest {
 	inMemoryChangeRequest := &InMemoryChangeRequest{
 		BaseChangeRequest: api.BaseChangeRequest{
 			Creator_: user,
 		},
+		id:         id,
 		changes:    []api.ChangeSet{},
 		objectID:   objectID,
 		objectType: objectType,

@@ -143,7 +143,7 @@ func CreateChangeRequest(c *gin.Context) {
 		return
 	}
 
-	request, err := controller.MakeChangeRequest(object, apiUser)
+	request, err := controller.MakeChangeRequest(nil, object, apiUser)
 
 	if err != nil {
 		api.HandleError(c, 500, err)

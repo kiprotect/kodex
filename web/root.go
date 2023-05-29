@@ -3,6 +3,8 @@ package web
 import (
 	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex/api"
+	"net/http"
+	"time"
 )
 
 func AuthorizedContent(c Context) Element {
@@ -23,7 +25,7 @@ func AuthorizedContent(c Context) Element {
 	apiUser, err := externalUser.ApiUser(controller)
 
 	if err != nil {
-		return Div("errr")
+		return Div(Fmt("Cannot get user: %v", err))
 	}
 
 	SetExternalUser(c, externalUser)
@@ -59,6 +61,80 @@ func Logout(c Context) Element {
 				P(
 					"You have been logged out. ",
 					A(Href("/login"), "Log back in."),
+				),
+			),
+		),
+	)
+}
+
+func TokenLogin(c Context) Element {
+
+	token := Var(c, "")
+	error := Var(c, "")
+	router := UseRouter(c)
+	onSubmit := Func[any](c, func() {
+
+		if token.Get() == "" {
+			error.Set("Please enter a token value")
+			return
+		}
+
+		w := c.ResponseWriter()
+
+		http.SetCookie(w, &http.Cookie{Path: "/", Name: "kodex-auth", Value: token.Get(), Secure: false, HttpOnly: true, Expires: time.Now().Add(365 * 24 * 7 * time.Hour)})
+
+		router.RedirectTo("/")
+
+	})
+
+	var errorNotice Element
+
+	if error.Get() != "" {
+		errorNotice = P(
+			Class("bulma-help", "bulma-is-danger"),
+			error.Get(),
+		)
+	}
+
+	return Section(
+		Class("kip-centered-card", "kip-is-info", "kip-is-fullheight"),
+		Div(
+			Class("kip-card", "kip-is-centered", "kip-account"),
+			Div(
+				Class("kip-card-header"),
+				Div(
+					Class("kip-card-title"),
+					H2("Login"),
+				),
+			),
+			Div(
+				Class("kip-card-content", "kip-card-centered"),
+				Form(
+					Method("POST"),
+					OnSubmit(onSubmit),
+					Div(
+						Class("bulma-field"),
+						errorNotice,
+						Label(
+							Class("bulma-label", "Token"),
+							Input(
+								Class("bulma-input", If(error.Get() != "", "bulma-is-danger")),
+								Value(token),
+								Placeholder("Token value"),
+							),
+						),
+					),
+					Div(
+						Class("bulma-field"),
+						P(
+							Class("bulma-control"),
+							Button(
+								Class("bulma-button", "bulma-is-success"),
+								Type("submit"),
+								"Log in via token",
+							),
+						),
+					),
 				),
 			),
 		),
@@ -103,6 +179,15 @@ func Login(c Context) Element {
 										Button(
 											Class("bulma-button", "bulma-is-success", "bulma-is-flex"),
 											"Log in via SSO",
+										),
+									),
+								),
+								Li(
+									A(
+										Href("/token-login"),
+										Button(
+											Class("bulma-button", "bulma-is-success", "bulma-is-flex"),
+											"Log in via Access Token",
 										),
 									),
 								),
@@ -161,6 +246,7 @@ func AppContent(c Context) Element {
 	return router.Match(
 		c,
 		Route("/login", Login),
+		Route("/token-login", TokenLogin),
 		Route("/logout", Logout),
 		Route("/404", NotFound),
 		Route("", AuthorizedContent),

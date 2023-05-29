@@ -16,3 +16,7 @@ type WebPlugin interface {
 type AppLinkPlugin interface {
 	AppLink() (string, string, string)
 }
+
+type UserProviderPlugin interface {
+	LoginPath() string
+}
