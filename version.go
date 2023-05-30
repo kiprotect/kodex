@@ -1,3 +1,3 @@
 package kodex
 
-var Version = "1.0"
+var Version = "development"

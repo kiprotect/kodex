@@ -2,6 +2,7 @@ package web
 
 import (
 	. "github.com/gospel-dev/gospel"
+	"github.com/kiprotect/kodex"
 )
 
 func Dropdown(c Context, id, icon string, items []Element) Element {
@@ -118,7 +119,7 @@ func Navbar(c Context) Element {
 						),
 						Span(
 							Class("kip-version"),
-							"latest",
+							kodex.Version,
 						),
 					),
 				),

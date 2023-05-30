@@ -6,17 +6,26 @@
         line-height: 17px;
         margin-bottom: 24px;
     }
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+
     ul {
 
-        display: inline-block;
-        width: 100%;
+        max-width: 200px;
 
         li:not(:last-of-type) {
             margin-bottom: 1em;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
     }
 
     .bulma-button:not(.bulma-is-success) {
         color: #555;
+        width: 100%;
     }
 }

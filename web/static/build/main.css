@@ -15279,20 +15279,29 @@ ul.kip-menu-list li ul {
   flex: 10;
 }
 
+.kip-provider-list {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+}
 .kip-provider-list .label {
   font-size: 14px;
   line-height: 17px;
   margin-bottom: 24px;
 }
 .kip-provider-list ul {
-  display: inline-block;
-  width: 100%;
+  max-width: 200px;
 }
 .kip-provider-list ul li:not(:last-of-type) {
   margin-bottom: 1em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .kip-provider-list .bulma-button:not(.bulma-is-success) {
   color: #555;
+  width: 100%;
 }
 
 .bulma-button.kip-no-text {

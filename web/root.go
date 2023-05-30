@@ -104,11 +104,11 @@ func TokenLogin(c Context) Element {
 				Class("kip-card-header"),
 				Div(
 					Class("kip-card-title"),
-					H2("Login"),
+					H2("Access Token Login"),
 				),
 			),
 			Div(
-				Class("kip-card-content", "kip-card-centered"),
+				Class("kip-card-content", "kip-card-centered", "kip-provider-list"),
 				Form(
 					Method("POST"),
 					OnSubmit(onSubmit),
@@ -175,20 +175,18 @@ func Login(c Context) Element {
 							Ul(
 								Li(
 									A(
+										Role("button"),
+										Class("bulma-button", "bulma-is-success", "bulma-is-flex"),
 										Href("/api/v1/login"),
-										Button(
-											Class("bulma-button", "bulma-is-success", "bulma-is-flex"),
-											"Log in via SSO",
-										),
+										"Log in via SSO",
 									),
 								),
 								Li(
 									A(
+										Class("bulma-is-small"),
+										Role("button"),
 										Href("/token-login"),
-										Button(
-											Class("bulma-button", "bulma-is-success", "bulma-is-flex"),
-											"Log in via Access Token",
-										),
+										"Use An Access Token",
 									),
 								),
 							),

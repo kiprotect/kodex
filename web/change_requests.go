@@ -19,7 +19,7 @@ func ChangeRequests(project kodex.Project) ElementFunction {
 		return F(
 			router.Match(
 				c,
-				Route("/details/(?P<changeRequestId>[^/]+)(?:/(?P<tab>discussion|changes|description))?", ChangeRequestDetails(project)),
+				Route("/details/(?P<changeRequestId>[^/]+)(?:/(?P<tab>discussion|changes|description|merge))?", ChangeRequestDetails(project)),
 				Route("", ChangeRequestList(project)),
 			),
 		)
@@ -102,6 +102,7 @@ func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.Chan
 			return
 		}
 
+
 		if err := changeRequest.Delete(); err != nil {
 			error.Set(Fmt("Cannot delete change request: %v", err))
 			return
@@ -114,13 +115,30 @@ func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.Chan
 		router.RedirectTo(Fmt("/projects/%s", Hex(project.ID())))
 	})
 
-	var errorNotice Element
+	cancelButton := A(
+		Class("bulma-button"),
+		Href(Fmt("/projects/%s/changes/details/%s", Hex(project.ID()), Hex(changeRequest.ID()))),
+		"Cancel",
+	)
 
 	if error.Get() != "" {
-		errorNotice = P(
-			Class("bulma-help", "bulma-is-danger"),
-			error.Get(),
+
+		return ui.MessageWithTitle(
+			"danger",
+			Div(
+				Class("kip-col", "kip-is-lg"),
+				"Error merging change request",
+			),
+			Div(
+				P(
+					"There was an error merging this change request: ",
+					Strong(error.Get()),
+				),
+				Br(),
+				cancelButton,
+			),
 		)
+
 	}
 
 	return ui.MessageWithTitle(
@@ -130,7 +148,6 @@ func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.Chan
 			"Do you really want to merge this change request?",
 		),
 		Div(
-			errorNotice,
 			P(
 				"Merging the request will apply all changes to the current project. This cannot be undone!",
 			),
@@ -141,11 +158,7 @@ func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.Chan
 					Class("bulma-field", "bulma-is-grouped"),
 					P(
 						Class("bulma-control"),
-						A(
-							Class("bulma-button"),
-							Href(router.CurrentPath()),
-							"Cancel",
-						),
+						cancelButton,
 					),
 					P(
 						Class("bulma-control"),
@@ -212,7 +225,7 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 		return Div(
 			H2(Class("bulma-subtitle"), changeRequest.Title()),
 			IfElse(
-				showMergeRequest.Get(),
+				tab == "merge",
 				MergeRequestNotice(c, project, changeRequest),
 				F(
 					ui.Tabs(
@@ -240,11 +253,9 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 							),
 							If(
 								canMerge,
-								Button(
-									Name("action"),
-									Value("merge"),
+								A(
+									Href(Fmt("/projects/%s/changes/details/%s/merge", Hex(project.ID()), Hex(changeRequest.ID()))),
 									Class("bulma-button", "bulma-is-primary"),
-									Type("submit"),
 									"Merge",
 								),
 							),
