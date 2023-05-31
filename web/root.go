@@ -254,13 +254,18 @@ func AppContent(c Context) Element {
 
 func Root(controller api.Controller, plugins []WebPlugin) (func(c Context) Element, error) {
 
-	userProvider, err := controller.UserProvider()
-
-	if err != nil {
-		return nil, err
-	}
-
 	return func(c Context) Element {
+
+		// we create a fresh clone of the controller so that e.g. transactions
+		// remain isolated to this goroutine...
+		controller = controller.ApiClone()
+
+		userProvider, err := controller.UserProvider()
+
+		if err != nil {
+			// should never happen
+			return Div("cannot create user provider")
+		}
 
 		// we set the user provider
 		SetUserProvider(c, userProvider)

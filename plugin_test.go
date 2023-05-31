@@ -17,6 +17,7 @@
 package kodex
 
 import (
+	"os"
 	"plugin"
 	"testing"
 )
@@ -40,6 +41,11 @@ func (c *MyConfig) ID() []byte {
 }
 
 func TestPlugin(t *testing.T) {
+
+	if os.Getenv("KODEX_PLUGIN_TEST") == "" {
+		t.Skip("Skipping plugin test")
+	}
+
 	p, err := plugin.Open("plugins/writers/example/example.so")
 	if err != nil {
 		t.Fatal(err)

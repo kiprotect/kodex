@@ -102,7 +102,6 @@ func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.Chan
 			return
 		}
 
-
 		if err := changeRequest.Delete(); err != nil {
 			error.Set(Fmt("Cannot delete change request: %v", err))
 			return

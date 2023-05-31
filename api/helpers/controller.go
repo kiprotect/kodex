@@ -32,11 +32,12 @@ func Controller(c *gin.Context) api.Controller {
 	}
 
 	apiController, ok := controller.(api.Controller)
+
 	if !ok {
 		api.HandleError(c, 500, fmt.Errorf("not an API controller"))
 		return nil
 	}
 
-	return apiController
+	return apiController.ApiClone()
 
 }

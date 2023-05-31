@@ -483,7 +483,7 @@ func initDestinations(project Project, config map[string]interface{}) error {
 		destination := project.MakeDestination(id)
 
 		if err := destination.Create(destinationMapConfig); err != nil {
-			return err
+			return fmt.Errorf("error creating destination: %v", err)
 		}
 
 		if err := FixDates(destination, destinationMapConfig); err != nil {
@@ -491,7 +491,7 @@ func initDestinations(project Project, config map[string]interface{}) error {
 		}
 
 		if err := destination.Save(); err != nil {
-			return err
+			return fmt.Errorf("error saving destination: %v", err)
 		}
 
 	}
@@ -542,27 +542,27 @@ func initStreams(project Project, config map[string]interface{}) error {
 				stream = project.MakeStream(streamID)
 
 				if err := stream.Create(params); err != nil {
-					return err
+					return fmt.Errorf("error creating stream: %v", err)
 				}
 
 			} else if err := stream.Update(params); err != nil {
-				return err
+				return fmt.Errorf("error updating stream: %v", err)
 			}
 
 			if err := FixDates(stream, streamConfigMap); err != nil {
-				return err
+				return fmt.Errorf("error fixing dates: %v", err)
 			}
 
 			if err := stream.Save(); err != nil {
-				return err
+				return fmt.Errorf("error saving stream: %v", err)
 			}
 
 			if err := initStreamSources(stream, streamConfigMap); err != nil {
-				return err
+				return fmt.Errorf("error initializing stream sources: %v", err)
 			}
 
 			if err := initStreamConfigs(stream, streamConfigMap); err != nil {
-				return err
+				return fmt.Errorf("error initializing stream configs: %v", err)
 			}
 		}
 
@@ -580,7 +580,7 @@ func initStreamSources(stream Stream, config map[string]interface{}) error {
 	allSources, err := stream.Project().Controller().Sources(map[string]interface{}{})
 
 	if err != nil {
-		return err
+		return fmt.Errorf("error fetching sources: %v", err)
 	}
 
 	sourcesByName := map[string]Source{}
@@ -610,7 +610,7 @@ func initStreamSources(stream Stream, config map[string]interface{}) error {
 		}
 
 		if err := stream.AddSource(source, SourceStatus(sourceStatus)); err != nil {
-			return err
+			return fmt.Errorf("error adding a source: %v", err)
 		}
 	}
 	return nil
@@ -656,11 +656,11 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 				config = stream.MakeConfig(configID)
 
 				if err := config.Create(params); err != nil {
-					return err
+					return fmt.Errorf("error creating a config: %v", err)
 				}
 
 			} else if err := config.Update(params); err != nil {
-				return err
+				return fmt.Errorf("error updating a config: %v", err)
 			}
 
 			if err := FixDates(config, mapConfigConfig); err != nil {
@@ -668,15 +668,15 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 			}
 
 			if err := config.Save(); err != nil {
-				return err
+				return fmt.Errorf("error saving a config: %v", err)
 			}
 
 			if err := initConfigDestinations(config, mapConfigConfig); err != nil {
-				return err
+				return fmt.Errorf("error initializing config destinations: %v", err)
 			}
 
 			if err := initConfigActions(config, mapConfigConfig); err != nil {
-				return err
+				return fmt.Errorf("error initializing config actions: %v", err)
 			}
 
 			Log.Debugf("Created config '%s'", name)
@@ -735,7 +735,7 @@ func initConfigDestinations(config Config, configData map[string]interface{}) er
 		}
 
 		if err := config.AddDestination(destination, nameStr, DestinationStatus(status)); err != nil {
-			return err
+			return fmt.Errorf("error adding destination: %v", err)
 		}
 	}
 
@@ -854,7 +854,7 @@ func initConfigActions(config Config, configData map[string]interface{}) error {
 	allActionConfigs, err := config.Stream().Project().Controller().ActionConfigs(map[string]interface{}{})
 
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot get all action configs: %v", err)
 	}
 
 	actionConfigsByName := map[string]ActionConfig{}
@@ -886,7 +886,7 @@ func initConfigActions(config Config, configData map[string]interface{}) error {
 		Log.Debugf("Adding action %s", nameStr)
 
 		if err := config.AddActionConfig(actionConfig, i); err != nil {
-			return err
+			return fmt.Errorf("cannot add action config: %v", err)
 		}
 	}
 

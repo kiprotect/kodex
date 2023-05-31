@@ -32,6 +32,9 @@ type APIControllerDefinitions map[string]APIControllerMaker
 type Controller interface {
 	kodex.Controller
 
+	// Clone the controller
+	ApiClone() Controller
+
 	KodexController() kodex.Controller
 	RegisterAPIPlugin(APIPlugin) error
 	APIDefinitions() *Definitions

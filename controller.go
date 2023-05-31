@@ -29,6 +29,9 @@ type Controller interface {
 	SetVar(key string, value interface{}) error
 	GetVar(key string) (interface{}, bool)
 
+	// Clone the controller
+	Clone() Controller
+
 	// Transaction Helpers
 	Begin() error
 	Commit() error

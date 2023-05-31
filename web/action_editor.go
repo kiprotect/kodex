@@ -43,7 +43,7 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(Change
 	formAction, ok := action.(*actions.FormAction)
 
 	if !ok {
-		return Div("errr")
+		return Div("Error")
 	}
 
 	form := formAction.Form()
