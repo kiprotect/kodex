@@ -70,7 +70,7 @@ func Changes(changeRequest api.ChangeRequest) Element {
 
 }
 
-func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.ChangeRequest) Element {
+func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.ChangeRequest) *HTMLElement {
 
 	router := UseRouter(c)
 	error := Var(c, "")

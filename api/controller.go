@@ -33,7 +33,7 @@ type Controller interface {
 	kodex.Controller
 
 	// Clone the controller
-	ApiClone() Controller
+	ApiClone() (Controller, error)
 
 	KodexController() kodex.Controller
 	RegisterAPIPlugin(APIPlugin) error

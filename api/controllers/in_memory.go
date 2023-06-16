@@ -57,13 +57,17 @@ func MakeInMemoryController(config map[string]interface{}, controller kodex.Cont
 	return apiController, nil
 }
 
-func (m *InMemoryController) ApiClone() api.Controller {
+func (m *InMemoryController) ApiClone() (api.Controller, error) {
 	// we clone the controller itself
 	clone := *m
 	// we clone the in memory controller
-	clone.InMemoryController = clone.InMemoryController.Clone().(*kodexControllers.InMemoryController)
+	if inMemoryController, err := clone.InMemoryController.Clone(); err != nil {
+		return nil, err
+	} else {
+		clone.InMemoryController = inMemoryController.(*kodexControllers.InMemoryController)
+	}
 
-	return &clone
+	return &clone, nil
 }
 
 func (m *InMemoryController) KodexController() kodex.Controller {

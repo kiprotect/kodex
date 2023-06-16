@@ -24,6 +24,8 @@ import (
 func WithController(controller api.Controller) gin.HandlerFunc {
 
 	decorator := func(c *gin.Context) {
+
+		// we clone the controller to ensure we get a new transaction etc.
 		c.Set("controller", controller)
 	}
 

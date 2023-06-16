@@ -85,8 +85,12 @@ func (c *InMemoryController) SaveActionConfig(actionConfig kodex.ActionConfig) e
 	return nil
 }
 
-func (c *InMemoryController) Clone() kodex.Controller {
-	return &(*c)
+func (c *InMemoryController) Connect() error {
+	return nil
+}
+
+func (c *InMemoryController) Clone() (kodex.Controller, error) {
+	return &(*c), nil
 }
 
 func (c *InMemoryController) SaveSource(source kodex.Source) error {

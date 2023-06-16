@@ -258,7 +258,11 @@ func Root(controller api.Controller, plugins []WebPlugin) (func(c Context) Eleme
 
 		// we create a fresh clone of the controller so that e.g. transactions
 		// remain isolated to this goroutine...
-		controller = controller.ApiClone()
+		controller, err := controller.ApiClone()
+
+		if err != nil {
+			return Div("cannot create controller")
+		}
 
 		userProvider, err := controller.UserProvider()
 

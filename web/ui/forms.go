@@ -4,7 +4,7 @@ import (
 	. "github.com/gospel-dev/gospel"
 )
 
-func Message(msgType string, content any) Element {
+func Message(msgType string, content any) *HTMLElement {
 	return Div(
 		Class("bulma-message", Fmt("bulma-is-%s", msgType)),
 		Div(
@@ -14,7 +14,7 @@ func Message(msgType string, content any) Element {
 	)
 }
 
-func MessageWithTitle(msgType string, title, content any) Element {
+func MessageWithTitle(msgType string, title, content any) *HTMLElement {
 	return Div(
 		Class("bulma-message", Fmt("bulma-is-%s", msgType)),
 		Div(

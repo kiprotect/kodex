@@ -30,7 +30,7 @@ type Controller interface {
 	GetVar(key string) (interface{}, bool)
 
 	// Clone the controller
-	Clone() Controller
+	Clone() (Controller, error)
 
 	// Transaction Helpers
 	Begin() error

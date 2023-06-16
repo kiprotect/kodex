@@ -38,6 +38,13 @@ func Controller(c *gin.Context) api.Controller {
 		return nil
 	}
 
-	return apiController.ApiClone()
+	apiController, err := apiController.ApiClone()
+
+	if err != nil {
+		api.HandleError(c, 500, fmt.Errorf("not an API controller"))
+		return nil
+	}
+
+	return apiController
 
 }
