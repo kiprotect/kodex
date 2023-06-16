@@ -90,7 +90,10 @@ func (c *InMemoryController) Connect() error {
 }
 
 func (c *InMemoryController) Clone() (kodex.Controller, error) {
-	return &(*c), nil
+
+	d := *c
+
+	return &d, nil
 }
 
 func (c *InMemoryController) SaveSource(source kodex.Source) error {
