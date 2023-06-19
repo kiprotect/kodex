@@ -210,8 +210,6 @@ func NewStreamConfig(stream kodex.Stream, onUpdate func(ChangeInfo, string)) Ele
 
 			configs, _ := stream.Configs()
 
-			kodex.Log.Infof("Configs: %d", len(configs))
-
 		})
 
 		var errorNotice Element
