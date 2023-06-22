@@ -154,7 +154,8 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 								A(
 									Style("float: right"),
 									Href(router.CurrentRoute().Path+"/name/edit"),
-									"&nbsp;&nbsp;",
+									Nbsp,
+									Nbsp,
 									I(Class("fas fa-edit")),
 								),
 							),

@@ -133,7 +133,8 @@ func StreamDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 									A(
 										Style("float: right"),
 										Href(router.CurrentRoute().Path+"/name/edit"),
-										"&nbsp;&nbsp;",
+										Nbsp,
+										Nbsp,
 										I(Class("fas fa-edit")),
 									),
 								),

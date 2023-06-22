@@ -134,7 +134,8 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 								A(
 									Style("float: right"),
 									Href(router.CurrentRoute().Path+"/name/edit"),
-									"&nbsp;&nbsp;",
+									Nbsp,
+									Nbsp,
 									I(Class("fas fa-edit")),
 								),
 							),
@@ -150,7 +151,7 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 				),
 				Span(
 					Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
-					"Type: ", "&nbsp;", B(action.ActionType()),
+					"Type: ", Nbsp, B(action.ActionType()),
 				),
 			),
 			Div(Class("bulma-content"), IfElse(action.Description() != "", action.Description(), "(no description given)")),
