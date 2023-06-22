@@ -295,11 +295,9 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(Ch
 			onUpdate(ChangeInfo{}, router.CurrentPathWithQuery())
 		}
 
-		/*router.RedirectTo(PathWithQuery(router.CurrentPath(), map[string][]string{
-			"field":         append(path, field.Name),
-			"validatorType": []string{validatorType.Get()},
-			"action":        []string{"addValidator"},
-		}))*/
+		router.RedirectTo(PathWithQuery(router.CurrentPath(), map[string][]string{
+			"field": append(path, Fmt("%d", len(field.Validators)-1)),
+		}))
 	})
 
 	return Form(
@@ -390,7 +388,7 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 
 	return F(
 		Li(
-			Class("kip-item"),
+			Class("kip-item", If(extraContent != nil, "kip-with-extra-content")),
 			Div(
 				Class("kip-field-name", "kip-col", "kip-is-sm"),
 				H3(
@@ -415,7 +413,13 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 					),
 				),
 			),
-			If(extraContent != nil, F(Div(Class("kip-break")), extraContent)),
+			If(
+				extraContent != nil,
+				Div(
+					Class("kip-extra-content"),
+					extraContent,
+				),
+			),
 		),
 	)
 }
@@ -436,7 +440,7 @@ func FormFields(c Context, form *forms.Form, onUpdate func(ChangeInfo, string), 
 	return Div(
 		Class("kip-form-config"),
 		Ul(
-			Class("kip-fields", "kip-top-level", "kip-list"),
+			Class("kip-fields", "kip-list", If(len(path) == 1, "kip-top-level")),
 			Li(
 				Class("kip-item", "kip-is-header"),
 				Div(
