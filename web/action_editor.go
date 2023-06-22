@@ -32,6 +32,14 @@ func ActionEditor(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) 
 	}
 }
 
+func SetFormAction(c Context, action *actions.FormAction) {
+	GlobalVar(c, "formAction", action)
+}
+
+func UseFormAction(c Context) *actions.FormAction {
+	return UseGlobal[*actions.FormAction](c, "formAction")
+}
+
 func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(ChangeInfo, string)) Element {
 
 	action, err := actionConfig.Action()
@@ -45,6 +53,8 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(Change
 	if !ok {
 		return Div("Error")
 	}
+
+	SetFormAction(c, formAction)
 
 	form := formAction.Form()
 
@@ -278,20 +288,24 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(Ch
 
 	validatorType := Var(c, router.Query().Get("validatorType"))
 
+	action := UseFormAction(c)
+
 	onSubmit := Func[any](c, func() {
 
-		switch validatorType.Get() {
-		case "IsStringMap":
+		var validator forms.Validator
 
-			validator := forms.IsStringMap{
-				Form: &forms.Form{
-					Strict: true,
-					Fields: []forms.Field{},
-				},
-			}
+		validator, err := forms.ValidatorFromDescription(&forms.ValidatorDescription{
+			Type:   validatorType.Get(),
+			Config: map[string]any{},
+		}, action.Context())
 
+		if err != nil {
+			kodex.Log.Error(err)
+			return
+		}
+
+		if validator != nil {
 			field.Validators = append(field.Validators, validator)
-
 			onUpdate(ChangeInfo{}, router.CurrentPathWithQuery())
 		}
 
@@ -299,6 +313,12 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(Ch
 			"field": append(path, Fmt("%d", len(field.Validators)-1)),
 		}))
 	})
+
+	values := []any{}
+
+	for vt, _ := range action.Context().Validators {
+		values = append(values, Option(Value(vt), vt))
+	}
 
 	return Form(
 		Method("POST"),
@@ -312,8 +332,7 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(Ch
 					Div(
 						Class("bulma-select", "bulma-is-fullwidth"),
 						Select(
-							Option(Value("IsString"), "string"),
-							Option(Value("IsStringMap"), "map<string,any>"),
+							values,
 							Value(validatorType),
 						),
 					),
@@ -322,7 +341,99 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(Ch
 					Class("bulma-control"),
 					Button(
 						Class("bulma-button", "bulma-is-primary"),
-						"Continue",
+						"add validator",
+					),
+				),
+			),
+		),
+	)
+}
+
+func ValidatorEditor(c Context, field *forms.Field, index int, validator forms.Validator, path []string, onUpdate func(ChangeInfo, string)) Element {
+
+	configJson, err := json.MarshalIndent(validator, "", "  ")
+
+	if err != nil {
+		return Div("Error serializing validator config")
+	}
+
+	config := Var(c, string(configJson))
+	error := Var(c, "")
+	router := UseRouter(c)
+
+	onSubmit := Func[any](c, func() {
+
+		if config.Get() == "" {
+			error.Set("Please enter a config")
+			return
+		}
+
+		var configMap map[string]any
+
+		if err := json.Unmarshal([]byte(config.Get()), &configMap); err != nil {
+			error.Set(Fmt("Invalid JSON: %v", err))
+			return
+		}
+
+		validatorType := forms.GetType(validator)
+
+		action := UseFormAction(c)
+
+		newValidator, err := forms.ValidatorFromDescription(&forms.ValidatorDescription{
+			Type:   validatorType,
+			Config: configMap,
+		}, action.Context())
+
+		if err != nil {
+			error.Set(Fmt("Cannot update validator: %v", err))
+			return
+		}
+
+		// we replace the validator with the new version...
+		field.Validators[index] = newValidator
+
+		onUpdate(ChangeInfo{
+			Description: Fmt("Update validator config with value '%s' at path '%s'.", config.Get(), strings.Join(path, ".")),
+		},
+			router.CurrentPathWithQuery())
+	})
+
+	var errorNotice Element
+
+	if error.Get() != "" {
+		errorNotice = P(
+			Class("bulma-help", "bulma-is-danger"),
+			error.Get(),
+		)
+	}
+
+	return Form(
+		Class("bulma-form"),
+		Method("POST"),
+		OnSubmit(onSubmit),
+		Fieldset(
+			errorNotice,
+			Div(
+				Class("bulma-field"),
+				P(
+					Class("bulma-control"),
+					Style("flex-grow: 1"),
+					Div(
+						Class("bulma-control"),
+						Textarea(
+							Class("bulma-textarea"),
+							Attrib("rows")(Fmt("%d", 5)),
+							Value(config),
+						),
+					),
+				),
+				Br(),
+				P(
+					Class("bulma-control"),
+					Button(
+						Class("bulma-button", "bulma-is-success"),
+						Type("submit"),
+						"update config",
 					),
 				),
 			),
@@ -382,7 +493,7 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 				extraContent = FormFields(c, vt.Form, onUpdate, append(path, Fmt("%d", index)))
 			}
 		default:
-			extraContent = Span(Fmt("don't know: %v", vt))
+			extraContent = ValidatorEditor(c, field, index, validator, append(path, Fmt("%d", index)), onUpdate)
 		}
 	}
 

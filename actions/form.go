@@ -25,6 +25,7 @@ import (
 type FormAction struct {
 	kodex.BaseAction
 	actions []kodex.Action
+	context *forms.FormDescriptionContext
 	form    *forms.Form
 }
 
@@ -34,6 +35,10 @@ type IsAction struct {
 	Action kodex.Action           `json:"-"`
 	Type   string                 `json:"type"`
 	Config map[string]interface{} `json:"config"`
+}
+
+func (f *FormAction) Context() *forms.FormDescriptionContext {
+	return f.context
 }
 
 func (i IsAction) Validate(input interface{}, values map[string]interface{}) (interface{}, error) {
@@ -53,12 +58,14 @@ var IsActionForm = forms.Form{
 		{
 			Name: "type",
 			Validators: []forms.Validator{
+				forms.IsOptional{Default: "drop"},
 				forms.IsString{},
 			},
 		},
 		{
 			Name: "config",
 			Validators: []forms.Validator{
+				forms.IsOptional{Default: map[string]any{}},
 				forms.IsStringMap{},
 			},
 		},
@@ -112,6 +119,7 @@ func MakeFormAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 		return &FormAction{
 			BaseAction: kodex.MakeBaseAction(spec, "form"),
 			actions:    actions,
+			context:    context,
 			form:       form,
 		}, nil
 	}
