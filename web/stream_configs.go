@@ -208,8 +208,6 @@ func NewStreamConfig(stream kodex.Stream, onUpdate func(ChangeInfo, string)) Ele
 				onUpdate(ChangeInfo{}, router.CurrentPath())
 			}
 
-			configs, _ := stream.Configs()
-
 		})
 
 		var errorNotice Element

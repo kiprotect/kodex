@@ -29,6 +29,10 @@ $bulma-button-hover-border-color: darken($kip-green, 20%);
 
 @import "bulma/bulma.sass";
 
+.bulma-container {
+    padding: map-get($kip-space, md);
+}
+
 a.bulma-dropdown-item {
     &.bulma-is-active {
         background-color: $kip-blue;
