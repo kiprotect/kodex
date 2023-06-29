@@ -361,6 +361,12 @@ func ValidatorEditor(c Context, field *forms.Field, index int, validator forms.V
 	error := Var(c, "")
 	router := UseRouter(c)
 
+	if onUpdate == nil {
+		return Pre(
+			config.Get(),
+		)
+	}
+
 	onSubmit := Func[any](c, func() {
 
 		if config.Get() == "" {
