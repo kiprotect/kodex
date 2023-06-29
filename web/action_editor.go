@@ -455,6 +455,291 @@ func ValidatorEditor(c Context, update func(validator forms.Validator) error, va
 	)
 }
 
+func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInfo, string), path []string) Element {
+
+	key := Var(c, validator.Key)
+	newCase := Var(c, "")
+	formError := Var(c, "")
+	router := UseRouter(c)
+
+	queryPath := queryPath(c)
+	queryAction := queryAction(c)
+
+	onChangeKey := Func[any](c, func() {
+
+		if key.Get() == "" {
+			formError.Set("Please enter a key")
+			return
+		}
+
+		validator.Key = key.Get()
+
+		onUpdate(ChangeInfo{
+			Description: "Update switch key",
+		},
+			router.CurrentPathWithQuery())
+	})
+
+	onAddCase := Func[any](c, func() {
+
+		if newCase.Get() == "" {
+			formError.Set("Please enter a case value")
+			return
+		}
+
+		validator.Cases[newCase.Get()] = []forms.Validator{}
+
+		onUpdate(ChangeInfo{
+			Description: "Update switch key",
+		},
+
+			router.CurrentPathWithQuery())
+	})
+
+	var errorNotice Element
+
+	if formError.Get() != "" {
+		errorNotice = P(
+			Class("bulma-help", "bulma-is-danger"),
+			formError.Get(),
+		)
+	}
+
+	cases := []Element{}
+
+	caseValues := []string{}
+
+	for caseValue, _ := range validator.Cases {
+		caseValues = append(caseValues, caseValue)
+	}
+
+	sort.Strings(caseValues)
+
+	for _, caseValue := range caseValues {
+
+		casePath := append(path, caseValue)
+
+		fullMatch := true
+
+		for i, pe := range queryPath {
+			if i >= len(casePath) {
+				// there are segments beyond this field
+				fullMatch = false
+				break
+			} else if casePath[i] != pe {
+				fullMatch = false
+				// match = false
+				break
+			}
+		}
+
+		if onUpdate != nil && fullMatch && queryAction == "delete" {
+
+			url := PathWithQuery(router.CurrentPath(), map[string][]string{
+				"field": path,
+			})
+
+			onSubmit := Func[any](c, func() {
+
+				delete(validator.Cases, caseValue)
+
+				onUpdate(ChangeInfo{}, url)
+			})
+
+			item := Li(
+				Class("kip-item", "kip-is-danger"),
+				Div(
+					Class("kip-col", "kip-is-lg"),
+					"Do you really want to delete the case \"",
+					Strong(caseValue),
+					"\"?",
+				),
+				Div(
+					Class("kip-col", "kip-is-icon"),
+					Form(
+						Method("POST"),
+						OnSubmit(onSubmit),
+						Div(
+							Class("bulma-field", "bulma-is-grouped"),
+							P(
+								Class("bulma-control"),
+								A(
+									Class("bulma-button"),
+									Href(url),
+									"Cancel",
+								),
+							),
+							P(
+								Class("bulma-control"),
+								Button(
+									Class("bulma-button", "bulma-is-danger"),
+									"Delete",
+								),
+							),
+						),
+					),
+				),
+			)
+			cases = append(cases, item)
+			continue
+		}
+
+		validators := validator.Cases[caseValue]
+
+		var extraContent = ValidatorsActions(c, validators, func(newValidator forms.Validator) int {
+			validator.Cases[caseValue] = append(validator.Cases[caseValue], newValidator)
+			return len(validator.Cases[caseValue]) - 1
+		}, func(index int, newValidator forms.Validator) error {
+			if index >= len(validator.Cases[caseValue]) {
+				return fmt.Errorf("out of bounds: %d", index)
+			}
+			validator.Cases[caseValue][index] = newValidator
+			return nil
+		}, casePath, onUpdate)
+
+		item := Li(
+			Class("kip-item", If(extraContent != nil, "kip-with-extra-content")),
+			Div(
+				Class("kip-field-name", "kip-col", "kip-is-sm"),
+				H3(
+					caseValue,
+				),
+			),
+			Div(
+				Class("kip-col", "kip-is-md"),
+				Validators(c, validators, casePath, onUpdate),
+			),
+			Div(
+				Class("kip-col", "kip-is-icon"),
+				If(onUpdate != nil,
+					A(
+						Href(PathWithQuery(router.CurrentPath(), map[string][]string{
+							"field":  casePath,
+							"action": []string{"delete"},
+						})),
+						I(
+							Class("fa", "fa-trash"),
+						),
+					),
+				),
+			),
+			If(
+				extraContent != nil,
+				Div(
+					Class("kip-extra-content"),
+					extraContent,
+				),
+			),
+		)
+
+		cases = append(cases, item)
+
+	}
+
+	return F(
+		Form(
+			Class("bulma-form"),
+			Method("POST"),
+			OnSubmit(onChangeKey),
+			Fieldset(
+				errorNotice,
+				Div(
+					Class("bulma-field", "bulma-has-addons"),
+					P(
+						Class("bulma-control"),
+						Style("flex-grow: 1"),
+						Input(
+							Class("bulma-input", If(formError.Get() != "", "bulma-is-danger")),
+							Value(key),
+						),
+					),
+					P(
+						Class("bulma-control"),
+						Button(
+							Class("bulma-button", "bulma-is-success"),
+							Type("submit"),
+							"update key",
+						),
+					),
+				),
+			),
+		),
+		Div(
+			Class("kip-form-config"),
+			Ul(
+				Class("kip-fields", "kip-list"),
+				Li(
+					Class("kip-item", "kip-is-header"),
+					Div(
+						Class("kip-col", "kip-is-sm"),
+						"Case",
+					),
+					Div(
+						Class("kip-col", "kip-is-md"),
+						"Validators",
+					),
+					Div(
+						Class("kip-col", "kip-is-icon"),
+						"",
+					),
+				),
+				cases,
+				DoIf(onUpdate != nil,
+					func() Element {
+						return Li(
+							Class("kip-item"),
+							Form(
+								Class("bulma-form"),
+								Method("POST"),
+								OnSubmit(onAddCase),
+								Fieldset(
+									errorNotice,
+									Div(
+										Class("bulma-field", "bulma-has-addons"),
+										P(
+											Class("bulma-control"),
+											Style("flex-grow: 1"),
+											Input(
+												Class("bulma-input", If(formError.Get() != "", "bulma-is-danger")),
+												Value(newCase),
+											),
+										),
+										P(
+											Class("bulma-control"),
+											Button(
+												Class("bulma-button", "bulma-is-success"),
+												Type("submit"),
+												"add case",
+											),
+										),
+									),
+								),
+							),
+						)
+					},
+				),
+			),
+		),
+	)
+
+	/*
+		return Div(
+			Validators(c, validator.Validators, path, onUpdate),
+			ValidatorsActions(c, validator.Validators, func(newValidator forms.Validator) int {
+				validator.Validators = append(validator.Validators, newValidator)
+				return len(validator.Validators) - 1
+			}, func(index int, newValidator forms.Validator) error {
+				if index >= len(validator.Validators) {
+					return fmt.Errorf("out of bounds: %d", index)
+				}
+				validator.Validators[index] = newValidator
+				return nil
+			}, path, onUpdate),
+		)
+	*/
+
+}
+
 func IsListValidator(c Context, validator *forms.IsList, onUpdate func(ChangeInfo, string), path []string) Element {
 	return Div(
 		Validators(c, validator.Validators, path, onUpdate),
@@ -476,6 +761,8 @@ func ValidatorDetails(c Context, validator forms.Validator, update func(validato
 	switch vt := validator.(type) {
 	case *forms.IsList:
 		return IsListValidator(c, vt, onUpdate, path)
+	case *forms.Switch:
+		return SwitchValidator(c, vt, onUpdate, path)
 	case *forms.IsStringMap:
 
 		// we always create a form
