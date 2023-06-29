@@ -49,7 +49,7 @@ func Changes(changeRequest api.ChangeRequest) Element {
 			changeItem := ui.ListItem(
 				ui.ListColumn("xs", Fmt("%d.%d", a+1, b+1)),
 				ui.ListColumn("sm", Strong(api.OpName(change.Op))),
-				ui.ListColumn("sm", strings.Join(pathStrs, " &gt; ")),
+				ui.ListColumn("sm", strings.Join(pathStrs, " > ")),
 				ui.ListColumn("md", Pre(string(value))),
 			)
 
