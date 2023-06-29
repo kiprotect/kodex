@@ -158,7 +158,7 @@ func NewProject() ElementFunction {
 	}
 }
 
-func Settings(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
+func Settings(project, realProject kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
 
 	return func(c Context) Element {
 
@@ -189,6 +189,56 @@ func Settings(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementF
 						})
 
 						return nil
+					}),
+			),
+			Route("/delete",
+				c.ElementFunction("deleteProject",
+					func(c Context) Element {
+
+						router := UseRouter(c)
+
+						onSubmit := Func[any](c, func() {
+
+							realProject.Delete()
+							router.RedirectTo("/projects")
+
+						})
+
+						return ui.MessageWithTitle(
+							"danger",
+							"Confirm Project Deletion",
+							F(
+								Div(
+									Class("kip-col", "kip-is-lg"),
+									"Do you really want to delete this project? This cannot be undone!",
+								),
+								Div(
+									Class("kip-col", "kip-is-icon"),
+									Form(
+										Method("POST"),
+										OnSubmit(onSubmit),
+										Div(
+											Class("bulma-field", "bulma-is-grouped"),
+											P(
+												Class("bulma-control"),
+												A(
+													Class("bulma-button"),
+													Href(router.LastPath()),
+													"Cancel",
+												),
+											),
+											P(
+												Class("bulma-control"),
+												Button(
+													Class("bulma-button", "bulma-is-danger"),
+													"Delete",
+												),
+											),
+										),
+									),
+								),
+							),
+						)
 					}),
 			),
 			Route(
@@ -345,6 +395,22 @@ func SettingsTab(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 						Class("bulma-button", "bulma-is-success"),
 						Type("submit"),
 						"Export Blueprint",
+					),
+				),
+			),
+			ui.MessageWithTitle(
+				"danger",
+				"Delete Project",
+				F(
+					P(
+						"You can delete the project. This cannot be undone!",
+					),
+					Br(),
+					A(
+						Href(Fmt("/projects/%s/settings/delete", Hex(project.ID()))),
+						Class("bulma-button", "bulma-is-danger"),
+						Type("submit"),
+						"Delete Project",
 					),
 				),
 			),
@@ -593,7 +659,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		case "changes":
 			content = c.Element("changes", ChangeRequests(project))
 		case "settings":
-			content = c.Element("settings", Settings(importedProject, onUpdate))
+			content = c.Element("settings", Settings(importedProject, project, onUpdate))
 		default:
 			content = Div("...")
 		}
