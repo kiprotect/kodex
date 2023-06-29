@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
 	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
@@ -167,14 +168,14 @@ func typeOf(validator forms.Validator) string {
 	}
 }
 
-func Validators(c Context, field *forms.Field, path []string, onUpdate func(ChangeInfo, string), selected bool) Element {
+func Validators(c Context, validators []forms.Validator, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	router := UseRouter(c)
 
-	validators := make([]Element, 0)
+	elements := make([]Element, 0)
 
-	for i, validator := range field.Validators {
-		validators = append(validators,
+	for i, validator := range validators {
+		elements = append(elements,
 			Li(
 				A(
 					Href(
@@ -190,7 +191,7 @@ func Validators(c Context, field *forms.Field, path []string, onUpdate func(Chan
 
 	return Ul(
 		Class("kip-validators"),
-		validators,
+		elements,
 		If(onUpdate != nil,
 			Li(
 				A(
@@ -283,7 +284,7 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 	)
 }
 
-func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(ChangeInfo, string)) Element {
+func NewValidator(c Context, create func(validator forms.Validator) int, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	router := UseRouter(c)
 
@@ -306,13 +307,12 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(Ch
 		}
 
 		if validator != nil {
-			field.Validators = append(field.Validators, validator)
+			index := create(validator)
 			onUpdate(ChangeInfo{}, router.CurrentPathWithQuery())
+			router.RedirectTo(PathWithQuery(router.CurrentPath(), map[string][]string{
+				"field": append(path, Fmt("%d", index)),
+			}))
 		}
-
-		router.RedirectTo(PathWithQuery(router.CurrentPath(), map[string][]string{
-			"field": append(path, Fmt("%d", len(field.Validators)-1)),
-		}))
 	})
 
 	values := []any{}
@@ -358,7 +358,7 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(Ch
 	)
 }
 
-func ValidatorEditor(c Context, field *forms.Field, index int, validator forms.Validator, path []string, onUpdate func(ChangeInfo, string)) Element {
+func ValidatorEditor(c Context, update func(validator forms.Validator) error, validator forms.Validator, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	configJson, err := json.MarshalIndent(validator, "", "  ")
 
@@ -404,8 +404,7 @@ func ValidatorEditor(c Context, field *forms.Field, index int, validator forms.V
 			return
 		}
 
-		// we replace the validator with the new version...
-		field.Validators[index] = newValidator
+		update(newValidator)
 
 		onUpdate(ChangeInfo{
 			Description: Fmt("Update validator config with value '%s' at path '%s'.", config.Get(), strings.Join(path, ".")),
@@ -456,6 +455,83 @@ func ValidatorEditor(c Context, field *forms.Field, index int, validator forms.V
 	)
 }
 
+func IsListValidator(c Context, validator *forms.IsList, onUpdate func(ChangeInfo, string), path []string) Element {
+	return Div(
+		Validators(c, validator.Validators, path, onUpdate),
+		ValidatorsActions(c, validator.Validators, func(newValidator forms.Validator) int {
+			validator.Validators = append(validator.Validators, newValidator)
+			return len(validator.Validators) - 1
+		}, func(index int, newValidator forms.Validator) error {
+			if index >= len(validator.Validators) {
+				return fmt.Errorf("out of bounds: %d", index)
+			}
+			validator.Validators[index] = newValidator
+			return nil
+		}, path, onUpdate),
+	)
+}
+
+func ValidatorDetails(c Context, validator forms.Validator, update func(validator forms.Validator) error, path []string, onUpdate func(ChangeInfo, string)) Element {
+
+	switch vt := validator.(type) {
+	case *forms.IsList:
+		return IsListValidator(c, vt, onUpdate, path)
+	case *forms.IsStringMap:
+
+		// we always create a form
+		if vt.Form == nil {
+			vt.Form = &forms.Form{}
+		}
+		return FormFields(c, vt.Form, onUpdate, path)
+	default:
+		return ValidatorEditor(c, update, validator, path, onUpdate)
+	}
+
+}
+
+func ValidatorsActions(c Context, validators []forms.Validator, create func(validator forms.Validator) int, update func(index int, validator forms.Validator) error, path []string, onUpdate func(ChangeInfo, string)) Element {
+
+	queryPath := queryPath(c)
+	queryAction := queryAction(c)
+
+	fullMatch := true
+	match := true
+
+	for i, pe := range queryPath {
+		if i >= len(path) {
+			// there are segments beyond this field
+			fullMatch = false
+			break
+		} else if path[i] != pe {
+			fullMatch = false
+			match = false
+			break
+		}
+	}
+
+	var index int = -1
+
+	if len(queryPath) > len(path) {
+		// we get the validator index from the query path
+		var err error
+
+		if index, err = strconv.Atoi(queryPath[len(path)]); err != nil {
+			// invalid index, we ignore...
+			index = -1
+		}
+	}
+
+	if fullMatch && queryAction == "addValidator" {
+		return NewValidator(c, create, path, onUpdate)
+	} else if match && index >= 0 && index < len(validators) {
+		return ValidatorDetails(c, validators[index], func(validator forms.Validator) error {
+			return update(index, validator)
+		}, append(path, Fmt("%d", index)), onUpdate)
+	}
+
+	return nil
+}
+
 func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	router := UseRouter(c)
@@ -497,19 +573,20 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 	}
 
 	if fullMatch && queryAction == "addValidator" {
-		extraContent = NewValidator(c, field, path, onUpdate)
+		extraContent = NewValidator(c, func(validator forms.Validator) int {
+			field.Validators = append(field.Validators, validator)
+			return len(field.Validators) - 1
+		}, path, onUpdate)
 	} else if match && index >= 0 && index < len(field.Validators) {
 
-		validator := field.Validators[index]
-
-		switch vt := validator.(type) {
-		case *forms.IsStringMap:
-			if vt.Form != nil {
-				extraContent = FormFields(c, vt.Form, onUpdate, append(path, Fmt("%d", index)))
-			}
-		default:
-			extraContent = ValidatorEditor(c, field, index, validator, append(path, Fmt("%d", index)), onUpdate)
+		update := func(validator forms.Validator) error {
+			// we replace the validator with the new version...
+			field.Validators[index] = validator
+			return nil
 		}
+
+		extraContent = ValidatorDetails(c, field.Validators[index], update, append(path, Fmt("%d", index)), onUpdate)
+
 	}
 
 	return F(
@@ -523,7 +600,7 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 			),
 			Div(
 				Class("kip-col", "kip-is-md"),
-				Validators(c, field, path, onUpdate, match),
+				Validators(c, field.Validators, path, onUpdate),
 			),
 			Div(
 				Class("kip-col", "kip-is-icon"),
