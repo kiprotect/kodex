@@ -7,6 +7,7 @@ import (
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -316,7 +317,15 @@ func NewValidator(c Context, field *forms.Field, path []string, onUpdate func(Ch
 
 	values := []any{}
 
+	vts := []string{}
+
 	for vt, _ := range action.Context().Validators {
+		vts = append(vts, vt)
+	}
+
+	sort.Strings(vts)
+
+	for _, vt := range vts {
 		values = append(values, Option(Value(vt), vt))
 	}
 
