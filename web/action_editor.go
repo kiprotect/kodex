@@ -7,6 +7,7 @@ import (
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions"
+	"github.com/kiprotect/kodex/web/ui"
 	"reflect"
 	"sort"
 	"strconv"
@@ -518,20 +519,7 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 	for _, caseValue := range caseValues {
 
 		casePath := append(path, caseValue)
-
-		fullMatch := true
-
-		for i, pe := range queryPath {
-			if i >= len(casePath) {
-				// there are segments beyond this field
-				fullMatch = false
-				break
-			} else if casePath[i] != pe {
-				fullMatch = false
-				// match = false
-				break
-			}
-		}
+		_, fullMatch := pathMatches(casePath, queryPath)
 
 		if onUpdate != nil && fullMatch && queryAction == "delete" {
 
@@ -593,6 +581,14 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 			if index >= len(validator.Cases[caseValue]) {
 				return fmt.Errorf("out of bounds: %d", index)
 			}
+
+			if newValidator == nil {
+				// we delete the validator
+				cv := validator.Cases[caseValue]
+				validator.Cases[caseValue] = append(cv[:index], cv[index+1:]...)
+				return nil
+			}
+
 			validator.Cases[caseValue][index] = newValidator
 			return nil
 		}, casePath, onUpdate)
@@ -722,22 +718,6 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 		),
 	)
 
-	/*
-		return Div(
-			Validators(c, validator.Validators, path, onUpdate),
-			ValidatorsActions(c, validator.Validators, func(newValidator forms.Validator) int {
-				validator.Validators = append(validator.Validators, newValidator)
-				return len(validator.Validators) - 1
-			}, func(index int, newValidator forms.Validator) error {
-				if index >= len(validator.Validators) {
-					return fmt.Errorf("out of bounds: %d", index)
-				}
-				validator.Validators[index] = newValidator
-				return nil
-			}, path, onUpdate),
-		)
-	*/
-
 }
 
 func IsListValidator(c Context, validator *forms.IsList, onUpdate func(ChangeInfo, string), path []string) Element {
@@ -750,6 +730,14 @@ func IsListValidator(c Context, validator *forms.IsList, onUpdate func(ChangeInf
 			if index >= len(validator.Validators) {
 				return fmt.Errorf("out of bounds: %d", index)
 			}
+
+			if newValidator == nil {
+				// we delete the validator
+				cv := validator.Validators
+				validator.Validators = append(cv[:index], cv[index+1:]...)
+				return nil
+			}
+
 			validator.Validators[index] = newValidator
 			return nil
 		}, path, onUpdate),
@@ -758,21 +746,124 @@ func IsListValidator(c Context, validator *forms.IsList, onUpdate func(ChangeInf
 
 func ValidatorDetails(c Context, validator forms.Validator, update func(validator forms.Validator) error, path []string, onUpdate func(ChangeInfo, string)) Element {
 
+	var content Element
+
+	queryPath := queryPath(c)
+	queryAction := queryAction(c)
+
+	_, fullMatch := pathMatches(path, queryPath)
+
+	router := UseRouter(c)
+
+	if onUpdate != nil && fullMatch && queryAction == "delete" {
+
+		url := PathWithQuery(router.CurrentPath(), map[string][]string{
+			"field": path[:len(path)-1],
+		})
+
+		onSubmit := Func[any](c, func() {
+			update(nil)
+			onUpdate(ChangeInfo{}, url)
+		})
+
+		return ui.Message(
+			"danger",
+			F(
+				"Do you really want to delete this validator?",
+				Div(
+					Class("kip-col", "kip-is-icon"),
+					Form(
+						Method("POST"),
+						OnSubmit(onSubmit),
+						Div(
+							Class("bulma-field", "bulma-is-grouped"),
+							P(
+								Class("bulma-control"),
+								A(
+									Class("bulma-button"),
+									Href(url),
+									"Cancel",
+								),
+							),
+							P(
+								Class("bulma-control"),
+								Button(
+									Class("bulma-button", "bulma-is-danger"),
+									"Delete",
+								),
+							),
+						),
+					),
+				),
+			),
+		)
+	}
+
 	switch vt := validator.(type) {
 	case *forms.IsList:
-		return IsListValidator(c, vt, onUpdate, path)
+		content = IsListValidator(c, vt, onUpdate, path)
 	case *forms.Switch:
-		return SwitchValidator(c, vt, onUpdate, path)
+		content = SwitchValidator(c, vt, onUpdate, path)
 	case *forms.IsStringMap:
 
 		// we always create a form
 		if vt.Form == nil {
 			vt.Form = &forms.Form{}
 		}
-		return FormFields(c, vt.Form, onUpdate, path)
+		content = FormFields(c, vt.Form, onUpdate, path)
 	default:
-		return ValidatorEditor(c, update, validator, path, onUpdate)
+		content = ValidatorEditor(c, update, validator, path, onUpdate)
 	}
+
+	return F(
+		H2(
+			Class("bulma-subtitle"),
+			F(
+				forms.GetType(validator),
+				If(onUpdate != nil,
+					A(
+						Style("float: right"),
+						Href(
+							PathWithQuery(router.CurrentPath(), map[string][]string{
+								"field":  path,
+								"action": []string{"delete"},
+							}),
+						),
+						Nbsp,
+						Nbsp,
+						I(Class("fas fa-trash")),
+					),
+				),
+			),
+		),
+
+		content,
+	)
+
+}
+
+func pathMatches(path []string, queryPath []string) (bool, bool) {
+
+	fullMatch := true
+	match := true
+
+	for i, pe := range path {
+		if i >= len(queryPath) {
+			// there are segments beyond this field
+			fullMatch = false
+			break
+		} else if queryPath[i] != pe {
+			fullMatch = false
+			match = false
+			break
+		}
+	}
+
+	if len(queryPath) != len(path) {
+		fullMatch = false
+	}
+
+	return match, fullMatch
 
 }
 
@@ -781,20 +872,7 @@ func ValidatorsActions(c Context, validators []forms.Validator, create func(vali
 	queryPath := queryPath(c)
 	queryAction := queryAction(c)
 
-	fullMatch := true
-	match := true
-
-	for i, pe := range queryPath {
-		if i >= len(path) {
-			// there are segments beyond this field
-			fullMatch = false
-			break
-		} else if path[i] != pe {
-			fullMatch = false
-			match = false
-			break
-		}
-	}
+	partialMatch, fullMatch := pathMatches(path, queryPath)
 
 	var index int = -1
 
@@ -810,7 +888,7 @@ func ValidatorsActions(c Context, validators []forms.Validator, create func(vali
 
 	if fullMatch && queryAction == "addValidator" {
 		return NewValidator(c, create, path, onUpdate)
-	} else if match && index >= 0 && index < len(validators) {
+	} else if partialMatch && index >= 0 && index < len(validators) {
 		return ValidatorDetails(c, validators[index], func(validator forms.Validator) error {
 			return update(index, validator)
 		}, append(path, Fmt("%d", index)), onUpdate)
@@ -826,55 +904,34 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 	queryPath := queryPath(c)
 	queryAction := queryAction(c)
 
-	fullMatch := true
-	match := true
-
-	for i, pe := range queryPath {
-		if i >= len(path) {
-			// there are segments beyond this field
-			fullMatch = false
-			break
-		} else if path[i] != pe {
-			fullMatch = false
-			match = false
-			break
-		}
-	}
+	_, fullMatch := pathMatches(path, queryPath)
 
 	if onUpdate != nil && fullMatch && queryAction == "delete" {
 		return DeleteFieldNotice(c, form, field, path, onUpdate)
 	}
 
-	var extraContent Element
-
-	var index int = -1
-
-	if len(queryPath) > len(path) {
-		// we get the validator index from the query path
-		var err error
-
-		if index, err = strconv.Atoi(queryPath[len(path)]); err != nil {
-			// invalid index, we ignore...
-			index = -1
-		}
-	}
-
-	if fullMatch && queryAction == "addValidator" {
-		extraContent = NewValidator(c, func(validator forms.Validator) int {
-			field.Validators = append(field.Validators, validator)
+	extraContent := ValidatorsActions(c, field.Validators,
+		func(newValidator forms.Validator) int {
+			field.Validators = append(field.Validators, newValidator)
 			return len(field.Validators) - 1
-		}, path, onUpdate)
-	} else if match && index >= 0 && index < len(field.Validators) {
+		},
+		func(index int, newValidator forms.Validator) error {
 
-		update := func(validator forms.Validator) error {
-			// we replace the validator with the new version...
-			field.Validators[index] = validator
+			if index >= len(field.Validators) {
+				return fmt.Errorf("out of bounds: %d", index)
+			}
+
+			if newValidator == nil {
+				// we delete the validator
+				cv := field.Validators
+				field.Validators = append(cv[:index], cv[index+1:]...)
+				return nil
+			}
+
+			field.Validators[index] = newValidator
 			return nil
-		}
 
-		extraContent = ValidatorDetails(c, field.Validators[index], update, append(path, Fmt("%d", index)), onUpdate)
-
-	}
+		}, path, onUpdate)
 
 	return F(
 		Li(
