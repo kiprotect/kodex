@@ -371,7 +371,6 @@ func SettingsTab(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 						),
 					),
 					Script(`
-						console.log("hey");
 						const fileInput = document.querySelector('#blueprint-file input[type=file]');
 						  fileInput.onchange = () => {
 						    if (fileInput.files.length > 0) {
