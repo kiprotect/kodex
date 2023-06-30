@@ -45,6 +45,9 @@ func Logout(c Context) Element {
 
 	userProvider.Logout(controller, c.Request(), c.ResponseWriter())
 
+	// we clear the context
+	c.Clear()
+
 	return Section(
 		Class("kip-centered-card", "kip-is-info", "kip-is-fullheight"),
 		Div(
