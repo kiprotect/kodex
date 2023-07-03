@@ -1,7 +1,9 @@
 package web
 
 import (
+	"encoding/json"
 	"bytes"
+	"io"
 	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/web/ui"
@@ -18,12 +20,200 @@ func Actions(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFu
 		return F(
 			router.Match(
 				c,
-				Route("/details/(?P<actionId>[^/]+)(?:/(?P<tab>edit|test))?", ActionDetails(project, onUpdate)),
+				Route("/details/(?P<actionId>[^/]+)(?:/(?P<tab>edit|test|data))?", ActionDetails(project, onUpdate)),
 				Route("", ActionsList(project, onUpdate)),
 			),
 		)
 	}
 }
+
+func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) ElementFunction {
+	return func(c Context) Element {
+
+		error := Var(c, "")
+		router := UseRouter(c)
+
+		// we fetch the existing data
+		existingData := action.Data()
+
+		dataMap, ok := existingData.(map[string]any)
+
+		if !ok {
+			dataMap = map[string]any{}
+		}
+
+		dataItems, ok := dataMap["items"].([]any)
+
+		if !ok {
+			dataItems = []any{}
+		}
+
+		onSubmit := Func[any](c, func() {
+
+			request := c.Request()
+
+			file, header, err := request.FormFile("data")
+
+			kodex.Log.Info(header.Filename)
+
+			if err != nil {
+				error.Set(Fmt("Cannot retrieve file: %v", err))
+				return
+			}
+
+			content, err := io.ReadAll(file)
+
+			if err != nil {
+				error.Set(Fmt("Cannot read file: %v", err))
+				return
+			}
+
+			error.Set(Fmt("file length: %d", len(content)))
+
+			var data map[string]any
+
+			if err := json.Unmarshal(content, &data); err != nil {
+				error.Set(Fmt("cannot unmarshal JSON: %v", err))
+				return
+			}
+
+			dataItems = []any{}
+
+			dataItems = append(dataItems, map[string]any{
+				"name": header.Filename,
+				"data": data,
+			})
+
+			dataMap["items"] = dataItems
+
+			// we update the data map
+			if err := action.SetData(dataMap); err != nil {
+				error.Set(Fmt("Cannot set data: %v", err))
+				return
+			}
+
+
+			if err := action.Save(); err != nil {
+				error.Set(Fmt("Cannot save action: %v", err))
+				return
+			}
+
+			kodex.Log.Info("Success")
+
+			onUpdate(ChangeInfo{}, router.CurrentPath())
+		})
+
+		items := []Element{}
+
+		ed, _ := json.Marshal(dataMap)
+
+		for _, dataItem := range dataItems {
+			itemMap, ok := dataItem.(map[string]any)
+
+			if !ok {
+				continue
+			}
+
+
+			item := ui.ListItem(
+				ui.ListColumn("md", itemMap["name"]),
+				ui.ListColumn("sm", ""),
+			)
+
+			items = append(items, item)
+
+		}
+
+		return F(
+			string(ed),
+			ui.List(
+				ui.ListHeader(
+					ui.ListColumn("md", "Name"),
+					ui.ListColumn("sm", "Type"),
+				),
+				items,
+			),
+
+			ui.MessageWithTitle(
+				"grey",
+				"Import Data",
+				F(
+					P(
+						"You can import data from a JSON file.",
+					),
+					Br(),
+					If(
+						error.Get() != "",
+						P(
+							Class("bulma-help", "bulma-is-danger"),
+							error.Get(),
+						),
+					),
+					IfElse(
+						onUpdate != nil,
+						F(
+							Form(
+								Method("POST"),
+								Enctype("multipart/form-data"),
+								OnSubmit(onSubmit),
+								Div(
+									Id("data-file"),
+									Class("bulma-file", "bulma-has-name"),
+									Label(
+										Class("bulma-file-label"),
+										Input(
+											Class("bulma-file-input"),
+											Type("file"),
+											Id("data"),
+											Name("data"),
+										),
+										Span(
+											Class("bulma-file-cta"),
+											Span(
+												Class("bulma-file-icon"),
+												I(
+													Class("fas", "fa-upload"),
+												),
+											),
+											Span(
+												Class("bulma-file-label"),
+												"Info file...",
+											),
+										),
+										Span(
+											Class("bulma-file-name"),
+											"please select a file",
+										),
+									),
+								),
+								Hr(),
+								Button(
+									Class("bulma-button", "bulma-is-success"),
+									Type("submit"),
+									"Import Data",
+								),
+							),
+						),
+						P(
+							"You need to open a change request to import first.",
+						),
+					),
+					Script(`
+						console.log("hey");
+						const fileInput = document.querySelector('#data-file input[type=file]');
+						  fileInput.onchange = () => {
+						    if (fileInput.files.length > 0) {
+						      const fileName = document.querySelector('#data-file .bulma-file-name');
+						      fileName.textContent = fileInput.files[0].name;
+						    }
+						  }
+					`),
+				),
+			),
+		)
+	}
+}
+
 
 func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) func(c Context, actionId, tab string) Element {
 
@@ -88,7 +278,7 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 				Fieldset(
 					errorNotice,
 					Div(
-						Class("bulma-field", "bulma-has-addons"),
+						Class("bHavelwelle,  14471 Brandenburg - PotsdamHavelwelle,  14471 Brandenburg - Potsdamulma-field", "bulma-has-addons"),
 						P(
 							Class("bulma-control"),
 							Input(Class("bulma-control", "bulma-input"), Value(name)),
@@ -113,8 +303,8 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 			content = c.Element("actionEditor",
 				ActionEditor(action, onUpdate),
 			)
-		case "test":
-			content = Div("coming soon")
+		case "data":
+			content = c.Element("actionData", ActionData(action, onUpdate))
 		}
 
 		return Div(
@@ -158,6 +348,7 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 			ui.Tabs(
 				ui.Tab(ui.ActiveTab(tab == "edit"), A(Href(Fmt("/projects/%s/actions/details/%s/edit", Hex(project.ID()), actionId)), "Edit")),
 				ui.Tab(ui.ActiveTab(tab == "test"), A(Href(Fmt("/projects/%s/actions/details/%s/test", Hex(project.ID()), actionId)), "Test")),
+				ui.Tab(ui.ActiveTab(tab == "data"), A(Href(Fmt("/projects/%s/actions/details/%s/data", Hex(project.ID()), actionId)), "Data")),
 			),
 			content,
 		)
