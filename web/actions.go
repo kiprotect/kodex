@@ -1,12 +1,12 @@
 package web
 
 import (
-	"encoding/json"
 	"bytes"
-	"io"
+	"encoding/json"
 	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/web/ui"
+	"io"
 	"time"
 	//	"github.com/kiprotect/kodex/api"
 )
@@ -27,6 +27,163 @@ func Actions(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFu
 	}
 }
 
+func MapValue(c Context, key string, newValue, oldValue any, path []string) Element {
+
+	var extraContent any
+
+	newMap, isMap := newValue.(map[string]any)
+	oldMap, ok := oldValue.(map[string]any)
+
+	if !ok {
+		oldMap = map[string]any{}
+	}
+
+	if isMap {
+		extraContent = MapDiff(c, newMap, oldMap, path)
+	}
+
+	return Li(
+		Class("kip-item", If(extraContent != nil, "kip-with-extra-content")),
+		Div(
+			Class("kip-field-name", "kip-col", "kip-is-sm"),
+			H3(
+				key,
+			),
+		),
+		Div(
+			Class("kip-col", "kip-is-md"),
+			IfElse(oldValue != nil, oldValue, "(undefined)"),
+		),
+		Div(
+			Class("kip-col", "kip-is-md"),
+			newValue,
+		),
+		Div(
+			Class("kip-col", "kip-is-icon"),
+		),
+		If(
+			extraContent != nil,
+			Div(
+				Class("kip-extra-content"),
+				extraContent,
+			),
+		),
+	)
+}
+
+func MapDiff(c Context, newMap, oldMap map[string]any, path []string) Element {
+	values := []Element{}
+
+	for key, newValue := range newMap {
+
+		oldValue, _ := oldMap[key]
+		values = append(values, MapValue(c, key, newValue, oldValue, append(path, key)))
+
+	}
+
+	return Div(
+		Class("kip-form-config"),
+		Ul(
+			Class("kip-fields", "kip-list", If(len(path) == 1, "kip-top-level")),
+			Li(
+				Class("kip-item", "kip-is-header"),
+				Div(
+					Class("kip-col", "kip-is-sm"),
+					"Name",
+				),
+				Div(
+					Class("kip-col", "kip-is-md"),
+					"Original",
+				),
+				Div(
+					Class("kip-col", "kip-is-md"),
+					"New",
+				),
+				Div(
+					Class("kip-col", "kip-is-icon"),
+					"",
+				),
+			),
+			values,
+		),
+	)
+
+}
+
+func ItemDiff(c Context, newItem, oldItem *kodex.Item) Element {
+	return MapDiff(c, newItem.All(), oldItem.All(), []string{})
+}
+
+func ActionTest(actionConfig kodex.ActionConfig, onUpdate func(ChangeInfo, string)) ElementFunction {
+	return func(c Context) Element {
+
+		controller := UseController(c)
+
+		action, err := actionConfig.Action()
+
+		if err != nil {
+			return Div("cannot get action")
+		}
+
+		data, ok := actionConfig.Data().(map[string]any)
+
+		if !ok {
+			return Div("cannot get data (not a map)")
+		}
+
+		// to do: improve parsing...
+
+		rawItems, ok := data["items"].([]any)
+
+		if !ok {
+			return Div("cannot get data")
+		}
+
+		dataItem, ok := rawItems[0].(map[string]any)
+
+		if !ok {
+			return Div("cannot get data item")
+		}
+
+		dataItemData, ok := dataItem["data"].(map[string]any)
+
+		if !ok {
+			return Div("cannot get data item data")
+		}
+
+		items := []*kodex.Item{kodex.MakeItem(dataItemData)}
+
+		parameterSet, err := kodex.MakeParameterSet([]kodex.Action{action}, controller.ParameterStore())
+
+		writer := kodex.MakeInMemoryChannelWriter()
+
+		processor, err := kodex.MakeProcessor(parameterSet, writer, nil)
+
+		if err != nil {
+			return Div("cannot create processor")
+		}
+
+		if newItems, err := processor.Process(items, nil); err != nil {
+			return Div("Cannot process")
+		} else {
+			channels := make(map[string]interface{})
+			channels["items"] = newItems
+			for k, v := range writer.Items {
+				channels[k] = v
+			}
+
+			// channels["errors"] = writer.Errors
+			// channels["messages"] = writer.Messages
+			// channels["warnings"] = writer.Warnings
+
+			return ItemDiff(c, newItems[0], items[0])
+		}
+
+		return Div("testing this action...")
+
+	}
+}
+
 func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) ElementFunction {
 	return func(c Context) Element {
 
@@ -42,7 +199,14 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 			dataMap = map[string]any{}
 		}
 
-		dataItems, ok := dataMap["items"].([]any)
+		newData := map[string]any{}
+
+		// we copy the existing map
+		for k, v := range dataMap {
+			newData[k] = v
+		}
+
+		dataItems, ok := newData["items"].([]any)
 
 		if !ok {
 			dataItems = []any{}
@@ -53,8 +217,6 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 			request := c.Request()
 
 			file, header, err := request.FormFile("data")
-
-			kodex.Log.Info(header.Filename)
 
 			if err != nil {
 				error.Set(Fmt("Cannot retrieve file: %v", err))
@@ -68,8 +230,6 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 				return
 			}
 
-			error.Set(Fmt("file length: %d", len(content)))
-
 			var data map[string]any
 
 			if err := json.Unmarshal(content, &data); err != nil {
@@ -77,35 +237,28 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 				return
 			}
 
-			dataItems = []any{}
-
 			dataItems = append(dataItems, map[string]any{
 				"name": header.Filename,
 				"data": data,
 			})
 
-			dataMap["items"] = dataItems
+			newData["items"] = dataItems
 
 			// we update the data map
-			if err := action.SetData(dataMap); err != nil {
+			if err := action.SetData(newData); err != nil {
 				error.Set(Fmt("Cannot set data: %v", err))
 				return
 			}
-
 
 			if err := action.Save(); err != nil {
 				error.Set(Fmt("Cannot save action: %v", err))
 				return
 			}
 
-			kodex.Log.Info("Success")
-
 			onUpdate(ChangeInfo{}, router.CurrentPath())
 		})
 
 		items := []Element{}
-
-		ed, _ := json.Marshal(dataMap)
 
 		for _, dataItem := range dataItems {
 			itemMap, ok := dataItem.(map[string]any)
@@ -113,7 +266,6 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 			if !ok {
 				continue
 			}
-
 
 			item := ui.ListItem(
 				ui.ListColumn("md", itemMap["name"]),
@@ -125,7 +277,6 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 		}
 
 		return F(
-			string(ed),
 			ui.List(
 				ui.ListHeader(
 					ui.ListColumn("md", "Name"),
@@ -213,7 +364,6 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 		)
 	}
 }
-
 
 func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) func(c Context, actionId, tab string) Element {
 
@@ -303,6 +453,8 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 			content = c.Element("actionEditor",
 				ActionEditor(action, onUpdate),
 			)
+		case "test":
+			content = c.Element("actionTest", ActionTest(action, onUpdate))
 		case "data":
 			content = c.Element("actionData", ActionData(action, onUpdate))
 		}

@@ -933,39 +933,37 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 
 		}, path, onUpdate)
 
-	return F(
-		Li(
-			Class("kip-item", If(extraContent != nil, "kip-with-extra-content")),
-			Div(
-				Class("kip-field-name", "kip-col", "kip-is-sm"),
-				H3(
-					field.Name,
-				),
+	return Li(
+		Class("kip-item", If(extraContent != nil, "kip-with-extra-content")),
+		Div(
+			Class("kip-field-name", "kip-col", "kip-is-sm"),
+			H3(
+				field.Name,
 			),
-			Div(
-				Class("kip-col", "kip-is-md"),
-				Validators(c, field.Validators, path, onUpdate),
-			),
-			Div(
-				Class("kip-col", "kip-is-icon"),
-				If(onUpdate != nil,
-					A(
-						Href(PathWithQuery(router.CurrentPath(), map[string][]string{
-							"field":  path,
-							"action": []string{"delete"},
-						})),
-						I(
-							Class("fa", "fa-trash"),
-						),
+		),
+		Div(
+			Class("kip-col", "kip-is-md"),
+			Validators(c, field.Validators, path, onUpdate),
+		),
+		Div(
+			Class("kip-col", "kip-is-icon"),
+			If(onUpdate != nil,
+				A(
+					Href(PathWithQuery(router.CurrentPath(), map[string][]string{
+						"field":  path,
+						"action": []string{"delete"},
+					})),
+					I(
+						Class("fa", "fa-trash"),
 					),
 				),
 			),
-			If(
-				extraContent != nil,
-				Div(
-					Class("kip-extra-content"),
-					extraContent,
-				),
+		),
+		If(
+			extraContent != nil,
+			Div(
+				Class("kip-extra-content"),
+				extraContent,
 			),
 		),
 	)
