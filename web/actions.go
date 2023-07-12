@@ -3,11 +3,13 @@ package web
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"strconv"
+	"time"
+
 	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/web/ui"
-	"io"
-	"time"
 	//	"github.com/kiprotect/kodex/api"
 )
 
@@ -114,16 +116,78 @@ func ItemDiff(c Context, newItem, oldItem *kodex.Item) Element {
 	return MapDiff(c, newItem.All(), oldItem.All(), []string{})
 }
 
+func TestWithItem(c Context, actionConfig kodex.ActionConfig, item int) Element {
+
+	controller := UseController(c)
+
+	action, err := actionConfig.Action()
+
+	if err != nil {
+		return Div("cannot get action")
+	}
+
+	data, ok := actionConfig.Data().(map[string]any)
+
+	if !ok {
+		return Div("cannot get data (not a map)")
+	}
+
+	// to do: improve parsing...
+
+	rawItems, ok := data["items"].([]any)
+
+	if !ok {
+		return Div("cannot get data")
+	}
+
+	dataItem, ok := rawItems[item].(map[string]any)
+
+	if !ok {
+		return Div("cannot get data item")
+	}
+
+	dataItemData, ok := dataItem["data"].(map[string]any)
+
+	if !ok {
+		return Div("cannot get data item data")
+	}
+
+	items := []*kodex.Item{kodex.MakeItem(dataItemData)}
+
+	parameterSet, err := kodex.MakeParameterSet([]kodex.Action{action}, controller.ParameterStore())
+
+	writer := kodex.MakeInMemoryChannelWriter()
+
+	processor, err := kodex.MakeProcessor(parameterSet, writer, nil)
+
+	if err != nil {
+		return Div("cannot create processor")
+	}
+
+	if newItems, err := processor.Process(items, nil); err != nil {
+		return Div("Cannot process")
+	} else {
+		channels := make(map[string]interface{})
+		channels["items"] = newItems
+		for k, v := range writer.Items {
+			channels[k] = v
+		}
+
+		// channels["errors"] = writer.Errors
+		// channels["messages"] = writer.Messages
+		// channels["warnings"] = writer.Warnings
+
+		if len(newItems) == 0 {
+			return Div("Cannot process")
+		}
+
+		return ItemDiff(c, newItems[0], items[0])
+	}
+
+}
+
 func ActionTest(actionConfig kodex.ActionConfig, onUpdate func(ChangeInfo, string)) ElementFunction {
 	return func(c Context) Element {
-
-		controller := UseController(c)
-
-		action, err := actionConfig.Action()
-
-		if err != nil {
-			return Div("cannot get action")
-		}
 
 		data, ok := actionConfig.Data().(map[string]any)
 
@@ -139,48 +203,46 @@ func ActionTest(actionConfig kodex.ActionConfig, onUpdate func(ChangeInfo, strin
 			return Div("cannot get data")
 		}
 
-		dataItem, ok := rawItems[0].(map[string]any)
+		content := TestWithItem(c, actionConfig, 0)
+		router := UseRouter(c)
+		dataItem := 0
 
-		if !ok {
-			return Div("cannot get data item")
+		rv := router.Query().Get("dataItem")
+
+		if len(rv) > 0 {
+			var err error
+
+			if dataItem, err = strconv.Atoi(string(rv[0])); err != nil {
+				kodex.Log.Error(err)
+			}
 		}
 
-		dataItemData, ok := dataItem["data"].(map[string]any)
+		kodex.Log.Infof("Data item: %d", dataItem)
 
-		if !ok {
-			return Div("cannot get data item data")
-		}
+		values := []Element{}
 
-		items := []*kodex.Item{kodex.MakeItem(dataItemData)}
+		for i, item := range rawItems {
+			itemMap, ok := item.(map[string]any)
 
-		parameterSet, err := kodex.MakeParameterSet([]kodex.Action{action}, controller.ParameterStore())
-
-		writer := kodex.MakeInMemoryChannelWriter()
-
-		processor, err := kodex.MakeProcessor(parameterSet, writer, nil)
-
-		if err != nil {
-			return Div("cannot create processor")
-		}
-
-		if newItems, err := processor.Process(items, nil); err != nil {
-			return Div("Cannot process")
-		} else {
-			channels := make(map[string]interface{})
-			channels["items"] = newItems
-			for k, v := range writer.Items {
-				channels[k] = v
+			if !ok {
+				continue
 			}
 
-			// channels["errors"] = writer.Errors
-			// channels["messages"] = writer.Messages
-			// channels["warnings"] = writer.Warnings
-
-			return ItemDiff(c, newItems[0], items[0])
+			values = append(values, Option(If(i == dataItem, BooleanAttrib("selected")()), Value(Fmt("%d", i)), itemMap["name"]))
 		}
 
-		return Div("testing this action...")
-
+		return Div(
+			Form(
+				Id("itemForm"),
+				Select(
+					values,
+					Id("itemSelect"),
+					OnChange("itemForm.submit()"),
+					Name("dataItem"),
+				),
+			),
+			content,
+		)
 	}
 }
 
@@ -212,6 +274,10 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 			dataItems = []any{}
 		}
 
+		newDataItems := make([]any, len(dataItems))
+
+		copy(newDataItems, dataItems)
+
 		onSubmit := Func[any](c, func() {
 
 			request := c.Request()
@@ -237,12 +303,12 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 				return
 			}
 
-			dataItems = append(dataItems, map[string]any{
+			newDataItems = append(newDataItems, map[string]any{
 				"name": header.Filename,
 				"data": data,
 			})
 
-			newData["items"] = dataItems
+			newData["items"] = newDataItems
 
 			// we update the data map
 			if err := action.SetData(newData); err != nil {
@@ -260,16 +326,46 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 
 		items := []Element{}
 
-		for _, dataItem := range dataItems {
+		for i, dataItem := range dataItems {
 			itemMap, ok := dataItem.(map[string]any)
 
 			if !ok {
 				continue
 			}
 
+			deleteDataItem := Func[any](c, func() {
+
+				newData["items"] = append(newDataItems[:i], newDataItems[i+1:]...)
+
+				// we update the data map
+				if err := action.SetData(newData); err != nil {
+					error.Set(Fmt("Cannot set data: %v", err))
+					return
+				}
+
+				if err := action.Save(); err != nil {
+					error.Set(Fmt("Cannot save action: %v", err))
+					return
+				}
+
+				onUpdate(ChangeInfo{}, router.CurrentPath())
+
+			})
+
 			item := ui.ListItem(
 				ui.ListColumn("md", itemMap["name"]),
-				ui.ListColumn("sm", ""),
+				ui.ListColumn("icon",
+					Form(
+						Method("POST"),
+						OnSubmit(deleteDataItem),
+						Button(
+							Type("submit"),
+							I(
+								Class("fas", "fa-trash"),
+							),
+						),
+					),
+				),
 			)
 
 			items = append(items, item)
@@ -280,7 +376,7 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 			ui.List(
 				ui.ListHeader(
 					ui.ListColumn("md", "Name"),
-					ui.ListColumn("sm", "Type"),
+					ui.ListColumn("icon", "Menu"),
 				),
 				items,
 			),
@@ -350,7 +446,6 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 						),
 					),
 					Script(`
-						console.log("hey");
 						const fileInput = document.querySelector('#data-file input[type=file]');
 						  fileInput.onchange = () => {
 						    if (fileInput.files.length > 0) {
