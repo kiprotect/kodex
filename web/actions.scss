@@ -1,0 +1,58 @@
+@import "variables.scss";
+
+ul.kip-slice-diff {
+
+	font-size: 12px;
+
+	li {
+		margin-bottom: map-get($kip-space, sm);
+	}
+}
+
+ul.kip-map-diff {
+
+	font-size: 12px;
+
+	:not(&.kip-top-level) {
+		padding-left: map-get($kip-space, sm);
+	}
+
+	li {
+
+		margin-bottom: map-get($kip-space, sm) !important;
+
+		span {
+			margin-right: 4px;
+			padding: 4px;
+			display: inline-block;
+			border-radius: 2px;
+
+			&.kip-key {
+				font-weight: 600;
+
+				&::after {
+					content: ":";
+				}
+			}
+
+			&.kip-identical {
+				background: #ffa;
+			}
+
+			&.kip-type {
+				font-style: italic;
+			}
+
+			&.kip-arrow {
+			}
+
+			&.kip-to {
+				background: #afa;				
+			}
+
+			&.kip-from {
+				background: #faa;
+			}
+		}
+	}
+}

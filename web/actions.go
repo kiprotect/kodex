@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"sort"
 	"strconv"
 	"time"
 
 	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/web/ui"
-	//	"github.com/kiprotect/kodex/api"
 )
 
 func Actions(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
@@ -29,40 +29,107 @@ func Actions(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFu
 	}
 }
 
-func MapValue(c Context, key string, newValue, oldValue any, path []string) Element {
+func FromTo(newValue, oldValue any) Element {
 
-	var extraContent any
-
-	newMap, isMap := newValue.(map[string]any)
-	oldMap, ok := oldValue.(map[string]any)
-
-	if !ok {
-		oldMap = map[string]any{}
+	if oldValue == newValue {
+		return F(
+			Span(Class("kip-identical"), Fmt("%v", oldValue)),
+		)
 	}
 
-	if isMap {
-		extraContent = MapDiff(c, newMap, oldMap, path)
+	// the values are not identical
+	return F(
+		Span(Class("kip-from"), Fmt("%v", oldValue)),
+		Span(Class("kip-arrow"), "→"),
+		Span(Class("kip-to"), Fmt("%v", newValue)),
+	)
+
+}
+
+func SliceDiff(c Context, newValue, oldValue []any, path []string) Element {
+
+	items := []Element{}
+
+	for i, nv := range newValue {
+		var ov any
+
+		if i < len(oldValue) {
+			ov = oldValue[i]
+		}
+
+		extraContent := AnyDiff(c, nv, ov, append(path, Fmt("%d", i)))
+
+		var item Element
+
+		if extraContent == nil {
+			item = Li(
+				Span(Class("kip-key"), Fmt("%d", i)),
+				FromTo(nv, ov),
+			)
+		} else {
+			item = Li(
+				Div(
+					Class("kip-extra-content"),
+					extraContent,
+				),
+			)
+		}
+
+		items = append(items, item)
+	}
+
+	return Ul(
+		Class("kip-slice-diff"),
+		items,
+	)
+}
+
+func AnyDiff(c Context, newValue, oldValue any, path []string) Element {
+
+	switch nv := newValue.(type) {
+	case map[string]any:
+		ov, ok := oldValue.(map[string]any)
+		if !ok {
+			ov = map[string]any{}
+		}
+		return MapDiff(c, nv, ov, path)
+	case []any:
+		ov, ok := oldValue.([]any)
+		if !ok {
+			ov = []any{}
+		}
+		return SliceDiff(c, nv, ov, path)
+	}
+
+	// we don't return anything
+	return nil
+}
+
+func MapValue(c Context, key string, newValue, oldValue any, path []string) Element {
+
+	extraContent := AnyDiff(c, newValue, oldValue, path)
+
+	var fromTo Element
+
+	if extraContent == nil {
+		fromTo = FromTo(newValue, oldValue)
+	} else {
+
+		typeInfo := "<>"
+
+		switch newValue.(type) {
+		case []any:
+			typeInfo = "[]"
+		case map[string]any:
+			typeInfo = "map<string,any>"
+		}
+
+		fromTo = Span(Class("kip-type"), typeInfo)
 	}
 
 	return Li(
-		Class("kip-item", If(extraContent != nil, "kip-with-extra-content")),
-		Div(
-			Class("kip-field-name", "kip-col", "kip-is-sm"),
-			H3(
-				key,
-			),
-		),
-		Div(
-			Class("kip-col", "kip-is-md"),
-			IfElse(oldValue != nil, oldValue, "(undefined)"),
-		),
-		Div(
-			Class("kip-col", "kip-is-md"),
-			newValue,
-		),
-		Div(
-			Class("kip-col", "kip-is-icon"),
-		),
+		Span(Class("kip-key"), key),
+		fromTo,
 		If(
 			extraContent != nil,
 			Div(
@@ -76,38 +143,24 @@ func MapValue(c Context, key string, newValue, oldValue any, path []string) Elem
 func MapDiff(c Context, newMap, oldMap map[string]any, path []string) Element {
 	values := []Element{}
 
-	for key, newValue := range newMap {
+	keys := []string{}
 
-		oldValue, _ := oldMap[key]
-		values = append(values, MapValue(c, key, newValue, oldValue, append(path, key)))
-
+	for key, _ := range newMap {
+		keys = append(keys, key)
 	}
 
-	return Div(
-		Class("kip-form-config"),
-		Ul(
-			Class("kip-fields", "kip-list", If(len(path) == 1, "kip-top-level")),
-			Li(
-				Class("kip-item", "kip-is-header"),
-				Div(
-					Class("kip-col", "kip-is-sm"),
-					"Name",
-				),
-				Div(
-					Class("kip-col", "kip-is-md"),
-					"Original",
-				),
-				Div(
-					Class("kip-col", "kip-is-md"),
-					"New",
-				),
-				Div(
-					Class("kip-col", "kip-is-icon"),
-					"",
-				),
-			),
-			values,
-		),
+	// we always sort keys
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		newValue, _ := newMap[key]
+		oldValue, _ := oldMap[key]
+		values = append(values, MapValue(c, key, newValue, oldValue, append(path, key)))
+	}
+
+	return Ul(
+		Class("kip-map-diff", If(len(path) == 0, "kip-top-level")),
+		values,
 	)
 
 }
@@ -177,8 +230,22 @@ func TestWithItem(c Context, actionConfig kodex.ActionConfig, item int) Element 
 		// channels["messages"] = writer.Messages
 		// channels["warnings"] = writer.Warnings
 
+		errors := []Element{}
+
+		for _, error := range writer.Errors {
+			errors = append(errors, Li(Fmt("%v", error.Error)))
+		}
+
 		if len(newItems) == 0 {
-			return Div("Cannot process")
+			return Div(
+				Class("bulma-message", "bulma-is-danger"),
+				Div(
+					Class("bulma-message-body"),
+					Ul(
+						errors,
+					),
+				),
+			)
 		}
 
 		return ItemDiff(c, newItems[0], items[0])
@@ -203,7 +270,6 @@ func ActionTest(actionConfig kodex.ActionConfig, onUpdate func(ChangeInfo, strin
 			return Div("cannot get data")
 		}
 
-		content := TestWithItem(c, actionConfig, 0)
 		router := UseRouter(c)
 		dataItem := 0
 
@@ -217,8 +283,6 @@ func ActionTest(actionConfig kodex.ActionConfig, onUpdate func(ChangeInfo, strin
 			}
 		}
 
-		kodex.Log.Infof("Data item: %d", dataItem)
-
 		values := []Element{}
 
 		for i, item := range rawItems {
@@ -231,14 +295,19 @@ func ActionTest(actionConfig kodex.ActionConfig, onUpdate func(ChangeInfo, strin
 			values = append(values, Option(If(i == dataItem, BooleanAttrib("selected")()), Value(Fmt("%d", i)), itemMap["name"]))
 		}
 
+		content := TestWithItem(c, actionConfig, dataItem)
+
 		return Div(
 			Form(
 				Id("itemForm"),
-				Select(
-					values,
-					Id("itemSelect"),
-					OnChange("itemForm.submit()"),
-					Name("dataItem"),
+				Div(
+					Class("bulma-select", "bulma-is-fullwidth"),
+					Select(
+						values,
+						Id("itemSelect"),
+						OnChange("itemForm.submit()"),
+						Name("dataItem"),
+					),
 				),
 			),
 			content,

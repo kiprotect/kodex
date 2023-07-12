@@ -65,10 +65,6 @@
                 font-weight: 300;
             }
 
-            button {
-                border: none;
-                background: none;
-            }
         }
 
         span.action {
@@ -133,6 +129,15 @@
                 text-overflow: ellipsis;
                 overflow: hidden;
             }
+
+            form {
+                button {
+                    cursor: pointer;
+                    border: none;
+                    background: none;
+                }                
+            }
+
         }
 
         .kip-content {
