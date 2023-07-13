@@ -13,7 +13,7 @@ ul.kip-map-diff {
 
 	font-size: 12px;
 
-	:not(&.kip-top-level) {
+	&:not(.kip-top-level) {
 		padding-left: map-get($kip-space, sm);
 	}
 
