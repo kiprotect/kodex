@@ -591,6 +591,10 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 
 			validator.Cases[caseValue][index] = newValidator
 			return nil
+		}, func(fromIndex, toIndex int) error {
+			cases := validator.Cases[caseValue]
+			cases[fromIndex], cases[toIndex] = cases[toIndex], cases[fromIndex]
+			return nil
 		}, casePath, onUpdate)
 
 		item := Li(
@@ -740,11 +744,15 @@ func IsListValidator(c Context, validator *forms.IsList, onUpdate func(ChangeInf
 
 			validator.Validators[index] = newValidator
 			return nil
+		}, func(fromIndex, toIndex int) error {
+			validators := validator.Validators
+			validators[fromIndex], validators[toIndex] = validators[toIndex], validators[fromIndex]
+			return nil
 		}, path, onUpdate),
 	)
 }
 
-func ValidatorDetails(c Context, validator forms.Validator, update func(validator forms.Validator) error, path []string, onUpdate func(ChangeInfo, string)) Element {
+func ValidatorDetails(c Context, validator forms.Validator, index, length int, update func(validator forms.Validator) error, move func(fromIndex, toIndex int) error, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	var content Element
 
@@ -815,23 +823,66 @@ func ValidatorDetails(c Context, validator forms.Validator, update func(validato
 		content = ValidatorEditor(c, update, validator, path, onUpdate)
 	}
 
+	moveLeft := Func[any](c, func() {
+
+		if index == 0 {
+			return
+		}
+
+		url := PathWithQuery(router.CurrentPath(), map[string][]string{
+			"field": append(path[:len(path)-1], Fmt("%d", index-1)),
+		})
+
+		move(index, index-1)
+		onUpdate(ChangeInfo{}, url)
+	})
+
+	moveRight := Func[any](c, func() {
+
+		if index >= length-1 {
+			return
+		}
+
+		url := PathWithQuery(router.CurrentPath(), map[string][]string{
+			"field": append(path[:len(path)-1], Fmt("%d", index+1)),
+		})
+
+		move(index, index+1)
+		onUpdate(ChangeInfo{}, url)
+	})
+
 	return F(
 		H2(
 			Class("bulma-subtitle"),
 			F(
 				forms.GetType(validator),
 				If(onUpdate != nil,
-					A(
-						Style("float: right"),
-						Href(
-							PathWithQuery(router.CurrentPath(), map[string][]string{
-								"field":  path,
-								"action": []string{"delete"},
-							}),
+					F(
+						Nbsp,
+						Form(
+							Style("display: inline-block"),
+							Method("POST"),
+							OnSubmit(moveLeft),
+							A("←", OnClick("this.parentElement.submit()")),
 						),
-						Nbsp,
-						Nbsp,
-						I(Class("fas fa-trash")),
+						Form(
+							Style("display: inline-block"),
+							Method("POST"),
+							OnSubmit(moveRight),
+							A("→", OnClick("this.parentElement.submit()")),
+						),
+						A(
+							Style("float: right"),
+							Href(
+								PathWithQuery(router.CurrentPath(), map[string][]string{
+									"field":  path,
+									"action": []string{"delete"},
+								}),
+							),
+							Nbsp,
+							Nbsp,
+							I(Class("fas fa-trash")),
+						),
 					),
 				),
 			),
@@ -867,7 +918,7 @@ func pathMatches(path []string, queryPath []string) (bool, bool) {
 
 }
 
-func ValidatorsActions(c Context, validators []forms.Validator, create func(validator forms.Validator) int, update func(index int, validator forms.Validator) error, path []string, onUpdate func(ChangeInfo, string)) Element {
+func ValidatorsActions(c Context, validators []forms.Validator, create func(validator forms.Validator) int, update func(index int, validator forms.Validator) error, move func(fromIndex, toIndex int) error, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	queryPath := queryPath(c)
 	queryAction := queryAction(c)
@@ -889,9 +940,9 @@ func ValidatorsActions(c Context, validators []forms.Validator, create func(vali
 	if fullMatch && queryAction == "addValidator" {
 		return NewValidator(c, create, path, onUpdate)
 	} else if partialMatch && index >= 0 && index < len(validators) {
-		return ValidatorDetails(c, validators[index], func(validator forms.Validator) error {
+		return ValidatorDetails(c, validators[index], index, len(validators), func(validator forms.Validator) error {
 			return update(index, validator)
-		}, append(path, Fmt("%d", index)), onUpdate)
+		}, move, append(path, Fmt("%d", index)), onUpdate)
 	}
 
 	return nil
@@ -931,6 +982,9 @@ func Field(c Context, form *forms.Form, field *forms.Field, path []string, onUpd
 			field.Validators[index] = newValidator
 			return nil
 
+		}, func(fromIndex, toIndex int) error {
+			field.Validators[fromIndex], field.Validators[toIndex] = field.Validators[toIndex], field.Validators[fromIndex]
+			return nil
 		}, path, onUpdate)
 
 	return Li(

@@ -427,7 +427,9 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 					Form(
 						Method("POST"),
 						OnSubmit(deleteDataItem),
-						Button(
+						A(
+							Href("#"),
+							OnClick("this.parentElement.submit()"),
 							Type("submit"),
 							I(
 								Class("fas", "fa-trash"),
