@@ -36,6 +36,16 @@
 
             padding: 4px;
 
+            &:hover {
+                > .kip-is-icon > * {
+                    display: inherit;
+                }
+            }
+
+            .kip-is-icon > * {
+                display: none;
+            }
+
             .kip-extra-content {
                 display: block;
                 width: 100%;
@@ -43,47 +53,28 @@
                 background: #fff;
                 padding: map-get($kip-space, sm);
                 box-shadow: $kip-box-shadow;
-            }
 
-            .kip-active-validator {
-                padding-left: 10px;
-                border-left: 2px dashed #eee;
-                margin-top: map-get($kip-space, sm);
-
-                .kip-is-invalid {
-                    border-color: #f00;
-                    background: #fdd;
-                }
-
-                > .kip-validator-type {
-                    display: flex;
-                    margin-bottom: map-get($kip-space, sm);
-
-                    h4 {
-                        font-size: 24px;
-                        margin-top: 8px;
+                h2.bulma-subtitle {
+                    & > * {
+                        display: none;
                     }
 
-                    span {
-                        user-select: none;
-                        flex-grow: 1;
-                        margin-top: 16px;
-                        margin-left: map-get($kip-space, md);
+                    &:hover > * {
+                        display: inline-block;
                     }
-
-                    a {
-                        opacity: 8%;
-                        margin-top: 16px;
-                    }
-
-                    &:hover, :active {
-                        a {
-                            opacity: 100%;
-                        }
-                    }
-
                 }
             }
+
+            &.kip-with-extra-content {
+
+                background: repeating-linear-gradient(
+                  45deg,
+                  #fff,
+                  #efe 10px,
+                  #fff 10px,
+                );
+            }
+
         }
     }
 
@@ -100,9 +91,11 @@
             text-select: none;
             margin-right: map-get($kip-space, sm);
 
-            &.is-active {
-                background: $kip-lightgreen;
-                color: #fff;
+            &.kip-is-active {
+                background: #efa;
+                a {
+                    color: #000;
+                }
             }
         }
 

@@ -30,23 +30,3 @@ func Tab(args ...any) Element {
 		args,
 	)
 }
-
-/*
-export const Tab = ({ active, children, href, icon, params, onClick }) => (
-    <li className={active ? 'bulma-is-active' : ''}>
-        <A href={href} params={params} onClick={onClick}>
-            {icon && <span className="icon is-small">{icon}</span>}
-            {children}
-        </A>
-    </li>
-);
-
-Tab.propTypes = {
-    active: PropTypes.bool,
-    children: PropTypes.node.isRequired,
-    href: PropTypes.string,
-    icon: PropTypes.node,
-    params: PropTypes.object,
-    onClick: PropTypes.func,
-};
-*/

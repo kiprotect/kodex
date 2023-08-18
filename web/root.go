@@ -180,6 +180,7 @@ func Login(c Context) Element {
 									A(
 										Role("button"),
 										Class("bulma-button", "bulma-is-success", "bulma-is-flex"),
+										DataAttrib("plain", ""),
 										Href("/api/v1/login"),
 										"Log in via SSO",
 									),

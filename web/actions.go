@@ -300,12 +300,14 @@ func ActionTest(actionConfig kodex.ActionConfig, onUpdate func(ChangeInfo, strin
 		return Div(
 			Form(
 				Id("itemForm"),
+				Method("GET"),
 				Div(
 					Class("bulma-select", "bulma-is-fullwidth"),
 					Select(
 						values,
+						Attrib("autocomplete")("off"),
 						Id("itemSelect"),
-						OnChange("itemForm.submit()"),
+						OnChange("itemForm.requestSubmit()"),
 						Name("dataItem"),
 					),
 				),
@@ -429,7 +431,7 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 						OnSubmit(deleteDataItem),
 						A(
 							Href("#"),
-							OnClick("this.parentElement.submit()"),
+							OnClick("this.parentElement.requestSubmit()"),
 							Type("submit"),
 							I(
 								Class("fas", "fa-trash"),

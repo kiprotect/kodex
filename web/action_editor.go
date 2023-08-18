@@ -175,9 +175,33 @@ func Validators(c Context, validators []forms.Validator, path []string, onUpdate
 
 	elements := make([]Element, 0)
 
+	queryPath := queryPath(c)
+
+	partialMatch, _ := pathMatches(path, queryPath)
+
+	var index int = -1
+
+	if len(queryPath) > len(path) {
+		// we get the validator index from the query path
+		var err error
+
+		if index, err = strconv.Atoi(queryPath[len(path)]); err != nil {
+			// invalid index, we ignore...
+			index = -1
+		}
+	}
+
 	for i, validator := range validators {
+
+		active := false
+
+		if partialMatch && index == i {
+			active = true
+		}
+
 		elements = append(elements,
 			Li(
+				If(active, Class("kip-is-active")),
 				A(
 					Href(
 						PathWithQuery(router.CurrentPath(), map[string][]string{
@@ -860,16 +884,14 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 					F(
 						Nbsp,
 						Form(
-							Style("display: inline-block"),
 							Method("POST"),
 							OnSubmit(moveLeft),
-							A("←", OnClick("this.parentElement.submit()")),
+							A("←", OnClick("this.parentElement.requestSubmit()")),
 						),
 						Form(
-							Style("display: inline-block"),
 							Method("POST"),
 							OnSubmit(moveRight),
-							A("→", OnClick("this.parentElement.submit()")),
+							A("→", OnClick("this.parentElement.requestSubmit()")),
 						),
 						A(
 							Style("float: right"),
