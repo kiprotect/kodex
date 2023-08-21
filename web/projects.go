@@ -3,6 +3,7 @@ package web
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
@@ -17,6 +18,68 @@ import (
 func InMemoryController(c Context) (api.Controller, error) {
 	controller := UseController(c)
 	return ctrlHelpers.InMemoryController(controller.Settings(), map[string]interface{}{}, controller.APIDefinitions())
+}
+
+func MakeProject(controller api.Controller, name string, org *api.UserOrganization) (kodex.Project, error) {
+
+	project := controller.MakeProject(nil)
+
+	project.SetName(name)
+
+	if err := project.Save(); err != nil {
+		return nil, fmt.Errorf("Cannot save project: %v", err)
+	}
+
+	apiOrg, err := org.ApiOrganization(controller)
+
+	if err != nil {
+		return nil, fmt.Errorf("cannot get API organization: %v", err)
+	}
+
+	// we always add admin and superuser roles
+	for _, orgRole := range []string{"admin", "superuser"} {
+		role := controller.MakeObjectRole(project, apiOrg)
+		values := map[string]interface{}{
+			"organization_role": orgRole,
+			"role":              "superuser",
+		}
+
+		if err := role.Create(values); err != nil {
+			return nil, fmt.Errorf("cannot create role: %v", err)
+		}
+		if err := role.Save(); err != nil {
+			return nil, fmt.Errorf("cannot save role: %v", err)
+		}
+	}
+
+	// we try to add default roles as well
+	if defaultRoles, err := controller.DefaultObjectRoles(apiOrg.ID()); err != nil {
+		return nil, fmt.Errorf("cannot load default roles: %v", err)
+	} else {
+		for _, defaultRole := range defaultRoles {
+			if defaultRole.ObjectType() != "project" {
+				continue
+			}
+
+			role := controller.MakeObjectRole(project, apiOrg)
+
+			values := map[string]interface{}{
+				"organization_role": defaultRole.OrganizationRole(),
+				"role":              defaultRole.ObjectRole(),
+			}
+
+			if err := role.Create(values); err != nil {
+				return nil, fmt.Errorf("cannot create role: %v", err)
+			}
+			if err := role.Save(); err != nil {
+				return nil, fmt.Errorf("cannot save role: %v", err)
+			}
+
+		}
+	}
+
+	return project, nil
+
 }
 
 func NewProject() ElementFunction {
@@ -34,6 +97,13 @@ func NewProject() ElementFunction {
 				return
 			}
 
+			org := UseDefaultOrganization(c)
+
+			if org == nil {
+				error.Set("Cannot get organization")
+				return
+			}
+
 			controller.Begin()
 
 			success := false
@@ -45,71 +115,11 @@ func NewProject() ElementFunction {
 				controller.Rollback()
 			}()
 
-			project := controller.MakeProject(nil)
-
-			project.SetName(name.Get())
-
-			if err := project.Save(); err != nil {
-				error.Set("Cannot save project")
-				return
-			}
-
-			org := UseDefaultOrganization(c)
-
-			if org == nil {
-				error.Set("Cannot get organization")
-				return
-			}
-
-			apiOrg, err := org.ApiOrganization(controller)
+			project, err := MakeProject(controller, name.Get(), org)
 
 			if err != nil {
-				error.Set("Cannot get organization")
+				error.Set(Fmt("%v", err))
 				return
-			}
-
-			// we always add admin and superuser roles
-			for _, orgRole := range []string{"admin", "superuser"} {
-				role := controller.MakeObjectRole(project, apiOrg)
-				values := map[string]interface{}{
-					"organization_role": orgRole,
-					"role":              "superuser",
-				}
-
-				if err := role.Create(values); err != nil {
-					error.Set(Fmt("Cannot create role: %v", err))
-					return
-				}
-				if err := role.Save(); err != nil {
-					error.Set(Fmt("Cannot save role: %v", err))
-					return
-				}
-			}
-
-			// we try to add default roles as well
-			if defaultRoles, err := controller.DefaultObjectRoles(apiOrg.ID()); err != nil {
-				kodex.Log.Errorf("Cannot load default roles: %v", err)
-			} else {
-				for _, defaultRole := range defaultRoles {
-					if defaultRole.ObjectType() != "project" {
-						continue
-					}
-
-					role := controller.MakeObjectRole(project, apiOrg)
-
-					values := map[string]interface{}{
-						"organization_role": defaultRole.OrganizationRole(),
-						"role":              defaultRole.ObjectRole(),
-					}
-
-					if err := role.Create(values); err != nil {
-						return
-					}
-					if err := role.Save(); err != nil {
-						return
-					}
-
-				}
 			}
 
 			success = true
