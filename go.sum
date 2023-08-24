@@ -46,6 +46,8 @@ github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/gopacket v1.1.19 h1:ves8RnFZPGiFnTS0uPQStjwru6uO6h+nlr9j6fL7kF8=
 github.com/google/gopacket v1.1.19/go.mod h1:iJ8V8n6KS+z2U1A8pUwu8bW5SyEMkXJB8Yo/Vo+TKTo=
+github.com/gospel-dev/gospel v0.0.0-20230622220546-10f4c1f940f8 h1:RUdo9PTi4xU55YVSTeHw1p71ddHrFUN7gmjepvy7ysA=
+github.com/gospel-dev/gospel v0.0.0-20230622220546-10f4c1f940f8/go.mod h1:EaIFc4HQNHBQeranjdU0gpYkh/OrCvOFMyHKBrguAok=
 github.com/json-iterator/go v1.1.9 h1:9yzud/Ht36ygwatGx56VwCZtlI/2AD15T1X2sjSuGns=
 github.com/json-iterator/go v1.1.9/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
@@ -84,6 +86,8 @@ github.com/kiprotect/go-helpers v0.0.0-20211126144132-63cf08b7160f h1:27hamANw04
 github.com/kiprotect/go-helpers v0.0.0-20211126144132-63cf08b7160f/go.mod h1:eIQRg8JS++hWm0qzHR0XlWZgCD4zBQOnQHlrHxaHUQU=
 github.com/kiprotect/go-helpers v0.0.0-20211210144244-79ce90e73e79 h1:DkoSA58JBhgaK+cL4z421isWIPvSbaB2ovrofUTIp/I=
 github.com/kiprotect/go-helpers v0.0.0-20211210144244-79ce90e73e79/go.mod h1:eIQRg8JS++hWm0qzHR0XlWZgCD4zBQOnQHlrHxaHUQU=
+github.com/kiprotect/go-helpers v0.0.0-20230622215249-2b24b29fc854 h1:qAKmmS48MEOS2ssZpUPcYaOfjpkmW90ne/J3SikUM10=
+github.com/kiprotect/go-helpers v0.0.0-20230622215249-2b24b29fc854/go.mod h1:0CQdbyrzEX+1Agn/cCtwFONHE14NUBRK/9XRL+p0Yio=
 github.com/kiprotect/kiprotect v0.0.0-20200925133616-dec1868af81b h1:cEcqLsH4GG0FOOOwzvlwXd2+SlreoIUtrx3WdW85MuI=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3 h1:CE8S1cTafDpPvMhIxNJKvHsGVBgn1xWYf1NbHQhywc8=
