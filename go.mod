@@ -7,6 +7,7 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/btree v1.1.2
 	github.com/google/gopacket v1.1.19
+	github.com/gospel-dev/gospel v0.0.0-20230818123335-65eb7fb5862a
 	github.com/kiprotect/go-helpers v0.0.0-20230622215249-2b24b29fc854
 	github.com/sirupsen/logrus v1.9.0
 	github.com/streadway/amqp v1.0.0
@@ -22,7 +23,6 @@ require (
 	github.com/go-playground/validator/v10 v10.11.0 // indirect
 	github.com/goccy/go-json v0.9.10 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/gospel-dev/gospel v0.0.0-20230622220546-10f4c1f940f8 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
