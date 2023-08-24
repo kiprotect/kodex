@@ -29,7 +29,6 @@ import (
 	controllerHelpers "github.com/kiprotect/kodex/api/helpers/controller"
 	ginHelpers "github.com/kiprotect/kodex/api/helpers/gin"
 	"github.com/urfave/cli"
-	"strconv"
 	"sync"
 )
 
@@ -51,8 +50,16 @@ func API(controller kodex.Controller, definitions interface{}) ([]cli.Command, e
 							Value: "",
 							Usage: "enable profiler and store results to given filename",
 						},
+						cli.IntFlag{
+							Name:  "port",
+							Usage: "The port to bind to",
+						},
+						cli.StringFlag{
+							Name:  "host",
+							Usage: "The host to bind to",
+						},
 					},
-					Usage: "Run the KIProtect API.",
+					Usage: "Run the Kodex API.",
 					Action: func(c *cli.Context) error {
 
 						blueprintName := ""
@@ -61,7 +68,7 @@ func API(controller kodex.Controller, definitions interface{}) ([]cli.Command, e
 							blueprintName = c.Args().Get(0)
 						}
 
-						return RunAPI(controller, apiDefinitions, "", nil, blueprintName)
+						return RunAPI(controller, apiDefinitions, c.String("host"), c.Int("port"), "", nil, blueprintName)
 					},
 				},
 			},
@@ -70,25 +77,40 @@ func API(controller kodex.Controller, definitions interface{}) ([]cli.Command, e
 
 }
 
-func RunAPI(controller kodex.Controller, definitions *api.Definitions, prefix string, handlerMaker func(api.Controller, http.Handler) (http.Handler, error), blueprintName string) error {
+func RunAPI(controller kodex.Controller, definitions *api.Definitions, host string, port int, prefix string, handlerMaker func(api.Controller, http.Handler) (http.Handler, error), blueprintName string) error {
 	kodex.Log.Infof("Running Kodex - API %s", kodex.Version)
 
 	var wg sync.WaitGroup
-
-	port, ok := controller.Settings().Int("port")
-	if !ok {
-		port = 8000
-	}
-	host, ok := controller.Settings().String("host")
-	if !ok {
-		host = "0.0.0.0"
-	}
 
 	apiController, err := controllerHelpers.ApiController(controller, definitions)
 
 	if err != nil {
 		return err
 	}
+
+	var ok bool
+
+	if port == 0 {
+
+		port, ok = controller.Settings().Int("port")
+
+		if !ok {
+			port = 8000
+		}
+
+	}
+
+	if host == "" {
+
+		host, ok = controller.Settings().String("host")
+
+		if !ok {
+			host = "0.0.0.0"
+		}
+
+	}
+
+	bindAddress := fmt.Sprintf("%s:%d", host, port)
 
 	if blueprintName != "" {
 
@@ -111,9 +133,7 @@ func RunAPI(controller kodex.Controller, definitions *api.Definitions, prefix st
 
 	}
 
-	var addr = host + ":" + strconv.Itoa(port)
-
-	srv, _, err := ginHelpers.RunApi(apiController, addr, prefix, handlerMaker, &wg)
+	srv, _, err := ginHelpers.RunApi(apiController, bindAddress, prefix, handlerMaker, &wg)
 
 	if err != nil {
 		return err

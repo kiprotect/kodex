@@ -159,8 +159,8 @@ func Kodex(definitions *api.Definitions) {
 	}
 
 	app := cli.NewApp()
-	app.Name = "KIProtect"
-	app.Usage = "Run all KIProtect commands"
+	app.Name = "Kodex"
+	app.Usage = "Run all Kodex commands"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "level",

@@ -88,5 +88,5 @@ func RunApp(controller kodex.Controller, definitions *api.Definitions, blueprint
 		}, nil
 	}
 
-	return apiCmd.RunAPI(controller, definitions, "/api", handlerMaker, blueprintName)
+	return apiCmd.RunAPI(controller, definitions, "", 0, "/api", handlerMaker, blueprintName)
 }
