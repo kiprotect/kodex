@@ -54,20 +54,19 @@ func SettingsPaths() ([]string, fs.FS, error) {
 		}
 
 		// we set the main root from the path root
-		mainRoot = root + "/"
+		mainRoot = root
 
+		// we replace the slashes
 		value = filepath.ToSlash(value)
 
+		// we remove the volume or root part (e.g. 'c:/' on Windows or '/' on Linux)
 		value = value[len(root)+1:]
+
+		// we append the value to the sanitized paths
 		sanitizedValues = append(sanitizedValues, value)
 	}
 
-	// on Linux, mainRoot will be unset
-	if mainRoot == "" {
-		mainRoot = "/"
-	}
-
-	return sanitizedValues, os.DirFS(mainRoot), nil
+	return sanitizedValues, os.DirFS(mainRoot + "/"), nil
 }
 
 func Settings(settingsPaths []string, fS fs.FS) (kodex.Settings, error) {
