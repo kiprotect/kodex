@@ -7,6 +7,7 @@ import (
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions"
+	"github.com/kiprotect/kodex/actions/pseudonymize"
 	"github.com/kiprotect/kodex/web/ui"
 	"reflect"
 	"sort"
@@ -383,6 +384,16 @@ func NewValidator(c Context, create func(validator forms.Validator) int, path []
 	)
 }
 
+func lines(s string) int {
+	count := 0
+	for _, c := range s {
+		if c == '\n' {
+			count++
+		}
+	}
+	return count
+}
+
 func ValidatorEditor(c Context, update func(validator forms.Validator) error, validator forms.Validator, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	configJson, err := json.MarshalIndent(validator, "", "  ")
@@ -446,6 +457,12 @@ func ValidatorEditor(c Context, update func(validator forms.Validator) error, va
 		)
 	}
 
+	lineCount := lines(config.Get()) + 1
+
+	if lineCount > 20 {
+		lineCount = 20
+	}
+
 	return Form(
 		Class("bulma-form"),
 		Method("POST"),
@@ -461,7 +478,7 @@ func ValidatorEditor(c Context, update func(validator forms.Validator) error, va
 						Class("bulma-control"),
 						Textarea(
 							Class("bulma-textarea"),
-							Attrib("rows")(Fmt("%d", 5)),
+							Attrib("rows")(Fmt("%d", lineCount)),
 							Value(config),
 						),
 					),
@@ -748,6 +765,72 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 
 }
 
+func PseudonymizeValidator(c Context, validator *actions.IsAction, action *actions.PseudonymizeTransformation, onUpdate func(ChangeInfo, string), path []string) Element {
+
+	// to do: add a switch field that toggles the pseudonymizer type and updates the underlying form
+	// to do: add specific forms for merengue, HMAC or structured pseudonymization, which all update the config
+
+	values := make([]Element, 0)
+
+	pseudonymizeMethod := Var[string](c, action.Method)
+	router := UseRouter(c)
+
+	onSubmit := Func[any](c, func() {
+
+		if _, ok := pseudonymize.Pseudonymizers[pseudonymizeMethod.Get()]; !ok {
+			// invalid pseudonymizer method
+			return
+		}
+
+		validator.Config = map[string]any{
+			"method": pseudonymizeMethod.Get(),
+			// we fall back to the default config...
+			"config": nil,
+		}
+
+		url := PathWithQuery(router.CurrentPath(), map[string][]string{
+			"field": path,
+		})
+
+		onUpdate(ChangeInfo{}, url)
+	})
+
+	for method, _ := range pseudonymize.Pseudonymizers {
+		values = append(values, Option(If(action.Method == method, BooleanAttrib("selected")()), Value(method), method))
+	}
+
+	return Div(
+		Form(
+			OnSubmit(onSubmit),
+			Id("pseudonymizerForm"),
+			Method("POST"),
+			Div(
+				Class("bulma-select", "bulma-is-fullwidth"),
+				Select(
+					values,
+					Value(pseudonymizeMethod),
+					Attrib("autocomplete")("off"),
+					Id("itemSelect"),
+					OnChange("pseudonymizerForm.requestSubmit()"),
+				),
+			),
+		),
+	)
+}
+
+func IsActionValidator(c Context, validator *actions.IsAction, onUpdate func(ChangeInfo, string), path []string) Element {
+
+	// to do: add a switch that toggles the action type and updates the underlying form
+
+	switch vt := validator.Action.(type) {
+	case *actions.PseudonymizeTransformation:
+		return PseudonymizeValidator(c, validator, vt, onUpdate, path)
+	}
+
+	return Div("Unknown action")
+
+}
+
 func IsListValidator(c Context, validator *forms.IsList, onUpdate func(ChangeInfo, string), path []string) Element {
 	return Div(
 		Validators(c, validator.Validators, path, onUpdate),
@@ -778,8 +861,6 @@ func IsListValidator(c Context, validator *forms.IsList, onUpdate func(ChangeInf
 
 func ValidatorDetails(c Context, validator forms.Validator, index, length int, update func(validator forms.Validator) error, move func(fromIndex, toIndex int) error, path []string, onUpdate func(ChangeInfo, string)) Element {
 
-	var content Element
-
 	queryPath := queryPath(c)
 	queryAction := queryAction(c)
 
@@ -801,28 +882,27 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 		return ui.Message(
 			"danger",
 			F(
-				"Do you really want to delete this validator?",
-				Div(
-					Class("kip-col", "kip-is-icon"),
-					Form(
-						Method("POST"),
-						OnSubmit(onSubmit),
-						Div(
-							Class("bulma-field", "bulma-is-grouped"),
-							P(
-								Class("bulma-control"),
-								A(
-									Class("bulma-button"),
-									Href(url),
-									"Cancel",
-								),
+				P(
+					"Do you really want to delete this validator?",
+				),
+				Form(
+					Method("POST"),
+					OnSubmit(onSubmit),
+					Div(
+						Class("bulma-field", "bulma-is-grouped"),
+						P(
+							Class("bulma-control"),
+							A(
+								Class("bulma-button"),
+								Href(url),
+								"Cancel",
 							),
-							P(
-								Class("bulma-control"),
-								Button(
-									Class("bulma-button", "bulma-is-danger"),
-									"Delete",
-								),
+						),
+						P(
+							Class("bulma-control"),
+							Button(
+								Class("bulma-button", "bulma-is-danger"),
+								"Delete",
 							),
 						),
 					),
@@ -831,20 +911,36 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 		)
 	}
 
+	tab := router.Query().Get("tab")
+
+	if tab != "source" && tab != "editor" {
+		tab = "editor"
+	}
+
+	if !fullMatch {
+		tab = "editor"
+	}
+
+	var editor Element
+
 	switch vt := validator.(type) {
 	case *forms.IsList:
-		content = IsListValidator(c, vt, onUpdate, path)
+		editor = IsListValidator(c, vt, onUpdate, path)
 	case *forms.Switch:
-		content = SwitchValidator(c, vt, onUpdate, path)
+		editor = SwitchValidator(c, vt, onUpdate, path)
+	case *actions.IsAction:
+		editor = IsActionValidator(c, vt, onUpdate, path)
 	case *forms.IsStringMap:
 
 		// we always create a form
 		if vt.Form == nil {
 			vt.Form = &forms.Form{}
 		}
-		content = FormFields(c, vt.Form, onUpdate, path)
-	default:
-		content = ValidatorEditor(c, update, validator, path, onUpdate)
+		editor = FormFields(c, vt.Form, onUpdate, path)
+	}
+
+	if editor == nil {
+		tab = "source"
 	}
 
 	moveLeft := Func[any](c, func() {
@@ -855,6 +951,7 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 
 		url := PathWithQuery(router.CurrentPath(), map[string][]string{
 			"field": append(path[:len(path)-1], Fmt("%d", index-1)),
+			"tab":   []string{tab},
 		})
 
 		move(index, index-1)
@@ -869,11 +966,19 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 
 		url := PathWithQuery(router.CurrentPath(), map[string][]string{
 			"field": append(path[:len(path)-1], Fmt("%d", index+1)),
+			"tab":   []string{tab},
 		})
 
 		move(index, index+1)
 		onUpdate(ChangeInfo{}, url)
 	})
+
+	url := func(tab string) string {
+		return PathWithQuery(router.CurrentPath(), map[string][]string{
+			"field": path,
+			"tab":   []string{tab},
+		})
+	}
 
 	return F(
 		H2(
@@ -909,8 +1014,18 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 				),
 			),
 		),
-
-		content,
+		If(
+			editor != nil,
+			ui.Tabs(
+				ui.Tab(ui.ActiveTab(tab == "editor"), A(Href(url("editor")), "Editor")),
+				ui.Tab(ui.ActiveTab(tab == "source"), A(Href(url("source")), "Source")),
+			),
+		),
+		IfElse(
+			tab == "source",
+			ValidatorEditor(c, update, validator, path, onUpdate),
+			editor,
+		),
 	)
 
 }

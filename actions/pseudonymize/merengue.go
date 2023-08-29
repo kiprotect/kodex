@@ -137,6 +137,11 @@ func (p *MerenguePseudonymizer) SetParams(params interface{}) error {
 }
 
 func MakeMerenguePseudonymizer(config map[string]interface{}) (Pseudonymizer, error) {
+
+	if config == nil {
+		config = map[string]any{}
+	}
+
 	params, err := MerengueConfigForm.Validate(config)
 	if err != nil {
 		return nil, err

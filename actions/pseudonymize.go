@@ -25,10 +25,9 @@ import (
 
 type PseudonymizeTransformation struct {
 	kodex.BaseAction
-	pseudonymizer pseudonymize.Pseudonymizer
-	key           string
-	method        string
-	config        map[string]interface{}
+	Pseudonymizer pseudonymize.Pseudonymizer
+	Key           string
+	Method        string
 }
 
 func (p *PseudonymizeTransformation) Undoable(item *kodex.Item) bool {
@@ -36,36 +35,36 @@ func (p *PseudonymizeTransformation) Undoable(item *kodex.Item) bool {
 }
 
 func (p *PseudonymizeTransformation) process(item *kodex.Item, writer kodex.ChannelWriter, f func(interface{}) (interface{}, error)) (*kodex.Item, error) {
-	value, ok := item.Get(p.key)
+	value, ok := item.Get(p.Key)
 	if !ok {
-		return nil, fmt.Errorf("key %s missing", p.key)
+		return nil, fmt.Errorf("key %s missing", p.Key)
 	}
 	newValue, err := f(value)
 	if err != nil {
 		return nil, err
 	}
-	item.Set(p.key, newValue)
+	item.Set(p.Key, newValue)
 	return item, err
 }
 
 func (p *PseudonymizeTransformation) Undo(item *kodex.Item, writer kodex.ChannelWriter) (*kodex.Item, error) {
-	return p.process(item, writer, p.pseudonymizer.Depseudonymize)
+	return p.process(item, writer, p.Pseudonymizer.Depseudonymize)
 }
 
 func (p *PseudonymizeTransformation) Do(item *kodex.Item, writer kodex.ChannelWriter) (*kodex.Item, error) {
-	return p.process(item, writer, p.pseudonymizer.Pseudonymize)
+	return p.process(item, writer, p.Pseudonymizer.Pseudonymize)
 }
 
 func (p *PseudonymizeTransformation) GenerateParams(key, salt []byte) error {
-	return p.pseudonymizer.GenerateParams(key, salt)
+	return p.Pseudonymizer.GenerateParams(key, salt)
 }
 
 func (p *PseudonymizeTransformation) SetParams(params interface{}) error {
-	return p.pseudonymizer.SetParams(params)
+	return p.Pseudonymizer.SetParams(params)
 }
 
 func (p *PseudonymizeTransformation) Params() interface{} {
-	return p.pseudonymizer.Params()
+	return p.Pseudonymizer.Params()
 }
 
 func MakePseudonymizeAction(spec kodex.ActionSpecification) (kodex.Action, error) {
@@ -84,16 +83,26 @@ func MakePseudonymizeAction(spec kodex.ActionSpecification) (kodex.Action, error
 		return nil, fmt.Errorf("Unknown pseudonymizer method %s", method)
 	}
 
-	ps, err := psMaker(spec.Config)
+	var mapConfig map[string]any
+
+	if _, ok := spec.Config["config"]; !ok {
+		// we fall back to the parent config...
+		mapConfig = spec.Config
+	} else {
+		// we convert the config to a map
+		mapConfig, _ = params["config"].(map[string]any)
+	}
+
+	ps, err := psMaker(mapConfig)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &PseudonymizeTransformation{
-		pseudonymizer: ps,
-		method:        method,
-		key:           params["key"].(string),
+		Pseudonymizer: ps,
+		Method:        method,
+		Key:           params["key"].(string),
 		BaseAction:    kodex.MakeBaseAction(spec, "pseudonymize"),
 	}, nil
 
@@ -117,6 +126,13 @@ var PseudonymizeConfigForm = forms.Form{
 			Validators: []forms.Validator{
 				forms.IsOptional{Default: "_"},
 				forms.IsString{},
+			},
+		},
+		{
+			Name: "config",
+			Validators: []forms.Validator{
+				forms.IsOptional{},
+				forms.IsStringMap{},
 			},
 		},
 	},

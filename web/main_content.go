@@ -20,7 +20,7 @@ func MainContent(c Context) Element {
 	routes := []*RouteConfig{
 		Route("/projects/new", c.ElementFunction("newProject", NewProject())),
 		Route("/projects/(?P<projectId>[^/]+)(?:/(?P<tab>actions|streams|changes|settings))?", ProjectDetails),
-		Route("(?:/projects|^)/$", c.ElementFunction("projects", Projects)),
+		Route("(?:/projects|^/)$", c.ElementFunction("projects", Projects)),
 	}
 
 	// we add the main plugin routes

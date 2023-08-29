@@ -130,6 +130,16 @@ var StructuredPseudonymizerForm = forms.Form{
 
 func MakeStructuredPseudonymizer(config map[string]interface{}) (Pseudonymizer, error) {
 
+	if config == nil {
+		config = map[string]any{
+			"type": "integer",
+			"type-params": map[string]any{
+				"min": 0,
+				"max": 100,
+			},
+		}
+	}
+
 	var ok bool
 
 	params, err := StructuredPseudonymizerForm.Validate(config)

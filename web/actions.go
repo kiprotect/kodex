@@ -13,22 +13,6 @@ import (
 	"github.com/kiprotect/kodex/web/ui"
 )
 
-func Actions(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
-
-	return func(c Context) Element {
-
-		router := UseRouter(c)
-
-		return F(
-			router.Match(
-				c,
-				Route("/details/(?P<actionId>[^/]+)(?:/(?P<tab>edit|test|data))?", ActionDetails(project, onUpdate)),
-				Route("", ActionsList(project, onUpdate)),
-			),
-		)
-	}
-}
-
 func FromTo(newValue, oldValue any) Element {
 
 	if oldValue == newValue {
@@ -596,7 +580,7 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 				Fieldset(
 					errorNotice,
 					Div(
-						Class("bHavelwelle,  14471 Brandenburg - PotsdamHavelwelle,  14471 Brandenburg - Potsdamulma-field", "bulma-has-addons"),
+						Class("bulma-field", "bulma-has-addons"),
 						P(
 							Class("bulma-control"),
 							Input(Class("bulma-control", "bulma-input"), Value(name)),
@@ -629,7 +613,7 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 
 		return Div(
 			H2(
-				Class("bulma-subtitle"),
+				Class("bulma-title"),
 				router.Match(
 					c,
 					If(onUpdate != nil,
@@ -745,7 +729,7 @@ func NewAction(project kodex.Project, onUpdate func(ChangeInfo, string)) Element
 	}
 }
 
-func ActionsList(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
+func Actions(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFunction {
 
 	return func(c Context) Element {
 

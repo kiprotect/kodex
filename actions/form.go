@@ -32,9 +32,9 @@ type FormAction struct {
 var Validators = map[string]forms.ValidatorMaker{}
 
 type IsAction struct {
-	Action kodex.Action           `json:"-"`
-	Type   string                 `json:"type"`
-	Config map[string]interface{} `json:"config"`
+	Action kodex.Action   `json:"-"`
+	Type   string         `json:"type"`
+	Config map[string]any `json:"config"`
 }
 
 func (f *FormAction) Context() *forms.FormDescriptionContext {

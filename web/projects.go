@@ -402,6 +402,7 @@ func SettingsTab(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 					A(
 						Href(Fmt("/projects/%s/settings/export-blueprint", Hex(project.ID()))),
 						Class("bulma-button", "bulma-is-success"),
+						DataAttrib("plain", ""),
 						Type("submit"),
 						"Export Blueprint",
 					),
@@ -568,12 +569,14 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 				return nil
 			}
 
-			importedBlueprint = kodex.MakeBlueprint(exportedBlueprint)
-			importedProject, err = importedBlueprint.Create(ctrl, true)
+			reimportedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
+			importedProject, err = reimportedBlueprint.Create(ctrl, true)
 
-			if err != nil {
-				return Div(Fmt("uh oh: %v (%s)", err, changeRequest.Changes()))
-			}
+			/*
+				if err != nil {
+					return Div(Fmt("cannot import project: %v (%s)", err, changeRequest.Changes()))
+				}
+			*/
 
 		} else {
 			Log.Error("Import error: %v", err)
@@ -759,6 +762,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	return router.Match(
 		c,
 		If(tab == "streams", Route("/details/(?P<streamId>[^/]+)(?:/(?P<tab>configs|sources))?", StreamDetails(importedProject, onUpdate))),
+		If(tab == "actions", Route("/details/(?P<actionId>[^/]+)(?:/(?P<tab>edit|test|data))?", ActionDetails(importedProject, onUpdate))),
 		Route("", mainContent),
 	)
 }
