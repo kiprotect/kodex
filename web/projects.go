@@ -562,6 +562,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 		if changeRequest != nil {
 
+			// we reexport the original project again
 			exportedBlueprint, err = kodex.ExportBlueprint(project)
 
 			if err != nil {
@@ -572,11 +573,10 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			reimportedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
 			importedProject, err = reimportedBlueprint.Create(ctrl, true)
 
-			/*
-				if err != nil {
-					return Div(Fmt("cannot import project: %v (%s)", err, changeRequest.Changes()))
-				}
-			*/
+			// to do: fix this import problem with the in-memory controller
+			if err != nil {
+				return Div(Fmt("cannot import project: %v (%s)", err, changeRequest.Changes()))
+			}
 
 		} else {
 			Log.Error("Import error: %v", err)
