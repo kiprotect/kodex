@@ -17,6 +17,7 @@
 package helpers
 
 import (
+	"fmt"
 	"github.com/kiprotect/go-helpers/settings"
 	"github.com/kiprotect/kodex"
 	"io/fs"
@@ -34,6 +35,9 @@ func SettingsPaths() ([]string, fs.FS, error) {
 	}
 	values := strings.Split(envValue, ":")
 	sanitizedValues := make([]string, 0, len(values))
+
+	mainRoot := ""
+
 	for _, value := range values {
 		if value == "" {
 			continue
@@ -42,10 +46,28 @@ func SettingsPaths() ([]string, fs.FS, error) {
 		if value, err = filepath.Abs(value); err != nil {
 			return nil, nil, err
 		}
-		value = value[1:]
+
+		root := filepath.VolumeName(value)
+
+		if mainRoot != "" && root != mainRoot {
+			return nil, nil, fmt.Errorf("cannot load settings from multiple volumes on Windows, sorry...")
+		}
+
+		// we set the main root from the path root
+		mainRoot = root + "/"
+
+		value = filepath.ToSlash(value)
+
+		value = value[len(root)+1:]
 		sanitizedValues = append(sanitizedValues, value)
 	}
-	return sanitizedValues, os.DirFS("/"), nil
+
+	// on Linux, mainRoot will be unset
+	if mainRoot == "" {
+		mainRoot = "/"
+	}
+
+	return sanitizedValues, os.DirFS(mainRoot), nil
 }
 
 func Settings(settingsPaths []string, fS fs.FS) (kodex.Settings, error) {
