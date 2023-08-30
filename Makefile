@@ -3,7 +3,7 @@
 
 SHELL := /bin/bash
 
-GOFLAGS ?= $(GOFLAGS:)
+GOFLAGS ?= -ldflags="-extldflags=-static" $(GOFLAGS:)
 
 export KIPROTECT_TEST = yes
 
@@ -11,16 +11,16 @@ KIPROTECT_TEST_CONFIG ?= "$(shell pwd)/config"
 KIPROTECT_TEST_SETTINGS ?= "$(shell pwd)/testing/settings"
 KIPROTECT_TEST_API_SETTINGS ?= "$(shell pwd)/testing/api/settings"
 
-all: dep install
+all: dep build install
 
 build:
-	@go build $(GOFLAGS) ./...
+	@CGO_ENABLED=0 go build $(GOFLAGS) ./...
 
 dep:
 	@go get ./...
 
 install:
-	@go install $(GOFLAGS) ./...
+	@CGO_ENABLED=0 go install $(GOFLAGS) ./...
 
 copyright:
 	python .scripts/make_copyright_headers.py
