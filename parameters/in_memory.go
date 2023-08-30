@@ -227,6 +227,12 @@ func (p *InMemoryParameterStore) SaveParameterSet(parameterSet *kodex.ParameterS
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
+	for _, parameters := range parameterSet.Parameters() {
+		if _, ok := p.parametersById[hex.EncodeToString(parameters.ID())]; !ok {
+			return false, fmt.Errorf("cannot save parameter set: parameters with ID '%s' are missing", hex.EncodeToString(parameters.ID()))
+		}
+	}
+
 	hashStr := hex.EncodeToString(parameterSet.Hash())
 	if _, ok := p.parameterSets[hashStr]; ok {
 		return false, nil

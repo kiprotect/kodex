@@ -768,6 +768,12 @@ func (p *FileParameterStore) SaveParameterSet(parameterSet *kodex.ParameterSet) 
 		return false, err
 	}
 
+	for _, parameters := range parameterSet.Parameters() {
+		if _, err := p.inMemoryStore.ParametersById(parameters.ID()); err != nil {
+			return false, fmt.Errorf("cannot save parameter set: parameters with ID '%s' are missing: %v", hex.EncodeToString(parameters.ID()), err)
+		}
+	}
+
 	// we check if the parameter set already exists in the in-memory store
 	// (in that case it already has been written to disk)
 	if parameters, err := p.inMemoryStore.ParameterSet(parameterSet.Hash()); err != nil {
