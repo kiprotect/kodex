@@ -31,7 +31,7 @@ import (
 var InMemoryUserProviderForm = api.BlueprintConfigForm
 
 type InMemoryUserProviderSettings struct {
-	api.UsersAndRoles
+	api.BlueprintSpec
 }
 
 func ValidateInMemoryUserProviderSettings(settings map[string]interface{}) (interface{}, error) {

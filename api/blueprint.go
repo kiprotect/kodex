@@ -37,6 +37,13 @@ var BPObjectRoleForm = forms.Form{
 			},
 		},
 		{
+			Name: "organizationSource",
+			Validators: []forms.Validator{
+				forms.IsOptional{Default: "inMemory"},
+				forms.IsIn{Choices: []interface{}{"inMemory"}},
+			},
+		},
+		{
 			Name: "objectID",
 			Validators: []forms.Validator{
 				forms.IsBytes{Encoding: "hex"},
@@ -224,7 +231,7 @@ type ObjectRoleSpec struct {
 	ObjectType         string `json:"objectType"`
 }
 
-type UsersAndRoles struct {
+type BlueprintSpec struct {
 	Users []*ExternalUser   `json:"users"`
 	Roles []*ObjectRoleSpec `json:"roles"`
 }
@@ -303,15 +310,16 @@ func (b *Blueprint) Create(controller Controller) error {
 	if params, err := BlueprintConfigForm.Validate(b.config); err != nil {
 		return err
 	} else {
-		usersAndRoles := &UsersAndRoles{}
-		if err := BlueprintConfigForm.Coerce(usersAndRoles, params); err != nil {
+		spec := &BlueprintSpec{}
+		if err := BlueprintConfigForm.Coerce(spec, params); err != nil {
 			return err
 		}
-		// users need to be initialized first
-		if err := InitUsers(controller, usersAndRoles.Users); err != nil {
+		// we initialize users
+		if err := InitUsers(controller, spec.Users); err != nil {
 			return err
 		}
-		if err := InitRoles(controller, usersAndRoles.Roles); err != nil {
+		// we initialize roles
+		if err := InitRoles(controller, spec.Roles); err != nil {
 			return err
 		}
 		return nil
