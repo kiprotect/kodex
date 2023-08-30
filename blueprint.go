@@ -334,10 +334,10 @@ func LoadBlueprintConfig(settingsObj Settings, filename, version string) (map[st
 	if absFilename, err := filepath.Abs(filename); err != nil {
 		return nil, err
 	} else {
-	
+
 		sanitizedFilename := filepath.ToSlash(absFilename)
 		root = filepath.VolumeName(sanitizedFilename)
-	
+
 		// we remove the leading '/' as that's illegal for the FS interface
 		// filename = absFilename[1:]
 		if runtime.GOOS == "windows" {
