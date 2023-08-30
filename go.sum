@@ -90,6 +90,8 @@ github.com/kiprotect/go-helpers v0.0.0-20211210144244-79ce90e73e79 h1:DkoSA58JBh
 github.com/kiprotect/go-helpers v0.0.0-20211210144244-79ce90e73e79/go.mod h1:eIQRg8JS++hWm0qzHR0XlWZgCD4zBQOnQHlrHxaHUQU=
 github.com/kiprotect/go-helpers v0.0.0-20230622215249-2b24b29fc854 h1:qAKmmS48MEOS2ssZpUPcYaOfjpkmW90ne/J3SikUM10=
 github.com/kiprotect/go-helpers v0.0.0-20230622215249-2b24b29fc854/go.mod h1:0CQdbyrzEX+1Agn/cCtwFONHE14NUBRK/9XRL+p0Yio=
+github.com/kiprotect/go-helpers v0.0.0-20230829124511-69a25bca7e79 h1:IuIVrnH5/inbOXhAkB77BJFBgFKjvmciuA+yyi6o/oc=
+github.com/kiprotect/go-helpers v0.0.0-20230829124511-69a25bca7e79/go.mod h1:0CQdbyrzEX+1Agn/cCtwFONHE14NUBRK/9XRL+p0Yio=
 github.com/kiprotect/kiprotect v0.0.0-20200925133616-dec1868af81b h1:cEcqLsH4GG0FOOOwzvlwXd2+SlreoIUtrx3WdW85MuI=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3 h1:CE8S1cTafDpPvMhIxNJKvHsGVBgn1xWYf1NbHQhywc8=
