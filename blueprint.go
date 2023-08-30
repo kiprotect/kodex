@@ -328,18 +328,25 @@ func LoadBlueprintConfig(settingsObj Settings, filename, version string) (map[st
 	if _, err := os.Stat(filename); err != nil {
 		return nil, fmt.Errorf("blueprint '%s' not found", filename)
 	}
+
+	var root string
+
 	if absFilename, err := filepath.Abs(filename); err != nil {
 		return nil, err
 	} else {
+	
+		sanitizedFilename := filepath.ToSlash(absFilename)
+		root = filepath.VolumeName(sanitizedFilename)
+	
 		// we remove the leading '/' as that's illegal for the FS interface
 		// filename = absFilename[1:]
 		if runtime.GOOS == "windows" {
-			filename = filepath.ToSlash(absFilename)[3:] // we remove the drive letter and first slash
+			filename = sanitizedFilename[3:] // we remove the drive letter and first slash
 		} else {
-			filename = filepath.ToSlash(absFilename)[1:] // we remove the first slash
+			filename = sanitizedFilename[1:] // we remove the first slash
 		}
 	}
-	if config, err := settings.LoadYaml(filename, os.DirFS("")); err != nil {
+	if config, err := settings.LoadYaml(filename, os.DirFS(root+"/")); err != nil {
 		return nil, err
 	} else if configMap, ok := config.(map[string]interface{}); !ok {
 		return nil, fmt.Errorf("expected a map")
