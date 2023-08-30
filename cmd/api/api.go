@@ -117,18 +117,18 @@ func RunAPI(controller kodex.Controller, definitions *api.Definitions, host stri
 		blueprintConfig, err := kodex.LoadBlueprintConfig(apiController.Settings(), blueprintName, "")
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Cannot load blueprint: %v", err)
 		}
 
 		blueprint := kodex.MakeBlueprint(blueprintConfig)
 		apiBlueprint := api.MakeBlueprint(blueprintConfig)
 
 		if _, err := blueprint.Create(apiController, true); err != nil {
-			return err
+			return fmt.Errorf("Cannot create blueprint: %v", err)
 		}
 
 		if err := apiBlueprint.Create(apiController); err != nil {
-			return err
+			return fmt.Errorf("Cannot create API blueprint: %v", err)
 		}
 
 	}

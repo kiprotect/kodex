@@ -244,7 +244,7 @@ func InitRoles(controller Controller, roles []*ObjectRoleSpec) error {
 			return fmt.Errorf("invalid object type: %s", role.ObjectType)
 		}
 		if org, err := controller.Organization(role.OrganizationSource, role.OrganizationID); err != nil {
-			return err
+			return fmt.Errorf("Organization not found: %v", err)
 		} else {
 			objRole := controller.MakeObjectRole(obj, org)
 			if err := objRole.SetObjectRole(role.ObjectRole); err != nil {
@@ -309,10 +309,10 @@ func (b *Blueprint) Create(controller Controller) error {
 		}
 		// users need to be initialized first
 		if err := InitUsers(controller, usersAndRoles.Users); err != nil {
-			return err
+			return fmt.Errorf("Cannot create users: %v", err)
 		}
 		if err := InitRoles(controller, usersAndRoles.Roles); err != nil {
-			return err
+			return fmt.Errorf("Cannot create roles: %v", err)
 		}
 		return nil
 	}
