@@ -1,0 +1,31 @@
+# we include the actions and forms that we want to use
+# as well as the API-related data
+$include:
+  - actions.yml
+  - api.yml
+# here we list the destinations that we want to write to
+sources:
+  - name: stdin
+    type: stdin
+    config:
+      format: json
+      chunk-size: 1
+destinations:
+  - name: stdout
+    type: stdout
+    config: {}
+streams:
+  - name: default
+    id: abcdef
+    sources:
+      # we want to read input items from stdin
+      - source: stdin
+    configs:
+      - name: default
+        id: abcdef
+        actions:
+          - name: protect example data
+        destinations:
+          # we want to send output items to stdout
+          - name: stdout
+            status: active

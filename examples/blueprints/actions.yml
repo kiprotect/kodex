@@ -1,0 +1,26 @@
+forms:
+  DataForm: &DataForm
+    fields:
+      - name: id
+        validators:
+          - type: IsString
+            config:
+              maxLength: 64
+          - type: IsAction
+            config:
+              type: pseudonymize
+              config:
+                method: merengue
+      - name: name
+        validators:
+          - type: IsString
+          - type: IsAction
+            config:
+              type: pseudonymize
+              config:
+                method: merengue
+actions:
+ - name: protect example data
+   type: form
+   id: aabbccdd
+   config: *DataForm
