@@ -50,6 +50,8 @@ github.com/gospel-dev/gospel v0.0.0-20230622220546-10f4c1f940f8 h1:RUdo9PTi4xU55
 github.com/gospel-dev/gospel v0.0.0-20230622220546-10f4c1f940f8/go.mod h1:EaIFc4HQNHBQeranjdU0gpYkh/OrCvOFMyHKBrguAok=
 github.com/gospel-dev/gospel v0.0.0-20230818123335-65eb7fb5862a h1:kpsPad7ZVZrs+iVKU7Xym7sKU/mV5sZ7lFCG7bJusZE=
 github.com/gospel-dev/gospel v0.0.0-20230818123335-65eb7fb5862a/go.mod h1:EaIFc4HQNHBQeranjdU0gpYkh/OrCvOFMyHKBrguAok=
+github.com/gospel-dev/gospel v0.0.0-20230830090326-725bfd607ee9 h1:aW5s1z9IveYbnLKJSUMGok6JaTIIT2faCOR6lIwP7j4=
+github.com/gospel-dev/gospel v0.0.0-20230830090326-725bfd607ee9/go.mod h1:EaIFc4HQNHBQeranjdU0gpYkh/OrCvOFMyHKBrguAok=
 github.com/json-iterator/go v1.1.9 h1:9yzud/Ht36ygwatGx56VwCZtlI/2AD15T1X2sjSuGns=
 github.com/json-iterator/go v1.1.9/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
