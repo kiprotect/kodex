@@ -560,6 +560,14 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 		error.Set(Fmt("Error importing project: %v", err))
 
+		// we reset the controller
+		ctrl, err = InMemoryController(c)
+
+		if err != nil {
+			error.Set(Fmt("cannot recreate in-memory controller"))
+			return nil
+		}
+
 		if changeRequest != nil {
 
 			// we reexport the original project again
@@ -613,7 +621,29 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		changeSets = append(changeSets, changeSet)
 
 		if err := changeRequest.SetChanges(changeSets); err != nil {
+			error.Set(Fmt("cannot set changes: %v", err))
+			return
+		}
+
+		if err := api.ApplyChanges(exportedBlueprint, changeSet.Changes); err != nil {
 			error.Set(Fmt("cannot apply changes: %v", err))
+			return
+		}
+
+		// we create a test controller
+		testCtrl, err := InMemoryController(c)
+
+		if err != nil {
+			error.Set(Fmt("cannot recreate in-memory controller"))
+			return
+		}
+
+		reimportedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
+		_, err = reimportedBlueprint.Create(testCtrl, true)
+
+		// we cannot recreate the modified blueprint, we abort
+		if err != nil {
+			error.Set(Fmt("cannot import project: %v (%s)", err, changeRequest.Changes()))
 			return
 		}
 
@@ -746,7 +776,6 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 					)
 				},
 			),
-			If(error.Get() != "", ui.Message("danger", error.Get())),
 			ui.Tabs(
 				ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),
 				ui.Tab(ui.ActiveTab(tab == "streams"), A(Href(Fmt("/projects/%s/streams", projectId)), "Streams")),
@@ -759,11 +788,14 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		)
 	}
 
-	return router.Match(
-		c,
-		If(tab == "streams", Route("/details/(?P<streamId>[^/]+)(?:/(?P<tab>configs|sources))?", StreamDetails(importedProject, onUpdate))),
-		If(tab == "actions", Route("/details/(?P<actionId>[^/]+)(?:/(?P<tab>edit|test|data))?", ActionDetails(importedProject, onUpdate))),
-		Route("", mainContent),
+	return F(
+		If(error.Get() != "", ui.Message("danger", error.Get())),
+		router.Match(
+			c,
+			If(tab == "streams", Route("/details/(?P<streamId>[^/]+)(?:/(?P<tab>configs|sources))?", StreamDetails(importedProject, onUpdate))),
+			If(tab == "actions", Route("/details/(?P<actionId>[^/]+)(?:/(?P<tab>edit|test|data))?", ActionDetails(importedProject, onUpdate))),
+			Route("", mainContent),
+		),
 	)
 }
 

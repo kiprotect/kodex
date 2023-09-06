@@ -832,7 +832,12 @@ func IsActionValidator(c Context, validator *actions.IsAction, onUpdate func(Cha
 		return Div("no form definition for this action")
 	}
 
-	return FormAutoEditor(c, *actionDefinition.Form, validator.Config, func(key string, value any) {})
+	return FormAutoEditor(c, *actionDefinition.Form, validator.Config, func(value map[string]any) {
+		// we update the validator config
+		validator.Config = value
+		// we notify the editor of the change
+		onUpdate(ChangeInfo{}, UseRouter(c).CurrentPathWithQuery())
+	})
 
 }
 
