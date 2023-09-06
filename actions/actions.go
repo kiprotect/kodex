@@ -29,6 +29,7 @@ var Actions = kodex.ActionDefinitions{
 	"pseudonymize": kodex.ActionDefinition{
 		Name:  "Pseudonymize",
 		Maker: MakePseudonymizeAction,
+		Form:  &PseudonymizeConfigForm,
 	},
 	"quantize": kodex.ActionDefinition{
 		Name:  "Quantize",
@@ -41,7 +42,7 @@ var Actions = kodex.ActionDefinitions{
 	"form": kodex.ActionDefinition{
 		Name:  "Form Validation",
 		Maker: MakeFormAction,
-		Form:  FormForm,
+		Form:  &FormForm,
 	},
 	"anonymize": kodex.ActionDefinition{
 		Name:  "Anonymize",

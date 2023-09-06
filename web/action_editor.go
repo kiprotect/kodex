@@ -95,7 +95,7 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(Change
 
 func NewField(c Context, form *forms.Form, path []string, onUpdate func(ChangeInfo, string)) Element {
 
-	name := Var(c, "")
+	name := NamedVar(c, "name", "")
 	error := Var(c, "")
 	router := UseRouter(c)
 
@@ -281,9 +281,7 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 		Div(
 			Class("kip-col", "kip-is-lg"),
 			"Do you really want to delete this field?",
-		),
-		Div(
-			Class("kip-col", "kip-is-icon"),
+			Br(),
 			Form(
 				Method("POST"),
 				OnSubmit(onSubmit),
@@ -822,12 +820,19 @@ func IsActionValidator(c Context, validator *actions.IsAction, onUpdate func(Cha
 
 	// to do: add a switch that toggles the action type and updates the underlying form
 
-	switch vt := validator.Action.(type) {
-	case *actions.PseudonymizeTransformation:
-		return PseudonymizeValidator(c, validator, vt, onUpdate, path)
+	controller := UseController(c)
+
+	actionDefinition, ok := controller.Definitions().ActionDefinitions[validator.Type]
+
+	if !ok {
+		return Div("unknown action")
 	}
 
-	return Div("Unknown action")
+	if actionDefinition.Form == nil {
+		return Div("no form definition for this action")
+	}
+
+	return FormAutoEditor(c, *actionDefinition.Form, validator.Config, func(key string, value any) {})
 
 }
 

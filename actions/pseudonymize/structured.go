@@ -87,7 +87,6 @@ var StructuredPseudonymizerForm = forms.Form{
 			Name: "type",
 			Validators: []forms.Validator{
 				forms.IsRequired{},
-				forms.IsString{},
 				forms.IsIn{
 					Choices: []interface{}{"ip", "date", "integer", "ipv4", "ipv6"},
 				},

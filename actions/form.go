@@ -29,7 +29,7 @@ type FormAction struct {
 	form    *forms.Form
 }
 
-var Validators = map[string]forms.ValidatorMaker{}
+var Validators = map[string]forms.ValidatorDefinition{}
 
 type IsAction struct {
 	Action kodex.Action   `json:"-"`
@@ -73,7 +73,8 @@ var IsActionForm = forms.Form{
 }
 
 func MakeFormAction(spec kodex.ActionSpecification) (kodex.Action, error) {
-	combinedValidators := map[string]forms.ValidatorMaker{}
+
+	combinedValidators := map[string]forms.ValidatorDefinition{}
 
 	for k, v := range Validators {
 		combinedValidators[k] = v
@@ -108,7 +109,7 @@ func MakeFormAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 		return isAction, nil
 	}
 
-	combinedValidators["IsAction"] = makeIsAction
+	combinedValidators["IsAction"] = forms.ValidatorDefinition{makeIsAction, IsActionForm}
 
 	context := &forms.FormDescriptionContext{
 		Validators: combinedValidators,

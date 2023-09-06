@@ -40,5 +40,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-// replace github.com/gospel-dev/gospel => ../gospel
-// replace github.com/kiprotect/go-helpers => ../go-helpers
+replace github.com/gospel-dev/gospel => ../gospel
+replace github.com/kiprotect/go-helpers => ../go-helpers

@@ -29,7 +29,7 @@ type ActionDefinition struct {
 	Internal    bool        `json:"internal"`
 	Maker       ActionMaker `json:"-"`
 	Data        interface{} `json:"data"`
-	Form        forms.Form  `json:"form"`
+	Form        *forms.Form `json:"form"`
 }
 
 type ActionMakerParams struct {

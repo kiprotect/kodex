@@ -115,7 +115,6 @@ var PseudonymizeConfigForm = forms.Form{
 			Name: "method",
 			Validators: []forms.Validator{
 				forms.IsRequired{},
-				forms.IsString{},
 				forms.IsIn{
 					Choices: []interface{}{"merengue", "structured"},
 				},
@@ -132,7 +131,21 @@ var PseudonymizeConfigForm = forms.Form{
 			Name: "config",
 			Validators: []forms.Validator{
 				forms.IsOptional{},
-				forms.IsStringMap{},
+				forms.Switch{
+					Key: "method",
+					Cases: map[string][]forms.Validator{
+						"merengue": []forms.Validator{
+							forms.IsStringMap{
+								Form: &pseudonymize.MerengueConfigForm,
+							},
+						},
+						"structured": []forms.Validator{
+							forms.IsStringMap{
+								Form: &pseudonymize.StructuredPseudonymizerForm,
+							},
+						},
+					},
+				},
 			},
 		},
 	},
