@@ -27,43 +27,12 @@ import (
 
 type StructuredPseudonymizer struct {
 	Type             string
-	prefixPreserving bool
+	prefixPreserving bool `json:"preserve-prefixes"`
 	TypeParams       interface{}
 	Format           string
 	key              []byte
 	defaultKey       []byte
 	Maker            structured.TypeMaker
-}
-
-type IntegerTypeParamsValidator struct{}
-
-func (t IntegerTypeParamsValidator) Validate(input interface{}, values map[string]interface{}) (interface{}, error) {
-	v, ok := maps.ToStringMap(input)
-	if !ok {
-		return nil, fmt.Errorf("expected a map[string]interface{}")
-	}
-	for _, key := range []string{"min", "max"} {
-		kv, ok := v[key]
-		if ok {
-			kvInt, ok := kv.(int)
-			if !ok {
-				kvInt64, ok := kv.(int64)
-				if !ok {
-					kvFloat64, ok := kv.(float64)
-					if !ok {
-						return nil, fmt.Errorf("%s value must be an integer", key)
-					} else {
-						v[key] = int64(kvFloat64)
-					}
-				} else {
-					v[key] = kvInt64
-				}
-			} else {
-				v[key] = int64(kvInt)
-			}
-		}
-	}
-	return v, nil
 }
 
 var StructuredPseudonymizerForm = forms.Form{
@@ -95,12 +64,28 @@ var StructuredPseudonymizerForm = forms.Form{
 		{
 			Name: "type-params",
 			Validators: []forms.Validator{
-				forms.IsOptional{},
 				forms.Switch{
 					Key: "type",
 					Cases: map[string][]forms.Validator{
 						"integer": []forms.Validator{
-							IntegerTypeParamsValidator{},
+							forms.IsStringMap{
+								Form: &forms.Form{
+									Fields: []forms.Field{
+										{
+											Name: "min",
+											Validators: []forms.Validator{
+												forms.IsInteger{},
+											},
+										},
+										{
+											Name: "max",
+											Validators: []forms.Validator{
+												forms.IsInteger{},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -116,9 +101,11 @@ var StructuredPseudonymizerForm = forms.Form{
 							forms.IsOptional{Default: "%Y-%m-%dT%H:%M:%SZ"},
 							forms.IsString{},
 						},
-						"default!": []forms.Validator{
-							forms.IsOptional{Default: ""},
-							forms.IsString{},
+					},
+					// to do: remove this
+					Default: []forms.Validator{
+						forms.IsNil{
+							AllowNull: true,
 						},
 					},
 				},
@@ -158,9 +145,7 @@ func MakeStructuredPseudonymizer(config map[string]interface{}) (Pseudonymizer, 
 		return nil, fmt.Errorf("type: expected a string")
 	}
 
-	if strFormat, ok = format.(string); !ok {
-		return nil, fmt.Errorf("format: expected a string")
-	}
+	strFormat, _ = format.(string)
 
 	if _, ok = structured.Types[strType]; !ok {
 		return nil, fmt.Errorf("unknown type: %s", strType)

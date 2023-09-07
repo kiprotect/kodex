@@ -36,7 +36,7 @@ type IsFunction struct{}
 func (i IsFunction) Validate(input interface{}, values map[string]interface{}) (interface{}, error) {
 	name, ok := input.(string)
 	if !ok {
-		return nil, fmt.Errorf("expected a string")
+		return nil, fmt.Errorf("IsFunction: expected a string")
 	}
 	f, ok := functions.Functions[name]
 	if !ok {

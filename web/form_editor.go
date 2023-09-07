@@ -45,14 +45,14 @@ func validatorInput(
 		values[field.Name] = value
 	}
 
+	// we can possibly get a form definition from
+
 	for _, validator := range validators {
 		switch vt := validator.(type) {
 		case forms.IsOptional:
-
 			if vv == nil || vv == "" {
 				update(vt.Default)
 			}
-
 		case forms.IsString:
 
 			// the variable value should be tied to the form so that it's
@@ -86,12 +86,17 @@ func validatorInput(
 				)
 			}
 			return Div("map")
+		case forms.IsBoolean:
+			return Div("bool")
 		case forms.IsInteger:
 			return Div("integer")
 		case forms.IsFloat:
 			return Div("float")
 		case forms.IsBytes:
 			return Div("bytes")
+		case forms.IsNil:
+			// there's nothing to edit here
+			return nil
 		case forms.IsIn:
 
 			options := make([]Element, 0)
@@ -144,16 +149,17 @@ func validatorInput(
 
 		case forms.Switch:
 
-			keyValue, ok := values[vt.Key].(string)
-
-			if !ok {
-				return Div("error: key value missing or not a string")
-			}
-
+			keyValue, _ := values[vt.Key].(string)
 			switchValidators, ok := vt.Cases[keyValue]
 
+			if !ok && vt.Default != nil {
+				switchValidators = vt.Default
+				ok = true
+			}
+
 			if !ok {
-				return Div("error: unknown switch case")
+				// there's no validator for this case...
+				return nil
 			}
 
 			return validatorInput(c, field, data, path, switchValidators, values)
@@ -181,7 +187,14 @@ func FormField(
 	data *FormData,
 	path []string,
 	values map[string]any) Element {
-	return Div(field.Name, validatorInput(c, field, data, path, field.Validators, values))
+
+	elem := validatorInput(c, field, data, path, field.Validators, values)
+
+	if elem == nil {
+		return nil
+	}
+
+	return Div(field.Name, elem)
 }
 
 func FormAutoEditor(
@@ -243,6 +256,7 @@ func applyValidators(field forms.Field, validators []forms.Validator, values map
 		case forms.IsInteger:
 		case forms.IsFloat:
 		case forms.IsBytes:
+		case forms.IsNil:
 		case forms.IsIn:
 
 			// we get the new index
@@ -268,13 +282,13 @@ func applyValidators(field forms.Field, validators []forms.Validator, values map
 
 		case forms.Switch:
 
-			keyValue, ok := newValues[vt.Key].(string)
-
-			if !ok {
-				continue
-			}
-
+			keyValue, _ := newValues[vt.Key].(string)
 			switchValidators, ok := vt.Cases[keyValue]
+
+			if !ok && vt.Default != nil {
+				switchValidators = vt.Default
+				ok = true
+			}
 
 			if !ok {
 				continue

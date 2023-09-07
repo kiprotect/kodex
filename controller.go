@@ -172,7 +172,7 @@ func (b *BaseController) InitializePlugins() error {
 			for _, pluginName := range pluginsList {
 				pluginNameStr, ok := pluginName.(string)
 				if !ok {
-					return fmt.Errorf("expected a string")
+					return fmt.Errorf("Plugins: expected a string")
 				}
 				if definition, ok := b.definitions.PluginDefinitions[pluginNameStr]; ok {
 					plugin, err := definition.Maker(nil)

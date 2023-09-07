@@ -950,6 +950,26 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 	}
 
 	if editor == nil {
+
+		validatorDefinition, ok := forms.Validators[forms.GetType(validator)]
+
+		if ok {
+
+			config, err := forms.SerializeValidator(validator)
+
+			if err == nil {
+				editor = FormAutoEditor(c, validatorDefinition.Form, config.Config, func(value map[string]any) {
+					// we update the validator config
+					// validator.Config = value
+					// we notify the editor of the change
+					onUpdate(ChangeInfo{}, router.CurrentPathWithQuery())
+				})
+			}
+
+		}
+	}
+
+	if editor == nil {
 		tab = "source"
 	}
 
