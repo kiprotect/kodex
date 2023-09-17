@@ -65,7 +65,7 @@ var IsActionForm = forms.Form{
 		{
 			Name: "config",
 			Validators: []forms.Validator{
-				forms.IsOptional{Default: map[string]any{}},
+				forms.IsOptional{},
 				forms.IsStringMap{},
 			},
 		},

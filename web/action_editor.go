@@ -816,29 +816,98 @@ func PseudonymizeValidator(c Context, validator *actions.IsAction, action *actio
 	)
 }
 
-func IsActionValidator(c Context, validator *actions.IsAction, onUpdate func(ChangeInfo, string), path []string) Element {
+func IsActionValidator(c Context, validator *actions.IsAction, updateValidator func(forms.Validator) error, onUpdate func(ChangeInfo, string), path []string) Element {
 
 	// to do: add a switch that toggles the action type and updates the underlying form
 
 	controller := UseController(c)
 
-	actionDefinition, ok := controller.Definitions().ActionDefinitions[validator.Type]
+	ads := controller.Definitions().ActionDefinitions
+
+	actionDefinition, ok := ads[validator.Type]
 
 	if !ok {
 		return Div("unknown action")
 	}
 
-	if actionDefinition.Form == nil {
-		return Div("no form definition for this action")
+	var update func(map[string]any)
+
+	if onUpdate != nil {
+		update = func(value map[string]any) {
+			// we update the validator config
+			validator.Config = value
+			// we notify the editor of the change
+			onUpdate(ChangeInfo{}, UseRouter(c).CurrentPathWithQuery())
+		}
 	}
 
-	return FormAutoEditor(c, *actionDefinition.Form, validator.Config, func(value map[string]any) {
-		// we update the validator config
-		validator.Config = value
-		// we notify the editor of the change
+	actionTypes := []Element{}
+
+	ats := []string{}
+
+	for at, _ := range ads {
+		ats = append(ats, at)
+	}
+
+	sort.Strings(ats)
+
+	for _, at := range ats {
+		actionTypes = append(actionTypes, Option(Value(at), at))
+	}
+
+	actionType := Var(c, validator.Type)
+
+	onSubmit := Func[any](c, func() {
+
+		newValidator := &actions.IsAction{
+			Type:   actionType.Get(),
+			Config: nil,
+		}
+
+		updateValidator(newValidator)
 		onUpdate(ChangeInfo{}, UseRouter(c).CurrentPathWithQuery())
 	})
 
+	return F(
+		Form(
+			Method("POST"),
+			OnSubmit(onSubmit),
+			Div(
+				H2(Class("bulma-subtitle"), "Action Type"),
+				Div(
+					Class("bulma-field", "bulma-has-addons"),
+					Div(
+						Class("bulma-control", "bulma-is-expanded"),
+						Div(
+							Class("bulma-select", "bulma-is-fullwidth"),
+							Select(
+								actionTypes,
+								Value(actionType),
+							),
+						),
+					),
+					Div(
+						Class("bulma-control"),
+						Button(
+							Class("bulma-button", "bulma-is-primary"),
+							"change type",
+						),
+					),
+				),
+			),
+		),
+		Hr(),
+		DoIf(
+			actionDefinition.Form != nil,
+			func() Element {
+				return FormAutoEditor(c, *actionDefinition.Form, validator.Config, update)
+			},
+		),
+		If(
+			actionDefinition.Form == nil,
+			Div("There's no configuration form available for this action, sorry..."),
+		),
+	)
 }
 
 func IsListValidator(c Context, validator *forms.IsList, onUpdate func(ChangeInfo, string), path []string) Element {
@@ -939,7 +1008,7 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 	case *forms.Switch:
 		editor = SwitchValidator(c, vt, onUpdate, path)
 	case *actions.IsAction:
-		editor = IsActionValidator(c, vt, onUpdate, path)
+		editor = IsActionValidator(c, vt, update, onUpdate, path)
 	case *forms.IsStringMap:
 
 		// we always create a form
@@ -955,15 +1024,41 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 
 		if ok {
 
-			config, err := forms.SerializeValidator(validator)
+			desc, err := forms.SerializeValidator(validator)
 
 			if err == nil {
-				editor = FormAutoEditor(c, validatorDefinition.Form, config.Config, func(value map[string]any) {
-					// we update the validator config
-					// validator.Config = value
-					// we notify the editor of the change
-					onUpdate(ChangeInfo{}, router.CurrentPathWithQuery())
-				})
+
+				var updateConfig func(map[string]any)
+
+				if onUpdate != nil {
+					updateConfig = func(values map[string]any) {
+						// we update the validator config
+						// validator.Config = value
+						// we notify the editor of the change
+
+						// we update the description config
+						desc.Config = values
+
+						context := &forms.FormDescriptionContext{
+							Validators: forms.Validators,
+						}
+
+						// we create a new validator
+						newValidator, err := forms.ValidatorFromDescription(desc, context)
+
+						if err != nil {
+							return
+						}
+
+						// we replace the validator with the new one
+						update(newValidator)
+
+						// we notify the system of a change
+						onUpdate(ChangeInfo{}, router.CurrentPathWithQuery())
+					}
+				}
+
+				editor = FormAutoEditor(c, validatorDefinition.Form, desc.Config, updateConfig)
 			}
 
 		}

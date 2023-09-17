@@ -4,19 +4,9 @@ import (
 	. "github.com/gospel-dev/gospel"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
+	"strconv"
 	"strings"
 )
-
-func fieldElement(input Element, errorNotice Element) Element {
-	return Div(
-		Class("bulma-field"),
-		errorNotice,
-		Label(
-			Class("bulma-label", "Name"),
-			input,
-		),
-	)
-}
 
 func name(path []string, name string) string {
 	return strings.Join(append(path, name), ".")
@@ -29,6 +19,7 @@ func validatorInput(
 	path []string,
 	validators []forms.Validator,
 	values map[string]any,
+	readOnly bool,
 ) Element {
 
 	var vv any
@@ -53,6 +44,34 @@ func validatorInput(
 			if vv == nil || vv == "" {
 				update(vt.Default)
 			}
+		case forms.CanBeAnything:
+			// to do: support non-string values
+
+			vs, _ := vv.(string)
+
+			value := data.Var(name(path, field.Name), vs)
+
+			return Div(
+				Class("bulma-field"),
+				Label(
+					Class("bulma-label"),
+					field.Name,
+				),
+				Input(
+					If(readOnly, BooleanAttrib("disabled")()),
+					Class("bulma-input", If(false, "bulma-is-danger")),
+					Type("text"),
+					Value(value),
+				),
+				If(
+					field.Description != "",
+					P(
+						Class("bulma-help"),
+						field.Description,
+					),
+				),
+			)
+
 		case forms.IsString:
 
 			// the variable value should be tied to the form so that it's
@@ -62,15 +81,27 @@ func validatorInput(
 
 			value := data.Var(name(path, field.Name), vs)
 
-			return fieldElement(
+			return Div(
+				Class("bulma-field"),
+				Label(
+					Class("bulma-label"),
+					field.Name,
+				),
 				Input(
+					If(readOnly, BooleanAttrib("disabled")()),
 					Class("bulma-input", If(false, "bulma-is-danger")),
 					Type("text"),
 					Value(value),
-					Placeholder(field.Description),
 				),
-				nil,
+				If(
+					field.Description != "",
+					P(
+						Class("bulma-help"),
+						field.Description,
+					),
+				),
 			)
+
 		case forms.IsStringMap:
 
 			mapValue, ok := values[field.Name].(map[string]any)
@@ -82,16 +113,105 @@ func validatorInput(
 			if vt.Form != nil {
 				return Div(
 					Style("border: 1px solid #eee; padding: 10px; margin-top: 10px; margin-bottom: 10px;"),
-					formAutoEditor(c, *vt.Form, mapValue, data, append(path, field.Name), nil),
+					formAutoEditor(c, *vt.Form, mapValue, data, append(path, field.Name), readOnly),
 				)
 			}
 			return Div("map")
 		case forms.IsBoolean:
-			return Div("bool")
+
+			vs := ""
+
+			if vb, _ := vv.(bool); vb {
+				vs = "true"
+			}
+
+			name := name(path, field.Name)
+			value := data.Var(name, vs)
+
+			return Div(
+				Class("bulma-field"),
+				Label(
+					Class("bulma-checkbox"),
+					Nbsp,
+					Input(
+						If(readOnly, BooleanAttrib("disabled")()),
+						If(value.Get() == "true", BooleanAttrib("checked")()),
+						Type("checkbox"),
+						Name(name),
+						Value("true"),
+					),
+					field.Name,
+				),
+				If(
+					field.Description != "",
+					P(
+						Class("bulma-help"),
+						field.Description,
+					),
+				),
+			)
 		case forms.IsInteger:
-			return Div("integer")
+
+			// the variable value should be tied to the form so that it's
+			// identifiable, i.e.
+
+			vi, _ := vv.(int)
+
+			value := data.Var(name(path, field.Name), Fmt("%d", vi))
+
+			return Div(
+				Class("bulma-field"),
+				Label(
+					Class("bulma-label"),
+					field.Name,
+				),
+				Input(
+					If(readOnly, BooleanAttrib("disabled")()),
+					Class("bulma-input", If(false, "bulma-is-danger")),
+					Type("number"),
+					If(vt.HasMin, Attrib("min")(Fmt("%d", vt.Min))),
+					If(vt.HasMax, Attrib("max")(Fmt("%d", vt.Max))),
+					Value(value),
+				),
+				If(
+					field.Description != "",
+					P(
+						Class("bulma-help"),
+						field.Description,
+					),
+				),
+			)
 		case forms.IsFloat:
-			return Div("float")
+
+			// the variable value should be tied to the form so that it's
+			// identifiable, i.e.
+
+			vi, _ := vv.(float64)
+
+			value := data.Var(name(path, field.Name), Fmt("%f", vi))
+
+			return Div(
+				Class("bulma-field"),
+				Label(
+					Class("bulma-label"),
+					field.Name,
+				),
+				Input(
+					If(readOnly, BooleanAttrib("disabled")()),
+					Class("bulma-input", If(false, "bulma-is-danger")),
+					Type("number"),
+					If(vt.HasMin, Attrib("min")(Fmt("%f", vt.Min))),
+					If(vt.HasMax, Attrib("max")(Fmt("%f", vt.Max))),
+					Value(value),
+				),
+				If(
+					field.Description != "",
+					P(
+						Class("bulma-help"),
+						field.Description,
+					),
+				),
+			)
 		case forms.IsBytes:
 			return Div("bytes")
 		case forms.IsNil:
@@ -132,19 +252,31 @@ func validatorInput(
 				)
 			}
 
-			return fieldElement(
+			return Div(
+				Class("bulma-field"),
+				Label(
+					Class("bulma-label"),
+					field.Name,
+				),
 				Div(
 					Class("bulma-control", "bulma-is-expanded"),
 					Div(
 						Class("bulma-select", If(false, "bulma-is-danger")),
 						Select(
+							If(readOnly, BooleanAttrib("disabled")()),
 							options,
 							Value(value),
 							OnChange("this.form.requestSubmit()"),
 						),
 					),
 				),
-				nil,
+				If(
+					field.Description != "",
+					P(
+						Class("bulma-help"),
+						field.Description,
+					),
+				),
 			)
 
 		case forms.Switch:
@@ -162,12 +294,12 @@ func validatorInput(
 				return nil
 			}
 
-			return validatorInput(c, field, data, path, switchValidators, values)
+			return validatorInput(c, field, data, path, switchValidators, values, readOnly)
 
 		}
 	}
 
-	return Div(Fmt("no UI available, sorry - %s", field.Name))
+	return nil
 }
 
 func copyMap(values map[string]any) map[string]any {
@@ -186,24 +318,9 @@ func FormField(
 	field forms.Field,
 	data *FormData,
 	path []string,
-	values map[string]any) Element {
-
-	elem := validatorInput(c, field, data, path, field.Validators, values)
-
-	if elem == nil {
-		return nil
-	}
-
-	return Div(field.Name, elem)
-}
-
-func FormAutoEditor(
-	c Context,
-	form forms.Form,
 	values map[string]any,
-	update func(map[string]any),
-) Element {
-	return formAutoEditor(c, form, values, nil, []string{}, update)
+	readOnly bool) Element {
+	return validatorInput(c, field, data, path, field.Validators, values, readOnly)
 }
 
 func applyValidators(field forms.Field, validators []forms.Validator, values map[string]any, newValues map[string]any, path []string, data *FormData) {
@@ -223,6 +340,21 @@ func applyValidators(field forms.Field, validators []forms.Validator, values map
 			if vv == nil || vv == "" {
 				update(vt.Default)
 			}
+		case forms.CanBeAnything:
+			// to do: support non-string values
+
+			// we initialize the variable with the existing value
+			vs, _ := vv.(string)
+
+			fullName := name(path, field.Name)
+
+			if formValues.Has(fullName) {
+				// if a new value exists in the form data, we replace vs
+				vs = formValues.Get(fullName)
+			}
+
+			// we assign the value to the new data
+			newValues[field.Name] = vs
 
 		case forms.IsString:
 
@@ -253,8 +385,44 @@ func applyValidators(field forms.Field, validators []forms.Validator, values map
 				// we directly assign the new value
 				newValues[field.Name] = vm
 			}
+		case forms.IsBoolean:
+
+			value := formValues.Get(name(path, field.Name))
+
+			if value != "" {
+				newValues[field.Name] = true
+			} else {
+				newValues[field.Name] = false
+			}
+
 		case forms.IsInteger:
+
+			// we get the new index
+			value := formValues.Get(name(path, field.Name))
+
+			vd, err := strconv.Atoi(value)
+
+			if err != nil {
+				kodex.Log.Errorf("%v", err)
+				continue
+			}
+
+			newValues[field.Name] = vd
+
 		case forms.IsFloat:
+
+			// we get the new index
+			value := formValues.Get(name(path, field.Name))
+
+			vd, err := strconv.ParseFloat(value, 64)
+
+			if err != nil {
+				kodex.Log.Errorf("%v", err)
+				continue
+			}
+
+			newValues[field.Name] = vd
+
 		case forms.IsBytes:
 		case forms.IsNil:
 		case forms.IsIn:
@@ -311,32 +479,23 @@ func applyFormData(form forms.Form, values map[string]any, path []string, data *
 	return newValues
 }
 
-func formAutoEditor(
+func FormAutoEditor(
 	c Context,
 	form forms.Form,
 	values map[string]any,
-	data *FormData,
-	path []string,
-	update func(map[string]any)) Element {
+	update func(map[string]any),
+) Element {
 
 	// to do: use the ID of the form as a scope
 	c = c.Scope("form")
-
-	fields := make([]Element, 0)
-
-	if data == nil {
-		data = MakeFormData(c)
-	}
-
-	copiedValues := copyMap(values)
-
-	for _, field := range form.Fields {
-		fields = append(fields, FormField(c, form, field, data, path, copiedValues))
-	}
-
+	data := MakeFormData(c)
 	submitAction := NamedVar(c, "submitAction", "")
 
 	onSubmit := Func[any](c, func() {
+
+		if update == nil {
+			return
+		}
 
 		if submitAction.Get() == "" {
 			// this isn't a real update...
@@ -355,16 +514,25 @@ func formAutoEditor(
 		}
 	})
 
-	if update != nil {
-		return Form(
-			Method("POST"),
-			OnSubmit(onSubmit),
-			fields,
-			data,
-			Div(
-				Class("bulma-field"),
-				P(
-					Class("bulma-control"),
+	fields := formAutoEditor(c, form, copyMap(values), data, []string{}, update == nil)
+
+	if len(fields) == 0 {
+		return Div(
+			"It seems this validator doesn't have any fields to edit.",
+		)
+	}
+
+	return Form(
+		Method("POST"),
+		If(update != nil, OnSubmit(onSubmit)),
+		fields,
+		data,
+		Div(
+			Class("bulma-field"),
+			P(
+				Class("bulma-control"),
+				If(
+					update != nil,
 					Button(
 						Class("bulma-button", "bulma-is-success"),
 						// we set the action to 'update'
@@ -374,9 +542,32 @@ func formAutoEditor(
 					),
 				),
 			),
-		)
-	} else {
-		return F(fields)
+		),
+	)
+}
+
+func formAutoEditor(
+	c Context,
+	form forms.Form,
+	values map[string]any,
+	data *FormData,
+	path []string,
+	readOnly bool) []Element {
+
+	fields := make([]Element, 0)
+
+	for _, field := range form.Fields {
+
+		formField := FormField(c, form, field, data, path, values, readOnly)
+
+		if formField == nil {
+			continue
+		}
+
+		fields = append(fields, formField)
+
 	}
+
+	return fields
 
 }

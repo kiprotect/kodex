@@ -69,6 +69,13 @@ func (p *PseudonymizeTransformation) Params() interface{} {
 
 func MakePseudonymizeAction(spec kodex.ActionSpecification) (kodex.Action, error) {
 
+	if spec.Config == nil || len(spec.Config) == 0 {
+		spec.Config = map[string]any{
+			"method": "merengue",
+			"config": map[string]any{},
+		}
+	}
+
 	params, err := PseudonymizeConfigForm.Validate(spec.Config)
 
 	if err != nil {
@@ -112,7 +119,8 @@ var PseudonymizeConfigForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the 'pseudonymize' form",
 	Fields: []forms.Field{
 		{
-			Name: "method",
+			Name:        "method",
+			Description: "The pseudonymization method to use. Structured pseudonymization will preserve the data format and (partial) structure of the input data when pseudonymizing. Merengue pseudonymization will produce unstructured pseudonyms instead.",
 			Validators: []forms.Validator{
 				forms.IsRequired{},
 				forms.IsIn{
@@ -121,7 +129,8 @@ var PseudonymizeConfigForm = forms.Form{
 			},
 		},
 		{
-			Name: "key",
+			Name:        "key",
+			Description: "The key of the attribute to pseudonymize ('_' by default).",
 			Validators: []forms.Validator{
 				forms.IsOptional{Default: "_"},
 				forms.IsString{},

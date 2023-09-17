@@ -39,14 +39,16 @@ var StructuredPseudonymizerForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the structured pseudonymizer form",
 	Fields: []forms.Field{
 		{
-			Name: "key",
+			Name:        "key",
+			Description: "The encryption key to use for this pseudonymizer (will override any default key).",
 			Validators: []forms.Validator{
 				forms.IsOptional{},
 				forms.IsString{},
 			},
 		},
 		{
-			Name: "preserve-prefixes",
+			Name:        "preserve-prefixes",
+			Description: "Whether to preserve structural prefixes of a value. For example, if a date is formatted as %Y-%m-%d and prefix preservation is enabled, input dates sharing a prefix e.g. 2000-10-07 and 2000-10-13 will be mapped to pseudonyms also sharing a prefix of the same length, e.g. 2022-05-11, 2022-05-30.",
 			Validators: []forms.Validator{
 				forms.IsOptional{Default: false},
 				forms.IsBoolean{},
