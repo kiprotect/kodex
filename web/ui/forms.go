@@ -1,7 +1,7 @@
 package ui
 
 import (
-	. "github.com/gospel-dev/gospel"
+	. "github.com/gospel-sh/gospel"
 )
 
 func Message(msgType string, content any) *HTMLElement {

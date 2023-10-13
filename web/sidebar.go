@@ -1,10 +1,30 @@
 package web
 
 import (
-	. "github.com/gospel-dev/gospel"
+	. "github.com/gospel-sh/gospel"
 )
 
-func WithSidebar(sidebar Element, content Element) ElementFunction {
+type SidebarItem struct {
+	Title string
+	Path  string
+	Icon  string
+}
+
+func InitSidebar(c Context) {
+	// we get the sidebar variable
+	itemsVar := GlobalVar(c, "sidebar", []SidebarItem{})
+
+	// we reset the sidebar items
+	itemsVar.Set([]SidebarItem{})
+}
+
+func AddSidebarItem(c Context, item SidebarItem) {
+
+	itemsVar := GlobalVar(c, "sidebar", []SidebarItem{})
+	itemsVar.Set(append(itemsVar.Get(), item))
+}
+
+func WithSidebar(sidebar any, content any) ElementFunction {
 
 	return func(c Context) Element {
 
@@ -23,27 +43,35 @@ func WithSidebar(sidebar Element, content Element) ElementFunction {
 
 }
 
-func NavItem(c Context) Element {
+func NavItem(c Context, item SidebarItem) Element {
 	return Li(
 		Class("kip-nav-item"),
 		A(
-			Href("/projects"),
+			Href(item.Path),
 			Span(
 				Span(
 					Class("icon", "is-small"),
 					I(
-						Class("fas", "fa-chalkboard"),
+						Class("fas", Fmt("fa-%s", item.Icon)),
 					),
 				),
-				"Projects",
+				item.Title,
 			),
 		),
 	)
 }
 
 func MenuItems(c Context) Element {
+
+	items := UseGlobal[[]SidebarItem](c, "sidebar")
+	menuItems := make([]Element, 0, len(items))
+
+	for _, item := range items {
+
+		menuItems = append(menuItems, NavItem(c, item))
+	}
 	return F(
-		c.Element("navItem", NavItem),
+		menuItems,
 	)
 }
 
@@ -59,7 +87,7 @@ func KipMenu(c Context) Element {
 
 func Sidebar(c Context) Element {
 	return Div(
-		Class("kip-sidebar", "kip-sidebar--collapsed"),
+		Class("kip-sidebar"),
 		c.Element("menu", KipMenu),
 	)
 }

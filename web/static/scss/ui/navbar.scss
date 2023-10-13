@@ -21,7 +21,7 @@
         }
     }
 
-    .centered {
+    .kip-is-centered {
         width: 100%;
         display: flex;
         align-items: center;
@@ -36,6 +36,11 @@
     }
 
     .bulma-navbar-brand {
+
+        .kip-breadcrumbs-wrapper {
+            padding: map-get($kip-space, 'md');
+        }
+
         .kip-logo-wrapper {
             margin: 0 0.5rem;
             text-align: center;

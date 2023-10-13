@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/gospel-dev/gospel"
+	. "github.com/gospel-sh/gospel"
 	"github.com/kiprotect/kodex/api"
 	"net/http"
 	"time"

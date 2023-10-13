@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/gospel-dev/gospel"
+	. "github.com/gospel-sh/gospel"
 )
 
 type Breadcrumb struct {
@@ -39,6 +39,7 @@ func Breadcrumbs(c Context) Element {
 			crumbs,
 		),
 	)
+
 }
 
 func AddBreadcrumb(c Context, title string, path string) {
@@ -57,11 +58,11 @@ func AddBreadcrumb(c Context, title string, path string) {
 
 func MainTitle(c Context) string {
 
-	breadcrumbs := UseGlobal[[]Breadcrumb](c, "breadcrumbs")
+	breadcrumbs := GlobalVar(c, "breadcrumbs", []Breadcrumb{})
 
 	title := ""
 
-	for _, breadcrumb := range breadcrumbs {
+	for _, breadcrumb := range breadcrumbs.Get() {
 
 		if title != "" {
 			title += " :: "
@@ -69,6 +70,9 @@ func MainTitle(c Context) string {
 
 		title += breadcrumb.Title
 	}
+
+	// we reset the breadcrumbs
+	breadcrumbs.Set([]Breadcrumb{})
 
 	return title
 

@@ -1,0 +1,34 @@
+@import "variables.scss";
+
+.bulma-modal {
+    .bulma-modal-card-foot {
+        a {
+            margin-right: map-get($kip-space, sm);
+        }
+    }
+
+    .bulma-modal-card-body:first-child {
+        border-top-left-radius: $kip-border-radius;
+        border-top-right-radius: $kip-border-radius;
+    }
+
+    .bulma-modal-card-body:last-child {
+        border-bottom-left-radius: $kip-border-radius;
+        border-bottom-right-radius: $kip-border-radius;
+    }
+
+    .bulma-modal-icon {
+        cursor: pointer;
+        padding: map-get($kip-space, sm);
+    }
+
+    .bulma-modal-card-head:first-child,
+    .bulma-modal-card-foot:last-child {
+        @media (max-width: $kip-tablet) {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+    }
+}

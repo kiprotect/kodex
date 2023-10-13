@@ -7,7 +7,7 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/btree v1.1.2
 	github.com/google/gopacket v1.1.19
-	github.com/gospel-dev/gospel v0.0.0-20230830090326-725bfd607ee9
+	github.com/gospel-sh/gospel v0.0.0-20230830090326-725bfd607ee9
 	github.com/kiprotect/go-helpers v0.0.0-20230829124511-69a25bca7e79
 	github.com/sirupsen/logrus v1.9.0
 	github.com/streadway/amqp v1.0.0
@@ -40,5 +40,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/gospel-dev/gospel => ../gospel
+replace github.com/gospel-sh/gospel => ../gospel
 replace github.com/kiprotect/go-helpers => ../go-helpers

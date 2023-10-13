@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/gospel-dev/gospel"
+	. "github.com/gospel-sh/gospel"
 )
 
 func Kodex(c Context) Element {

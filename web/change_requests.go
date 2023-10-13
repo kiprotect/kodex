@@ -2,7 +2,7 @@ package web
 
 import (
 	"encoding/json"
-	. "github.com/gospel-dev/gospel"
+	. "github.com/gospel-sh/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/web/ui"
@@ -19,7 +19,7 @@ func ChangeRequests(project kodex.Project) ElementFunction {
 		return F(
 			router.Match(
 				c,
-				Route("/details/(?P<changeRequestId>[^/]+)(?:/(?P<tab>discussion|changes|description|merge))?", ChangeRequestDetails(project)),
+				Route("/details/(?P<changeRequestId>[^/]+)(?:/(?P<tab>discussion|changes|description|merge|close))?", ChangeRequestDetails(project)),
 				Route("", ChangeRequestList(project)),
 			),
 		)
@@ -70,7 +70,7 @@ func Changes(changeRequest api.ChangeRequest) Element {
 
 }
 
-func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.ChangeRequest) *HTMLElement {
+func CloseChangeRequest(c Context, project kodex.Project, changeRequest api.ChangeRequest) Element {
 
 	router := UseRouter(c)
 	error := Var(c, "")
@@ -120,55 +120,42 @@ func MergeRequestNotice(c Context, project kodex.Project, changeRequest api.Chan
 		"Cancel",
 	)
 
-	if error.Get() != "" {
-
-		return ui.MessageWithTitle(
-			"danger",
-			Div(
-				Class("kip-col", "kip-is-lg"),
-				"Error merging change request",
-			),
-			Div(
+	return ui.FormModal(
+		c,
+		[]any{
+			Method("POST"),
+			OnSubmit(onSubmit),
+		},
+		F(
+			IfElse(
+				error.Get() != "",
 				P(
 					"There was an error merging this change request: ",
 					Strong(error.Get()),
 				),
-				Br(),
-				cancelButton,
+				P(
+					"Merging the request will apply all changes to the current project. This cannot be undone!",
+				),
 			),
-		)
-
-	}
-
-	return ui.MessageWithTitle(
-		"info",
-		Div(
-			Class("kip-col", "kip-is-lg"),
-			"Do you really want to merge this change request?",
 		),
-		Div(
-			P(
-				"Merging the request will apply all changes to the current project. This cannot be undone!",
-			),
-			Form(
-				Method("POST"),
-				OnSubmit(onSubmit),
-				Div(
-					Class("bulma-field", "bulma-is-grouped"),
-					P(
-						Class("bulma-control"),
-						cancelButton,
-					),
-					P(
-						Class("bulma-control"),
-						Button(
-							Class("bulma-button", "bulma-is-success"),
-							"Merge",
-						),
+		F(
+			Div(
+				Class("bulma-field", "bulma-is-grouped"),
+				P(
+					Class("bulma-control"),
+					cancelButton,
+				),
+				P(
+					Class("bulma-control"),
+					Button(
+						Class("bulma-button", "bulma-is-success"),
+						"Merge",
 					),
 				),
 			),
 		),
+		"Merge Change Request",
+		Fmt("/projects/%s/changes", Hex(project.ID())),
 	)
 }
 
@@ -179,9 +166,7 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 			tab = "description"
 		}
 
-		router := UseRouter(c)
 		controller := UseController(c)
-		showMergeRequest := Var(c, false)
 
 		// we retrieve the action configs of the project...
 		changeRequest, err := controller.ChangeRequest(Unhex(changeRequestId))
@@ -190,23 +175,6 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 			// to do: error handling
 			return nil
 		}
-
-		changeRequestIdVar := PersistentGlobalVar(c, "changeRequestId", "")
-
-		onSubmit := Func[any](c, func() {
-
-			req := c.Request()
-
-			action := req.FormValue("action")
-
-			switch action {
-			case "edit":
-				changeRequestIdVar.Set(Hex(changeRequest.ID()))
-				router.RedirectTo(router.CurrentPath())
-			case "merge":
-				showMergeRequest.Set(true)
-			}
-		})
 
 		var content Element
 
@@ -219,48 +187,19 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 			content = Changes(changeRequest)
 		}
 
-		canMerge := true
-
 		return Div(
 			H2(Class("bulma-subtitle"), changeRequest.Title()),
-			IfElse(
-				tab == "merge",
-				MergeRequestNotice(c, project, changeRequest),
-				F(
-					ui.Tabs(
-						ui.Tab(ui.ActiveTab(tab == "description"), A(Href(Fmt("/projects/%s/changes/details/%s/description", Hex(project.ID()), changeRequestId)), "Description")),
-						ui.Tab(ui.ActiveTab(tab == "discussion"), A(Href(Fmt("/projects/%s/changes/details/%s/discussion", Hex(project.ID()), changeRequestId)), "Discussion")),
-						ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes/details/%s/changes", Hex(project.ID()), changeRequestId)), "Changes")),
-					),
-					content,
-					Hr(),
-					Form(
-						Class("bulma-is-inline"),
-						Method("POST"),
-						OnSubmit(onSubmit),
-						Div(
-							Class("bulma-buttons", "bulma-has-addons"),
-							If(
-								changeRequestIdVar.Get() != changeRequestId,
-								Button(
-									Name("action"),
-									Value("edit"),
-									Class("bulma-button", "bulma-is-success"),
-									Type("submit"),
-									"Open",
-								),
-							),
-							If(
-								canMerge,
-								A(
-									Href(Fmt("/projects/%s/changes/details/%s/merge", Hex(project.ID()), Hex(changeRequest.ID()))),
-									Class("bulma-button", "bulma-is-primary"),
-									"Merge",
-								),
-							),
-						),
-					),
+			If(
+				tab == "close",
+				CloseChangeRequest(c, project, changeRequest),
+			),
+			F(
+				ui.Tabs(
+					ui.Tab(ui.ActiveTab(tab == "description"), A(Href(Fmt("/projects/%s/changes/details/%s/description", Hex(project.ID()), changeRequestId)), "Description")),
+					ui.Tab(ui.ActiveTab(tab == "discussion"), A(Href(Fmt("/projects/%s/changes/details/%s/discussion", Hex(project.ID()), changeRequestId)), "Discussion")),
+					ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes/details/%s/changes", Hex(project.ID()), changeRequestId)), "Changes")),
 				),
+				content,
 			),
 		)
 	}
@@ -296,7 +235,13 @@ func NewChangeRequest(project kodex.Project) ElementFunction {
 			if err := changeRequest.Save(); err != nil {
 				error.Set(Fmt("Cannot save change request: %v", err))
 			} else {
-				router.RedirectTo(Fmt("/projects/%s/changes/details/%s", Hex(project.ID()), Hex(changeRequest.ID())))
+
+				// we open the change request
+				changeRequestIdVar := PersistentGlobalVar(c, "changeRequestId", "")
+				changeRequestIdVar.Set(Hex(changeRequest.ID()))
+
+				// we redirect to the main project view
+				router.RedirectTo(Fmt("/projects/%s", Hex(project.ID())))
 			}
 		})
 
@@ -309,32 +254,41 @@ func NewChangeRequest(project kodex.Project) ElementFunction {
 			)
 		}
 
-		return Form(
-			Method("POST"),
-			OnSubmit(onSubmit),
-			Div(
-				Class("bulma-field"),
-				errorNotice,
-				Label(
-					Class("bulma-label", "Title"),
-					Input(
-						Class("bulma-input", If(error.Get() != "", "bulma-is-danger")),
-						Value(title),
-						Placeholder("change request title"),
+		return ui.FormModal(
+			c,
+			[]any{
+				Method("POST"),
+				OnSubmit(onSubmit),
+			},
+			F(
+				Div(
+					Class("bulma-field"),
+					errorNotice,
+					Label(
+						Class("bulma-label", "Title"),
+						Input(
+							Class("bulma-input", If(error.Get() != "", "bulma-is-danger")),
+							Value(title),
+							Placeholder("change request title"),
+						),
 					),
 				),
 			),
-			Div(
-				Class("bulma-field"),
-				P(
-					Class("bulma-control"),
-					Button(
-						Class("bulma-button", "bulma-is-success"),
-						Type("submit"),
-						"Create Change Request",
+			F(
+				Div(
+					Class("bulma-field"),
+					P(
+						Class("bulma-control"),
+						Button(
+							Class("bulma-button", "bulma-is-success"),
+							Type("submit"),
+							"Create Change Request",
+						),
 					),
 				),
 			),
+			"New Change Request",
+			Fmt("/projects/%s/changes", Hex(project.ID())),
 		)
 	}
 }
@@ -371,35 +325,31 @@ func ChangeRequestList(project kodex.Project) ElementFunction {
 		router := UseRouter(c)
 
 		return F(
+			IfElse(
+				len(cri) > 0,
+				F(
+					ui.List(
+						ui.ListHeader(
+							ui.ListColumn("md", "Name"),
+							ui.ListColumn("sm", "Created By"),
+							ui.ListColumn("sm", "Created At"),
+							ui.ListColumn("icon", "Status"),
+						),
+						cri),
+				),
+				ui.Message(
+					"info",
+					"No open change requests.",
+				),
+			),
+			A(
+				Href(router.CurrentRoute().Path+"/new"),
+				Class("bulma-button", "bulma-is-success"),
+				"New Change Request",
+			),
 			router.Match(
 				c,
 				Route("/new", c.Element("newChangeRequest", NewChangeRequest(project))),
-				Route("",
-					F(
-						IfElse(
-							len(cri) > 0,
-							F(
-								ui.List(
-									ui.ListHeader(
-										ui.ListColumn("md", "Name"),
-										ui.ListColumn("sm", "Created By"),
-										ui.ListColumn("sm", "Created At"),
-										ui.ListColumn("icon", "Status"),
-									),
-									cri),
-							),
-							ui.Message(
-								"info",
-								"No open change requests.",
-							),
-						),
-						A(
-							Href(router.CurrentRoute().Path+"/new"),
-							Class("bulma-button", "bulma-is-success"),
-							"New Change Request",
-						),
-					),
-				),
 			),
 		)
 

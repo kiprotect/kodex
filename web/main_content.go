@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/gospel-dev/gospel"
+	. "github.com/gospel-sh/gospel"
 )
 
 func NotFoundRedirect(c Context) Element {
@@ -14,8 +14,10 @@ func MainContent(c Context) Element {
 
 	// get the router
 	router := UseRouter(c)
-
 	plugins := UsePlugins(c)
+
+	// we initialize the sidebar
+	InitSidebar(c)
 
 	routes := []*RouteConfig{
 		Route("/projects/new", c.ElementFunction("newProject", NewProject())),
@@ -31,12 +33,18 @@ func MainContent(c Context) Element {
 	// we add a "not found" catch-all route...
 	routes = append(routes, Route("", c.ElementFunction("notFound", NotFoundRedirect)))
 
-	return Div(
-		Class("bulma-container"),
-		c.Element("breadcrumbs", Breadcrumbs),
-		router.Match(
-			c,
-			routes...,
+	AddSidebarItem(c, SidebarItem{"Projects", "/projects", "bars"})
+
+	return WithSidebar(
+		c.DeferElement("sidebar", Sidebar),
+		F(
+			Div(
+				Class("bulma-container"),
+				router.Match(
+					c,
+					routes...,
+				),
+			),
 		),
-	)
+	)(c)
 }

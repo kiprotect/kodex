@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/gospel-dev/gospel"
+	. "github.com/gospel-sh/gospel"
 	"github.com/kiprotect/kodex"
 )
 
@@ -102,7 +102,7 @@ func Navbar(c Context) Element {
 	return Header(
 		Class("kip-navbar", "bulma-navbar", "bulma-is-fixed-top"),
 		Div(
-			Class("centered"),
+			Class("kip-is-centered"),
 			Div(
 				Class("bulma-navbar-brand"),
 				Div(
@@ -122,6 +122,10 @@ func Navbar(c Context) Element {
 							kodex.Version,
 						),
 					),
+				),
+				Div(
+					Class("kip-breadcrumbs-wrapper"),
+					c.DeferElement("breadcrumbs", Breadcrumbs),
 				),
 			),
 		),

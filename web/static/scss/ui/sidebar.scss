@@ -1,7 +1,7 @@
 @import "../variables.scss";
 
 $kip-sidebar-fixed-z: 29; // less than navbar-fixed-z (default: 30)
-$kip-sidebar-width: 200px;
+$kip-sidebar-width: 180px;
 
 .kip-sidebar {
     padding-top: $kip-navbar-height * 1.2;

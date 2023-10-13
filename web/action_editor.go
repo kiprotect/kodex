@@ -3,7 +3,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	. "github.com/gospel-dev/gospel"
+	. "github.com/gospel-sh/gospel"
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions"

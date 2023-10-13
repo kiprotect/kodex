@@ -14840,7 +14840,7 @@ a.bulma-dropdown-item .icon {
     background-color: #0a65a7;
   }
 }
-.kip-navbar .centered {
+.kip-navbar .kip-is-centered {
   width: 100%;
   display: flex;
   align-items: center;
@@ -14851,6 +14851,9 @@ a.bulma-dropdown-item .icon {
   padding-left: 10px;
   color: #aaa;
   text-transform: uppercase;
+}
+.kip-navbar .bulma-navbar-brand .kip-breadcrumbs-wrapper {
+  padding: 16px;
 }
 .kip-navbar .bulma-navbar-brand .kip-logo-wrapper {
   margin: 0 0.5rem;
@@ -15058,7 +15061,7 @@ ul.kip-menu-list li ul {
     min-width: 100px;
     top: 0;
     right: 0;
-    max-width: 200px;
+    max-width: 180px;
   }
   .kip-sidebar--active {
     display: block;
@@ -15066,7 +15069,7 @@ ul.kip-menu-list li ul {
 }
 @media (min-width: 1088px) {
   .kip-sidebar {
-    width: 200px;
+    width: 180px;
     position: fixed;
     z-index: 29;
     top: 0;
@@ -15086,20 +15089,17 @@ ul.kip-menu-list li ul {
 }
 @media (min-width: 1088px) {
   .kip-with-sidebar__sidebar {
-    width: 64px;
+    width: 46px;
   }
 }
 .kip-with-sidebar__content {
   width: 100%;
-  margin: 24px 24px 24px;
-  max-width: calc(100% - 64px);
-}
-.kip-with-sidebar__content .bulma-container {
-  margin: 0 auto;
+  margin: 0;
+  margin-top: 16px;
 }
 @media (min-width: 1088px) {
   .kip-with-sidebar__content {
-    max-width: calc(100% - 128px);
+    margin-left: 160px;
   }
 }
 
@@ -15530,11 +15530,6 @@ ul.kip-menu-list li ul {
   background-color: #777;
 }
 
-.bulma-container {
-  margin-top: 3.25rem;
-  padding-top: 30px;
-}
-
 .kip-action-config p {
   margin-bottom: 16px;
 }
@@ -15613,6 +15608,31 @@ ul.kip-menu-list li ul {
 .bulma-message .bulma-field {
   margin-bottom: 0;
   margin-top: 0.75rem;
+}
+
+.bulma-modal .bulma-modal-card-foot a {
+  margin-right: 8px;
+}
+.bulma-modal .bulma-modal-card-body:first-child {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+.bulma-modal .bulma-modal-card-body:last-child {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+.bulma-modal .bulma-modal-icon {
+  cursor: pointer;
+  padding: 8px;
+}
+@media (max-width: 769px) {
+  .bulma-modal .bulma-modal-card-head:first-child,
+  .bulma-modal .bulma-modal-card-foot:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
 }
 
 ul.kip-slice-diff {

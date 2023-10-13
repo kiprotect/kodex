@@ -6,22 +6,18 @@
 
     &__sidebar {
         @media (min-width: $kip-desktop) {
-            width: 64px;
+            width: 46px;
         }
     }
 
     &__content {
         width: 100%;
-        margin: map-get($kip-space, lg) map-get($kip-space, lg)
-            map-get($kip-space, lg);
-        max-width: calc(100% - 64px);
+        margin: 0;
 
-        .bulma-container {
-            margin: 0 auto;
-        }
+        margin-top: map-get($kip-space, md);
 
         @media (min-width: $kip-desktop) {
-            max-width: calc(100% - 128px);
+            margin-left: 160px;
         }
     }
 }

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	. "github.com/gospel-dev/gospel"
+	. "github.com/gospel-sh/gospel"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/api"
 	ctrlHelpers "github.com/kiprotect/kodex/api/helpers/controller"
@@ -691,105 +691,107 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		),
 	)
 
+	var subtitle string
+
 	mainContent := func(c Context) Element {
 
 		switch tab {
 		case "streams":
 			content = c.Element("streams", Streams(importedProject, onUpdate))
+			subtitle = "Streams"
 		case "actions":
 			content = c.Element("actions", Actions(importedProject, onUpdate))
+			subtitle = "Actions"
 		case "changes":
 			content = c.Element("changes", ChangeRequests(project))
+			subtitle = "Changes"
 		case "settings":
 			content = c.Element("settings", Settings(importedProject, project, onUpdate))
+			subtitle = "Settings"
 		default:
-			content = Div("...")
+			content = Div("unknown section")
 		}
-
-		onDoneEditing := Func[any](c, func() {
-			changeRequestId.Set("")
-			router := UseRouter(c)
-			router.RedirectTo(router.CurrentPath())
-		})
 
 		return Div(
 			Div(
 				Class("bulma-content"),
-				H2(Class("bulma-title"), project.Name()),
+				H2(Class("bulma-title"), project.Name(), "  ", L("&gt;"), " ", subtitle),
 			),
-			Div(
-				Class("bulma-tags"),
-				Span(
-					Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
-					Fmt("last modified: %s", HumanDuration(time.Now().Sub(project.CreatedAt()))),
-				),
-			),
-
-			If(
-				onUpdate == nil,
-				ui.Message("warning",
-					F(
-						I(
-							Class("fa", "fa-lock"),
-						),
-						" Read-only mode, please open a change request to edit project.",
-					),
-				),
-			),
-			DoIf(
-				changeRequest != nil,
-				func() Element {
-					return F(
-						ui.Message("info",
-							F(
-								I(
-									Class("fa", "fa-check"),
-								),
-								" Working on change request ",
-								A(
-									Href(
-										Fmt("/projects/%s/changes/details/%s",
-											projectId,
-											Hex(changeRequest.ID()),
-										),
-									),
-									changeRequest.Title(),
-								),
-								Fmt(", %d changes so far.", len(changeRequest.Changes())),
-								Form(
-									Method("POST"),
-									OnSubmit(onDoneEditing),
-									Div(
-										Class("bulma-field"),
-										P(
-											Class("bulma-control"),
-											Button(
-												Class("bulma-button", "bulma-is-info"),
-												Type("submit"),
-												"Finish work",
-											),
-										),
-									),
-								),
-							),
-						),
-					)
-				},
-			),
-			ui.Tabs(
-				ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(Fmt("/projects/%s/actions", projectId)), "Actions")),
-				ui.Tab(ui.ActiveTab(tab == "streams"), A(Href(Fmt("/projects/%s/streams", projectId)), "Streams")),
-				ui.Tab(ui.ActiveTab(tab == "changes"), A(Href(Fmt("/projects/%s/changes", projectId)), "Change Requests")),
-				ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(Fmt("/projects/%s/settings", projectId)), "Settings")),
-			),
+			//			Div(
+			//				Class("bulma-tags"),
+			//				Span(
+			//					Class("bulma-tag", "bulma-is-info", "bulma-is-light"),
+			//					Fmt("last modified: %s", HumanDuration(time.Now().Sub(project.CreatedAt()))),
+			//				),
+			//			),
 			content,
 			Hr(),
 			roles,
 		)
 	}
 
+	AddSidebarItem(c, SidebarItem{"Actions", Fmt("/projects/%s/actions", projectId), "play-circle"})
+	AddSidebarItem(c, SidebarItem{"Streams", Fmt("/projects/%s/streams", projectId), "random"})
+	AddSidebarItem(c, SidebarItem{"Changes", Fmt("/projects/%s/changes", projectId), "folder-open"})
+	AddSidebarItem(c, SidebarItem{"Settings", Fmt("/projects/%s/settings", projectId), "cogs"})
+
 	return F(
 		If(error.Get() != "", ui.Message("danger", error.Get())),
+		//ui.Modal(c, router.CurrentPath()),
+		If(
+			onUpdate == nil,
+			ui.Message("warning",
+				F(
+					I(
+						Class("fa", "fa-lock"),
+					),
+					" Read-only mode, please click on 'edit' to make changes.",
+					Div(
+						Class("bulma-is-pulled-right"),
+						A(
+							Style("height: 32px; margin-top: -5px;"),
+							Class("bulma-button", "bulma-is-success"),
+							Href(Fmt("/projects/%s/changes/new", projectId)),
+							"edit",
+						),
+					),
+				),
+			),
+		),
+		DoIf(
+			changeRequest != nil,
+			func() Element {
+				return F(
+					ui.Message("info",
+						F(
+							I(
+								Class("fa", "fa-check"),
+							),
+							" Working on change request ",
+							A(
+								Href(
+									Fmt("/projects/%s/changes/details/%s",
+										projectId,
+										Hex(changeRequest.ID()),
+									),
+								),
+								changeRequest.Title(),
+							),
+							Div(
+								Class("bulma-is-pulled-right"),
+								A(
+									Style("height: 32px; margin-top: -5px;"),
+									Class("bulma-button", "bulma-is-success"),
+									Href(Fmt("/projects/%s/changes/details/%s/close", projectId, Hex(changeRequest.ID()))),
+									"I'm done",
+								),
+							),
+						),
+					),
+				)
+			},
+		),
+
 		router.Match(
 			c,
 			If(tab == "streams", Route("/details/(?P<streamId>[^/]+)(?:/(?P<tab>configs|sources))?", StreamDetails(importedProject, onUpdate))),
