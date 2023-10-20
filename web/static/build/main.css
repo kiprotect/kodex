@@ -14967,9 +14967,10 @@ li.kip-nav-item {
   border-radius: 0;
 }
 li.kip-nav-item a {
-  display: inline-block;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
   width: 100%;
-  color: #fff;
   padding: 12px 14px;
   border-radius: 0;
 }
@@ -14981,8 +14982,9 @@ li.kip-nav-item a .icon.is-small {
   width: 20px;
   margin-right: 10px;
 }
-li.kip-nav-item a.is-active {
-  background: #0a65a7;
+li.kip-nav-item a.kip-is-active {
+  background: #4b9bbd;
+  color: #fff;
 }
 li.kip-nav-item a:hover {
   color: #fff;
@@ -14991,26 +14993,37 @@ li.kip-nav-item a:hover {
 li.kip-nav-item ul li.kip-nav-item a {
   padding-left: 40px;
 }
-li.kip-nav-item ul {
-  background: #2581c4;
-}
 
-@media (min-width: 1088px) {
-  .kip-sidebar:not(:hover) li.kip-nav-item ul {
-    display: none;
-  }
-  .kip-sidebar:not(:hover) li.kip-nav-item a.is-active {
-    background: inherit;
-  }
-  .kip-sidebar:hover li.kip-nav-item a.is-active {
-    background: #0a65a7;
-  }
-  .kip-sidebar:hover li.kip-nav-item a.is-active i.fas {
-    color: #fff;
-  }
+/*
+@media (min-width: $kip-desktop) {
+    .kip-sidebar:not(:hover) {
+        li.kip-nav-item {
+            // we hide submenus if the menubar is not active
+            ul {
+                display: none;
+            }
+            a.kip-is-active {
+                background: inherit;
+            }
+        }
+    }
+
+    // we only show different colors when the menubar is active
+    .kip-sidebar:hover {
+        li.kip-nav-item {
+            a.kip-is-active {
+                background: $kip-darkblue;
+                i.fas {
+                    color: #fff;
+                }
+            }
+        }
+    }
 }
+*/
 aside.kip-menu-aside {
   font-weight: 200;
+  margin-top: 8px;
 }
 @media (min-width: 1088px) {
   aside.kip-menu-aside.kip-mobile-only {
@@ -15027,6 +15040,14 @@ ul.kip-menu-list {
   font-size: 14px;
   font-weight: bold;
 }
+ul.kip-menu-list.kip-is-submenu {
+  margin-left: 8px;
+  border-left: 1px dashed #ccc;
+}
+ul.kip-menu-list li.kip-is-header a {
+  text-decoration: underline;
+  font-weight: 800;
+}
 ul.kip-menu-list li ul {
   margin: 0;
   padding-left: 0;
@@ -15035,15 +15056,11 @@ ul.kip-menu-list li ul {
 
 .kip-sidebar {
   padding-top: 3.9rem;
-  color: #000;
+  transition: width 150ms ease-in-out;
   overflow-x: hidden;
   white-space: nowrap;
-  transition: width 150ms ease-in-out;
   box-shadow: 0 1px 1px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
-  background: linear-gradient(to top, #2581c4, #1a936f);
-  background-size: 100% 750px;
-  background-repeat: repeat-x;
-  background-color: #2581c4;
+  background-color: #fff;
 }
 .kip-sidebar h1 {
   padding: 0 16px 16px 16px;
@@ -15056,20 +15073,19 @@ ul.kip-menu-list li ul {
     display: none;
     position: fixed;
     z-index: 29;
+    width: 200px;
     height: 100%;
     overflow-y: auto;
-    min-width: 100px;
     top: 0;
     right: 0;
-    max-width: 180px;
   }
-  .kip-sidebar--active {
+  .kip-sidebar.kip-is-active {
     display: block;
   }
 }
 @media (min-width: 1088px) {
   .kip-sidebar {
-    width: 180px;
+    width: 200px;
     position: fixed;
     z-index: 29;
     top: 0;

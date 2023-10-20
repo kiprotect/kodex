@@ -127,6 +127,13 @@ func Navbar(c Context) Element {
 					Class("kip-breadcrumbs-wrapper"),
 					c.DeferElement("breadcrumbs", Breadcrumbs),
 				),
+				Div(
+					OnClick("toggleSidebar(event)"),
+					Class("bulma-navbar-burger", "bulma-burger", "is-hidden-desktop", "is-active"),
+					Span(Aria("hidden", true)),
+					Span(Aria("hidden", true)),
+					Span(Aria("hidden", true)),
+				),
 			),
 		),
 		Div(
@@ -149,6 +156,10 @@ func Navbar(c Context) Element {
 			}
 
 			window.addEventListener("click", closeMenu, false);
+
+			function toggleSidebar(id, e){
+				window.sidebar.classList.toggle('kip-is-active');
+			}
 
 			function toggleDropdown(id, e){
 				window[id].classList.toggle('bulma-is-active');

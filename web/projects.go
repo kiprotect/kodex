@@ -730,10 +730,45 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		)
 	}
 
-	AddSidebarItem(c, SidebarItem{"Actions", Fmt("/projects/%s/actions", projectId), "play-circle"})
-	AddSidebarItem(c, SidebarItem{"Streams", Fmt("/projects/%s/streams", projectId), "random"})
-	AddSidebarItem(c, SidebarItem{"Changes", Fmt("/projects/%s/changes", projectId), "folder-open"})
-	AddSidebarItem(c, SidebarItem{"Settings", Fmt("/projects/%s/settings", projectId), "cogs"})
+	projectMenu := []*SidebarItem{
+		{
+			Title:  project.Name(),
+			Path:   Fmt("/projects/%s", projectId),
+			Header: true,
+		},
+		{
+			Title:  "Actions",
+			Path:   Fmt("/projects/%s/actions", projectId),
+			Icon:   "play-circle",
+			Active: tab == "actions",
+		},
+		{
+			Title:  "Streams",
+			Path:   Fmt("/projects/%s/streams", projectId),
+			Icon:   "random",
+			Active: tab == "streams",
+		},
+		{
+			Title:  "Changes",
+			Path:   Fmt("/projects/%s/changes", projectId),
+			Icon:   "folder-open",
+			Active: tab == "changes",
+		},
+		{
+			Title:  "Settings",
+			Path:   Fmt("/projects/%s/settings", projectId),
+			Icon:   "cogs",
+			Active: tab == "settings",
+		},
+	}
+
+	projectsMenu := GetSidebarItemByPath(c, "/projects")
+
+	if projectsMenu == nil {
+		Log.Warning("Cannot find 'projects' sidebar menu...")
+	} else {
+		projectsMenu.Submenu = append(projectsMenu.Submenu, projectMenu...)
+	}
 
 	return F(
 		If(error.Get() != "", ui.Message("danger", error.Get())),

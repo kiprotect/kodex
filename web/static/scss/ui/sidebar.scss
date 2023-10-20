@@ -1,20 +1,16 @@
 @import "../variables.scss";
 
 $kip-sidebar-fixed-z: 29; // less than navbar-fixed-z (default: 30)
-$kip-sidebar-width: 180px;
+$kip-sidebar-width: 200px;
 
 .kip-sidebar {
     padding-top: $kip-navbar-height * 1.2;
-    color: #000;
+    transition: width 150ms ease-in-out;
     overflow-x: hidden;
     white-space: nowrap;
-    transition: width 150ms ease-in-out;
 
     box-shadow: $kip-box-shadow;
-    @include kip-gradient("to top");
-    background-size: 100% 750px;
-    background-repeat: repeat-x;
-    background-color: $kip-blue;
+    background-color: #fff;
 
     h1 {
         padding: 0 16px 16px 16px;
@@ -27,14 +23,13 @@ $kip-sidebar-width: 180px;
         display: none;
         position: fixed;
         z-index: $kip-sidebar-fixed-z;
+        width: $kip-sidebar-width;
         height: 100%;
         overflow-y: auto;
-        min-width: 100px;
         top: 0;
         right: 0;
-        max-width: $kip-sidebar-width;
-
-        &--active {
+        
+        &.kip-is-active {
             display: block;
         }
     }

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"bytes"
 	"encoding/json"
 	. "github.com/gospel-sh/gospel"
 	"github.com/kiprotect/kodex"
@@ -77,35 +78,37 @@ func CloseChangeRequest(c Context, project kodex.Project, changeRequest api.Chan
 
 	onSubmit := Func[any](c, func() {
 
-		// we export the current blueprint
-		exportedBlueprint, err := kodex.ExportBlueprint(project)
+		/*
+			// we export the current blueprint
+			exportedBlueprint, err := kodex.ExportBlueprint(project)
 
-		if err != nil {
-			error.Set(Fmt("Cannot export blueprint: %v", err))
-			return
-		}
-
-		for _, changeSet := range changeRequest.Changes() {
-			if err := api.ApplyChanges(exportedBlueprint, changeSet.Changes); err != nil {
-				error.Set(Fmt("cannot apply changes: %v", err))
+			if err != nil {
+				error.Set(Fmt("Cannot export blueprint: %v", err))
 				return
 			}
-		}
 
-		importedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
+			for _, changeSet := range changeRequest.Changes() {
+				if err := api.ApplyChanges(exportedBlueprint, changeSet.Changes); err != nil {
+					error.Set(Fmt("cannot apply changes: %v", err))
+					return
+				}
+			}
 
-		// we re-import the blueprint
-		_, err = importedBlueprint.Create(project.Controller(), false)
+			importedBlueprint := kodex.MakeBlueprint(exportedBlueprint)
 
-		if err != nil {
-			error.Set(Fmt("Cannot import project: %v", err))
-			return
-		}
+			// we re-import the blueprint
+			_, err = importedBlueprint.Create(project.Controller(), false)
 
-		if err := changeRequest.Delete(); err != nil {
-			error.Set(Fmt("Cannot delete change request: %v", err))
-			return
-		}
+			if err != nil {
+				error.Set(Fmt("Cannot import project: %v", err))
+				return
+			}
+
+			if err := changeRequest.Delete(); err != nil {
+				error.Set(Fmt("Cannot delete change request: %v", err))
+				return
+			}
+		*/
 
 		// we remove the current change request
 		changeRequestId := PersistentGlobalVar(c, "changeRequestId", "")
@@ -134,27 +137,28 @@ func CloseChangeRequest(c Context, project kodex.Project, changeRequest api.Chan
 					Strong(error.Get()),
 				),
 				P(
-					"Merging the request will apply all changes to the current project. This cannot be undone!",
+					"If you're done editing this change request and want it to be reviewed, please choose ", Strong("Ready for review"),
+					". If you just want to close it for now but keep editing it later, choose ", Strong("Close for now"), ".",
 				),
 			),
 		),
 		F(
-			Div(
-				Class("bulma-field", "bulma-is-grouped"),
-				P(
-					Class("bulma-control"),
-					cancelButton,
+			cancelButton,
+			Span(
+				Style("flex-grow: 1"),
+			),
+			F(
+				Button(
+					Class("bulma-button", "bulma-is-primary"),
+					"Close for now",
 				),
-				P(
-					Class("bulma-control"),
-					Button(
-						Class("bulma-button", "bulma-is-success"),
-						"Merge",
-					),
+				Button(
+					Class("bulma-button", "bulma-is-success"),
+					"Ready for review",
 				),
 			),
 		),
-		"Merge Change Request",
+		"Close Change Request",
 		Fmt("/projects/%s/changes", Hex(project.ID())),
 	)
 }
@@ -205,7 +209,7 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 	}
 }
 
-func NewChangeRequest(project kodex.Project) ElementFunction {
+func NewChangeRequest(project kodex.Project, confirmed bool) ElementFunction {
 	return func(c Context) Element {
 
 		title := Var(c, "")
@@ -214,6 +218,78 @@ func NewChangeRequest(project kodex.Project) ElementFunction {
 		user := UseApiUser(c)
 
 		controller := UseController(c)
+
+		if !confirmed {
+
+			existingChangeRequests, err := controller.ChangeRequests(project)
+
+			if err != nil {
+				// to do: proper error view
+				return Div("Cannot load change request")
+			}
+
+			changeRequestId := Var(c, "")
+
+			onSubmit := Func[any](c, func() {
+				Log.Info("Opening existing change request '%s'...", changeRequestId.Get())
+				changeRequestIdVar := PersistentGlobalVar(c, "changeRequestId", "")
+				// to do: verify ID
+				changeRequestIdVar.Set(changeRequestId.Get())
+				router.RedirectTo(router.CurrentPath())
+			})
+
+			for _, changeRequest := range existingChangeRequests {
+				if changeRequest.Status() == api.DraftCR && bytes.Equal(changeRequest.Creator().SourceID(), user.SourceID()) {
+					return ui.Modal(
+						c,
+						"Existing change request found",
+						Span(
+							"There already is a draft change request ",
+							A(
+								Href(
+									Fmt("/projects/%s/changes/details/%s", Hex(project.ID()), Hex(changeRequest.ID())),
+								),
+								Strong(changeRequest.Title()),
+							),
+							", do you want to work on this one instead?",
+						),
+						F(
+							A(
+								Class("bulma-button"),
+								Href(Fmt("/projects/%s", Hex(project.ID()))),
+								"Cancel",
+							),
+							Span(Style("flex-grow: 1")),
+							Span(
+								Form(
+									Class("bulma-is-inline"),
+									Method("POST"),
+									OnSubmit(onSubmit),
+									Input(
+										Type("hidden"),
+										Value(changeRequestId, Hex(changeRequest.ID())),
+									),
+									Button(
+										Name("action"),
+										Value("edit"),
+										Class("bulma-button", "bulma-is-warning"),
+										Type("submit"),
+										"Use Existing",
+									),
+								),
+
+								A(
+									Class("bulma-button", "bulma-is-success"),
+									Href(Fmt("/projects/%s/changes/new/confirm", Hex(project.ID()))),
+									"Open New One",
+								),
+							),
+						),
+						router.CurrentPath(),
+					)
+				}
+			}
+		}
 
 		onSubmit := Func[any](c, func() {
 
@@ -349,7 +425,8 @@ func ChangeRequestList(project kodex.Project) ElementFunction {
 			),
 			router.Match(
 				c,
-				Route("/new", c.Element("newChangeRequest", NewChangeRequest(project))),
+				Route("/new/confirm", c.Element("newChangeRequest", NewChangeRequest(project, true))),
+				Route("/new", c.Element("newChangeRequest", NewChangeRequest(project, false))),
 			),
 		)
 

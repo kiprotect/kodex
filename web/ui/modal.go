@@ -4,7 +4,7 @@ import (
 	. "github.com/gospel-sh/gospel"
 )
 
-func Modal(c Context, closeUrl string) Element {
+func Modal(c Context, title string, content, footer any, closeUrl string) Element {
 	return Div(
 		Class("bulma-modal", "bulma-is-active"),
 		Div(
@@ -17,15 +17,16 @@ func Modal(c Context, closeUrl string) Element {
 				Class("bulma-modal-card-head"),
 				P(
 					Class("bulma-modal-card-title"),
-					"test",
+					title,
 				),
 			),
 			Section(
 				Class("bulma-modal-card-body"),
-				Div("test"),
+				content,
 			),
 			Footer(
 				Class("bulma-modal-card-foot"),
+				footer,
 			),
 		),
 	)

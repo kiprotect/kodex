@@ -33,7 +33,7 @@ func MainContent(c Context) Element {
 	// we add a "not found" catch-all route...
 	routes = append(routes, Route("", c.ElementFunction("notFound", NotFoundRedirect)))
 
-	AddSidebarItem(c, SidebarItem{"Projects", "/projects", "bars"})
+	AddSidebarItem(c, &SidebarItem{Title: "Projects", Path: "/projects", Icon: "bars"})
 
 	return WithSidebar(
 		c.DeferElement("sidebar", Sidebar),

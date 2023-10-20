@@ -3,9 +3,10 @@
 li.kip-nav-item {
     border-radius: 0;
     a {
-        display: inline-block;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
         width: 100%;
-        color: #fff;
         padding: 12px 14px;
         border-radius: 0;
         .icon {
@@ -18,8 +19,9 @@ li.kip-nav-item {
             }
 
         }
-        &.is-active {
-            background: $kip-darkblue;
+        &.kip-is-active {
+            background: $kip-lightblue;
+            color: #fff;
         }
         &:hover {
             color: #fff;
@@ -29,11 +31,8 @@ li.kip-nav-item {
     ul li.kip-nav-item a {
         padding-left:40px;
     }
-    ul {
-        background: $kip-blue;
-    }
 }
-
+/*
 @media (min-width: $kip-desktop) {
     .kip-sidebar:not(:hover) {
         li.kip-nav-item {
@@ -41,7 +40,7 @@ li.kip-nav-item {
             ul {
                 display: none;
             }
-            a.is-active {
+            a.kip-is-active {
                 background: inherit;
             }
         }
@@ -50,7 +49,7 @@ li.kip-nav-item {
     // we only show different colors when the menubar is active
     .kip-sidebar:hover {
         li.kip-nav-item {
-            a.is-active {
+            a.kip-is-active {
                 background: $kip-darkblue;
                 i.fas {
                     color: #fff;
@@ -59,9 +58,13 @@ li.kip-nav-item {
         }
     }
 }
+*/
 
 aside.kip-menu-aside {
+
     font-weight: 200;
+    margin-top: map-get($kip-space, sm);
+
     &.kip-mobile-only {
         @media(min-width: $kip-desktop){
             display: none;
@@ -77,11 +80,24 @@ p.kip-menu-label {
 ul.kip-menu-list {
     font-size: 14px;
     font-weight: bold;
+
+    &.kip-is-submenu {
+        margin-left: map-get($kip-space, sm);
+        border-left: 1px dashed #ccc;
+    }
+
     li {
+
+        &.kip-is-header a {
+            text-decoration: underline;
+            font-weight: 800;
+        }
+
         ul {
             margin: 0;
             padding-left: 0;
             border-left: 0;
+
         }
     }
 }
