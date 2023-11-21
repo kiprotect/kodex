@@ -137,7 +137,7 @@ func ConfigActionsList(config kodex.Config, onUpdate func(ChangeInfo, string)) E
 
 		for _, action := range actions {
 			actionItem := A(
-				Href(Fmt("/projects/%s/actions/details/%s", Hex(config.Stream().Project().ID()), Hex(action.ID()))),
+				Href(Fmt("/flows/projects/%s/actions/details/%s", Hex(config.Stream().Project().ID()), Hex(action.ID()))),
 				ui.ListItem(
 					ui.ListColumn("md", action.Name()),
 					ui.ListColumn("sm", HumanDuration(time.Now().Sub(action.CreatedAt()))),

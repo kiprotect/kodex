@@ -31,6 +31,7 @@ const (
 	WithdrawnCR ChangeRequestStatus = "withdrawn"
 	ApprovedCR  ChangeRequestStatus = "approved"
 	RejectedCR  ChangeRequestStatus = "rejected"
+	MergedCR    ChangeRequestStatus = "merged"
 )
 
 type ChangeRequest interface {

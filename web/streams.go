@@ -151,8 +151,8 @@ func StreamDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 				),
 				Div(Class("bulma-content"), IfElse(stream.Description() != "", stream.Description(), "(no description given)")),
 				ui.Tabs(
-					ui.Tab(ui.ActiveTab(tab == "configs"), A(Href(Fmt("/projects/%s/streams/details/%s/configs", Hex(project.ID()), streamId)), "Configs")),
-					ui.Tab(ui.ActiveTab(tab == "sources"), A(Href(Fmt("/projects/%s/streams/details/%s/sources", Hex(project.ID()), streamId)), "Sources")),
+					ui.Tab(ui.ActiveTab(tab == "configs"), A(Href(Fmt("/flows/projects/%s/streams/details/%s/configs", Hex(project.ID()), streamId)), "Configs")),
+					ui.Tab(ui.ActiveTab(tab == "sources"), A(Href(Fmt("/flows/projects/%s/streams/details/%s/sources", Hex(project.ID()), streamId)), "Sources")),
 				),
 				content,
 			)
@@ -249,7 +249,7 @@ func StreamsList(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 
 		for _, stream := range streams {
 			streamItem := A(
-				Href(Fmt("/projects/%s/streams/details/%s", Hex(project.ID()), Hex(stream.ID()))),
+				Href(Fmt("/flows/projects/%s/streams/details/%s", Hex(project.ID()), Hex(stream.ID()))),
 				ui.ListItem(
 					ui.ListColumn("md", stream.Name()),
 					ui.ListColumn("sm", HumanDuration(time.Now().Sub(stream.CreatedAt()))),

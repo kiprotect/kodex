@@ -31,11 +31,16 @@ func AuthorizedContent(c Context) Element {
 	SetExternalUser(c, externalUser)
 	SetApiUser(c, apiUser)
 
-	return F(
-		c.Element("navHeader", Navbar),
-		c.Element("mainContent", MainContent),
+	return router.Match(
+		c,
+		Route("^/?$", c.ElementFunction("chooser", AppChooser)),
+		Route("", c.ElementFunction("main", func(c Context) Element {
+			return F(
+				c.Element("navHeader", Navbar),
+				c.Element("mainContent", MainContent),
+			)
+		})),
 	)
-
 }
 
 func Logout(c Context) Element {

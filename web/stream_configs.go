@@ -134,7 +134,7 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 			content = c.Element("configSettings", ConfigSettings(config, onUpdate))
 		}
 
-		basePath := Fmt("/projects/%s/streams/details/%s/configs/details/%s", Hex(stream.Project().ID()), Hex(stream.ID()), configId)
+		basePath := Fmt("/flows/projects/%s/streams/details/%s/configs/details/%s", Hex(stream.Project().ID()), Hex(stream.ID()), configId)
 
 		return Div(
 			H2(
@@ -267,7 +267,7 @@ func StreamConfigsList(stream kodex.Stream, onUpdate func(ChangeInfo, string)) E
 
 		for _, config := range configs {
 			configItem := A(
-				Href(Fmt("/projects/%s/streams/details/%s/configs/details/%s", Hex(stream.Project().ID()), Hex(stream.ID()), Hex(config.ID()))),
+				Href(Fmt("/flows/projects/%s/streams/details/%s/configs/details/%s", Hex(stream.Project().ID()), Hex(stream.ID()), Hex(config.ID()))),
 				ui.ListItem(
 					ui.ListColumn("md", config.Name()),
 					ui.ListColumn("sm", HumanDuration(time.Now().Sub(config.CreatedAt()))),

@@ -32,28 +32,32 @@ func Dropdown(c Context, id, icon string, items []Element) Element {
 	)
 }
 
+func NavbarItem(path, icon, name string) Element {
+	return A(
+		Class("bulma-dropdown-item"),
+		Href(path),
+		Span(
+			Class("icon", "is-small"),
+			I(
+				Class("fas", icon),
+			),
+		),
+		name,
+	)
+}
+
 func AppNavbar(c Context) Element {
 
 	plugins := UsePlugins(c)
-
-	items := []Element{}
+	items := []Element{
+		NavbarItem("/flows", "flows", "Flows"),
+		NavbarItem("/admin", "admin", "Administration"),
+	}
 
 	for _, plugin := range plugins {
 		if appLinkPlugin, ok := plugin.(AppLinkPlugin); ok {
-
 			name, icon, path := appLinkPlugin.AppLink()
-
-			items = append(items, A(
-				Class("bulma-dropdown-item"),
-				Href(path),
-				Span(
-					Class("icon", "is-small"),
-					I(
-						Class("fas", icon),
-					),
-				),
-				name,
-			))
+			items = append(items, NavbarItem(path, icon, name))
 		}
 	}
 
@@ -144,7 +148,7 @@ func Navbar(c Context) Element {
 				UserNavbar(c),
 			),
 		),
-		Script(`
+		Script(Type("application/javascript"), `
 
 			function closeMenu(e){
 				let dropdowns = document.querySelectorAll('[data-type="navbar-dropdown"]');

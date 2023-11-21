@@ -650,9 +650,9 @@ func ActionDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 			),
 			Div(Class("bulma-content"), IfElse(action.Description() != "", action.Description(), "(no description given)")),
 			ui.Tabs(
-				ui.Tab(ui.ActiveTab(tab == "edit"), A(Href(Fmt("/projects/%s/actions/details/%s/edit", Hex(project.ID()), actionId)), "Edit")),
-				ui.Tab(ui.ActiveTab(tab == "test"), A(Href(Fmt("/projects/%s/actions/details/%s/test", Hex(project.ID()), actionId)), "Test")),
-				ui.Tab(ui.ActiveTab(tab == "data"), A(Href(Fmt("/projects/%s/actions/details/%s/data", Hex(project.ID()), actionId)), "Data")),
+				ui.Tab(ui.ActiveTab(tab == "edit"), A(Href(Fmt("/flows/projects/%s/actions/details/%s/edit", Hex(project.ID()), actionId)), "Edit")),
+				ui.Tab(ui.ActiveTab(tab == "test"), A(Href(Fmt("/flows/projects/%s/actions/details/%s/test", Hex(project.ID()), actionId)), "Test")),
+				ui.Tab(ui.ActiveTab(tab == "data"), A(Href(Fmt("/flows/projects/%s/actions/details/%s/data", Hex(project.ID()), actionId)), "Data")),
 			),
 			content,
 		)
@@ -747,7 +747,7 @@ func Actions(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFu
 
 		for _, action := range actions {
 			actionItem := A(
-				Href(Fmt("/projects/%s/actions/details/%s", Hex(project.ID()), Hex(action.ID()))),
+				Href(Fmt("/flows/projects/%s/actions/details/%s", Hex(project.ID()), Hex(action.ID()))),
 				ui.ListItem(
 					ui.ListColumn("md", action.Name()),
 					ui.ListColumn("sm", HumanDuration(time.Now().Sub(action.CreatedAt()))),

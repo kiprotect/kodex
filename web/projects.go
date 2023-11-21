@@ -124,7 +124,7 @@ func NewProject() ElementFunction {
 
 			success = true
 
-			router.RedirectTo(Fmt("/projects/%s", Hex(project.ID())))
+			router.RedirectTo(Fmt("/flows/projects/%s", Hex(project.ID())))
 		})
 
 		var errorNotice Element
@@ -210,7 +210,7 @@ func Settings(project, realProject kodex.Project, onUpdate func(ChangeInfo, stri
 						onSubmit := Func[any](c, func() {
 
 							realProject.Delete()
-							router.RedirectTo("/projects")
+							router.RedirectTo("/flows/projects")
 
 						})
 
@@ -400,7 +400,7 @@ func SettingsTab(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 					),
 					Br(),
 					A(
-						Href(Fmt("/projects/%s/settings/export-blueprint", Hex(project.ID()))),
+						Href(Fmt("/flows/projects/%s/settings/export-blueprint", Hex(project.ID()))),
 						Class("bulma-button", "bulma-is-success"),
 						DataAttrib("plain", ""),
 						Type("submit"),
@@ -417,7 +417,7 @@ func SettingsTab(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 					),
 					Br(),
 					A(
-						Href(Fmt("/projects/%s/settings/delete", Hex(project.ID()))),
+						Href(Fmt("/flows/projects/%s/settings/delete", Hex(project.ID()))),
 						Class("bulma-button", "bulma-is-danger"),
 						Type("submit"),
 						"Delete Project",
@@ -484,7 +484,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		return nil
 	}
 
-	AddBreadcrumb(c, "Projects", "/projects")
+	AddBreadcrumb(c, "Projects", "/flows/projects")
 	AddBreadcrumb(c, project.Name(), Fmt("/%s", Hex(project.ID())))
 
 	// we check that the user can access the project
@@ -733,36 +733,36 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	projectMenu := []*SidebarItem{
 		{
 			Title:  project.Name(),
-			Path:   Fmt("/projects/%s", projectId),
+			Path:   Fmt("/flows/projects/%s", projectId),
 			Header: true,
 		},
 		{
 			Title:  "Actions",
-			Path:   Fmt("/projects/%s/actions", projectId),
+			Path:   Fmt("/flows/projects/%s/actions", projectId),
 			Icon:   "play-circle",
 			Active: tab == "actions",
 		},
 		{
 			Title:  "Streams",
-			Path:   Fmt("/projects/%s/streams", projectId),
+			Path:   Fmt("/flows/projects/%s/streams", projectId),
 			Icon:   "random",
 			Active: tab == "streams",
 		},
 		{
 			Title:  "Changes",
-			Path:   Fmt("/projects/%s/changes", projectId),
+			Path:   Fmt("/flows/projects/%s/changes", projectId),
 			Icon:   "folder-open",
 			Active: tab == "changes",
 		},
 		{
 			Title:  "Settings",
-			Path:   Fmt("/projects/%s/settings", projectId),
+			Path:   Fmt("/flows/projects/%s/settings", projectId),
 			Icon:   "cogs",
 			Active: tab == "settings",
 		},
 	}
 
-	projectsMenu := GetSidebarItemByPath(c, "/projects")
+	projectsMenu := GetSidebarItemByPath(c, "/flows/projects")
 
 	if projectsMenu == nil {
 		Log.Warning("Cannot find 'projects' sidebar menu...")
@@ -786,7 +786,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 						A(
 							Style("height: 32px; margin-top: -5px;"),
 							Class("bulma-button", "bulma-is-success"),
-							Href(Fmt("/projects/%s/changes/new", projectId)),
+							Href(Fmt("/flows/projects/%s/changes/new", projectId)),
 							"edit",
 						),
 					),
@@ -805,7 +805,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 							" Working on change request ",
 							A(
 								Href(
-									Fmt("/projects/%s/changes/details/%s",
+									Fmt("/flows/projects/%s/changes/details/%s",
 										projectId,
 										Hex(changeRequest.ID()),
 									),
@@ -817,7 +817,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 								A(
 									Style("height: 32px; margin-top: -5px;"),
 									Class("bulma-button", "bulma-is-success"),
-									Href(Fmt("/projects/%s/changes/details/%s/close", projectId, Hex(changeRequest.ID()))),
+									Href(Fmt("/flows/projects/%s/changes/details/%s/close", projectId, Hex(changeRequest.ID()))),
 									"I'm done",
 								),
 							),
@@ -849,14 +849,14 @@ func Projects(c Context) Element {
 		return nil
 	}
 
-	AddBreadcrumb(c, "Projects", "/projects")
+	AddBreadcrumb(c, "Projects", "/flows/projects")
 
 	pis := make([]any, 0, len(projects))
 
 	for _, project := range projects {
 
 		projectItem := A(
-			Href(Fmt("/projects/%s", Hex(project.ID()))),
+			Href(Fmt("/flows/projects/%s", Hex(project.ID()))),
 			ui.ListItem(
 				ui.ListColumn("md", project.Name()),
 				ui.ListColumn("sm", HumanDuration(time.Now().Sub(project.CreatedAt()))),
@@ -873,7 +873,7 @@ func Projects(c Context) Element {
 			),
 			pis,
 		),
-		A(Href("/projects/new"), Class("bulma-button", "bulma-is-success"), "New Project"),
+		A(Href("/flows/projects/new"), Class("bulma-button", "bulma-is-success"), "New Project"),
 	)
 }
 

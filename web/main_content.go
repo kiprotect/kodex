@@ -10,6 +10,20 @@ func NotFoundRedirect(c Context) Element {
 	return nil
 }
 
+func Flows(c Context) Element {
+
+	router := UseRouter(c)
+
+	AddSidebarItem(c, &SidebarItem{Title: "Projects", Path: "/flows/projects", Icon: "bars"})
+
+	return router.Match(
+		c,
+		Route("/projects/new$", c.ElementFunction("newProject", NewProject())),
+		Route("/projects/(?P<projectId>[^/]+)(?:/(?P<tab>actions|streams|changes|settings))?", ProjectDetails),
+		Route("(?:/(?:projects)?)?$", c.ElementFunction("projects", Projects)),
+	)
+}
+
 func MainContent(c Context) Element {
 
 	// get the router
@@ -20,9 +34,8 @@ func MainContent(c Context) Element {
 	InitSidebar(c)
 
 	routes := []*RouteConfig{
-		Route("/projects/new", c.ElementFunction("newProject", NewProject())),
-		Route("/projects/(?P<projectId>[^/]+)(?:/(?P<tab>actions|streams|changes|settings))?", ProjectDetails),
-		Route("(?:/projects|^/)$", c.ElementFunction("projects", Projects)),
+		Route("/flows", c.ElementFunction("flows", Flows)),
+		Route("/admin", c.ElementFunction("admin", Admin)),
 	}
 
 	// we add the main plugin routes
@@ -32,8 +45,6 @@ func MainContent(c Context) Element {
 
 	// we add a "not found" catch-all route...
 	routes = append(routes, Route("", c.ElementFunction("notFound", NotFoundRedirect)))
-
-	AddSidebarItem(c, &SidebarItem{Title: "Projects", Path: "/projects", Icon: "bars"})
 
 	return WithSidebar(
 		c.DeferElement("sidebar", Sidebar),
