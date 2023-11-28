@@ -2,124 +2,120 @@ package web
 
 import (
 	. "github.com/gospel-sh/gospel"
+	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/api"
 )
 
-func NewProjectRole(c Context) Element {
+func NewProjectRole(project kodex.Project) ElementFunction {
 
-	orgRole := Var(c, "")
-	objectRole := Var(c, "")
-	objectType := Var(c, "")
-	error := Var(c, "")
-	router := UseRouter(c)
+	return func(c Context) Element {
+		orgRole := Var(c, "")
+		objectRole := Var(c, "")
+		error := Var(c, "")
+		router := UseRouter(c)
+		controller := UseController(c)
+		organization := UseDefaultOrganization(c)
+		apiOrg, err := organization.ApiOrganization(controller)
 
-	controller := UseController(c)
-	organization := UseDefaultOrganization(c)
-	apiOrg, err := organization.ApiOrganization(controller)
-
-	if err != nil {
-		// to do: improve
-		return Div("error")
-	}
-
-	onSubmit := Func[any](c, func() {
-
-		if orgRole.Get() == "" {
-			error.Set("Please enter a SSO group")
-			return
+		if err != nil {
+			return Div("cannot load API organization")
 		}
 
-		if objectRole.Get() == "" {
-			error.Set("Please enter a Kodex group")
-			return
-		}
+		onSubmit := Func[any](c, func() {
 
-		if objectType.Get() == "" {
-			error.Set("Please enter an object type")
-		}
-
-		controller.Begin()
-
-		success := false
-
-		defer func() {
-			if success {
-				controller.Commit()
+			if orgRole.Get() == "" {
+				error.Set("Please enter an organization role")
+				return
 			}
-			controller.Rollback()
-		}()
 
-		defaultRole := controller.MakeDefaultObjectRole(objectType.Get(), apiOrg)
+			if objectRole.Get() == "" {
+				error.Set("Please enter an object role")
+				return
+			}
 
-		defaultRole.SetOrganizationRole(orgRole.Get())
-		defaultRole.SetObjectRole(objectRole.Get())
+			controller.Begin()
 
-		if err := defaultRole.Save(); err != nil {
-			error.Set(Fmt("Cannot save role: %v", err))
-			return
+			success := false
+
+			defer func() {
+				if success {
+					controller.Commit()
+				}
+				controller.Rollback()
+			}()
+
+			role := controller.MakeObjectRole(project, apiOrg)
+			role.SetOrganizationRole(orgRole.Get())
+			role.SetObjectRole(objectRole.Get())
+
+			if err := role.Save(); err != nil {
+				error.Set(Fmt("Cannot save role: %v", err))
+				return
+			}
+
+			success = true
+
+			router.RedirectTo(Fmt("/flows/projects/%s/settings/roles/details/%s", Hex(project.ID()), Hex(role.ID())))
+		})
+
+		var errorNotice Element
+
+		if error.Get() != "" {
+			errorNotice = P(
+				Class("bulma-help", "bulma-is-danger"),
+				error.Get(),
+			)
 		}
 
-		success = true
+		roles := []Element{}
 
-		router.RedirectTo(Fmt("/admin/roles/details/%s", Hex(defaultRole.ID())))
-	})
+		for _, item := range api.ObjectRoleValues {
+			roles = append(roles, Option(If(item == objectRole.Get(), BooleanAttrib("selected")()), Value(item), item))
+		}
 
-	var errorNotice Element
-
-	if error.Get() != "" {
-		errorNotice = P(
-			Class("bulma-help", "bulma-is-danger"),
-			error.Get(),
+		return Form(
+			Method("POST"),
+			OnSubmit(onSubmit),
+			H1(Class("bulma-subtitle"), "New Object Role"),
+			Div(
+				Class("bulma-field"),
+				errorNotice,
+				Label(
+					Class("bulma-label"),
+					"Organization Role",
+					Input(
+						Class("bulma-input", If(error.Get() != "", "bulma-is-danger")),
+						Type("text"),
+						Value(orgRole),
+						Placeholder("organization role"),
+					),
+				),
+				Label(
+					Class("bulma-label"),
+					"Object Role",
+					Div(
+						Class("bulma-select", "bulma-is-fullwidth"),
+						Select(
+							roles,
+							Value(objectRole),
+							Attrib("autocomplete")("off"),
+							Id("objRoleSelect"),
+						),
+					),
+				),
+			),
+			Div(
+				Class("bulma-field"),
+				P(
+					Class("bulma-control"),
+					Button(
+						Class("bulma-button", "bulma-is-success"),
+						Type("submit"),
+						"Create Object Role",
+					),
+				),
+			),
 		)
-	}
 
-	return Form(
-		Method("POST"),
-		OnSubmit(onSubmit),
-		H1(Class("bulma-subtitle"), "New Default Role"),
-		Div(
-			Class("bulma-field"),
-			errorNotice,
-			Label(
-				Class("bulma-label"),
-				"Organization Role",
-				Input(
-					Class("bulma-input", If(error.Get() != "", "bulma-is-danger")),
-					Type("text"),
-					Value(orgRole),
-					Placeholder("organization role"),
-				),
-			),
-			Label(
-				Class("bulma-label"),
-				"Object Role",
-				Input(
-					Class("bulma-input", If(error.Get() != "", "bulma-is-danger")),
-					Type("text"),
-					Value(objectRole),
-					Placeholder("object role"),
-				),
-			),
-			Label(
-				Class("bulma-label"),
-				"Object Type",
-				Input(
-					Class("bulma-input", If(error.Get() != "", "bulma-is-danger")),
-					Type("text"),
-					Value(objectType),
-					Placeholder("object type"),
-				),
-			),
-		),
-		Div(
-			Class("bulma-field"),
-			P(
-				Class("bulma-control"),
-				Button(
-					Class("bulma-button", "bulma-is-success"),
-					Type("submit"),
-					"Create Default Role",
-				),
-			),
-		),
-	)
+	}
 }

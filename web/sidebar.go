@@ -21,15 +21,22 @@ func InitSidebar(c Context) {
 	itemsVar.Set([]*SidebarItem{})
 }
 
-func GetSidebarItemByPath(c Context, path string) *SidebarItem {
-
-	for _, item := range UseGlobal[[]*SidebarItem](c, "sidebar") {
+func getItem(items []*SidebarItem, path string) *SidebarItem {
+	for _, item := range items {
 		if item.Path == path {
 			return item
 		}
+		if item.Submenu != nil {
+			if item := getItem(item.Submenu, path); item != nil {
+				return item
+			}
+		}
 	}
-
 	return nil
+}
+
+func GetSidebarItemByPath(c Context, path string) *SidebarItem {
+	return getItem(UseGlobal[[]*SidebarItem](c, "sidebar"), path)
 }
 
 func AddSidebarItem(c Context, item *SidebarItem) {

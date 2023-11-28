@@ -88,6 +88,8 @@ func (b *BaseDefaultObjectRole) update(params map[string]interface{}) error {
 
 }
 
+var ObjectRoleValues = []any{"superuser", "admin", "viewer", "reviewer", "editor", "legal-reviewer", "technical-reviewer"}
+
 var DefaultObjectRoleForm = forms.Form{
 	ErrorMsg: "invalid data encountered in the default object role form",
 	Fields: []forms.Field{
@@ -104,7 +106,7 @@ var DefaultObjectRoleForm = forms.Form{
 			Validators: []forms.Validator{
 				forms.IsRequired{},
 				forms.IsString{},
-				forms.IsIn{Choices: []interface{}{"superuser", "admin", "viewer", "reviewer", "editor", "legal-reviewer", "technical-reviewer"}},
+				forms.IsIn{Choices: ObjectRoleValues},
 			},
 		},
 	},

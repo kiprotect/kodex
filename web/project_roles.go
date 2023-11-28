@@ -2,51 +2,63 @@ package web
 
 import (
 	. "github.com/gospel-sh/gospel"
+	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/web/ui"
 )
 
-func ProjectRoles(c Context) Element {
+func ProjectRolesRoutes(project kodex.Project) ElementFunction {
+	return func(c Context) Element {
 
-	controller := UseController(c)
-	organization := UseDefaultOrganization(c)
-	apiOrg, err := organization.ApiOrganization(controller)
+		if item := GetSidebarItemByPath(c, Fmt("/flows/projects/%s/settings/roles", Hex(project.ID()))); item != nil {
+			item.Active = true
+		}
 
-	if err != nil {
-		return Div("cannot get organization")
-	}
-
-	roles, err := controller.DefaultObjectRoles(apiOrg.ID())
-
-	if err != nil {
-		return Div("cannot load default object roles")
-	}
-
-	roleItems := make([]Element, len(roles))
-
-	for i, role := range roles {
-		roleItems[i] = A(
-			Href(Fmt("/admin/roles/details/%s", Hex(role.ID()))),
-			ui.ListItem(
-				ui.ListColumn("md", role.OrganizationRole()),
-				ui.ListColumn("md", role.ObjectRole()),
-				ui.ListColumn("md", role.ObjectType()),
-			),
+		return UseRouter(c).Match(
+			c,
+			Route("^/?$", ProjectRoles(project)),
+			Route("/details/(?P<roleId>[^/]+)", ProjectRoleDetails(project)),
+			Route("/new", NewProjectRole(project)),
 		)
 	}
+}
 
-	return F(
-		ui.List(
-			ui.ListHeader(
-				ui.ListColumn("md", "Organization Role"),
-				ui.ListColumn("md", "Object Role"),
-				ui.ListColumn("md", "Object Type"),
+func ProjectRoles(project kodex.Project) ElementFunction {
+
+	return func(c Context) Element {
+		controller := UseController(c)
+		// organization := UseDefaultOrganization(c)
+		roles, err := controller.RolesForObject(project)
+
+		if err != nil {
+			return Div("cannot get organization")
+		}
+
+		roleItems := make([]Element, len(roles))
+
+		for i, role := range roles {
+			roleItems[i] = A(
+				Href(Fmt("/flows/projects/%s/settings/roles/details/%s", Hex(project.ID()), Hex(role.ID()))),
+				ui.ListItem(
+					ui.ListColumn("md", role.OrganizationRole()),
+					ui.ListColumn("md", role.ObjectRole()),
+				),
+			)
+		}
+
+		return F(
+			ui.List(
+				ui.ListHeader(
+					ui.ListColumn("md", "Organization Role"),
+					ui.ListColumn("md", "Object Role"),
+				),
+				roleItems,
 			),
-			roleItems,
-		),
-		A(Href("/admin/roles/new"), Class("bulma-button", "bulma-is-success"), "New Role"),
-	)
+			A(Href(Fmt("/flows/projects/%s/settings/roles/new", Hex(project.ID()))), Class("bulma-button", "bulma-is-success"), "New Role"),
+		)
 
-	return Ul(
-		roleItems,
-	)
+		return Ul(
+			roleItems,
+		)
+
+	}
 }

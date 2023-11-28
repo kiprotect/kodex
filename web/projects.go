@@ -176,6 +176,7 @@ func Settings(project, realProject kodex.Project, onUpdate func(ChangeInfo, stri
 
 		return router.Match(
 			c,
+			Route("/roles", ProjectRolesRoutes(realProject)),
 			Route("/export-blueprint",
 				c.ElementFunction("downloadBlueprint",
 					func(c Context) Element {
@@ -691,23 +692,17 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		),
 	)
 
-	var subtitle string
-
 	mainContent := func(c Context) Element {
 
 		switch tab {
 		case "streams":
 			content = c.Element("streams", Streams(importedProject, onUpdate))
-			subtitle = "Streams"
 		case "actions":
 			content = c.Element("actions", Actions(importedProject, onUpdate))
-			subtitle = "Actions"
 		case "changes":
 			content = c.Element("changes", ChangeRequests(project))
-			subtitle = "Changes"
 		case "settings":
 			content = c.Element("settings", Settings(importedProject, project, onUpdate))
-			subtitle = "Settings"
 		default:
 			content = Div("unknown section")
 		}
@@ -715,7 +710,6 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		return Div(
 			Div(
 				Class("bulma-content"),
-				H2(Class("bulma-title"), project.Name(), "  ", L("&gt;"), " ", subtitle),
 			),
 			//			Div(
 			//				Class("bulma-tags"),
@@ -783,7 +777,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 		If(error.Get() != "", ui.Message("danger", error.Get())),
 		//ui.Modal(c, router.CurrentPath()),
 		If(
-			onUpdate == nil,
+			onUpdate == nil && (tab == "actions" || tab == "streams"),
 			ui.Message("warning",
 				F(
 					I(
