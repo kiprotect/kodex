@@ -8,11 +8,6 @@ import (
 
 func ProjectRolesRoutes(project kodex.Project) ElementFunction {
 	return func(c Context) Element {
-
-		if item := GetSidebarItemByPath(c, Fmt("/flows/projects/%s/settings/roles", Hex(project.ID()))); item != nil {
-			item.Active = true
-		}
-
 		return UseRouter(c).Match(
 			c,
 			Route("^/?$", ProjectRoles(project)),

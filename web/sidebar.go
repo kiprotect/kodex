@@ -2,6 +2,7 @@ package web
 
 import (
 	. "github.com/gospel-sh/gospel"
+	"strings"
 )
 
 type SidebarItem struct {
@@ -9,7 +10,6 @@ type SidebarItem struct {
 	Path    string
 	Icon    string
 	Header  bool
-	Active  bool
 	Submenu []*SidebarItem
 }
 
@@ -73,11 +73,15 @@ func Submenu(c Context, items []*SidebarItem) Element {
 }
 
 func NavItem(c Context, item *SidebarItem) Element {
+
+	router := UseRouter(c)
+	active := strings.HasPrefix(router.FullPath(), item.Path)
+
 	return Li(
 		Class("kip-nav-item", If(item.Header, "kip-is-header")),
 		A(
 			Href(item.Path),
-			If(item.Active, Class("kip-is-active")),
+			If(active, Class("kip-is-active")),
 			Span(
 				If(
 					item.Icon != "",
@@ -100,11 +104,13 @@ func MenuItems(c Context) Element {
 
 func menuItems(c Context, items []*SidebarItem) Element {
 
+	router := UseRouter(c)
 	menuItems := make([]Element, 0, len(items))
 
 	for _, item := range items {
+		active := strings.HasPrefix(router.FullPath(), item.Path)
 		menuItems = append(menuItems, NavItem(c, item))
-		if len(item.Submenu) > 0 && item.Active {
+		if len(item.Submenu) > 0 && active {
 			menuItems = append(menuItems, Submenu(c, item.Submenu))
 		}
 	}

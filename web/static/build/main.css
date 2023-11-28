@@ -14983,8 +14983,7 @@ li.kip-nav-item a .icon.is-small {
   margin-right: 10px;
 }
 li.kip-nav-item a.kip-is-active {
-  background: #4b9bbd;
-  color: #fff;
+  text-decoration: underline;
 }
 li.kip-nav-item a:hover {
   color: #fff;
@@ -15042,7 +15041,6 @@ ul.kip-menu-list {
 }
 ul.kip-menu-list.kip-is-submenu {
   margin-left: 8px;
-  border-left: 1px dashed #ccc;
 }
 ul.kip-menu-list li.kip-is-header a {
   text-decoration: underline;

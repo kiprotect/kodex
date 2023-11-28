@@ -74,8 +74,19 @@ func Changes(changeRequest api.ChangeRequest) Element {
 func CloseChangeRequest(c Context, project kodex.Project, changeRequest api.ChangeRequest) Element {
 
 	controller := UseController(c)
+	user := UseExternalUser(c)
 	router := UseRouter(c)
 	error := Var(c, "")
+
+	canEdit, err := controller.CanAccess(user, project, []string{"editor"})
+
+	if err != nil {
+		Log.Warning("Cannot get rights: %v", err)
+	}
+
+	if !canEdit {
+		return Div("you cannot edit this project")
+	}
 
 	onSubmit := Func[any](c, func() {
 
@@ -161,6 +172,8 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 
 	router := UseRouter(c)
 	error := Var(c, "")
+	controller := UseController(c)
+	user := UseExternalUser(c)
 
 	onSubmit := Func[any](c, func() {
 
@@ -168,16 +181,42 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 
 		action := req.FormValue("action")
 
-		/*
+		canReview, err := controller.CanAccess(user, project, []string{"reviewer"})
 
-		 */
+		if err != nil {
+			Log.Warning("Cannot get rights: %v", err)
+		}
 
 		switch action {
 		case "approve":
+			if !canReview {
+				error.Set("cannot review change request")
+				return
+			}
 			changeRequest.SetStatus(api.ApprovedCR)
 		case "reject":
+			if !canReview {
+				error.Set("cannot review change request")
+				return
+			}
 			changeRequest.SetStatus(api.RejectedCR)
 		case "merge":
+
+			if changeRequest.Status() != api.ApprovedCR {
+				error.Set("Change request is not approved!")
+				return
+			}
+
+			canEdit, err := controller.CanAccess(user, project, []string{"editor"})
+
+			if err != nil {
+				Log.Warning("Cannot get rights: %v", err)
+			}
+
+			if !canEdit {
+				error.Set("cannot merge change request")
+				return
+			}
 
 			changeRequest.SetStatus(api.MergedCR)
 
@@ -309,7 +348,7 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 		onSubmit := Func[any](c, func() {
 			changeRequestIdVar := PersistentGlobalVar(c, "changeRequestId", "")
 			changeRequestIdVar.Set(Hex(changeRequest.ID()))
-			router.RedirectTo(router.CurrentPath())
+			router.RedirectTo(Fmt("/flows/projects/%s", Hex(project.ID())))
 		})
 
 		return Div(
@@ -354,9 +393,24 @@ func NewChangeRequest(project kodex.Project, confirmed bool) ElementFunction {
 		title := Var(c, "")
 		error := Var(c, "")
 		router := UseRouter(c)
-		user := UseApiUser(c)
-
+		user := UseExternalUser(c)
 		controller := UseController(c)
+
+		apiUser, err := user.ApiUser(controller)
+
+		if err != nil {
+			return Div("cannot get API user")
+		}
+
+		canEdit, err := controller.CanAccess(user, project, []string{"editor"})
+
+		if err != nil {
+			Log.Warning("Cannot get rights: %v", err)
+		}
+
+		if !canEdit {
+			return Div("you cannot edit this project")
+		}
 
 		if !confirmed {
 
@@ -378,7 +432,7 @@ func NewChangeRequest(project kodex.Project, confirmed bool) ElementFunction {
 			})
 
 			for _, changeRequest := range existingChangeRequests {
-				if changeRequest.Status() == api.DraftCR && bytes.Equal(changeRequest.Creator().SourceID(), user.SourceID()) {
+				if changeRequest.Status() == api.DraftCR && bytes.Equal(changeRequest.Creator().SourceID(), apiUser.SourceID()) {
 					return ui.Modal(
 						c,
 						"Existing change request found",
@@ -437,7 +491,7 @@ func NewChangeRequest(project kodex.Project, confirmed bool) ElementFunction {
 				return
 			}
 
-			changeRequest, err := controller.MakeChangeRequest(nil, project, user)
+			changeRequest, err := controller.MakeChangeRequest(nil, project, apiUser)
 
 			if err != nil {
 				error.Set(Fmt("Cannot create change request: %v", err))

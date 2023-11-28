@@ -489,7 +489,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	AddBreadcrumb(c, project.Name(), Fmt("/%s", Hex(project.ID())))
 
 	// we check that the user can access the project
-	if ok, err := controller.CanAccess(user, project, []string{"read", "write", "admin"}); !ok || err != nil {
+	if ok, err := controller.CanAccess(user, project, []string{}); !ok || err != nil {
 		Log.Error("cannot access")
 		return nil
 	}
@@ -731,34 +731,29 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			Header: true,
 		},
 		{
-			Title:  "Actions",
-			Path:   Fmt("/flows/projects/%s/actions", projectId),
-			Icon:   "play-circle",
-			Active: tab == "actions",
+			Title: "Actions",
+			Path:  Fmt("/flows/projects/%s/actions", projectId),
+			Icon:  "play-circle",
 		},
 		{
-			Title:  "Streams",
-			Path:   Fmt("/flows/projects/%s/streams", projectId),
-			Icon:   "random",
-			Active: tab == "streams",
+			Title: "Streams",
+			Path:  Fmt("/flows/projects/%s/streams", projectId),
+			Icon:  "random",
 		},
 		{
-			Title:  "Changes",
-			Path:   Fmt("/flows/projects/%s/changes", projectId),
-			Icon:   "folder-open",
-			Active: tab == "changes",
+			Title: "Changes",
+			Path:  Fmt("/flows/projects/%s/changes", projectId),
+			Icon:  "folder-open",
 		},
 		{
-			Title:  "Settings",
-			Path:   Fmt("/flows/projects/%s/settings", projectId),
-			Icon:   "cogs",
-			Active: tab == "settings",
+			Title: "Settings",
+			Path:  Fmt("/flows/projects/%s/settings", projectId),
+			Icon:  "cogs",
 			Submenu: []*SidebarItem{
 				{
-					Title:  "Roles",
-					Path:   Fmt("/flows/projects/%s/settings/roles", projectId),
-					Icon:   "users",
-					Active: false,
+					Title: "Roles",
+					Path:  Fmt("/flows/projects/%s/settings/roles", projectId),
+					Icon:  "users",
 				},
 			},
 		},
@@ -769,15 +764,20 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	if projectsMenu == nil {
 		Log.Warning("Cannot find 'projects' sidebar menu...")
 	} else {
-		projectsMenu.Active = true
 		projectsMenu.Submenu = append(projectsMenu.Submenu, projectMenu...)
+	}
+
+	canEdit, err := controller.CanAccess(user, project, []string{"editor"})
+
+	if err != nil {
+		Log.Warning("Cannot get rights: %v", err)
 	}
 
 	return F(
 		If(error.Get() != "", ui.Message("danger", error.Get())),
 		//ui.Modal(c, router.CurrentPath()),
 		If(
-			onUpdate == nil && (tab == "actions" || tab == "streams"),
+			onUpdate == nil && (tab == "actions" || tab == "streams") && canEdit,
 			ui.Message("warning",
 				F(
 					I(
@@ -797,7 +797,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			),
 		),
 		DoIf(
-			changeRequest != nil,
+			changeRequest != nil && (tab == "actions" || tab == "streams"),
 			func() Element {
 				return F(
 					ui.Message("info",
@@ -841,10 +841,9 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 func Projects(c Context) Element {
 
-	externalUser := UseExternalUser(c)
+	user := UseExternalUser(c)
 	controller := UseController(c)
-
-	projects, err := projects(controller, externalUser)
+	projects, err := projects(controller, user)
 
 	if err != nil {
 		// to do: redirect to error page...
