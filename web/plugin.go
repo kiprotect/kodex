@@ -13,8 +13,15 @@ type WebPlugin interface {
 	MainRoutes(gospel.Context) []*gospel.RouteConfig
 }
 
+type AppLink struct {
+	Name      string
+	Path      string
+	Icon      string
+	Superuser bool
+}
+
 type AppLinkPlugin interface {
-	AppLink() (string, string, string)
+	AppLink() AppLink
 }
 
 type UserProviderPlugin interface {

@@ -56,8 +56,8 @@ func AppNavbar(c Context) Element {
 
 	for _, plugin := range plugins {
 		if appLinkPlugin, ok := plugin.(AppLinkPlugin); ok {
-			name, icon, path := appLinkPlugin.AppLink()
-			items = append(items, NavbarItem(path, icon, name))
+			appLink := appLinkPlugin.AppLink()
+			items = append(items, NavbarItem(appLink.Path, appLink.Icon, appLink.Name))
 		}
 	}
 

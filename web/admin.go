@@ -17,21 +17,7 @@ func Admin(c Context) Element {
 
 	user := UseExternalUser(c)
 
-	superuser := false
-
-	// we check if the user is a superuser
-outer:
-	for _, role := range user.Roles {
-		if role.Organization.Default {
-			for _, userRole := range role.Roles {
-				if userRole == "superuser" {
-					superuser = true
-					break outer
-				}
-			}
-			break outer
-		}
-	}
+	superuser := user.HasRole(nil, "superuser")
 
 	if !superuser {
 		return Div("Administration is for superusers only")

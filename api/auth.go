@@ -17,6 +17,7 @@
 package api
 
 import (
+	"bytes"
 	"github.com/gin-gonic/gin"
 	"github.com/kiprotect/kodex"
 	"net/http"
@@ -71,6 +72,20 @@ type ExternalUser struct {
 	Roles       []*OrganizationRoles   `json:"roles"`
 	Limits      map[string]interface{} `json:"limits"`
 	apiUser     User                   `json:"-"`
+}
+
+func (i *ExternalUser) HasRole(org *UserOrganization, roleName string) bool {
+	for _, role := range i.Roles {
+		if (org == nil && role.Organization.Default) || (bytes.Equal(role.Organization.ID, org.ID) && role.Organization.Source == org.Source) {
+			for _, userRole := range role.Roles {
+				if userRole == roleName {
+					return true
+				}
+			}
+			return false
+		}
+	}
+	return false
 }
 
 func (i *ExternalUser) ApiUser(controller Controller) (User, error) {

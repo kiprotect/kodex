@@ -759,6 +759,14 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			Path:   Fmt("/flows/projects/%s/settings", projectId),
 			Icon:   "cogs",
 			Active: tab == "settings",
+			Submenu: []*SidebarItem{
+				{
+					Title:  "Roles",
+					Path:   Fmt("/flows/projects/%s/settings/roles", projectId),
+					Icon:   "users",
+					Active: false,
+				},
+			},
 		},
 	}
 
@@ -767,6 +775,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	if projectsMenu == nil {
 		Log.Warning("Cannot find 'projects' sidebar menu...")
 	} else {
+		projectsMenu.Active = true
 		projectsMenu.Submenu = append(projectsMenu.Submenu, projectMenu...)
 	}
 

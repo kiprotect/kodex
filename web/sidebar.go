@@ -97,7 +97,7 @@ func menuItems(c Context, items []*SidebarItem) Element {
 
 	for _, item := range items {
 		menuItems = append(menuItems, NavItem(c, item))
-		if len(item.Submenu) > 0 {
+		if len(item.Submenu) > 0 && item.Active {
 			menuItems = append(menuItems, Submenu(c, item.Submenu))
 		}
 	}

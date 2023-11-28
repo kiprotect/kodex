@@ -20,17 +20,34 @@ func AppItem(path, icon, name string) Element {
 func AppChooser(c Context) Element {
 
 	plugins := UsePlugins(c)
-	items := []Element{
-		AppItem("/flows", "flows", "Data Flows"),
-		AppItem("/admin", "admin", "Administration"),
+	router := UseRouter(c)
+	user := UseExternalUser(c)
+
+	items := []Element{}
+
+	superuser := user.HasRole(nil, "superuser")
+
+	if superuser {
+		items = append(items, AppItem("/admin", "admin", "Administration"))
 	}
 
 	for _, plugin := range plugins {
 		if appLinkPlugin, ok := plugin.(AppLinkPlugin); ok {
-			name, icon, path := appLinkPlugin.AppLink()
-			items = append(items, AppItem(path, icon, name))
+			appLink := appLinkPlugin.AppLink()
+			if !appLink.Superuser || superuser {
+				items = append(items, AppItem(appLink.Path, appLink.Icon, appLink.Name))
+			}
 		}
 	}
+
+	if len(items) == 0 {
+		// there's only one choice, so we redirect directly
+		router.RedirectTo("/flows")
+		return nil
+	}
+
+	// we prepend the flows app
+	items = append([]Element{AppItem("/flows", "flows", "Data Flows")}, items...)
 
 	return Section(
 		Class("kip-centered-card", "kip-is-info", "kip-is-fullheight"),
