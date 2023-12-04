@@ -178,13 +178,13 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 	onSubmit := Func[any](c, func() {
 
 		req := c.Request()
-
 		action := req.FormValue("action")
-
 		canReview, err := controller.CanAccess(user, project, []string{"reviewer"})
 
 		if err != nil {
 			Log.Warning("Cannot get rights: %v", err)
+			error.Set("cannot check your reviewer status")
+			return
 		}
 
 		switch action {
@@ -201,7 +201,6 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 			}
 			changeRequest.SetStatus(api.RejectedCR)
 		case "merge":
-
 			if changeRequest.Status() != api.ApprovedCR {
 				error.Set("Change request is not approved!")
 				return
@@ -211,6 +210,8 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 
 			if err != nil {
 				Log.Warning("Cannot get rights: %v", err)
+				error.Set(Fmt("cannot get editor status: %v" ,err))
+				return
 			}
 
 			if !canEdit {
@@ -244,11 +245,14 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 				error.Set(Fmt("Cannot import project: %v", err))
 				return
 			}
-
+		default:
+			error.Set(Fmt("unknown action: %s", action))
+			return
 		}
 
 		// we save the change request
 		if err := changeRequest.Save(); err != nil {
+			error.Set(Fmt("Cannot save change request: %v", err))
 			return
 		}
 
@@ -271,7 +275,13 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 	}
 
 	return Div(
-		error.Get(),
+		If(
+			error.Get() != "",
+			P(
+				Class("bulma-help", "bulma-is-danger"),
+				error.Get(),
+			),
+		),
 		Class("bulma-content"),
 		Div(
 			Class("bulma-content"),
@@ -428,7 +438,7 @@ func NewChangeRequest(project kodex.Project, confirmed bool) ElementFunction {
 				changeRequestIdVar := PersistentGlobalVar(c, "changeRequestId", "")
 				// to do: verify ID
 				changeRequestIdVar.Set(changeRequestId.Get())
-				router.RedirectTo(router.CurrentPath())
+				router.RedirectTo(Fmt("/flows/projects/%s", Hex(project.ID())))
 			})
 
 			for _, changeRequest := range existingChangeRequests {
