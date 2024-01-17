@@ -19,45 +19,26 @@ li.kip-nav-item {
             }
 
         }
-        &.kip-is-active {
+    }
+
+    &.kip-is-active {
+        background-color: lighten($kip-darkblue, 60%);
+        a {
             text-decoration: underline;
         }
-        &:hover {
+    }
+
+    &:hover {
+        background-color: $kip-darkblue;
+        a {
             color: #fff;
-            background-color: $kip-darkblue;
         }
     }
+
     ul li.kip-nav-item a {
         padding-left:40px;
     }
 }
-/*
-@media (min-width: $kip-desktop) {
-    .kip-sidebar:not(:hover) {
-        li.kip-nav-item {
-            // we hide submenus if the menubar is not active
-            ul {
-                display: none;
-            }
-            a.kip-is-active {
-                background: inherit;
-            }
-        }
-    }
-
-    // we only show different colors when the menubar is active
-    .kip-sidebar:hover {
-        li.kip-nav-item {
-            a.kip-is-active {
-                background: $kip-darkblue;
-                i.fas {
-                    color: #fff;
-                }
-            }
-        }
-    }
-}
-*/
 
 aside.kip-menu-aside {
 
@@ -80,8 +61,16 @@ ul.kip-menu-list {
     font-size: 14px;
     font-weight: bold;
 
-    &.kip-is-submenu {
-        margin-left: map-get($kip-space, sm);
+    &.kip-is-submenu-1 li {
+        padding-left: map-get($kip-space, sm);
+    }
+
+    &.kip-is-submenu-2 li {
+        padding-left: map-get($kip-space, sm)*2;
+    }
+
+    &.kip-is-submenu-3 li {
+        padding-left: map-get($kip-space, sm)*3;
     }
 
     li {

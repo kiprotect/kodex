@@ -9,8 +9,13 @@ type WebPluginMaker interface {
 	InitializeWebPlugin(controller api.Controller) (WebPlugin, error)
 }
 
+type PluginRoutes struct {
+	Main       []*gospel.RouteConfig
+	Authorized []*gospel.RouteConfig
+}
+
 type WebPlugin interface {
-	MainRoutes(gospel.Context) []*gospel.RouteConfig
+	Routes(gospel.Context) PluginRoutes
 }
 
 type AppLink struct {

@@ -14982,44 +14982,22 @@ li.kip-nav-item a .icon.is-small {
   width: 20px;
   margin-right: 10px;
 }
-li.kip-nav-item a.kip-is-active {
+li.kip-nav-item.kip-is-active {
+  background-color: #e6f3fd;
+}
+li.kip-nav-item.kip-is-active a {
   text-decoration: underline;
 }
-li.kip-nav-item a:hover {
-  color: #fff;
+li.kip-nav-item:hover {
   background-color: #0a65a7;
+}
+li.kip-nav-item:hover a {
+  color: #fff;
 }
 li.kip-nav-item ul li.kip-nav-item a {
   padding-left: 40px;
 }
 
-/*
-@media (min-width: $kip-desktop) {
-    .kip-sidebar:not(:hover) {
-        li.kip-nav-item {
-            // we hide submenus if the menubar is not active
-            ul {
-                display: none;
-            }
-            a.kip-is-active {
-                background: inherit;
-            }
-        }
-    }
-
-    // we only show different colors when the menubar is active
-    .kip-sidebar:hover {
-        li.kip-nav-item {
-            a.kip-is-active {
-                background: $kip-darkblue;
-                i.fas {
-                    color: #fff;
-                }
-            }
-        }
-    }
-}
-*/
 aside.kip-menu-aside {
   font-weight: 200;
   margin-top: 8px;
@@ -15039,8 +15017,14 @@ ul.kip-menu-list {
   font-size: 14px;
   font-weight: bold;
 }
-ul.kip-menu-list.kip-is-submenu {
-  margin-left: 8px;
+ul.kip-menu-list.kip-is-submenu-1 li {
+  padding-left: 8px;
+}
+ul.kip-menu-list.kip-is-submenu-2 li {
+  padding-left: 16px;
+}
+ul.kip-menu-list.kip-is-submenu-3 li {
+  padding-left: 24px;
 }
 ul.kip-menu-list li.kip-is-header a {
   text-decoration: underline;

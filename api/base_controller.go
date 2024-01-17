@@ -37,6 +37,7 @@ func getUserProvider(controller Controller) (UserProvider, error) {
 	if !ok {
 		return nil, fmt.Errorf("invalid user provider type '%s'", userProviderType)
 	}
+	// to do: use the user provider settings instead after validating them
 	return definition.Maker(controller.Settings())
 }
 

@@ -19,6 +19,7 @@ func validatorInput(
 	path []string,
 	validators []forms.Validator,
 	values map[string]any,
+	error map[string]any,
 	readOnly bool,
 ) Element {
 
@@ -113,7 +114,7 @@ func validatorInput(
 			if vt.Form != nil {
 				return Div(
 					Style("border: 1px solid #eee; padding: 10px; margin-top: 10px; margin-bottom: 10px;"),
-					formAutoEditor(c, *vt.Form, mapValue, data, append(path, field.Name), readOnly),
+					formAutoEditor(c, *vt.Form, mapValue, data, nil, append(path, field.Name), readOnly),
 				)
 			}
 			return Div("map")
@@ -294,7 +295,13 @@ func validatorInput(
 				return nil
 			}
 
-			return validatorInput(c, field, data, path, switchValidators, values, readOnly)
+			var fieldError map[string]any
+
+			if error != nil {
+				fieldError, _ = error[vt.Key].(map[string]any)
+			}
+
+			return validatorInput(c, field, data, path, switchValidators, values, fieldError, readOnly)
 
 		}
 	}
@@ -319,8 +326,29 @@ func FormField(
 	data *FormData,
 	path []string,
 	values map[string]any,
+	formError map[string]any,
 	readOnly bool) Element {
-	return validatorInput(c, field, data, path, field.Validators, values, readOnly)
+
+	element := validatorInput(c, field, data, path, field.Validators, values, formError, readOnly)
+
+	if formError != nil {
+		fieldError, ok := formError[field.Name]
+		if ok {
+			err, ok := fieldError.(string)
+			if ok {
+				return Div(
+					P(
+						Class("bulma-help", "bulma-is-danger"),
+						err,
+					),
+					element,
+				)
+			}
+		}
+	}
+
+	return element
+
 }
 
 func applyValidators(field forms.Field, validators []forms.Validator, values map[string]any, newValues map[string]any, path []string, data *FormData) {
@@ -489,6 +517,7 @@ func FormAutoEditor(
 	// to do: use the ID of the form as a scope
 	c = c.Scope("form")
 	data := MakeFormData(c)
+	error := Var[map[string]any](c, nil)
 	submitAction := NamedVar(c, "submitAction", "")
 
 	onSubmit := Func[any](c, func() {
@@ -506,7 +535,12 @@ func FormAutoEditor(
 
 		if validatedData, err := form.Validate(newData); err != nil {
 			// to do: proper error handling
-			kodex.Log.Errorf("Invalid data: %v", err)
+			kodex.Log.Errorf("Invalid form data: %v", err)
+			formError, ok := err.(*forms.FormError)
+			if !ok {
+				return
+			}
+			error.Set(formError.Data())
 			return
 		} else {
 			// we update the original value with the validated data
@@ -514,9 +548,9 @@ func FormAutoEditor(
 		}
 	})
 
-	fields := formAutoEditor(c, form, copyMap(values), data, []string{}, update == nil)
+	fields := formAutoEditor(c, form, copyMap(values), data, error.Get(), []string{}, update == nil)
 
-	if len(fields) == 0 {
+	if fields == nil {
 		return Div(
 			"It seems this validator doesn't have any fields to edit.",
 		)
@@ -551,14 +585,15 @@ func formAutoEditor(
 	form forms.Form,
 	values map[string]any,
 	data *FormData,
+	error map[string]any,
 	path []string,
-	readOnly bool) []Element {
+	readOnly bool) Element {
 
 	fields := make([]Element, 0)
 
 	for _, field := range form.Fields {
 
-		formField := FormField(c, form, field, data, path, values, readOnly)
+		formField := FormField(c, form, field, data, path, values, error, readOnly)
 
 		if formField == nil {
 			continue
@@ -568,6 +603,17 @@ func formAutoEditor(
 
 	}
 
-	return fields
+	if len(fields) == 0 {
+		return nil
+	}
+
+	if error != nil {
+		return Div(
+			Style("background: repeating-linear-gradient(45deg, #fff, #feee 10px, #fff 10px); border: 2px solid #faa; padding: 10px; margin-top: 10px; margin-bottom: 10px;"),
+			fields,
+		)
+	}
+
+	return F(fields)
 
 }

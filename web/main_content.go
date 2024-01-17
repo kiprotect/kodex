@@ -40,7 +40,7 @@ func MainContent(c Context) Element {
 
 	// we add the main plugin routes
 	for _, plugin := range plugins {
-		routes = append(routes, plugin.MainRoutes(c)...)
+		routes = append(routes, plugin.Routes(c).Authorized...)
 	}
 
 	// we add a "not found" catch-all route...

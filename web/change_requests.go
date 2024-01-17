@@ -210,7 +210,7 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 
 			if err != nil {
 				Log.Warning("Cannot get rights: %v", err)
-				error.Set(Fmt("cannot get editor status: %v" ,err))
+				error.Set(Fmt("cannot get editor status: %v", err))
 				return
 			}
 

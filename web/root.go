@@ -149,64 +149,6 @@ func TokenLogin(c Context) Element {
 	)
 }
 
-func Login(c Context) Element {
-	return Div(
-		Class("kip-with-app-selector"),
-		A(
-			Class("kip-with-app-selector-link"),
-			Href("/#"),
-			Div(
-				Class("kip-logo-wrapper"),
-				Img(
-					Class("kip-logo", Alt("projects")),
-					Src("/static/images/kodexlogo-white.png"),
-				),
-			),
-		),
-		Section(
-			Class("kip-centered-card", "kip-is-info", "kip-is-fullheight"),
-			Div(
-				Class("kip-card", "kip-is-centered", "kip-account"),
-				Div(
-					Class("kip-card-header"),
-					Div(
-						Class("kip-card-title"),
-						H2("Login"),
-					),
-				),
-				Div(
-					Class("kip-card-content", "kip-card-centered"),
-					Div(
-						Class("kip-login"),
-						Div(
-							Class("kip-provider-list"),
-							Ul(
-								Li(
-									A(
-										Role("button"),
-										Class("bulma-button", "bulma-is-success", "bulma-is-flex"),
-										DataAttrib("plain", ""),
-										Href("/api/v1/login"),
-										"Log in via SSO",
-									),
-								),
-								Li(
-									A(
-										Class("bulma-is-small"),
-										Role("button"),
-										Href("/token-login"),
-										"Use An Access Token",
-									),
-								),
-							),
-						),
-					),
-				),
-			),
-		),
-	)
-}
-
 func NotFound(c Context) Element {
 
 	c.SetStatusCode(404)
@@ -249,14 +191,25 @@ func NotFound(c Context) Element {
 func AppContent(c Context) Element {
 
 	router := UseRouter(c)
+	plugins := UsePlugins(c)
 
-	return router.Match(
-		c,
-		Route("/login", Login),
+	routes := []*RouteConfig{
 		Route("/token-login", TokenLogin),
 		Route("/logout", Logout),
 		Route("/404", NotFound),
-		Route("", AuthorizedContent),
+	}
+
+	// we add the main plugin routes
+	for _, plugin := range plugins {
+		routes = append(routes, plugin.Routes(c).Main...)
+	}
+
+	// we serve the authorized content
+	routes = append(routes, Route("", AuthorizedContent))
+
+	return router.Match(
+		c,
+		routes...,
 	)
 
 }

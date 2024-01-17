@@ -723,6 +723,12 @@ func NewAction(project kodex.Project, onUpdate func(ChangeInfo, string)) Element
 						Type("submit"),
 						"Create Action",
 					),
+					Nbsp,
+					A(
+						Class("bulma-button"),
+						Href(Fmt("/flows/projects/%s/actions", Hex(project.ID()))),
+						"Cancel",
+					),
 				),
 			),
 		)

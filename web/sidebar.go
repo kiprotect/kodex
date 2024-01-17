@@ -64,11 +64,11 @@ func WithSidebar(sidebar any, content any) ElementFunction {
 
 }
 
-func Submenu(c Context, items []*SidebarItem) Element {
+func Submenu(c Context, level int, items []*SidebarItem) Element {
 
 	return Ul(
-		Class("kip-menu-list", "kip-is-submenu"),
-		menuItems(c, items),
+		Class("kip-menu-list", Fmt("kip-is-submenu-%d", level)),
+		menuItems(c, level+1, items),
 	)
 }
 
@@ -78,10 +78,13 @@ func NavItem(c Context, item *SidebarItem) Element {
 	active := strings.HasPrefix(router.FullPath(), item.Path)
 
 	return Li(
-		Class("kip-nav-item", If(item.Header, "kip-is-header")),
+		Class(
+			"kip-nav-item",
+			If(item.Header, "kip-is-header"),
+			If(active, "kip-is-active"),
+		),
 		A(
 			Href(item.Path),
-			If(active, Class("kip-is-active")),
 			Span(
 				If(
 					item.Icon != "",
@@ -99,10 +102,10 @@ func NavItem(c Context, item *SidebarItem) Element {
 }
 
 func MenuItems(c Context) Element {
-	return menuItems(c, UseGlobal[[]*SidebarItem](c, "sidebar"))
+	return menuItems(c, 1, UseGlobal[[]*SidebarItem](c, "sidebar"))
 }
 
-func menuItems(c Context, items []*SidebarItem) Element {
+func menuItems(c Context, level int, items []*SidebarItem) Element {
 
 	router := UseRouter(c)
 	menuItems := make([]Element, 0, len(items))
@@ -111,7 +114,7 @@ func menuItems(c Context, items []*SidebarItem) Element {
 		active := strings.HasPrefix(router.FullPath(), item.Path)
 		menuItems = append(menuItems, NavItem(c, item))
 		if len(item.Submenu) > 0 && active {
-			menuItems = append(menuItems, Submenu(c, item.Submenu))
+			menuItems = append(menuItems, Submenu(c, level, item.Submenu))
 		}
 	}
 	return F(

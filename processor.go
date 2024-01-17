@@ -305,7 +305,7 @@ func (p *Processor) Advance() ([]*Item, error) {
 }
 
 func (p *Processor) process(items []*Item, paramsMap map[string]interface{}, undo bool) ([]*Item, error) {
-	Log.Debugf("Processing %d items with error policy '%s'", len(items), p.errorPolicy)
+	Log.Tracef("Processing %d items with error policy '%s'", len(items), p.errorPolicy)
 	newItems := make([]*Item, 0)
 	// we first perform the Advance() method (for stateful actions)
 	if advanceItems, err := p.Advance(); err != nil {
@@ -325,7 +325,11 @@ func (p *Processor) process(items []*Item, paramsMap map[string]interface{}, und
 				itemError := errors.MakeExternalError("error processing item", "PROCESS-ITEM", nil, err)
 				// if we encounter an error during error reporting (i.e.
 				// too many errors received) we abort the processing.
-				Log.Error(itemError)
+				if p.config != nil {
+					Log.Errorf("Error processing item in config %s (project %s): %v", hex.EncodeToString(p.config.ID()), hex.EncodeToString(p.config.Stream().Project().ID()), itemError)
+				} else {
+					Log.Errorf("Error processing item: %v", itemError)
+				}
 				if err := p.channelWriter.Error(item, itemError); err != nil {
 					return newItems, err
 				}

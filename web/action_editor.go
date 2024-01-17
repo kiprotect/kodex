@@ -865,7 +865,11 @@ func IsActionValidator(c Context, validator *actions.IsAction, updateValidator f
 		}
 
 		updateValidator(newValidator)
-		onUpdate(ChangeInfo{}, UseRouter(c).CurrentPathWithQuery())
+
+		if onUpdate != nil {
+			onUpdate(ChangeInfo{}, UseRouter(c).CurrentPathWithQuery())
+		}
+
 	})
 
 	return F(
@@ -883,14 +887,18 @@ func IsActionValidator(c Context, validator *actions.IsAction, updateValidator f
 							Select(
 								actionTypes,
 								Value(actionType),
+								If(onUpdate == nil, BooleanAttrib("disabled")()),
 							),
 						),
 					),
-					Div(
-						Class("bulma-control"),
-						Button(
-							Class("bulma-button", "bulma-is-primary"),
-							"change type",
+					If(
+						onUpdate != nil,
+						Div(
+							Class("bulma-control"),
+							Button(
+								Class("bulma-button", "bulma-is-primary"),
+								"change type",
+							),
 						),
 					),
 				),

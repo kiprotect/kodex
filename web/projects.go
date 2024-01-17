@@ -162,6 +162,12 @@ func NewProject() ElementFunction {
 						Type("submit"),
 						"Create Project",
 					),
+					Nbsp,
+					A(
+						Class("bulma-button"),
+						Href("/flows/projects"),
+						"Cancel",
+					),
 				),
 			),
 		)
@@ -195,7 +201,7 @@ func Settings(project, realProject kodex.Project, onUpdate func(ChangeInfo, stri
 
 						c.SetRespondWith(func(c Context, w http.ResponseWriter) {
 							w.Header().Add("content-type", "application/json")
-							// w.Header().Add("content-disposition", "attachment; filename=blueprint.json;")
+							w.Header().Add("content-disposition", Fmt("attachment; filename=Kodex Blueprint - %s.json;", project.Name()))
 							w.Write(bytes)
 						})
 
@@ -316,7 +322,7 @@ func SettingsTab(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 			onUpdate(ChangeInfo{}, router.CurrentPath())
 		})
 
-		return F(
+		return Div(
 			ui.MessageWithTitle(
 				"grey",
 				"Import Blueprint",
@@ -861,7 +867,7 @@ func Projects(c Context) Element {
 			Href(Fmt("/flows/projects/%s", Hex(project.ID()))),
 			ui.ListItem(
 				ui.ListColumn("md", project.Name()),
-				ui.ListColumn("sm", HumanDuration(time.Now().Sub(project.CreatedAt()))),
+				ui.ListColumn("sm", HumanDuration(time.Now().Sub(project.UpdatedAt()))),
 			),
 		)
 		pis = append(pis, projectItem)
@@ -871,7 +877,7 @@ func Projects(c Context) Element {
 		ui.List(
 			ui.ListHeader(
 				ui.ListColumn("md", "Name"),
-				ui.ListColumn("sm", "Created At"),
+				ui.ListColumn("sm", "Updated At"),
 			),
 			pis,
 		),

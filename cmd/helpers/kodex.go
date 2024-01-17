@@ -146,6 +146,7 @@ func Kodex(definitions *api.Definitions) {
 			if err != nil {
 				return err
 			}
+			kodex.Log.Infof("Setting log level to '%s'", level)
 			kodex.Log.SetLevel(logLevel)
 
 			runner := func() error { return f(c) }

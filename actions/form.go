@@ -45,9 +45,11 @@ func (i IsAction) Validate(input interface{}, values map[string]interface{}) (in
 	item := kodex.MakeItem(map[string]interface{}{"_": input})
 	if newItem, err := i.Action.(kodex.DoableAction).Do(item, nil); err != nil {
 		return nil, err
-	} else {
+	} else if newItem != nil {
 		v, _ := newItem.Get("_")
 		return v, nil
+	} else {
+		return nil, nil
 	}
 }
 
