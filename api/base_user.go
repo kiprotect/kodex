@@ -94,13 +94,13 @@ var UserForm = forms.Form{
 	Fields: []forms.Field{
 		{
 			Name: "displayName",
-			Validators: append([]forms.Validator{
-				forms.IsRequired{}}, kodex.NameValidators...),
+			Validators: []forms.Validator{
+				forms.IsOptional{}},
 		},
 		{
 			Name: "email",
-			Validators: append([]forms.Validator{
-				forms.IsRequired{}}, kodex.NameValidators...),
+			Validators: []forms.Validator{
+				forms.IsRequired{}},
 		},
 		{
 			Name:       "data",
