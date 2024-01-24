@@ -36,8 +36,6 @@ func (p *Processor) ParameterSet() *ParameterSet {
 
 func (p *Processor) updateParams(item *Item, undo bool) error {
 
-	updated := false
-
 	for _, action := range p.parameterSet.Actions() {
 		// we get the parameter group for the specific item
 		parameterGroup, err := action.ParameterGroup(item)
@@ -81,12 +79,18 @@ func (p *Processor) updateParams(item *Item, undo bool) error {
 						// we try again, maybe another processor was simply faster
 						continue
 					}
-					updated = true
+					if !p.parameterSet.Empty() {
+						if err := p.parameterSet.Save(); err != nil {
+							return errors.MakeExternalError("error saving parameter set", "SAVE-PARAMS", nil, err)
+						}
+					}
 				}
 			} else if action.HasParams() {
 				// if the parameters were loaded we need to potentially save the parameter set
 				if loaded {
-					updated = true
+					if err := p.parameterSet.Save(); err != nil {
+						return errors.MakeExternalError("error saving parameter set", "SAVE-PARAMS", nil, err)
+					}
 				}
 				// the action might have changed
 				if err = spec.Action().SetParams(spec.Parameters()); err != nil {
@@ -95,10 +99,6 @@ func (p *Processor) updateParams(item *Item, undo bool) error {
 			}
 			break
 		}
-	}
-	if updated && !undo && p.key == nil && !p.parameterSet.Empty() {
-		// we try to save the new parameter set as well
-		return p.parameterSet.Save()
 	}
 	return nil
 }

@@ -296,6 +296,7 @@ func ActionTest(actionConfig kodex.ActionConfig, onUpdate func(ChangeInfo, strin
 					),
 				),
 			),
+			Hr(),
 			content,
 		)
 	}

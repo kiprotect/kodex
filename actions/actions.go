@@ -39,6 +39,11 @@ var Actions = kodex.ActionDefinitions{
 		Name:  "Generalize",
 		Maker: MakeGeneralizeAction,
 	},
+	"detect": kodex.ActionDefinition{
+		Name:  "Detect",
+		Maker: MakeDetectAction,
+		Form:  &DetectForm,
+	},
 	"form": kodex.ActionDefinition{
 		Name:  "Form Validation",
 		Maker: MakeFormAction,

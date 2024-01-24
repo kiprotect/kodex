@@ -37,7 +37,7 @@ func ProcessStream(stream kodex.Stream, timeout time.Duration) error {
 	}
 
 	// we process the stream using a local stream executor
-	streamExecutor := MakeLocalStreamExecutor(4, []byte("test"))
+	streamExecutor := MakeLocalStreamExecutor(1, []byte("test"))
 
 	if err := streamExecutor.Start(nil, stream); err != nil {
 		return err
@@ -64,7 +64,7 @@ func ProcessStream(stream kodex.Stream, timeout time.Duration) error {
 	}
 
 	for _, destinationMap := range destinationMaps {
-		destinationWriter := MakeLocalDestinationWriter(4, []byte("test"))
+		destinationWriter := MakeLocalDestinationWriter(1, []byte("test"))
 		if err := destinationWriter.Start(nil, destinationMap); err != nil {
 			return err
 		}

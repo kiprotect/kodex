@@ -856,12 +856,23 @@ func IsActionValidator(c Context, validator *actions.IsAction, updateValidator f
 	}
 
 	actionType := Var(c, validator.Type)
+	error := Var(c, "")
 
 	onSubmit := Func[any](c, func() {
 
 		newValidator := &actions.IsAction{
 			Type:   actionType.Get(),
 			Config: nil,
+		}
+
+		// we try to create the action to check if we can actually do it
+		if action, err := kodex.MakeAction("test", "test", actionType.Get(), []byte("test"), nil, controller.Definitions()); err != nil {
+			error.Set(Fmt("Cannot create action: %v", err))
+			return
+		} else if _, ok := action.(kodex.DoableAction); !ok {
+			// if the action cannot be done (i.e. requires a config or is undoable in general) we reject it
+			error.Set("This action is undoable, it cannot be embedded in a form")
+			return
 		}
 
 		updateValidator(newValidator)
@@ -872,12 +883,22 @@ func IsActionValidator(c Context, validator *actions.IsAction, updateValidator f
 
 	})
 
+	var errorNotice Element
+
+	if error.Get() != "" {
+		errorNotice = P(
+			Class("bulma-help", "bulma-is-danger"),
+			error.Get(),
+		)
+	}
+
 	return F(
 		Form(
 			Method("POST"),
 			OnSubmit(onSubmit),
 			Div(
 				H2(Class("bulma-subtitle"), "Action Type"),
+				errorNotice,
 				Div(
 					Class("bulma-field", "bulma-has-addons"),
 					Div(

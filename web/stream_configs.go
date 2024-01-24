@@ -32,7 +32,10 @@ func ConfigSettings(config kodex.Config, onUpdate func(ChangeInfo, string)) func
 				"API URL",
 			),
 			P(
-				"To transform data using this config, use the following URL in a POST request, e.g. ", Code("curl -X POST -h \"Content-Type: application/json\" -d '{\"items\": [...]}' ..."),
+				"To transform data using this config, use the following URL in a POST request, e.g. ", Code("curl -X POST -H \"Content-Type: application/json\" -d '{\"items\": [...]}' ..."),
+			),
+			P(
+				"Please also note that you will have to authenticate using an access token to use this endpoint.",
 			),
 			Hr(),
 			Pre(
