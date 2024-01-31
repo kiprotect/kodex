@@ -37,7 +37,7 @@ type Stats struct {
 type InMemoryController struct {
 	kodex.BaseController
 	mutex            sync.Mutex
-	streams          map[string]kodex.Stream
+	streams          map[string]*InMemoryStream
 	sources          map[string]kodex.Source
 	datasets         map[string]kodex.Dataset
 	destinations     map[string]kodex.Destination
@@ -64,7 +64,7 @@ func MakeInMemoryController(config map[string]interface{}, settings kodex.Settin
 		destinations:     make(map[string]kodex.Destination),
 		actionConfigs:    make(map[string]kodex.ActionConfig),
 		projects:         make(map[string]kodex.Project),
-		streams:          make(map[string]kodex.Stream),
+		streams:          make(map[string]*InMemoryStream),
 		sources:          make(map[string]kodex.Source),
 	}
 
@@ -160,13 +160,9 @@ func (c *InMemoryController) DeleteStream(stream *InMemoryStream) error {
 	return nil
 }
 
-func (c *InMemoryController) SaveStream(stream kodex.Stream) error {
-	inMemoryStream, ok := stream.(*InMemoryStream)
-	if !ok {
-		return fmt.Errorf("not an in-memory action config")
-	}
-	if existingStream, ok := c.streams[string(stream.ID())].(*InMemoryStream); ok {
-		if bytes.Equal(existingStream.InternalID(), inMemoryStream.InternalID()) && existingStream != inMemoryStream {
+func (c *InMemoryController) SaveStream(stream *InMemoryStream) error {
+	if existingStream, ok := c.streams[string(stream.ID())]; ok {
+		if bytes.Equal(existingStream.InternalID(), stream.InternalID()) && existingStream != stream {
 			return fmt.Errorf("ID conflict (stream)")
 		}
 	}

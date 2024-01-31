@@ -411,15 +411,18 @@ func ActionData(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) El
 			item := ui.ListItem(
 				ui.ListColumn("md", itemMap["name"]),
 				ui.ListColumn("icon",
-					Form(
-						Method("POST"),
-						OnSubmit(deleteDataItem),
-						A(
-							Href("#"),
-							OnClick("this.parentElement.requestSubmit()"),
-							Type("submit"),
-							I(
-								Class("fas", "fa-trash"),
+					If(
+						onUpdate != nil,
+						Form(
+							Method("POST"),
+							OnSubmit(deleteDataItem),
+							A(
+								Href("#"),
+								OnClick("this.parentElement.requestSubmit()"),
+								Type("submit"),
+								I(
+									Class("fas", "fa-trash"),
+								),
 							),
 						),
 					),

@@ -273,38 +273,38 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 
 		form.Fields = newFields
 
-		onUpdate(ChangeInfo{}, router.CurrentPathWithQuery())
+		onUpdate(ChangeInfo{}, router.UpdateQuery(map[string][]string{"action": nil}))
 	})
 
-	return Li(
-		Class("kip-item", "kip-is-danger"),
-		Div(
-			Class("kip-col", "kip-is-lg"),
-			"Do you really want to delete this field?",
-			Br(),
-			Form(
-				Method("POST"),
-				OnSubmit(onSubmit),
-				Div(
-					Class("bulma-field", "bulma-is-grouped"),
-					P(
-						Class("bulma-control"),
-						A(
-							Class("bulma-button"),
-							Href(router.CurrentPath()),
-							"Cancel",
-						),
-					),
-					P(
-						Class("bulma-control"),
-						Button(
-							Class("bulma-button", "bulma-is-danger"),
-							"Delete",
-						),
+	return ui.Modal(
+		c,
+		"Do you really want to delete this field?",
+		Span(
+			"Do you really want to delete the field ", Strong(field.Name), "?",
+		),
+		F(
+			A(
+				Class("bulma-button"),
+				Href(router.UpdateQuery(map[string][]string{"action": nil})),
+				"Cancel",
+			),
+			Span(Style("flex-grow: 1")),
+			Span(
+				Form(
+					Class("bulma-is-inline"),
+					Method("POST"),
+					OnSubmit(onSubmit),
+					Button(
+						Name("action"),
+						Value("edit"),
+						Class("bulma-button", "bulma-is-danger"),
+						Type("submit"),
+						"Yes, delete",
 					),
 				),
 			),
 		),
+		router.CurrentPathWithQuery(),
 	)
 }
 

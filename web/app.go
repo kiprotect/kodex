@@ -67,9 +67,17 @@ func AppServer(controller api.Controller) (*gospel.Server, error) {
 		return nil, fmt.Errorf("cannot get root: %v", err)
 	}
 
+	fs := StaticFiles
+
+	for _, plugin := range plugins {
+		if fsPlugin, ok := plugin.(StaticFilesPlugin); ok {
+			fs = append(fs, fsPlugin.StaticFiles())
+		}
+	}
+
 	return gospel.MakeServer(&gospel.App{
 		Root:         root,
-		StaticFiles:  StaticFiles,
+		StaticFiles:  fs,
 		StaticPrefix: "/static",
 	}), nil
 }
