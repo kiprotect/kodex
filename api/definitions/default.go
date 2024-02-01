@@ -25,11 +25,9 @@ import (
 )
 
 var DefaultDefinitions = api.Definitions{
-	Definitions: definitions.DefaultDefinitions,
-	APIControllerDefinitions: map[string]api.APIControllerMaker{
-		"inMemory": controllers.MakeInMemoryController,
-	},
-	Routes: []api.Routes{v1.Initialize},
+	Definitions:              definitions.DefaultDefinitions,
+	APIControllerDefinitions: controllers.Controllers,
+	Routes:                   []api.Routes{v1.Initialize},
 	ObjectAdaptors: map[string]api.ObjectAdaptor{
 		"stream":      StreamAdaptor{},
 		"config":      ConfigAdaptor{},

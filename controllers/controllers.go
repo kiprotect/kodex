@@ -22,4 +22,5 @@ import (
 
 var Controllers = map[string]kodex.ControllerMaker{
 	"inMemory": MakeInMemoryController,
+	"file":     MakeFileController,
 }

@@ -565,7 +565,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	if err != nil {
 
-		error.Set(Fmt("Error importing project: %v", err))
+		importErr := err
 
 		// we reset the controller
 		ctrl, err = InMemoryController(c)
@@ -594,8 +594,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 			}
 
 		} else {
-			Log.Error("Import error: %v", err)
-			return nil
+			return Div(Fmt("Import error: %v", importErr))
 		}
 
 	}

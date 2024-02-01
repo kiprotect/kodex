@@ -22,4 +22,5 @@ import (
 
 var Controllers = map[string]api.APIControllerMaker{
 	"inMemory": MakeInMemoryController,
+	"file":     MakeFileController,
 }

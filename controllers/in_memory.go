@@ -36,6 +36,7 @@ type Stats struct {
 
 type InMemoryController struct {
 	kodex.BaseController
+	onUpdate         func(object kodex.Model)
 	mutex            sync.Mutex
 	streams          map[string]*InMemoryStream
 	sources          map[string]kodex.Source
@@ -69,6 +70,17 @@ func MakeInMemoryController(config map[string]interface{}, settings kodex.Settin
 	}
 
 	return &controller, nil
+}
+
+func (c *InMemoryController) SetOnUpdate(onUpdate func(object kodex.Model)) {
+	c.onUpdate = onUpdate
+}
+
+// Notifies an observer that a given object has changed
+func (c *InMemoryController) OnUpdate(object kodex.Model) {
+	if c.onUpdate != nil {
+		c.onUpdate(object)
+	}
 }
 
 func (c *InMemoryController) SaveActionConfig(actionConfig kodex.ActionConfig) error {
@@ -181,6 +193,7 @@ func (c *InMemoryController) SaveProject(project kodex.Project) error {
 		}
 	}
 	c.projects[string(project.ID())] = project
+	c.OnUpdate(project)
 	return nil
 }
 

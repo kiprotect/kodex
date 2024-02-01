@@ -26,6 +26,7 @@ import (
 
 type InMemoryController struct {
 	api.BaseController
+	onUpdate           func(kodex.Model)
 	objectRoles        map[string]api.ObjectRole
 	changeRequests     map[string]api.ChangeRequest
 	defaultObjectRoles map[string]api.DefaultObjectRole
@@ -55,6 +56,16 @@ func MakeInMemoryController(config map[string]interface{}, controller kodex.Cont
 	apiController.Self = apiController
 
 	return apiController, nil
+}
+
+func (m *InMemoryController) SetOnApiUpdate(onUpdate func(kodex.Model)) {
+	m.onUpdate = onUpdate
+}
+
+func (m *InMemoryController) OnApiUpdate(object kodex.Model) {
+	if m.onUpdate != nil {
+		m.onUpdate(object)
+	}
 }
 
 func (m *InMemoryController) ApiClone() (api.Controller, error) {
