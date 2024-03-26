@@ -37,7 +37,7 @@ func Admin(c Context) Element {
 
 	return router.Match(c,
 		Route("/roles", DefaultRolesRoutes),
-		Route("", F(
+		Route("^$", F(
 			H1(
 				Class("bulma-title"),
 				"Administrative Settings",
