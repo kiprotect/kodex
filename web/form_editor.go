@@ -520,7 +520,7 @@ func FormAutoEditor(
 	error := Var[map[string]any](c, nil)
 	submitAction := formData.Var("submitAction", "")
 
-	onSubmit := Func[any](c, func() {
+	onSubmit := func() {
 
 		if update == nil {
 			return
@@ -546,7 +546,9 @@ func FormAutoEditor(
 			// we update the original value with the validated data
 			update(validatedData)
 		}
-	})
+	}
+
+	formData.OnSubmit(onSubmit)
 
 	fields := formAutoEditor(c, form, copyMap(values), formData, error.Get(), []string{}, update == nil)
 
@@ -557,9 +559,7 @@ func FormAutoEditor(
 	}
 
 	return formData.Form(
-		If(update != nil, OnSubmit(onSubmit)),
 		fields,
-		formData,
 		Div(
 			Class("bulma-field"),
 			P(

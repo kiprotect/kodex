@@ -177,6 +177,10 @@ func TestWithItem(c Context, actionConfig kodex.ActionConfig, item int) Element 
 		return Div("cannot get data")
 	}
 
+	if len(rawItems) <= item {
+		return Div("no data")
+	}
+
 	dataItem, ok := rawItems[item].(map[string]any)
 
 	if !ok {

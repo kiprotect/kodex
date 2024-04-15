@@ -775,10 +775,11 @@ func PseudonymizeValidator(c Context, validator *actions.IsAction, action *actio
 
 	values := make([]Element, 0)
 
-	pseudonymizeMethod := Var[string](c, action.Method)
+	form := MakeFormData(c, "pseudonymize", POST)
+	pseudonymizeMethod := form.Var("method", action.Method)
 	router := UseRouter(c)
 
-	onSubmit := Func[any](c, func() {
+	onSubmit := func() {
 
 		if _, ok := pseudonymize.Pseudonymizers[pseudonymizeMethod.Get()]; !ok {
 			// invalid pseudonymizer method
@@ -796,17 +797,16 @@ func PseudonymizeValidator(c Context, validator *actions.IsAction, action *actio
 		})
 
 		onUpdate(ChangeInfo{}, url)
-	})
+	}
+
+	form.OnSubmit(onSubmit)
 
 	for method, _ := range pseudonymize.Pseudonymizers {
 		values = append(values, Option(If(action.Method == method, BooleanAttrib("selected")()), Value(method), method))
 	}
 
 	return Div(
-		Form(
-			OnSubmit(onSubmit),
-			Id("pseudonymizerForm"),
-			Method("POST"),
+		form.Form(
 			Div(
 				Class("bulma-select", "bulma-is-fullwidth"),
 				Select(
@@ -860,10 +860,13 @@ func IsActionValidator(c Context, validator *actions.IsAction, updateValidator f
 		actionTypes = append(actionTypes, Option(Value(at), at))
 	}
 
-	actionType := Var(c, validator.Type)
+	fullPath := strings.Join(path, ".")
+
+	form := MakeFormData(c, Fmt("isAction.%s", fullPath), POST)
+	actionType := form.Var("actionType", validator.Type)
 	error := Var(c, "")
 
-	onSubmit := Func[any](c, func() {
+	onSubmit := func() {
 
 		newValidator := &actions.IsAction{
 			Type:   actionType.Get(),
@@ -886,7 +889,9 @@ func IsActionValidator(c Context, validator *actions.IsAction, updateValidator f
 			onUpdate(ChangeInfo{}, UseRouter(c).CurrentPathWithQuery())
 		}
 
-	})
+	}
+
+	form.OnSubmit(onSubmit)
 
 	var errorNotice Element
 
@@ -898,9 +903,7 @@ func IsActionValidator(c Context, validator *actions.IsAction, updateValidator f
 	}
 
 	return F(
-		Form(
-			Method("POST"),
-			OnSubmit(onSubmit),
+		form.Form(
 			Div(
 				H2(Class("bulma-subtitle"), "Action Type"),
 				errorNotice,
@@ -987,10 +990,14 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 			"field": path[:len(path)-1],
 		})
 
-		onSubmit := Func[any](c, func() {
+		form := MakeFormData(c, "deleteValidator", POST)
+
+		onSubmit := func() {
 			update(nil)
 			onUpdate(ChangeInfo{}, url)
-		})
+		}
+
+		form.OnSubmit(onSubmit)
 
 		return ui.Message(
 			"danger",
@@ -998,9 +1005,7 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 				P(
 					"Do you really want to delete this validator?",
 				),
-				Form(
-					Method("POST"),
-					OnSubmit(onSubmit),
+				form.Form(
 					Div(
 						Class("bulma-field", "bulma-is-grouped"),
 						P(
