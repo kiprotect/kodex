@@ -49,15 +49,23 @@ func NavbarItem(path, icon, name string) Element {
 func AppNavbar(c Context) Element {
 
 	plugins := UsePlugins(c)
+	user := UseExternalUser(c)
+	superuser := user.HasRole(nil, "superuser")
+
 	items := []Element{
 		NavbarItem("/flows", "flows", "Flows"),
-		NavbarItem("/admin", "admin", "Administration"),
+	}
+
+	if superuser {
+		items = append(items, NavbarItem("/admin", "admin", "Administration"))
 	}
 
 	for _, plugin := range plugins {
 		if appLinkPlugin, ok := plugin.(AppLinkPlugin); ok {
 			appLink := appLinkPlugin.AppLink()
-			items = append(items, NavbarItem(appLink.Path, appLink.Icon, appLink.Name))
+			if !appLink.Superuser || superuser {
+				items = append(items, NavbarItem(appLink.Path, appLink.Icon, appLink.Name))
+			}
 		}
 	}
 
@@ -72,9 +80,11 @@ func UserNavbar(c Context) Element {
 
 	// get the logged in user
 	user := UseExternalUser(c)
+	router := UseRouter(c)
 
 	items := []Element{
-		Div(
+		A(
+			Href(router.URL("/user")),
 			Class("bulma-dropdown-item"),
 			Span(
 				Class("kip-overflow-ellipsis"),

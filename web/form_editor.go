@@ -516,9 +516,9 @@ func FormAutoEditor(
 
 	// to do: use the ID of the form as a scope
 	c = c.Scope("form")
-	data := MakeFormData(c)
+	formData := MakeFormData(c, "edit", POST)
 	error := Var[map[string]any](c, nil)
-	submitAction := NamedVar(c, "submitAction", "")
+	submitAction := formData.Var("submitAction", "")
 
 	onSubmit := Func[any](c, func() {
 
@@ -531,7 +531,7 @@ func FormAutoEditor(
 			return
 		}
 
-		newData := applyFormData(form, values, []string{}, data)
+		newData := applyFormData(form, values, []string{}, formData)
 
 		if validatedData, err := form.Validate(newData); err != nil {
 			// to do: proper error handling
@@ -548,7 +548,7 @@ func FormAutoEditor(
 		}
 	})
 
-	fields := formAutoEditor(c, form, copyMap(values), data, error.Get(), []string{}, update == nil)
+	fields := formAutoEditor(c, form, copyMap(values), formData, error.Get(), []string{}, update == nil)
 
 	if fields == nil {
 		return Div(
@@ -556,11 +556,10 @@ func FormAutoEditor(
 		)
 	}
 
-	return Form(
-		Method("POST"),
+	return formData.Form(
 		If(update != nil, OnSubmit(onSubmit)),
 		fields,
-		data,
+		formData,
 		Div(
 			Class("bulma-field"),
 			P(

@@ -82,15 +82,34 @@ func MakeProject(controller api.Controller, name string, org *api.UserOrganizati
 
 }
 
+func CanCreate(user *api.ExternalUser, objectType string) bool {
+
+	for _, userRoles := range user.Roles {
+		for _, orgRole := range userRoles.Roles {
+			if orgRole == "admin" || orgRole == "superuser" || orgRole == "editor" {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func NewProject() ElementFunction {
 	return func(c Context) Element {
 
-		name := Var(c, "")
+		form := MakeFormData(c, "newProject", POST)
+		name := form.Var("name", "")
 		error := Var(c, "")
 		router := UseRouter(c)
 		controller := UseController(c)
+		user := UseExternalUser(c)
 
-		onSubmit := Func[any](c, func() {
+		if !CanCreate(user, "project") {
+			return Div("cannot create projects")
+		}
+
+		onSubmit := func() {
 
 			if name.Get() == "" {
 				error.Set("Please enter a name")
@@ -125,7 +144,9 @@ func NewProject() ElementFunction {
 			success = true
 
 			router.RedirectTo(Fmt("/flows/projects/%s", Hex(project.ID())))
-		})
+		}
+
+		form.OnSubmit(onSubmit)
 
 		var errorNotice Element
 
@@ -136,9 +157,7 @@ func NewProject() ElementFunction {
 			)
 		}
 
-		return Form(
-			Method("POST"),
-			OnSubmit(onSubmit),
+		return form.Form(
 			H1(Class("bulma-subtitle"), "New Project"),
 			Div(
 				Class("bulma-field"),
@@ -448,47 +467,16 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	user := UseExternalUser(c)
 	router := UseRouter(c)
 
-	// we load the project
-	projectVar := CachedVar(c, func() kodex.Project {
+	project, err := controller.Project(Unhex(projectId))
 
-		project, err := controller.Project(Unhex(projectId))
-
-		if err != nil {
-			error.Set(Fmt("Cannot load project: %v", err))
-			// to do: return error
-			Log.Error("%v", err)
-			return nil
-		}
-
-		return project
-
-	})
-
-	// we retrieve the project...
-	project := projectVar.Get()
-
-	if project == nil {
-		// to do: error handling...
-		return nil
+	if err != nil {
+		return Div(Fmt("Cannot load project: %v", err))
 	}
 
-	objectRolesVar := CachedVar(c, func() []api.ObjectRole {
-		roles, err := controller.RolesForObject(project)
+	objectRoles, err := controller.RolesForObject(project)
 
-		if err != nil {
-			error.Set(Fmt("Cannot load object roles: %v", err))
-			Log.Error("%v", err)
-			return nil
-		}
-		return roles
-
-	})
-
-	objectRoles := objectRolesVar.Get()
-
-	if objectRoles == nil {
-		// to do: error handling...
-		return nil
+	if err != nil {
+		return Div(Fmt("Cannot load object roles: %v", err))
 	}
 
 	AddBreadcrumb(c, "Projects", "/flows/projects")
@@ -496,7 +484,6 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	// we check that the user can access the project
 	if ok, err := controller.CanAccess(user, project, []string{}); !ok || err != nil {
-		Log.Error("cannot access")
 		return nil
 	}
 
@@ -522,31 +509,20 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	changeRequestId := PersistentGlobalVar(c, "changeRequestId", "")
 
-	changeRequestVar := CachedVar(c, func() api.ChangeRequest {
+	var changeRequest api.ChangeRequest
 
-		if changeRequestId.Get() == "" {
-			return nil
-		}
+	if changeRequestId.Get() != "" {
 
-		// we retrieve the action configs of the project...
-		changeRequest, err := controller.ChangeRequest(Unhex(changeRequestId.Get()))
+		// we retrieve the change request...
+		changeRequest, err = controller.ChangeRequest(Unhex(changeRequestId.Get()))
 
 		if err != nil {
 			error.Set(Fmt("cannot load change request: %v", err))
 			changeRequestId.Set("")
-			return nil
-		}
-
-		if !bytes.Equal(changeRequest.ObjectID(), project.ID()) {
+		} else if !bytes.Equal(changeRequest.ObjectID(), project.ID()) {
 			changeRequestId.Set("")
-			return nil
 		}
-
-		return changeRequest
-
-	})
-
-	changeRequest := changeRequestVar.Get()
+	}
 
 	if changeRequest != nil {
 
@@ -602,8 +578,6 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 	AddBreadcrumb(c, strings.Title(tab), Fmt("/%s", tab))
 
 	onUpdate := func(change ChangeInfo, path string) {
-
-		changeRequest := changeRequestVar.Get()
 
 		changedBlueprint, err := kodex.ExportBlueprint(importedProject)
 
@@ -664,12 +638,11 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 	}
 
-	if changeRequestVar.Get() == nil {
+	if changeRequest == nil {
 		onUpdate = nil
 	}
 
 	userRoles := []Element{}
-
 	foundRoles := map[string]any{}
 
 	for _, role := range user.Roles {
@@ -880,7 +853,10 @@ func Projects(c Context) Element {
 			),
 			pis,
 		),
-		A(Href("/flows/projects/new"), Class("bulma-button", "bulma-is-success"), "New Project"),
+		If(
+			CanCreate(user, "project"),
+			A(Href("/flows/projects/new"), Class("bulma-button", "bulma-is-success"), "New Project"),
+		),
 	)
 }
 

@@ -36,6 +36,7 @@ func MainContent(c Context) Element {
 	routes := []*RouteConfig{
 		Route("/flows", c.ElementFunction("flows", Flows)),
 		Route("/admin", c.ElementFunction("admin", Admin)),
+		Route("/user", c.ElementFunction("user", UserProfile)),
 	}
 
 	// we add the main plugin routes

@@ -95,11 +95,13 @@ func FormEditor(c Context, actionConfig kodex.ActionConfig, onUpdate func(Change
 
 func NewField(c Context, form *forms.Form, path []string, onUpdate func(ChangeInfo, string)) Element {
 
-	name := NamedVar(c, "name", "")
 	error := Var(c, "")
 	router := UseRouter(c)
 
-	onSubmit := Func[any](c, func() {
+	formData := MakeFormData(c, "newField", POST)
+	name := formData.Var("name", "")
+
+	onSubmit := func() {
 
 		if name.Get() == "" {
 			error.Set("Please enter a name")
@@ -122,7 +124,9 @@ func NewField(c Context, form *forms.Form, path []string, onUpdate func(ChangeIn
 			Description: Fmt("Create a new field with name '%s' at path '%s'.", name.Get(), strings.Join(path, ".")),
 		},
 			router.CurrentPathWithQuery())
-	})
+	}
+
+	formData.OnSubmit(onSubmit)
 
 	var errorNotice Element
 
@@ -133,10 +137,8 @@ func NewField(c Context, form *forms.Form, path []string, onUpdate func(ChangeIn
 		)
 	}
 
-	return Form(
+	return formData.Form(
 		Class("bulma-form"),
-		Method("POST"),
-		OnSubmit(onSubmit),
 		Fieldset(
 			errorNotice,
 			Div(
@@ -256,8 +258,9 @@ func queryAction(c Context) string {
 func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	router := UseRouter(c)
+	formData := MakeFormData(c, "deleteField", POST)
 
-	onSubmit := Func[any](c, func() {
+	onSubmit := func() {
 
 		newFields := []forms.Field{}
 
@@ -274,7 +277,9 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 		form.Fields = newFields
 
 		onUpdate(ChangeInfo{}, router.UpdateQuery(map[string][]string{"action": nil}))
-	})
+	}
+
+	formData.OnSubmit(onSubmit)
 
 	return ui.Modal(
 		c,
@@ -290,10 +295,8 @@ func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []s
 			),
 			Span(Style("flex-grow: 1")),
 			Span(
-				Form(
+				formData.Form(
 					Class("bulma-is-inline"),
-					Method("POST"),
-					OnSubmit(onSubmit),
 					Button(
 						Name("action"),
 						Value("edit"),
@@ -312,11 +315,11 @@ func NewValidator(c Context, create func(validator forms.Validator) int, path []
 
 	router := UseRouter(c)
 
-	validatorType := Var(c, router.Query().Get("validatorType"))
-
 	action := UseFormAction(c)
+	formData := MakeFormData(c, "newValidator", POST)
+	validatorType := formData.Var("validatorType", router.Query().Get("validatorType"))
 
-	onSubmit := Func[any](c, func() {
+	onSubmit := func() {
 
 		var validator forms.Validator
 
@@ -337,7 +340,9 @@ func NewValidator(c Context, create func(validator forms.Validator) int, path []
 				"field": append(path, Fmt("%d", index)),
 			}))
 		}
-	})
+	}
+
+	formData.OnSubmit(onSubmit)
 
 	values := []any{}
 
@@ -353,9 +358,7 @@ func NewValidator(c Context, create func(validator forms.Validator) int, path []
 		values = append(values, Option(Value(vt), vt))
 	}
 
-	return Form(
-		Method("POST"),
-		OnSubmit(onSubmit),
+	return formData.Form(
 		Div(
 			H2(Class("bulma-subtitle"), "New Validator"),
 			Div(
@@ -400,9 +403,11 @@ func ValidatorEditor(c Context, update func(validator forms.Validator) error, va
 		return Div("Error serializing validator config")
 	}
 
-	config := Var(c, string(configJson))
 	error := Var(c, "")
 	router := UseRouter(c)
+
+	formData := MakeFormData(c, "validatorEdit", POST)
+	config := formData.Var("config", string(configJson))
 
 	if onUpdate == nil {
 		return Pre(
@@ -410,7 +415,7 @@ func ValidatorEditor(c Context, update func(validator forms.Validator) error, va
 		)
 	}
 
-	onSubmit := Func[any](c, func() {
+	onSubmit := func() {
 
 		if config.Get() == "" {
 			error.Set("Please enter a config")
@@ -444,7 +449,9 @@ func ValidatorEditor(c Context, update func(validator forms.Validator) error, va
 			Description: Fmt("Update validator config with value '%s' at path '%s'.", config.Get(), strings.Join(path, ".")),
 		},
 			router.CurrentPathWithQuery())
-	})
+	}
+
+	formData.OnSubmit(onSubmit)
 
 	var errorNotice Element
 
@@ -461,10 +468,8 @@ func ValidatorEditor(c Context, update func(validator forms.Validator) error, va
 		lineCount = 20
 	}
 
-	return Form(
+	return formData.Form(
 		Class("bulma-form"),
-		Method("POST"),
-		OnSubmit(onSubmit),
 		Fieldset(
 			errorNotice,
 			Div(
@@ -497,44 +502,11 @@ func ValidatorEditor(c Context, update func(validator forms.Validator) error, va
 
 func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInfo, string), path []string) Element {
 
-	key := Var(c, validator.Key)
-	newCase := Var(c, "")
 	formError := Var(c, "")
 	router := UseRouter(c)
 
 	queryPath := queryPath(c)
 	queryAction := queryAction(c)
-
-	onChangeKey := Func[any](c, func() {
-
-		if key.Get() == "" {
-			formError.Set("Please enter a key")
-			return
-		}
-
-		validator.Key = key.Get()
-
-		onUpdate(ChangeInfo{
-			Description: "Update switch key",
-		},
-			router.CurrentPathWithQuery())
-	})
-
-	onAddCase := Func[any](c, func() {
-
-		if newCase.Get() == "" {
-			formError.Set("Please enter a case value")
-			return
-		}
-
-		validator.Cases[newCase.Get()] = []forms.Validator{}
-
-		onUpdate(ChangeInfo{
-			Description: "Update switch key",
-		},
-
-			router.CurrentPathWithQuery())
-	})
 
 	var errorNotice Element
 
@@ -545,8 +517,45 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 		)
 	}
 
-	cases := []Element{}
+	changeKeyData := MakeFormData(c, "changeKey", POST)
+	key := changeKeyData.Var("key", validator.Key)
 
+	onChangeKey := func() {
+
+		if key.Get() == "" {
+			formError.Set("Please enter a key")
+			return
+		}
+
+		validator.Key = key.Get()
+
+		onUpdate(ChangeInfo{
+			Description: "Update switch key",
+		}, router.CurrentPathWithQuery())
+	}
+
+	changeKeyData.OnSubmit(onChangeKey)
+
+	addCaseData := MakeFormData(c, "addCaseData", POST)
+	newCase := addCaseData.Var("newCase", "")
+
+	onAddCase := func() {
+
+		if newCase.Get() == "" {
+			formError.Set("Please enter a case value")
+			return
+		}
+
+		validator.Cases[newCase.Get()] = []forms.Validator{}
+
+		onUpdate(ChangeInfo{
+			Description: "Update switch key",
+		}, router.CurrentPathWithQuery())
+	}
+
+	addCaseData.OnSubmit(onAddCase)
+
+	cases := []Element{}
 	caseValues := []string{}
 
 	for caseValue, _ := range validator.Cases {
@@ -566,12 +575,14 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 				"field": path,
 			})
 
-			onSubmit := Func[any](c, func() {
+			formData := MakeFormData(c, "deleteCase", POST)
 
+			onSubmit := func() {
 				delete(validator.Cases, caseValue)
-
 				onUpdate(ChangeInfo{}, url)
-			})
+			}
+
+			formData.OnSubmit(onSubmit)
 
 			item := Li(
 				Class("kip-item", "kip-is-danger"),
@@ -583,9 +594,7 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 				),
 				Div(
 					Class("kip-col", "kip-is-icon"),
-					Form(
-						Method("POST"),
-						OnSubmit(onSubmit),
+					formData.Form(
 						Div(
 							Class("bulma-field", "bulma-is-grouped"),
 							P(
@@ -676,10 +685,8 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 	}
 
 	return F(
-		Form(
+		changeKeyData.Form(
 			Class("bulma-form"),
-			Method("POST"),
-			OnSubmit(onChangeKey),
 			Fieldset(
 				errorNotice,
 				Div(
@@ -727,10 +734,8 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 					func() Element {
 						return Li(
 							Class("kip-item"),
-							Form(
+							addCaseData.Form(
 								Class("bulma-form"),
-								Method("POST"),
-								OnSubmit(onAddCase),
 								Fieldset(
 									errorNotice,
 									Div(

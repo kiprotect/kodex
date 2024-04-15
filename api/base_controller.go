@@ -97,9 +97,14 @@ func (b *BaseController) CanAccess(user *ExternalUser, object kodex.Model, objec
 				// this role is for another organization
 				continue
 			}
+			// this role matches the user organization
 			for _, userRole := range userRoles {
 				// users with the "superuser" role always have access to the object
 				if userRole == "superuser" {
+					return true, nil
+				}
+				if len(objectRoles) == 0 {
+					// no specific rules were given, so any role will do
 					return true, nil
 				}
 				if userRole == role.OrganizationRole() {

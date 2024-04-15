@@ -7,6 +7,11 @@ import (
 	"github.com/kiprotect/kodex/controllers"
 )
 
+/*
+The API file controller persists all data in a single API blueprint file,
+which can be checked into version control and used to manage all API-related data.
+*/
+
 type FileController struct {
 	*InMemoryController
 }

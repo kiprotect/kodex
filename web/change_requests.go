@@ -175,19 +175,18 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 	controller := UseController(c)
 	user := UseExternalUser(c)
 
-	onSubmit := Func[any](c, func() {
+	formData := MakeFormData(c, "changeRequest", POST)
+	action := formData.Var("action", "")
 
-		req := c.Request()
-		action := req.FormValue("action")
-		canReview, err := controller.CanAccess(user, project, []string{"reviewer"})
+	canReview, err := controller.CanAccess(user, project, []string{"reviewer"})
 
-		if err != nil {
-			Log.Warning("Cannot get rights: %v", err)
-			error.Set("cannot check your reviewer status")
-			return
-		}
+	if err != nil {
+		error.Set("cannot check your reviewer status")
+	}
 
-		switch action {
+	onSubmit := func() {
+
+		switch action.Get() {
 		case "approve":
 			if !canReview {
 				error.Set("cannot review change request")
@@ -257,7 +256,9 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 		}
 
 		router.RedirectTo(router.CurrentPath())
-	})
+	}
+
+	formData.OnSubmit(onSubmit)
 
 	var status string
 
@@ -275,13 +276,15 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 	}
 
 	return Div(
-		If(
-			error.Get() != "",
-			P(
-				Class("bulma-help", "bulma-is-danger"),
-				error.Get(),
-			),
-		),
+		func() Element {
+			return If(
+				error.Get() != "",
+				P(
+					Class("bulma-help", "bulma-is-danger"),
+					error.Get(),
+				),
+			)
+		},
 		Class("bulma-content"),
 		Div(
 			Class("bulma-content"),
@@ -290,10 +293,8 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 			),
 		),
 		If(
-			changeRequest.Status() == api.ReadyCR || changeRequest.Status() == api.ApprovedCR,
-			Form(
-				Method("POST"),
-				OnSubmit(onSubmit),
+			canReview && (changeRequest.Status() == api.ReadyCR || changeRequest.Status() == api.ApprovedCR),
+			formData.Form(
 				IfElse(
 					changeRequest.Status() == api.ReadyCR,
 					Div(
@@ -355,13 +356,33 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 			content = Changes(changeRequest)
 		}
 
-		onSubmit := Func[any](c, func() {
+		form := MakeFormData(c, "openRequest", POST)
+		error := Var(c, "")
+
+		onSubmit := func() {
+
+			changeRequest.SetStatus(api.DraftCR)
+
+			if err := changeRequest.Save(); err != nil {
+				error.Set(Fmt("cannot save change request: %v", err))
+				return
+			}
+
 			changeRequestIdVar := PersistentGlobalVar(c, "changeRequestId", "")
 			changeRequestIdVar.Set(Hex(changeRequest.ID()))
 			router.RedirectTo(Fmt("/flows/projects/%s", Hex(project.ID())))
-		})
+		}
+
+		form.OnSubmit(onSubmit)
 
 		return Div(
+			If(
+				error.Get() != "",
+				P(
+					Class("bulma-help", "bulma-is-danger"),
+					error.Get(),
+				),
+			),
 			H2(
 				Class("bulma-subtitle"),
 				changeRequest.Title(),
@@ -369,9 +390,7 @@ func ChangeRequestDetails(project kodex.Project) func(c Context, changeRequestId
 					changeRequest.Status() != api.MergedCR,
 					Span(
 						Class("bulma-is-pulled-right"),
-						Form(
-							Method("POST"),
-							OnSubmit(onSubmit),
+						form.Form(
 							Button(
 								Type("submit"),
 								Class("bulma-tag", "bulma-is-primary", "bulma-is-small"),
