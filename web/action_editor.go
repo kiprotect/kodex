@@ -7,7 +7,6 @@ import (
 	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
 	"github.com/kiprotect/kodex/actions"
-	"github.com/kiprotect/kodex/actions/pseudonymize"
 	"github.com/kiprotect/kodex/web/ui"
 	"reflect"
 	"sort"
@@ -766,59 +765,6 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 		),
 	)
 
-}
-
-func PseudonymizeValidator(c Context, validator *actions.IsAction, action *actions.PseudonymizeTransformation, onUpdate func(ChangeInfo, string), path []string) Element {
-
-	// to do: add a switch field that toggles the pseudonymizer type and updates the underlying form
-	// to do: add specific forms for merengue, HMAC or structured pseudonymization, which all update the config
-
-	values := make([]Element, 0)
-
-	form := MakeFormData(c, "pseudonymize", POST)
-	pseudonymizeMethod := form.Var("method", action.Method)
-	router := UseRouter(c)
-
-	onSubmit := func() {
-
-		if _, ok := pseudonymize.Pseudonymizers[pseudonymizeMethod.Get()]; !ok {
-			// invalid pseudonymizer method
-			return
-		}
-
-		validator.Config = map[string]any{
-			"method": pseudonymizeMethod.Get(),
-			// we fall back to the default config...
-			"config": nil,
-		}
-
-		url := PathWithQuery(router.CurrentPath(), map[string][]string{
-			"field": path,
-		})
-
-		onUpdate(ChangeInfo{}, url)
-	}
-
-	form.OnSubmit(onSubmit)
-
-	for method, _ := range pseudonymize.Pseudonymizers {
-		values = append(values, Option(If(action.Method == method, BooleanAttrib("selected")()), Value(method), method))
-	}
-
-	return Div(
-		form.Form(
-			Div(
-				Class("bulma-select", "bulma-is-fullwidth"),
-				Select(
-					values,
-					Value(pseudonymizeMethod),
-					Attrib("autocomplete")("off"),
-					Id("itemSelect"),
-					OnChange("pseudonymizerForm.requestSubmit()"),
-				),
-			),
-		),
-	)
 }
 
 func IsActionValidator(c Context, validator *actions.IsAction, updateValidator func(forms.Validator) error, onUpdate func(ChangeInfo, string), path []string) Element {
