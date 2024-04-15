@@ -245,7 +245,7 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 				return
 			}
 		default:
-			error.Set(Fmt("unknown action: %s", action))
+			error.Set(Fmt("unknown action: %s", action.Get()))
 			return
 		}
 
