@@ -31,7 +31,11 @@ def process_file(path, copyright_notice):
     
 
 def enumerate_files(dir, extension='.go'):
-    for file in os.listdir(dir):
+    files = os.listdir(dir)
+    if ".crignore" in files:
+        # we ignore this directory
+        return
+    for file in files:
         path = os.path.join(dir, file)
         if file.startswith('.'):
             continue
@@ -41,6 +45,7 @@ def enumerate_files(dir, extension='.go'):
         else:
             if file.endswith(extension):
                 yield path
+
 if __name__ == '__main__':
     copyright_notice = format_copyright(read_copyright())
     for path in enumerate_files(source_dir):
