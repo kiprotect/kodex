@@ -1,9 +1,26 @@
+// Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
+// Copyright (C) 2019-2024  KIProtect GmbH (HRB 208395B) - Germany
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 package web
 
 import (
 	"bytes"
 	. "github.com/gospel-sh/gospel"
 	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/web/ui"
 	"time"
 	//	"github.com/kiprotect/kodex/api"
@@ -21,6 +38,12 @@ func StreamConfigs(stream kodex.Stream, onUpdate func(ChangeInfo, string)) Eleme
 				Route("", StreamConfigsList(stream, onUpdate)),
 			),
 		)
+	}
+}
+
+func ConfigTokens(config kodex.Config) func(c Context) Element {
+	return func(c Context) Element {
+		return ObjectTokens(c, config)
 	}
 }
 
@@ -69,6 +92,9 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 		AddBreadcrumb(c, config.Name(), Fmt("/details/%s", Hex(config.ID())))
 
 		router := UseRouter(c)
+		userProvider := UseUserProvider(c)
+
+		_, supportsTokens := userProvider.(api.AuthTokenUserProvider)
 
 		name := Var(c, config.Name())
 		error := Var(c, "")
@@ -135,6 +161,8 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 			content = c.Element("configActions", ConfigActionsList(config, onUpdate))
 		case "settings":
 			content = c.Element("configSettings", ConfigSettings(config, onUpdate))
+		case "tokens":
+			content = c.Element("tokens", ConfigTokens(config))
 		}
 
 		basePath := Fmt("/flows/projects/%s/streams/details/%s/configs/details/%s", Hex(stream.Project().ID()), Hex(stream.ID()), configId)
@@ -181,6 +209,7 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 			ui.Tabs(
 				ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(basePath+"/actions"), "Actions")),
 				ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(basePath+"/settings"), "Settings")),
+				If(supportsTokens, ui.Tab(ui.ActiveTab(tab == "tokens"), A(Href(basePath+"/tokens"), "Tokens"))),
 			),
 			content,
 		)
