@@ -1,5 +1,5 @@
 // Kodex (Community Edition - CE) - Privacy & Security Engineering Platform
-// Copyright (C) 2019-2022  KIProtect GmbH (HRB 208395B) - Germany
+// Copyright (C) 2019-2024  KIProtect GmbH (HRB 208395B) - Germany
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -17,6 +17,7 @@
 package decorators
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/kiprotect/go-helpers/errors"
@@ -58,12 +59,6 @@ func ValidObject(settings kodex.Settings, objectType string, objectRoles []strin
 				api.HandleError(c, 500, fmt.Errorf("corrupt user"))
 				return
 			}
-
-			if len(scopes) > 0 && !CheckScopes(scopes, user.AccessToken.Scopes) {
-				api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": user.AccessToken.Scopes, "required_scopes": scopes}, nil))
-				return
-			}
-
 		}
 
 		params, err := ObjectIDForm.Validate(map[string]interface{}{
@@ -102,15 +97,37 @@ func ValidObject(settings kodex.Settings, objectType string, objectRoles []strin
 			return
 		}
 
+		notFound := func() {
+			api.HandleError(c, 404, fmt.Errorf("object not found"))
+		}
+
 		object, roleObject, err = adaptor.Get(apiController, c, objectID)
 
 		if err != nil {
 			if err == kodex.NotFound {
-				api.HandleError(c, 404, fmt.Errorf("object not found"))
+				notFound()
 			} else {
 				api.HandleError(c, 500, err)
 			}
 			return
+		}
+
+		if len(scopes) > 0 {
+
+			fullScopes := []string{}
+
+			// we append the object ID to the scopes, such that it's possible to restrict access to
+			// a specific object not only an object type...
+			for _, scope := range scopes {
+				fullScopes = append(fullScopes, fmt.Sprintf("%s:%s", scope, hex.EncodeToString(objectID)))
+			}
+
+			// we check that the access token has the required scopes to access the object
+			if !CheckScopes(fullScopes, user.AccessToken.Scopes) {
+				api.HandleError(c, 403, errors.MakeExternalError("access denied", "ACCESS-DENIED", map[string]interface{}{"user_scopes": user.AccessToken.Scopes, "required_scopes": fullScopes}, nil))
+				return
+			}
+
 		}
 
 		if len(objectRoles) > 0 {
@@ -118,7 +135,7 @@ func ValidObject(settings kodex.Settings, objectType string, objectRoles []strin
 				if err != nil {
 					api.HandleError(c, 500, err)
 				} else {
-					api.HandleError(c, 404, fmt.Errorf("object not found"))
+					notFound()
 				}
 				return
 			}

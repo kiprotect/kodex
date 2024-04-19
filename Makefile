@@ -23,7 +23,7 @@ install:
 	@CGO_ENABLED=0 go install $(GOFLAGS) ./...
 
 copyright:
-	python .scripts/make_copyright_headers.py
+	python3 .scripts/make_copyright_headers.py
 
 init:
 	RABBITMQ_VHOST=kiprotect_test RABBITMQ_USER=kiprotect RABBITMQ_PASSWORD=kiprotect .scripts/init_rabbitmq.sh
