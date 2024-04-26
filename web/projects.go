@@ -826,7 +826,7 @@ func ProjectDetails(c Context, projectId string, tab string) Element {
 
 		router.Match(
 			c,
-			If(tab == "streams", Route("/details/(?P<streamId>[^/]+)(?:/(?P<tab>configs|sources))?", StreamDetails(importedProject, onUpdate))),
+			If(tab == "streams", Route("/details/(?P<streamId>[^/]+)(?:/(?P<tab>configs|sources|settings))?", StreamDetails(importedProject, onUpdate))),
 			If(tab == "actions", Route("/details/(?P<actionId>[^/]+)(?:/(?P<tab>edit|test|data))?", ActionDetails(importedProject, onUpdate))),
 			Route("", mainContent),
 		),

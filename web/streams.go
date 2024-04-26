@@ -40,6 +40,65 @@ func Streams(project kodex.Project, onUpdate func(ChangeInfo, string)) ElementFu
 	}
 }
 
+func StreamSettings(stream kodex.Stream, onUpdate func(ChangeInfo, string)) func(c Context) Element {
+	return func(c Context) Element {
+
+		router := UseRouter(c)
+		deleteForm := MakeFormData(c, "deleteStream", POST)
+
+		onSubmit := func() {
+			stream.Delete()
+			onUpdate(ChangeInfo{}, "deleted a stream")
+			router.RedirectTo(router.LastPath())
+		}
+
+		deleteForm.OnSubmit(onSubmit)
+
+		return F(
+			A(
+				Class("bulma-button", "bulma-is-danger"),
+				Href(router.CurrentPath()+"/delete"),
+				"delete stream",
+			),
+			router.Match(
+				c,
+				Route("/delete$",
+					func(c Context) Element {
+						return ui.Modal(
+							c,
+							"Do you really want to delete this stream?",
+							Span(
+								"Do you really want to delete this stream?",
+							),
+							F(
+								A(
+									Class("bulma-button"),
+									Href(router.LastPath()),
+									"Cancel",
+								),
+								Span(Style("flex-grow: 1")),
+								Span(
+									deleteForm.Form(
+										Class("bulma-is-inline"),
+										Button(
+											Name("action"),
+											Value("edit"),
+											Class("bulma-button", "bulma-is-danger"),
+											Type("submit"),
+											"Yes, delete",
+										),
+									),
+								),
+							),
+							router.LastPath(),
+						)
+					},
+				),
+			),
+		)
+	}
+}
+
 func StreamDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) func(c Context, streamId, tab string) Element {
 
 	return func(c Context, streamId, tab string) Element {
@@ -128,6 +187,8 @@ func StreamDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 			content = c.Element("streamConfigs", StreamConfigs(stream, onUpdate))
 		case "sources":
 			content = Div("coming soon...")
+		case "settings":
+			content = c.Element("streamSettings", StreamSettings(stream, onUpdate))
 		}
 
 		mainContent := func(c Context) Element {
@@ -169,6 +230,7 @@ func StreamDetails(project kodex.Project, onUpdate func(ChangeInfo, string)) fun
 				ui.Tabs(
 					ui.Tab(ui.ActiveTab(tab == "configs"), A(Href(Fmt("/flows/projects/%s/streams/details/%s/configs", Hex(project.ID()), streamId)), "Configs")),
 					ui.Tab(ui.ActiveTab(tab == "sources"), A(Href(Fmt("/flows/projects/%s/streams/details/%s/sources", Hex(project.ID()), streamId)), "Sources")),
+					ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(Fmt("/flows/projects/%s/streams/details/%s/settings", Hex(project.ID()), streamId)), "Settings")),
 				),
 				content,
 			)

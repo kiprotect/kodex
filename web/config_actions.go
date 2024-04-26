@@ -141,6 +141,7 @@ func ConfigActionsList(config kodex.Config, onUpdate func(ChangeInfo, string)) E
 
 	return func(c Context) Element {
 
+		router := UseRouter(c)
 		// we retrieve the config configs of the config...
 		actions, err := config.ActionConfigs()
 
@@ -157,12 +158,23 @@ func ConfigActionsList(config kodex.Config, onUpdate func(ChangeInfo, string)) E
 				ui.ListItem(
 					ui.ListColumn("md", action.Name()),
 					ui.ListColumn("sm", HumanDuration(time.Now().Sub(action.CreatedAt()))),
+					/*
+						ui.ListColumn("icon",
+							If(
+								onUpdate != nil,
+								A(
+									Href(router.CurrentPath()+"/delete"),
+									I(
+										Class("fas", "fa-trash"),
+									),
+								),
+							),
+						),
+					*/
 				),
 			)
 			ais = append(ais, actionItem)
 		}
-
-		router := UseRouter(c)
 
 		return F(
 			router.Match(
@@ -173,6 +185,7 @@ func ConfigActionsList(config kodex.Config, onUpdate func(ChangeInfo, string)) E
 						ui.ListHeader(
 							ui.ListColumn("md", "Name"),
 							ui.ListColumn("sm", "Created At"),
+							ui.ListColumn("icon", "Menu"),
 						),
 						ais,
 					),

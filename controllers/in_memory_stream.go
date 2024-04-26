@@ -108,6 +108,7 @@ func (c *InMemoryStream) DeleteConfig(dc *InMemoryConfig) error {
 		}
 		newConfigs = append(newConfigs, config)
 	}
+	c.configs = newConfigs
 	return nil
 }
 

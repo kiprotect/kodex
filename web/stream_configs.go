@@ -23,7 +23,6 @@ import (
 	"github.com/kiprotect/kodex/api"
 	"github.com/kiprotect/kodex/web/ui"
 	"time"
-	//	"github.com/kiprotect/kodex/api"
 )
 
 func StreamConfigs(stream kodex.Stream, onUpdate func(ChangeInfo, string)) ElementFunction {
@@ -43,12 +42,26 @@ func StreamConfigs(stream kodex.Stream, onUpdate func(ChangeInfo, string)) Eleme
 
 func ConfigTokens(config kodex.Config) func(c Context) Element {
 	return func(c Context) Element {
-		return ObjectTokens(c, config)
+		return ObjectTokens(c, config, []string{"read", "write", "transform"})
 	}
 }
 
 func ConfigSettings(config kodex.Config, onUpdate func(ChangeInfo, string)) func(c Context) Element {
 	return func(c Context) Element {
+
+		router := UseRouter(c)
+		deleteForm := MakeFormData(c, "deleteConfig", POST)
+
+		onSubmit := func() {
+			if err := config.Delete(); err != nil {
+				panic(err)
+			}
+			onUpdate(ChangeInfo{}, "deleted a config")
+			router.RedirectTo(router.LastPath())
+		}
+
+		deleteForm.OnSubmit(onSubmit)
+
 		return F(
 			H2(
 				Class("bulma-subtitle"),
@@ -65,6 +78,47 @@ func ConfigSettings(config kodex.Config, onUpdate func(ChangeInfo, string)) func
 				Span(Id("host")), Fmt("/api/v1/configs/%s/transform", Hex(config.ID())),
 			),
 			Script(`host.innerText = location.protocol + '//' + location.host;`),
+			Hr(),
+			A(
+				Class("bulma-button", "bulma-is-danger"),
+				Href(router.CurrentPath()+"/delete"),
+				"delete config",
+			),
+			router.Match(
+				c,
+				Route("/delete$",
+					func(c Context) Element {
+						return ui.Modal(
+							c,
+							"Do you really want to delete this config?",
+							Span(
+								"Do you really want to delete this config?",
+							),
+							F(
+								A(
+									Class("bulma-button"),
+									Href(router.LastPath()),
+									"Cancel",
+								),
+								Span(Style("flex-grow: 1")),
+								Span(
+									deleteForm.Form(
+										Class("bulma-is-inline"),
+										Button(
+											Name("action"),
+											Value("edit"),
+											Class("bulma-button", "bulma-is-danger"),
+											Type("submit"),
+											"Yes, delete",
+										),
+									),
+								),
+							),
+							router.LastPath(),
+						)
+					},
+				),
+			),
 		)
 	}
 }
@@ -209,7 +263,7 @@ func StreamConfigDetails(stream kodex.Stream, onUpdate func(ChangeInfo, string))
 			ui.Tabs(
 				ui.Tab(ui.ActiveTab(tab == "actions"), A(Href(basePath+"/actions"), "Actions")),
 				ui.Tab(ui.ActiveTab(tab == "settings"), A(Href(basePath+"/settings"), "Settings")),
-				If(supportsTokens, ui.Tab(ui.ActiveTab(tab == "tokens"), A(Href(basePath+"/tokens"), "Tokens"))),
+				If(supportsTokens, ui.Tab(ui.ActiveTab(tab == "tokens"), A(Href(basePath+"/tokens"), "Access Tokens"))),
 			),
 			content,
 		)
