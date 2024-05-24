@@ -30,6 +30,10 @@ import (
 	"strings"
 )
 
+func formName(path []string, name string) string {
+	return fmt.Sprintf("%s.%s", strings.Join(path, "."), name)
+}
+
 func ActionEditor(action kodex.ActionConfig, onUpdate func(ChangeInfo, string)) ElementFunction {
 	return func(c Context) Element {
 
@@ -113,7 +117,7 @@ func NewField(c Context, form *forms.Form, path []string, onUpdate func(ChangeIn
 	error := Var(c, "")
 	router := UseRouter(c)
 
-	formData := MakeFormData(c, "newField", POST)
+	formData := MakeFormData(c, formName(path, "newField"), POST)
 	name := formData.Var("name", "")
 
 	onSubmit := func() {
@@ -273,7 +277,7 @@ func queryAction(c Context) string {
 func DeleteFieldNotice(c Context, form *forms.Form, field *forms.Field, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	router := UseRouter(c)
-	formData := MakeFormData(c, "deleteField", POST)
+	formData := MakeFormData(c, formName(path, "deleteField"), POST)
 
 	onSubmit := func() {
 
@@ -331,7 +335,7 @@ func NewValidator(c Context, create func(validator forms.Validator) int, path []
 	router := UseRouter(c)
 
 	action := UseFormAction(c)
-	formData := MakeFormData(c, "newValidator", POST)
+	formData := MakeFormData(c, formName(path, "newValidator"), POST)
 	validatorType := formData.Var("validatorType", router.Query().Get("validatorType"))
 
 	onSubmit := func() {
@@ -421,7 +425,7 @@ func ValidatorEditor(c Context, update func(validator forms.Validator) error, va
 	error := Var(c, "")
 	router := UseRouter(c)
 
-	formData := MakeFormData(c, "validatorEdit", POST)
+	formData := MakeFormData(c, formName(path, "editValidator"), POST)
 	config := formData.Var("config", string(configJson))
 
 	if onUpdate == nil {
@@ -532,7 +536,7 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 		)
 	}
 
-	changeKeyData := MakeFormData(c, "changeKey", POST)
+	changeKeyData := MakeFormData(c, formName(path, "changeKey"), POST)
 	key := changeKeyData.Var("key", validator.Key)
 
 	onChangeKey := func() {
@@ -551,7 +555,7 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 
 	changeKeyData.OnSubmit(onChangeKey)
 
-	addCaseData := MakeFormData(c, "addCaseData", POST)
+	addCaseData := MakeFormData(c, formName(path, "addCaseData"), POST)
 	newCase := addCaseData.Var("newCase", "")
 
 	onAddCase := func() {
@@ -590,7 +594,7 @@ func SwitchValidator(c Context, validator *forms.Switch, onUpdate func(ChangeInf
 				"field": path,
 			})
 
-			formData := MakeFormData(c, "deleteCase", POST)
+			formData := MakeFormData(c, formName(path, "deleteCase"), POST)
 
 			onSubmit := func() {
 				delete(validator.Cases, caseValue)
@@ -822,9 +826,7 @@ func IsActionValidator(c Context, validator *actions.IsAction, updateValidator f
 		actionTypes = append(actionTypes, Option(Value(at), at))
 	}
 
-	fullPath := strings.Join(path, ".")
-
-	form := MakeFormData(c, Fmt("isAction.%s", fullPath), POST)
+	form := MakeFormData(c, formName(path, "isAction"), POST)
 	actionType := form.Var("actionType", validator.Type)
 	error := Var(c, "")
 
@@ -952,7 +954,7 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 			"field": path[:len(path)-1],
 		})
 
-		form := MakeFormData(c, "deleteValidator", POST)
+		form := MakeFormData(c, formName(path, "deleteValidator"), POST)
 
 		onSubmit := func() {
 			update(nil)
