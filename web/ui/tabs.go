@@ -26,7 +26,7 @@ func Tabs(args ...any) Element {
 		Class("active"),
 		Span(
 			Class("bulma-more"),
-			Span("cm-tabs-more", "&or;"),
+			Span(L("&or;")),
 		),
 		Ul(
 			args,

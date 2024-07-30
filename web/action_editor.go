@@ -191,6 +191,8 @@ func typeOf(validator forms.Validator) string {
 	}
 }
 
+var validatorPrefix = "validator-"
+
 func Validators(c Context, validators []forms.Validator, path []string, onUpdate func(ChangeInfo, string)) Element {
 
 	router := UseRouter(c)
@@ -207,7 +209,10 @@ func Validators(c Context, validators []forms.Validator, path []string, onUpdate
 		// we get the validator index from the query path
 		var err error
 
-		if index, err = strconv.Atoi(queryPath[len(path)]); err != nil {
+		validatorIndex := queryPath[len(path)]
+		if !strings.HasPrefix(validatorIndex, validatorPrefix) {
+			index = -1
+		} else if index, err = strconv.Atoi(validatorIndex[len(validatorPrefix):]); err != nil {
 			// invalid index, we ignore...
 			index = -1
 		}
@@ -227,7 +232,8 @@ func Validators(c Context, validators []forms.Validator, path []string, onUpdate
 				A(
 					Href(
 						PathWithQuery(router.CurrentPath(), map[string][]string{
-							"field": append(path, Fmt("%d", i)),
+							"field":  append(path, Fmt("%s%d", validatorPrefix, i)),
+							"action": []string{"view"},
 						}),
 					),
 					typeOf(validator),
@@ -241,6 +247,7 @@ func Validators(c Context, validators []forms.Validator, path []string, onUpdate
 		elements,
 		If(onUpdate != nil,
 			Li(
+				Class("kip-new-validator"),
 				A(
 					Href(PathWithQuery(router.CurrentPath(), map[string][]string{
 						"field":  path,
@@ -253,6 +260,15 @@ func Validators(c Context, validators []forms.Validator, path []string, onUpdate
 			),
 		),
 	)
+}
+
+func searchQuery(c Context) string {
+	router := UseRouter(c)
+
+	if query, ok := router.Query()["query"]; ok {
+		return query[0]
+	}
+	return ""
 }
 
 func queryPath(c Context) []string {
@@ -356,7 +372,7 @@ func NewValidator(c Context, create func(validator forms.Validator) int, path []
 			index := create(validator)
 			onUpdate(ChangeInfo{}, router.CurrentPathWithQuery())
 			router.RedirectTo(PathWithQuery(router.CurrentPath(), map[string][]string{
-				"field": append(path, Fmt("%d", index)),
+				"field": append(path, Fmt("%s%d", validatorPrefix, index)),
 			}))
 		}
 	}
@@ -1078,7 +1094,7 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 		}
 
 		url := PathWithQuery(router.CurrentPath(), map[string][]string{
-			"field": append(path[:len(path)-1], Fmt("%d", index-1)),
+			"field": append(path[:len(path)-1], Fmt("%s%d", validatorPrefix, index-1)),
 			"tab":   []string{tab},
 		})
 
@@ -1093,7 +1109,7 @@ func ValidatorDetails(c Context, validator forms.Validator, index, length int, u
 		}
 
 		url := PathWithQuery(router.CurrentPath(), map[string][]string{
-			"field": append(path[:len(path)-1], Fmt("%d", index+1)),
+			"field": append(path[:len(path)-1], Fmt("%s%d", validatorPrefix, index+1)),
 			"tab":   []string{tab},
 		})
 
@@ -1196,7 +1212,10 @@ func ValidatorsActions(c Context, validators []forms.Validator, create func(vali
 		// we get the validator index from the query path
 		var err error
 
-		if index, err = strconv.Atoi(queryPath[len(path)]); err != nil {
+		validatorIndex := queryPath[len(path)]
+		if !strings.HasPrefix(validatorIndex, validatorPrefix) {
+			index = -1
+		} else if index, err = strconv.Atoi(validatorIndex[len(validatorPrefix):]); err != nil {
 			// invalid index, we ignore...
 			index = -1
 		}
@@ -1207,7 +1226,7 @@ func ValidatorsActions(c Context, validators []forms.Validator, create func(vali
 	} else if partialMatch && index >= 0 && index < len(validators) {
 		return ValidatorDetails(c, validators[index], index, len(validators), func(validator forms.Validator) error {
 			return update(index, validator)
-		}, move, append(path, Fmt("%d", index)), onUpdate)
+		}, move, append(path, Fmt("%s%d", validatorPrefix, index)), onUpdate)
 	}
 
 	return nil

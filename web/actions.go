@@ -20,154 +20,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"sort"
 	"strconv"
 	"time"
 
 	. "github.com/gospel-sh/gospel"
+	"github.com/kiprotect/go-helpers/forms"
 	"github.com/kiprotect/kodex"
+	"github.com/kiprotect/kodex/actions"
 	"github.com/kiprotect/kodex/web/ui"
 )
-
-func FromTo(newValue, oldValue any) Element {
-
-	if oldValue == newValue {
-		return F(
-			Span(Class("kip-identical"), Fmt("%v", oldValue)),
-		)
-	}
-
-	// the values are not identical
-	return F(
-		Span(Class("kip-from"), Fmt("%v", oldValue)),
-		Span(Class("kip-arrow"), "→"),
-		Span(Class("kip-to"), Fmt("%v", newValue)),
-	)
-
-}
-
-func SliceDiff(c Context, newValue, oldValue []any, path []string) Element {
-
-	items := []Element{}
-
-	for i, nv := range newValue {
-		var ov any
-
-		if i < len(oldValue) {
-			ov = oldValue[i]
-		}
-
-		extraContent := AnyDiff(c, nv, ov, append(path, Fmt("%d", i)))
-
-		var item Element
-
-		if extraContent == nil {
-			item = Li(
-				Span(Class("kip-key"), Fmt("%d", i)),
-				FromTo(nv, ov),
-			)
-		} else {
-			item = Li(
-				Div(
-					Class("kip-extra-content"),
-					extraContent,
-				),
-			)
-		}
-
-		items = append(items, item)
-	}
-
-	return Ul(
-		Class("kip-slice-diff"),
-		items,
-	)
-}
-
-func AnyDiff(c Context, newValue, oldValue any, path []string) Element {
-
-	switch nv := newValue.(type) {
-	case map[string]any:
-		ov, ok := oldValue.(map[string]any)
-		if !ok {
-			ov = map[string]any{}
-		}
-		return MapDiff(c, nv, ov, path)
-	case []any:
-		ov, ok := oldValue.([]any)
-		if !ok {
-			ov = []any{}
-		}
-		return SliceDiff(c, nv, ov, path)
-	}
-
-	// we don't return anything
-	return nil
-}
-
-func MapValue(c Context, key string, newValue, oldValue any, path []string) Element {
-
-	extraContent := AnyDiff(c, newValue, oldValue, path)
-
-	var fromTo Element
-
-	if extraContent == nil {
-		fromTo = FromTo(newValue, oldValue)
-	} else {
-
-		typeInfo := "<>"
-
-		switch newValue.(type) {
-		case []any:
-			typeInfo = "[]"
-		case map[string]any:
-			typeInfo = "map<string,any>"
-		}
-
-		fromTo = Span(Class("kip-type"), typeInfo)
-	}
-
-	return Li(
-		Span(Class("kip-key"), key),
-		fromTo,
-		If(
-			extraContent != nil,
-			Div(
-				Class("kip-extra-content"),
-				extraContent,
-			),
-		),
-	)
-}
-
-func MapDiff(c Context, newMap, oldMap map[string]any, path []string) Element {
-	values := []Element{}
-
-	keys := []string{}
-
-	for key, _ := range newMap {
-		keys = append(keys, key)
-	}
-
-	// we always sort keys
-	sort.Strings(keys)
-
-	for _, key := range keys {
-		newValue, _ := newMap[key]
-		oldValue, _ := oldMap[key]
-		values = append(values, MapValue(c, key, newValue, oldValue, append(path, key)))
-	}
-
-	return Ul(
-		Class("kip-map-diff", If(len(path) == 0, "kip-top-level")),
-		values,
-	)
-
-}
-
-func ItemDiff(c Context, newItem, oldItem *kodex.Item) Element {
-	return MapDiff(c, newItem.All(), oldItem.All(), []string{})
-}
 
 func TestWithItem(c Context, actionConfig kodex.ActionConfig, item int) Element {
 
@@ -177,6 +38,13 @@ func TestWithItem(c Context, actionConfig kodex.ActionConfig, item int) Element 
 
 	if err != nil {
 		return Div("cannot get action")
+	}
+
+	var form *forms.Form
+
+	// we check if this is a form action
+	if formAction, ok := action.(*actions.FormAction); ok {
+		form = formAction.Form()
 	}
 
 	data, ok := actionConfig.Data().(map[string]any)
@@ -252,7 +120,27 @@ func TestWithItem(c Context, actionConfig kodex.ActionConfig, item int) Element 
 			)
 		}
 
-		return ItemDiff(c, newItems[0], items[0])
+		var errorNotice Element
+
+		formData := MakeFormData(c, "dataQuery", GET)
+		query := formData.Var("query", "")
+
+		return F(
+			formData.Form(
+				Fieldset(
+					errorNotice,
+					Div(
+						Class("bulma-field"),
+						P(
+							Class("bulma-control"),
+							Input(Class("bulma-control", "bulma-input"), Placeholder("filter fields by key or value"), Value(query)),
+						),
+					),
+				),
+			),
+			Hr(),
+			CodeDiff(c, newItems[0], items[0], form),
+		)
 	}
 
 }

@@ -11,7 +11,37 @@
     }
 }
 
-.kip-form-config {
+
+ul.kip-validators {
+
+    > li {
+        display: inline-block;
+        cursor: pointer;
+        background: #eee;
+        border: 1px solid #eee;
+        border-radius: $kip-border-radius;
+        padding: map-get($kip-space, xs);
+        font-size: 12px;
+        text-select: none;
+        margin-right: map-get($kip-space, sm);
+
+        &.kip-is-active {
+            background: #efa;
+            a {
+                color: #000;
+            }
+        }
+    }
+
+    > li.kip-controls {
+        border: none;
+        background: none;
+    }
+
+
+}
+
+.kip-form-config, .kip ul.kip-map-diff {
 
     width: 100%;
 
@@ -21,7 +51,7 @@
         display: flex;
     }
 
-    ul.kip-fields {
+    > ul.kip-fields {
 
         &.kip-top-level {
             margin-left: -24px;
@@ -76,34 +106,6 @@
             }
 
         }
-    }
-
-    ul.kip-validators {
-
-        > li {
-            display: inline-block;
-            cursor: pointer;
-            background: #eee;
-            border: 1px solid #eee;
-            border-radius: $kip-border-radius;
-            padding: map-get($kip-space, xs);
-            font-size: 12px;
-            text-select: none;
-            margin-right: map-get($kip-space, sm);
-
-            &.kip-is-active {
-                background: #efa;
-                a {
-                    color: #000;
-                }
-            }
-        }
-
-        > li.kip-controls {
-            border: none;
-            background: none;
-        }
-
     }
 
     .kip-add-field {

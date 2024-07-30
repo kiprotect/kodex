@@ -15182,7 +15182,7 @@ ul.kip-menu-list li ul {
   color: hsl(0, 0%, 29%);
 }
 .kip-list .kip-item {
-  min-width: 800px;
+  min-width: 400px;
   display: flex;
   flex-basis: 0;
   flex-wrap: wrap;
@@ -15536,48 +15536,7 @@ ul.kip-menu-list li ul {
   background: #fdd;
 }
 
-.kip-form-config {
-  width: 100%;
-}
-.kip-form-config .kip-add-field, .kip-form-config .kip-add-validator {
-  gap: 8px;
-  flex-direction: row;
-  display: flex;
-}
-.kip-form-config ul.kip-fields.kip-top-level {
-  margin-left: -24px;
-  margin-right: -24px;
-}
-.kip-form-config ul.kip-fields.kip-top-level > li {
-  padding-right: 24px;
-}
-.kip-form-config ul.kip-fields > li {
-  padding: 4px;
-}
-.kip-form-config ul.kip-fields > li:hover > .kip-is-icon > * {
-  display: inherit;
-}
-.kip-form-config ul.kip-fields > li .kip-is-icon > * {
-  display: none;
-}
-.kip-form-config ul.kip-fields > li .kip-extra-content {
-  display: block;
-  width: 100%;
-  margin: 4px;
-  background: #fff;
-  padding: 8px;
-  box-shadow: 0 1px 1px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
-}
-.kip-form-config ul.kip-fields > li .kip-extra-content h2.bulma-subtitle > * {
-  display: none;
-}
-.kip-form-config ul.kip-fields > li .kip-extra-content h2.bulma-subtitle:hover > * {
-  display: inline-block;
-}
-.kip-form-config ul.kip-fields > li.kip-with-extra-content {
-  background: repeating-linear-gradient(45deg, #fff, #efe 10px, #fff 10px);
-}
-.kip-form-config ul.kip-validators > li {
+ul.kip-validators > li {
   display: inline-block;
   cursor: pointer;
   background: #eee;
@@ -15588,17 +15547,59 @@ ul.kip-menu-list li ul {
   text-select: none;
   margin-right: 8px;
 }
-.kip-form-config ul.kip-validators > li.kip-is-active {
+ul.kip-validators > li.kip-is-active {
   background: #efa;
 }
-.kip-form-config ul.kip-validators > li.kip-is-active a {
+ul.kip-validators > li.kip-is-active a {
   color: #000;
 }
-.kip-form-config ul.kip-validators > li.kip-controls {
+ul.kip-validators > li.kip-controls {
   border: none;
   background: none;
 }
-.kip-form-config .kip-add-field .bulma-button {
+
+.kip-form-config, .kip ul.kip-map-diff {
+  width: 100%;
+}
+.kip-form-config .kip-add-field, .kip-form-config .kip-add-validator, .kip ul.kip-map-diff .kip-add-field, .kip ul.kip-map-diff .kip-add-validator {
+  gap: 8px;
+  flex-direction: row;
+  display: flex;
+}
+.kip-form-config > ul.kip-fields.kip-top-level, .kip ul.kip-map-diff > ul.kip-fields.kip-top-level {
+  margin-left: -24px;
+  margin-right: -24px;
+}
+.kip-form-config > ul.kip-fields.kip-top-level > li, .kip ul.kip-map-diff > ul.kip-fields.kip-top-level > li {
+  padding-right: 24px;
+}
+.kip-form-config > ul.kip-fields > li, .kip ul.kip-map-diff > ul.kip-fields > li {
+  padding: 4px;
+}
+.kip-form-config > ul.kip-fields > li:hover > .kip-is-icon > *, .kip ul.kip-map-diff > ul.kip-fields > li:hover > .kip-is-icon > * {
+  display: inherit;
+}
+.kip-form-config > ul.kip-fields > li .kip-is-icon > *, .kip ul.kip-map-diff > ul.kip-fields > li .kip-is-icon > * {
+  display: none;
+}
+.kip-form-config > ul.kip-fields > li .kip-extra-content, .kip ul.kip-map-diff > ul.kip-fields > li .kip-extra-content {
+  display: block;
+  width: 100%;
+  margin: 4px;
+  background: #fff;
+  padding: 8px;
+  box-shadow: 0 1px 1px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+}
+.kip-form-config > ul.kip-fields > li .kip-extra-content h2.bulma-subtitle > *, .kip ul.kip-map-diff > ul.kip-fields > li .kip-extra-content h2.bulma-subtitle > * {
+  display: none;
+}
+.kip-form-config > ul.kip-fields > li .kip-extra-content h2.bulma-subtitle:hover > *, .kip ul.kip-map-diff > ul.kip-fields > li .kip-extra-content h2.bulma-subtitle:hover > * {
+  display: inline-block;
+}
+.kip-form-config > ul.kip-fields > li.kip-with-extra-content, .kip ul.kip-map-diff > ul.kip-fields > li.kip-with-extra-content {
+  background: repeating-linear-gradient(45deg, #fff, #efe 10px, #fff 10px);
+}
+.kip-form-config .kip-add-field .bulma-button, .kip ul.kip-map-diff .kip-add-field .bulma-button {
   margin-top: 8px;
   height: 44px;
 }
@@ -15633,45 +15634,166 @@ ul.kip-menu-list li ul {
   }
 }
 
-ul.kip-slice-diff {
-  font-size: 12px;
+.kip ul.kip-slice-diff {
+  font-size: 14px;
+  list-style: square;
 }
-ul.kip-slice-diff li {
+.kip ul.kip-slice-diff li {
   margin-bottom: 8px;
 }
 
-ul.kip-map-diff {
-  font-size: 12px;
+.kip pre.kip-code-diff {
+  line-height: 2.4;
+  font-size: 16px;
 }
-ul.kip-map-diff:not(.kip-top-level) {
-  padding-left: 8px;
+.kip pre.kip-code-diff span.kip-field-and-validators:hover > span.kip-validator-list > span > ul.kip-validators > li.kip-new-validator {
+  display: inherit;
 }
-ul.kip-map-diff li {
-  margin-bottom: 8px !important;
+.kip pre.kip-code-diff span.kip-from-to {
+  border-radius: 4px;
+  padding: 0 8px;
 }
-ul.kip-map-diff li span {
-  margin-right: 4px;
-  padding: 4px;
-  display: inline-block;
-  border-radius: 2px;
-}
-ul.kip-map-diff li span.kip-key {
-  font-weight: 600;
-}
-ul.kip-map-diff li span.kip-key::after {
-  content: ":";
-}
-ul.kip-map-diff li span.kip-identical {
-  background: #ffa;
-}
-ul.kip-map-diff li span.kip-type {
-  font-style: italic;
-}
-ul.kip-map-diff li span.kip-to {
+.kip pre.kip-code-diff span.kip-from-to.kip-unmodified {
   background: #afa;
 }
-ul.kip-map-diff li span.kip-from {
+.kip pre.kip-code-diff span.kip-from-to.kip-modified {
+  background: #ffa;
+}
+.kip pre.kip-code-diff span.kip-from-to.kip-added {
+  background: #aaf;
+}
+.kip pre.kip-code-diff span.kip-from-to.kip-removed {
   background: #faa;
+}
+.kip pre.kip-code-diff ul.kip-validators {
+  margin: 0 8px;
+  display: inline;
+}
+.kip pre.kip-code-diff ul.kip-validators:before {
+  content: "<";
+}
+.kip pre.kip-code-diff ul.kip-validators:after {
+  content: ">";
+}
+.kip pre.kip-code-diff ul.kip-validators li {
+  display: inline;
+  border-radius: 4px;
+  margin-left: 8px;
+  padding: 4px;
+  background: #ddd;
+}
+.kip pre.kip-code-diff ul.kip-validators li:first-child {
+  margin-left: 0;
+}
+.kip pre.kip-code-diff ul.kip-validators li a {
+  color: #333;
+  padding: 0;
+  margin: 0;
+  text-decoration: underline;
+}
+.kip pre.kip-code-diff ul.kip-validators > li.kip-new-validator {
+  display: none;
+}
+
+.kip ul.kip-map-diff, .kip ul.kip-slice-diff {
+  font-size: 16px;
+}
+.kip ul.kip-map-diff.kip-top-level, .kip ul.kip-slice-diff.kip-top-level {
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+}
+.kip ul.kip-map-diff > li, .kip ul.kip-slice-diff > li {
+  border-bottom: 1px solid #ddd;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  background: #fff;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: left;
+  flex: 1 1;
+}
+.kip ul.kip-map-diff > li:last-child, .kip ul.kip-slice-diff > li:last-child {
+  border-bottom: none;
+}
+.kip ul.kip-map-diff > li.kip-header, .kip ul.kip-slice-diff > li.kip-header {
+  background: #eee;
+  font-weight: bolder;
+  border-bottom: 2px solid #333;
+}
+.kip ul.kip-map-diff > li .kip-extra-content, .kip ul.kip-slice-diff > li .kip-extra-content {
+  border-top: 1px dashed #ddd;
+  flex: 0 0 100%;
+}
+.kip ul.kip-map-diff > li > span, .kip ul.kip-slice-diff > li > span {
+  margin-right: 4px;
+  padding: 8px;
+  display: inline-block;
+}
+.kip ul.kip-map-diff > li > span.kip-key-props, .kip ul.kip-slice-diff > li > span.kip-key-props {
+  border-right: 1px solid #aaa;
+  flex-basis: 25%;
+  flex-shrink: 0;
+  flex-grow: 0;
+  align-self: stretch;
+  border-left-style: solid;
+  border-left-color: #bbb;
+  border-left-width: 0;
+}
+.kip ul.kip-map-diff > li > span.kip-key-props > span, .kip ul.kip-slice-diff > li > span.kip-key-props > span {
+  padding: 8px;
+}
+.kip ul.kip-map-diff > li > span.kip-validator-list, .kip ul.kip-slice-diff > li > span.kip-validator-list {
+  border-right: 1px solid #aaa;
+  flex-basis: 15%;
+  flex-shrink: 0;
+  flex-grow: 0;
+  align-self: stretch;
+}
+.kip ul.kip-map-diff > li > span.kip-value-map, .kip ul.kip-slice-diff > li > span.kip-value-map {
+  flex-basis: 50%;
+  flex-shrink: 0;
+  flex-grow: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: middle;
+  flex: 1 1;
+}
+.kip ul.kip-map-diff > li > span.kip-value-map .kip-from, .kip ul.kip-slice-diff > li > span.kip-value-map .kip-from {
+  border-right: 1px solid #aaa;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-basis: 45%;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+.kip ul.kip-map-diff > li > span.kip-value-map .kip-to, .kip ul.kip-slice-diff > li > span.kip-value-map .kip-to {
+  flex-basis: 45%;
+  flex-shrink: 0;
+  flex-grow: 0;
+  overflow: hidden;
+  padding-left: 6px;
+  text-overflow: ellipsis;
+}
+.kip ul.kip-map-diff > li > span.kip-key, .kip ul.kip-slice-diff > li > span.kip-key {
+  font-weight: 600;
+}
+.kip ul.kip-map-diff > li > span.kip-identical, .kip ul.kip-slice-diff > li > span.kip-identical {
+  background: #ffa;
+}
+.kip ul.kip-map-diff > li > span.kip-type, .kip ul.kip-slice-diff > li > span.kip-type {
+  font-style: italic;
+}
+.kip ul.kip-map-diff > li > span.kip-to, .kip ul.kip-slice-diff > li > span.kip-to {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kip ul.kip-map-diff > li > span.kip-from, .kip ul.kip-slice-diff > li > span.kip-from {
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 html {

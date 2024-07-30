@@ -1,38 +1,176 @@
 @import "variables.scss";
 
-ul.kip-slice-diff {
+.kip ul.kip-slice-diff {
 
-	font-size: 12px;
+	font-size: 14px;
+	list-style: square;
 
 	li {
 		margin-bottom: map-get($kip-space, sm);
 	}
 }
 
-ul.kip-map-diff {
+.kip pre.kip-code-diff {
+	line-height: 2.4;
+	font-size: 16px;
 
-	font-size: 12px;
+	span.kip-field-and-validators:hover > span.kip-validator-list > span > ul.kip-validators > li.kip-new-validator 
+	{
+		display: inherit;
+    }
 
-	&:not(.kip-top-level) {
-		padding-left: map-get($kip-space, sm);
+    span.kip-from-to {
+    	
+    	border-radius: 4px;
+    	padding: 0 map-get($kip-space, sm);
+
+    	&.kip-unmodified {
+	    	background: #afa;
+    	}
+    	&.kip-modified {
+    		background: #ffa;
+    	}
+    	&.kip-added {
+    		background: #aaf;
+    	}
+    	&.kip-removed {
+    		background: #faa;
+    	}
+    }
+
+	ul.kip-validators {
+		margin: 0 map-get($kip-space, sm);
+		display: inline;
+
+		&:before {
+			content: "<";
+		}
+
+		&:after {
+			content: ">";
+		}
+
+		li {
+			display: inline;
+			border-radius: 4px;
+			margin-left: map-get($kip-space, sm);
+			padding: 4px;
+			background: #ddd;
+
+			&:first-child {
+				margin-left: 0;
+			}
+
+			a {
+				color: #333;
+				padding: 0;
+				margin: 0;
+				text-decoration: underline;
+			}
+		}
+
+	    > li.kip-new-validator {
+	    	display: none;
+	    }
+
+	}
+}
+
+.kip ul.kip-map-diff, .kip ul.kip-slice-diff {
+
+	font-size: 16px;
+
+	&.kip-top-level {
+		border-radius: $kip-border-radius;
+		box-shadow: $kip-box-shadow;
 	}
 
-	li {
+	> li {
+		border-bottom: 1px solid #ddd;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: row;
+		background: #fff;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		justify-content: left;
+		flex: 1 1;
 
-		margin-bottom: map-get($kip-space, sm) !important;
+		&:last-child {
+			border-bottom: none;
+		}
 
-		span {
+		&.kip-header {
+			background: #eee;
+			font-weight: bolder;
+			border-bottom: 2px solid #333;	
+		}
+
+		.kip-extra-content {
+			border-top: 1px dashed #ddd;
+			flex: 0 0 100%;
+		}
+
+		> span {
 			margin-right: 4px;
-			padding: 4px;
+			padding: 8px;
 			display: inline-block;
-			border-radius: 2px;
+
+			&.kip-key-props {
+				border-right: 1px solid #aaa;
+				flex-basis: 25%;
+				flex-shrink: 0;
+				flex-grow: 0;
+				align-self: stretch;
+				border-left-style: solid;
+				border-left-color: #bbb;
+				border-left-width: 0;
+
+				> span {
+					padding: 8px;
+				}
+			}
+
+			&.kip-validator-list {
+				border-right: 1px solid #aaa;
+				flex-basis: 15%;				
+				flex-shrink: 0;
+				flex-grow: 0;
+				align-self: stretch;
+			}
+
+			&.kip-value-map {
+				flex-basis: 50%;
+				flex-shrink: 0;
+				flex-grow: 0;
+				display: flex;
+				flex-direction: row;
+				justify-content: left;
+				align-items: middle;
+				flex: 1 1;
+
+				.kip-from {
+					border-right: 1px solid #aaa;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					flex-basis: 45%;
+					flex-shrink: 0;
+					flex-grow: 0;
+				}
+
+				.kip-to {
+					flex-basis: 45%;
+					flex-shrink: 0;
+					flex-grow: 0;
+					overflow: hidden;
+					padding-left: 6px;
+					text-overflow: ellipsis;
+				}
+			}
 
 			&.kip-key {
 				font-weight: 600;
-
-				&::after {
-					content: ":";
-				}
 			}
 
 			&.kip-identical {
@@ -47,11 +185,14 @@ ul.kip-map-diff {
 			}
 
 			&.kip-to {
-				background: #afa;				
+				overflow: hidden;
+				text-overflow: ellipsis;
 			}
 
 			&.kip-from {
-				background: #faa;
+				text-align: right;
+				overflow: hidden;
+				text-overflow: ellipsis;
 			}
 		}
 	}
