@@ -36,7 +36,9 @@ func FromToCode(newValue, oldValue any, path []string) Element {
 func KeyPropsCode(c Context, key string, path []string) Element {
 
 	router := UseRouter(c)
+	qp := queryPath(c)
 	routePath := path
+	selected := fieldIsSelected(path, qp)
 
 	return F(
 		strings.Repeat(" ", (len(path)+1)*2),
@@ -46,10 +48,17 @@ func KeyPropsCode(c Context, key string, path []string) Element {
 				A(
 					Href(PathWithQuery(router.CurrentPath(), map[string][]string{
 						"field":    routePath,
-						"action":   []string{"view"},
+						"action":   []string{""},
 						"dataItem": router.Query()["dataItem"],
-					})), key),
+					})),
+					key,
+					If(selected, Id("selectedKey")),
+					If(selected, Class("kip-key-selected")),
+				),
 			),
+			If(selected, F(
+				Script(`setTimeout(function(){selectedKey.scrollIntoView()}, 100)`),
+			)),
 		),
 		": ",
 	)
@@ -86,7 +95,7 @@ func CodeSliceDiff(c Context, newValue, oldValue []any, validators []forms.Valid
 			}*/
 			items = append(items, F(
 				KeyPropsCode(c, key, newPath),
-				PlaceholderCode(c, newValue, oldValue),
+				PlaceholderCode(c, nv, ov),
 			))
 			continue
 		}
@@ -101,10 +110,10 @@ func CodeSliceDiff(c Context, newValue, oldValue []any, validators []forms.Valid
 
 		item = F(
 			KeyPropsCode(c, key, newPath),
-			Span(
-				Class("kip-validator-list"),
-				Span(Validators(c, listValidators, path, func(ChangeInfo, string) {})),
-			),
+			//			Span(
+			//				Class("kip-validator-list"),
+			//				Span(Validators(c, listValidators, path, nil, MakeExtra("class", "kip-validators-code"))),
+			//			),
 			extraContent,
 		)
 
@@ -165,10 +174,10 @@ func MapCodeValue(c Context, key string, newValue, oldValue any, validators []fo
 				KeyPropsCode(c, key, path),
 				Class("kip-field-and-validators"),
 				FromToCode(newValue, oldValue, path),
-				Span(
-					Class("kip-validator-list"),
-					Span(Validators(c, validators, path, func(ChangeInfo, string) {})),
-				),
+				//				Span(
+				//					Class("kip-validator-list"),
+				//					Span(Validators(c, validators, path, nil, MakeExtra("class", "kip-validators-code"))),
+				//				),
 			),
 			"\n",
 		)
@@ -184,10 +193,10 @@ func MapCodeValue(c Context, key string, newValue, oldValue any, validators []fo
 			Span(
 				Class("kip-field-and-validators"),
 				KeyPropsCode(c, key, path),
-				Span(
-					Class("kip-validator-list"),
-					Span(Validators(c, validators, path, func(ChangeInfo, string) {})),
-				),
+				//				Span(
+				//					Class("kip-validator-list"),
+				//					Span(Validators(c, validators, path, nil, MakeExtra("class", "kip-validators-code"))),
+				//				),
 			),
 			PlaceholderCode(c, newValue, oldValue),
 		)
@@ -200,10 +209,10 @@ func MapCodeValue(c Context, key string, newValue, oldValue any, validators []fo
 		Span(
 			Class("kip-field-and-validators"),
 			KeyPropsCode(c, key, path),
-			Span(
-				Class("kip-validator-list"),
-				Span(Validators(c, validators, path, func(ChangeInfo, string) {})),
-			),
+			//			Span(
+			//				Class("kip-validator-list"),
+			//				Span(Validators(c, validators, path, nil, MakeExtra("class", "kip-validators-code"))),
+			//			),
 		),
 		extraContent,
 	)
@@ -222,7 +231,7 @@ func PlaceholderCode(c Context, newValue, oldValue any) Element {
 		)
 	}
 
-	return nil
+	return F("…\n")
 
 }
 
@@ -267,7 +276,9 @@ func CodeMapDiff(c Context, newMap, oldMap map[string]any, form *forms.Form, pat
 		}
 
 		if field != nil && fieldIsSelected(append(path, key), qp) {
-			extraContent = FieldEditorModal(c, field, append(path, key), nil)
+			if queryAction(c) != "" {
+				extraContent = FieldEditorModal(c, field, sanitizeQueryPath(append(path, key)), nil)
+			}
 		}
 
 		previousPath := path
@@ -298,7 +309,7 @@ func CodeDiff(c Context, newItem, oldItem *kodex.Item, form *forms.Form) Element
 		return Search(c, query, newItem)
 	}
 
-	return Pre(
+	return Div(
 		Class("kip-code-diff"),
 		CodeMapDiff(c, newItem.All(), oldItem.All(), form, []string{}),
 	)

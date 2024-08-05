@@ -179,15 +179,16 @@ func AnyDiff(c Context, newValue, oldValue any, validators []forms.Validator, pa
 
 // checks if a given field is selected through the active query path
 func fieldIsSelected(path []string, queryPath []string) bool {
-	for i, pe := range queryPath {
-		if i >= len(path) {
-			if strings.HasPrefix(pe, "validator-") {
-				// this is a validator, we ignore it
-				continue
-			}
-			// there are non-validator segments beyond this field
-			return false
-		} else if path[i] != pe {
+
+	sanitizedQueryPath := sanitizeQueryPath(queryPath)
+	sanitizedPath := sanitizeQueryPath(path)
+
+	if len(sanitizedQueryPath) != len(sanitizedPath) {
+		return false
+	}
+
+	for i, pe := range sanitizedQueryPath {
+		if path[i] != pe {
 			// the query path doesn't match
 			return false
 		}
@@ -196,12 +197,28 @@ func fieldIsSelected(path []string, queryPath []string) bool {
 	return true
 }
 
+func sanitizeQueryPath(queryPath []string) []string {
+	sanitizedQueryPath := []string{}
+
+	for _, queryPathElement := range queryPath {
+		if strings.HasPrefix(queryPathElement, validatorPrefix) {
+			continue
+		}
+		sanitizedQueryPath = append(sanitizedQueryPath, queryPathElement)
+	}
+
+	return sanitizedQueryPath
+}
+
 func dataPathMatches(path []string, queryPath []string) bool {
+
+	sanitizedQueryPath := sanitizeQueryPath(queryPath)
+
 	for i, pe := range path {
-		if i >= len(queryPath) {
+		if i >= len(sanitizedQueryPath) {
 			// there are segments beyond this field
 			return false
-		} else if queryPath[i] != pe {
+		} else if sanitizedQueryPath[i] != pe {
 			return false
 		}
 	}
@@ -431,18 +448,21 @@ func MapDiff(c Context, newMap, oldMap map[string]any, form *forms.Form, path []
 func searchForKey(query string, data any, path []string) [][]string {
 
 	results := [][]string{}
+	newPath := make([]string, len(path))
+
+	copy(newPath, path)
 
 	switch dt := data.(type) {
 	case map[string]any:
 		for k, v := range dt {
 			if strings.Contains(k, query) {
-				results = append(results, append(path, k))
+				results = append(results, append(newPath, k))
 			}
-			results = append(results, searchForKey(query, v, append(path, k))...)
+			results = append(results, searchForKey(query, v, append(newPath, k))...)
 		}
 	case []any:
 		for i, v := range dt {
-			results = append(results, searchForKey(query, v, append(path, Fmt("%d", i)))...)
+			results = append(results, searchForKey(query, v, append(newPath, Fmt("%d", i)))...)
 		}
 	default:
 		return nil
@@ -462,8 +482,7 @@ func Search(c Context, query string, newItem *kodex.Item) Element {
 			A(
 				Href(
 					PathWithQuery(router.CurrentPath(), map[string][]string{
-						"field":  match,
-						"action": []string{"view"},
+						"field": match,
 					}),
 				),
 				fieldName(match),
@@ -472,6 +491,7 @@ func Search(c Context, query string, newItem *kodex.Item) Element {
 	}
 
 	return Ul(
+		Class("kip-search-results"),
 		matchesItems,
 	)
 

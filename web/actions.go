@@ -133,7 +133,7 @@ func TestWithItem(c Context, actionConfig kodex.ActionConfig, item int) Element 
 						Class("bulma-field"),
 						P(
 							Class("bulma-control"),
-							Input(Class("bulma-control", "bulma-input"), Placeholder("filter fields by key or value"), Value(query)),
+							Input(Class("bulma-control", "bulma-input"), Placeholder("filter fields by key"), Value(query)),
 						),
 					),
 				),
@@ -167,10 +167,9 @@ func ActionTest(actionConfig kodex.ActionConfig, onUpdate func(ChangeInfo, strin
 
 		rv := router.Query().Get("dataItem")
 
-		if len(rv) > 0 {
+		if rv != "" {
 			var err error
-
-			if dataItem, err = strconv.Atoi(string(rv[0])); err != nil {
+			if dataItem, err = strconv.Atoi(rv); err != nil {
 				kodex.Log.Error(err)
 			}
 		}

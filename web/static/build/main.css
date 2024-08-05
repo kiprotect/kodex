@@ -15536,7 +15536,7 @@ ul.kip-menu-list li ul {
   background: #fdd;
 }
 
-ul.kip-validators > li {
+.kip ul.kip-validators > li {
   display: inline-block;
   cursor: pointer;
   background: #eee;
@@ -15547,13 +15547,13 @@ ul.kip-validators > li {
   text-select: none;
   margin-right: 8px;
 }
-ul.kip-validators > li.kip-is-active {
+.kip ul.kip-validators > li.kip-is-active {
   background: #efa;
 }
-ul.kip-validators > li.kip-is-active a {
+.kip ul.kip-validators > li.kip-is-active a {
   color: #000;
 }
-ul.kip-validators > li.kip-controls {
+.kip ul.kip-validators > li.kip-controls {
   border: none;
   background: none;
 }
@@ -15642,56 +15642,77 @@ ul.kip-validators > li.kip-controls {
   margin-bottom: 8px;
 }
 
-.kip pre.kip-code-diff {
+.kip ul.kip-search-results {
+  list-style: disc;
+  margin-left: 16px;
+}
+.kip ul.kip-search-results li {
+  margin-bottom: 8px;
+}
+
+.kip .kip-code-diff {
   line-height: 2.4;
   font-size: 16px;
+  overflow: auto;
 }
-.kip pre.kip-code-diff span.kip-field-and-validators:hover > span.kip-validator-list > span > ul.kip-validators > li.kip-new-validator {
+.kip .kip-code-diff > * {
+  font-family: Source Code Pro, Courier, monospace;
+  white-space: pre;
+}
+.kip .kip-code-diff div {
+  font-family: Open Sans, sans-serif;
+  white-space: normal;
+}
+.kip .kip-code-diff span.kip-field-and-validators:hover > span.kip-validator-list > span > ul.kip-validators-code > li.kip-new-validator {
   display: inherit;
 }
-.kip pre.kip-code-diff span.kip-from-to {
+.kip .kip-code-diff span.kip-from-to {
   border-radius: 4px;
   padding: 0 8px;
 }
-.kip pre.kip-code-diff span.kip-from-to.kip-unmodified {
+.kip .kip-code-diff span.kip-from-to.kip-unmodified {
   background: #afa;
 }
-.kip pre.kip-code-diff span.kip-from-to.kip-modified {
+.kip .kip-code-diff span.kip-from-to.kip-modified {
   background: #ffa;
 }
-.kip pre.kip-code-diff span.kip-from-to.kip-added {
+.kip .kip-code-diff span.kip-from-to.kip-added {
   background: #aaf;
 }
-.kip pre.kip-code-diff span.kip-from-to.kip-removed {
+.kip .kip-code-diff span.kip-from-to.kip-removed {
   background: #faa;
 }
-.kip pre.kip-code-diff ul.kip-validators {
+.kip .kip-code-diff span.kip-key-props a.kip-key-selected {
+  font-weight: bolder;
+  scroll-margin-top: 80px;
+}
+.kip .kip-code-diff ul.kip-validators-code {
   margin: 0 8px;
   display: inline;
 }
-.kip pre.kip-code-diff ul.kip-validators:before {
+.kip .kip-code-diff ul.kip-validators-code:before {
   content: "<";
 }
-.kip pre.kip-code-diff ul.kip-validators:after {
+.kip .kip-code-diff ul.kip-validators-code:after {
   content: ">";
 }
-.kip pre.kip-code-diff ul.kip-validators li {
+.kip .kip-code-diff ul.kip-validators-code li {
   display: inline;
   border-radius: 4px;
   margin-left: 8px;
   padding: 4px;
   background: #ddd;
 }
-.kip pre.kip-code-diff ul.kip-validators li:first-child {
+.kip .kip-code-diff ul.kip-validators-code li:first-child {
   margin-left: 0;
 }
-.kip pre.kip-code-diff ul.kip-validators li a {
+.kip .kip-code-diff ul.kip-validators-code li a {
   color: #333;
   padding: 0;
   margin: 0;
   text-decoration: underline;
 }
-.kip pre.kip-code-diff ul.kip-validators > li.kip-new-validator {
+.kip .kip-code-diff ul.kip-validators-code > li.kip-new-validator {
   display: none;
 }
 
@@ -15804,6 +15825,10 @@ body.kip-fonts {
   margin: 0;
   padding: 0;
   font-family: Open Sans, sans-serif;
+}
+
+pre {
+  font-family: Source Code Pro, Courier, monospace;
 }
 
 div.kip fieldset {

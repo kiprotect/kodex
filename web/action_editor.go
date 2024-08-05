@@ -193,7 +193,30 @@ func typeOf(validator forms.Validator) string {
 
 var validatorPrefix = "validator-"
 
-func Validators(c Context, validators []forms.Validator, path []string, onUpdate func(ChangeInfo, string)) Element {
+type ExtraArg struct {
+	Type  string
+	Value any
+}
+
+func MakeExtra(t string, value any) ExtraArg {
+	return ExtraArg{
+		Type:  t,
+		Value: value,
+	}
+}
+
+func GetExtra[T any](args []ExtraArg, t string) T {
+	for _, e := range args {
+		if e.Type == t {
+			if vt, ok := e.Value.(T); ok {
+				return vt
+			}
+		}
+	}
+	return *(new(T))
+}
+
+func Validators(c Context, validators []forms.Validator, path []string, onUpdate func(ChangeInfo, string), extraArgs ...ExtraArg) Element {
 
 	router := UseRouter(c)
 
@@ -243,7 +266,7 @@ func Validators(c Context, validators []forms.Validator, path []string, onUpdate
 	}
 
 	return Ul(
-		Class("kip-validators"),
+		Class("kip-validators", GetExtra[string](extraArgs, "class")),
 		elements,
 		If(onUpdate != nil,
 			Li(

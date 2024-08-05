@@ -22,6 +22,10 @@ body.kip-fonts {
     @include font-open-sans;
 }
 
+pre {
+    @include font-source-code-pro;
+}
+
 div.kip {
 
     fieldset {

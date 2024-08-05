@@ -10,11 +10,31 @@
 	}
 }
 
-.kip pre.kip-code-diff {
+.kip ul.kip-search-results {
+	list-style: disc;
+	margin-left: map-get($kip-space, md);
+
+	li {
+		margin-bottom: map-get($kip-space, sm);
+	}
+}
+
+.kip .kip-code-diff {
 	line-height: 2.4;
 	font-size: 16px;
+	overflow: auto;
 
-	span.kip-field-and-validators:hover > span.kip-validator-list > span > ul.kip-validators > li.kip-new-validator 
+	> * {
+	    @include font-source-code-pro;
+		white-space: pre;
+	}
+
+	div {
+	    @include font-open-sans;
+		white-space: normal;
+	}
+
+	span.kip-field-and-validators:hover > span.kip-validator-list > span > ul.kip-validators-code > li.kip-new-validator 
 	{
 		display: inherit;
     }
@@ -38,7 +58,15 @@
     	}
     }
 
-	ul.kip-validators {
+    span.kip-key-props {
+
+		a.kip-key-selected {
+			font-weight: bolder;
+			scroll-margin-top: 80px;
+		}
+    }
+
+	ul.kip-validators-code {
 		margin: 0 map-get($kip-space, sm);
 		display: inline;
 
