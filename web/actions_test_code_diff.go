@@ -306,7 +306,7 @@ func CodeDiff(c Context, newItem, oldItem *kodex.Item, form *forms.Form) Element
 	query := searchQuery(c)
 
 	if query != "" {
-		return Search(c, query, newItem)
+		return Search(c, query, oldItem, newItem)
 	}
 
 	return Div(

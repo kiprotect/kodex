@@ -15654,6 +15654,7 @@ ul.kip-menu-list li ul {
   line-height: 2.4;
   font-size: 16px;
   overflow: auto;
+  white-space: pre;
 }
 .kip .kip-code-diff > * {
   font-family: Source Code Pro, Courier, monospace;
@@ -15662,6 +15663,9 @@ ul.kip-menu-list li ul {
 .kip .kip-code-diff div {
   font-family: Open Sans, sans-serif;
   white-space: normal;
+}
+.kip .kip-code-diff span.kip-map-field, .kip .kip-code-diff span.kip-field-and-validators {
+  white-space: pre;
 }
 .kip .kip-code-diff span.kip-field-and-validators:hover > span.kip-validator-list > span > ul.kip-validators-code > li.kip-new-validator {
   display: inherit;

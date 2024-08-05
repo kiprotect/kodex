@@ -23,6 +23,7 @@
 	line-height: 2.4;
 	font-size: 16px;
 	overflow: auto;
+	white-space: pre;
 
 	> * {
 	    @include font-source-code-pro;
@@ -32,6 +33,10 @@
 	div {
 	    @include font-open-sans;
 		white-space: normal;
+	}
+
+	span.kip-map-field, span.kip-field-and-validators {
+		white-space: pre;
 	}
 
 	span.kip-field-and-validators:hover > span.kip-validator-list > span > ul.kip-validators-code > li.kip-new-validator 

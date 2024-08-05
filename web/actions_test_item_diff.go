@@ -351,7 +351,7 @@ func ItemDiff(c Context, newItem, oldItem *kodex.Item, form *forms.Form) Element
 	query := searchQuery(c)
 
 	if query != "" {
-		return Search(c, query, newItem)
+		return Search(c, query, oldItem, newItem)
 	}
 
 	return MapDiff(c, newItem.All(), oldItem.All(), form, []string{})
@@ -471,9 +471,9 @@ func searchForKey(query string, data any, path []string) [][]string {
 	return results
 }
 
-func Search(c Context, query string, newItem *kodex.Item) Element {
+func Search(c Context, query string, oldItem, newItem *kodex.Item) Element {
 	router := UseRouter(c)
-	matches := searchForKey(query, newItem.All(), []string{})
+	matches := append(searchForKey(query, newItem.All(), []string{}), searchForKey(query, oldItem.All(), []string{})...)
 
 	matchesItems := []Element{}
 
