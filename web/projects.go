@@ -342,6 +342,8 @@ func SettingsTab(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 			}
 
 			blueprint := kodex.MakeBlueprint(data)
+			// we do not preserve IDs here as that will lead to conflicts
+			blueprint.PreserveIDs = false
 
 			err = blueprint.CreateWithProject(project.Controller(), project)
 
@@ -349,10 +351,6 @@ func SettingsTab(project kodex.Project, onUpdate func(ChangeInfo, string)) Eleme
 				error.Set(Fmt("Error creating blueprint: %v", err))
 				return
 			}
-
-			actionConfigs, _ := project.Controller().ActionConfigs(map[string]any{})
-
-			error.Set(Fmt("Success: %d", len(actionConfigs)))
 
 			onUpdate(ChangeInfo{}, router.CurrentPath())
 		})

@@ -202,6 +202,17 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 
 	onSubmit := func() {
 
+		controller.Begin()
+
+		success := false
+
+		defer func() {
+			if success {
+				controller.Commit()
+			}
+			controller.Rollback()
+		}()
+
 		switch action.Get() {
 		case "approve":
 			if !canReview {
@@ -270,6 +281,9 @@ func Overview(c Context, project kodex.Project, changeRequest api.ChangeRequest)
 			error.Set(Fmt("Cannot save change request: %v", err))
 			return
 		}
+
+		// we commit the changes
+		success = true
 
 		router.RedirectTo(router.CurrentPath())
 	}

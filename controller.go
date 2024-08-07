@@ -24,6 +24,7 @@ type ControllerMaker func(map[string]interface{}, Settings, *Definitions) (Contr
 type ControllerDefinitions map[string]ControllerMaker
 
 var NotFound = fmt.Errorf("object not found")
+var AlreadyInTransaction = fmt.Errorf("already in a transaction")
 
 type Controller interface {
 	SetVar(key string, value interface{}) error

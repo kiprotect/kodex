@@ -47,7 +47,7 @@ func MakeInMemoryDestination(id []byte, project kodex.Project) *InMemoryDestinat
 }
 
 func (i *InMemoryDestination) ID() []byte {
-	return []byte(i.name)
+	return i.id
 }
 
 func (i *InMemoryDestination) InternalID() []byte {

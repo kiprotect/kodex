@@ -167,7 +167,8 @@ var BlueprintConfigForm = forms.Form{
 }
 
 type Blueprint struct {
-	config map[string]interface{}
+	config      map[string]interface{}
+	PreserveIDs bool
 }
 
 func GetBlueprintsPaths(settings Settings) ([]string, error) {
@@ -362,7 +363,7 @@ func LoadBlueprintConfig(settingsObj Settings, filename, version string) (map[st
 	}
 }
 
-func initSources(project Project, config map[string]interface{}) error {
+func (b *Blueprint) initSources(project Project, config map[string]interface{}) error {
 	sourcesConfig, ok := maps.ToStringMapList(config["sources"])
 	if !ok {
 		return nil
@@ -380,10 +381,12 @@ func initSources(project Project, config map[string]interface{}) error {
 
 		var id []byte
 
-		if strId, ok := sourceMapConfig["id"].(string); ok {
-			var err error
-			if id, err = hex.DecodeString(strId); err != nil {
-				id = nil
+		if b.PreserveIDs {
+			if strId, ok := sourceMapConfig["id"].(string); ok {
+				var err error
+				if id, err = hex.DecodeString(strId); err != nil {
+					id = nil
+				}
 			}
 		}
 
@@ -406,7 +409,7 @@ func initSources(project Project, config map[string]interface{}) error {
 
 }
 
-func initActionConfigs(project Project, config map[string]interface{}) error {
+func (b *Blueprint) initActionConfigs(project Project, config map[string]interface{}) error {
 
 	actionsConfig, ok := maps.ToStringMapList(config["actions"])
 
@@ -433,10 +436,12 @@ func initActionConfigs(project Project, config map[string]interface{}) error {
 
 		var id []byte
 
-		if strId, ok := actionMapConfig["id"].(string); ok {
-			var err error
-			if id, err = hex.DecodeString(strId); err != nil {
-				id = nil
+		if b.PreserveIDs {
+			if strId, ok := actionMapConfig["id"].(string); ok {
+				var err error
+				if id, err = hex.DecodeString(strId); err != nil {
+					id = nil
+				}
 			}
 		}
 
@@ -460,7 +465,7 @@ func initActionConfigs(project Project, config map[string]interface{}) error {
 
 }
 
-func initDestinations(project Project, config map[string]interface{}) error {
+func (b *Blueprint) initDestinations(project Project, config map[string]interface{}) error {
 	destinationsConfig, ok := maps.ToStringMapList(config["destinations"])
 	if !ok {
 		Log.Debug("destinations config does not exist")
@@ -479,10 +484,12 @@ func initDestinations(project Project, config map[string]interface{}) error {
 
 		var id []byte
 
-		if strId, ok := destinationMapConfig["id"].(string); ok {
-			var err error
-			if id, err = hex.DecodeString(strId); err != nil {
-				id = nil
+		if b.PreserveIDs {
+			if strId, ok := destinationMapConfig["id"].(string); ok {
+				var err error
+				if id, err = hex.DecodeString(strId); err != nil {
+					id = nil
+				}
 			}
 		}
 
@@ -506,7 +513,7 @@ func initDestinations(project Project, config map[string]interface{}) error {
 
 }
 
-func initStreams(project Project, config map[string]interface{}) error {
+func (b *Blueprint) initStreams(project Project, config map[string]interface{}) error {
 	streamsConfig, ok := maps.ToStringMapList(config["streams"])
 
 	if !ok {
@@ -564,11 +571,11 @@ func initStreams(project Project, config map[string]interface{}) error {
 				return fmt.Errorf("error saving stream: %v", err)
 			}
 
-			if err := initStreamSources(stream, streamConfigMap); err != nil {
+			if err := b.initStreamSources(stream, streamConfigMap); err != nil {
 				return fmt.Errorf("error initializing stream sources: %v", err)
 			}
 
-			if err := initStreamConfigs(stream, streamConfigMap); err != nil {
+			if err := b.initStreamConfigs(stream, streamConfigMap); err != nil {
 				return fmt.Errorf("error initializing stream configs: %v", err)
 			}
 		}
@@ -577,7 +584,7 @@ func initStreams(project Project, config map[string]interface{}) error {
 	return nil
 }
 
-func initStreamSources(stream Stream, config map[string]interface{}) error {
+func (b *Blueprint) initStreamSources(stream Stream, config map[string]interface{}) error {
 	sourceConfigs, ok := maps.ToStringMapList(config["sources"])
 
 	if !ok {
@@ -623,7 +630,7 @@ func initStreamSources(stream Stream, config map[string]interface{}) error {
 	return nil
 }
 
-func initStreamConfigs(stream Stream, config map[string]interface{}) error {
+func (b *Blueprint) initStreamConfigs(stream Stream, config map[string]interface{}) error {
 
 	configConfigs, ok := maps.ToStringMapList(config["configs"])
 
@@ -678,11 +685,11 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 				return fmt.Errorf("error saving a config: %v", err)
 			}
 
-			if err := initConfigDestinations(config, mapConfigConfig); err != nil {
+			if err := b.initConfigDestinations(config, mapConfigConfig); err != nil {
 				return fmt.Errorf("error initializing config destinations: %v", err)
 			}
 
-			if err := initConfigActions(config, mapConfigConfig); err != nil {
+			if err := b.initConfigActions(config, mapConfigConfig); err != nil {
 				return fmt.Errorf("error initializing config actions: %v", err)
 			}
 
@@ -694,7 +701,7 @@ func initStreamConfigs(stream Stream, config map[string]interface{}) error {
 
 }
 
-func initConfigDestinations(config Config, configData map[string]interface{}) error {
+func (b *Blueprint) initConfigDestinations(config Config, configData map[string]interface{}) error {
 
 	destinationConfigs, ok := maps.ToStringMapList(configData["destinations"])
 
@@ -795,7 +802,7 @@ func FixDates(object Model, data map[string]interface{}) error {
 	}
 }
 
-func initProject(controller Controller, configData map[string]interface{}, createProject bool) (Project, error) {
+func (b *Blueprint) initProject(controller Controller, configData map[string]interface{}, createProject bool) (Project, error) {
 	projectConfigData, ok := configData["project"]
 
 	var projectConfig map[string]interface{}
@@ -814,6 +821,7 @@ func initProject(controller Controller, configData map[string]interface{}, creat
 	if params, err := BlueprintProjectForm.Validate(projectConfig); err != nil {
 		return nil, err
 	} else {
+		// we always preserve the project ID
 		id := params["id"].([]byte)
 
 		// if the project already exists we delete it
@@ -849,7 +857,7 @@ func initProject(controller Controller, configData map[string]interface{}, creat
 
 }
 
-func initConfigActions(config Config, configData map[string]interface{}) error {
+func (b *Blueprint) initConfigActions(config Config, configData map[string]interface{}) error {
 
 	actionConfigConfigs, ok := maps.ToStringMapList(configData["actions"])
 
@@ -901,7 +909,7 @@ func initConfigActions(config Config, configData map[string]interface{}) error {
 
 }
 
-func initKeys(project Project, config map[string]interface{}) error {
+func (b *Blueprint) initKeys(project Project, config map[string]interface{}) error {
 	settings := project.Controller().Settings()
 	if salt, ok := config["salt"].(string); ok {
 		settings.Set("salt", salt)
@@ -998,7 +1006,8 @@ func ExportBlueprint(project Project) (map[string]interface{}, error) {
 
 func MakeBlueprint(config map[string]interface{}) *Blueprint {
 	return &Blueprint{
-		config: config,
+		config:      config,
+		PreserveIDs: true,
 	}
 }
 
@@ -1007,19 +1016,22 @@ func (b *Blueprint) Create(controller Controller, createProject bool) (Project, 
 	succeeded := false
 
 	if err := controller.Begin(); err != nil {
-		return nil, err
+		// if we're already inside a transaction we ignore this error
+		if err != AlreadyInTransaction {
+			return nil, err
+		}
+	} else {
+		defer func() {
+			// we roll back the transaction, but only if it hasn't been successful
+			if !succeeded {
+				if err := controller.Rollback(); err != nil {
+					Log.Error(err)
+				}
+			}
+		}()
 	}
 
-	defer func() {
-		// we roll back the transaction, but only if it hasn't been successful
-		if !succeeded {
-			if err := controller.Rollback(); err != nil {
-				Log.Error(err)
-			}
-		}
-	}()
-
-	project, err := initProject(controller, b.config, createProject)
+	project, err := b.initProject(controller, b.config, createProject)
 
 	if err != nil {
 		return nil, err
@@ -1063,19 +1075,19 @@ func (b *Blueprint) CreateWithProject(controller Controller, project Project) er
 
 func (b *Blueprint) createWithProject(controller Controller, project Project) error {
 
-	if err := initSources(project, b.config); err != nil {
+	if err := b.initSources(project, b.config); err != nil {
 		return fmt.Errorf("error creating sources: %v", err)
 	}
-	if err := initDestinations(project, b.config); err != nil {
+	if err := b.initDestinations(project, b.config); err != nil {
 		return fmt.Errorf("error creating destinations: %v", err)
 	}
-	if err := initActionConfigs(project, b.config); err != nil {
+	if err := b.initActionConfigs(project, b.config); err != nil {
 		return fmt.Errorf("error creating action configs: %v", err)
 	}
-	if err := initStreams(project, b.config); err != nil {
+	if err := b.initStreams(project, b.config); err != nil {
 		return fmt.Errorf("error creating streams: %v", err)
 	}
-	if err := initKeys(project, b.config); err != nil {
+	if err := b.initKeys(project, b.config); err != nil {
 		return fmt.Errorf("error creating keys: %v", err)
 	}
 	if err := controller.Commit(); err != nil {

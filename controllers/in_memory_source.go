@@ -108,11 +108,11 @@ func (i *InMemorySource) Delete() error {
 }
 
 func (i *InMemorySource) ID() []byte {
-	return []byte(i.name)
+	return i.id
 }
 
-func (c *InMemorySource) InternalID() []byte {
-	return c.id
+func (i *InMemorySource) InternalID() []byte {
+	return i.id
 }
 
 func (i *InMemorySource) ConfigData() map[string]interface{} {
